@@ -2,7 +2,7 @@ all: ./build
 	make -C ./build
 
 ./build: dependencies
-	./dependencies/gyp/gyp --depth=. --generator-output=./build alux.gyp
+	./dependencies/gyp/gyp --depth=. -f make --generator-output=./build alux.gyp
 
 dependencies:
 	mkdir dependencies
