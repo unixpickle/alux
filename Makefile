@@ -1,8 +1,10 @@
+PLATFORM=x64
+
 all: ./build
 	make -C ./build
 
 ./build: dependencies
-	./dependencies/gyp/gyp --depth=. -f make --generator-output=./build alux.gyp
+	./dependencies/gyp/gyp --depth=. -f make --generator-output=./build -D PLATFORM=$(PLATFORM) alux.gyp
 
 dependencies:
 	mkdir dependencies

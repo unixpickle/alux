@@ -1,8 +1,9 @@
 {
   'target_defaults': {
     'include_dirs': [
+      './src/stdlib/cppheaders',
       './src/stdlib/headers',
-      './src/stdlib/hpp'
+      './src/'
     ],
     'cflags': [
       '-nostdinc',
@@ -17,8 +18,20 @@
       'target_name': 'learnos.a',
       'type': 'static_library',
       'sources': [
-        './src/platform/vm.cc'
+        './src/platform/general/vm.cc'
+      ],
+      
+      'conditions': [
+        ['PLATFORM=="x64"',
+          {
+            'sources': [
+              './src/platform/x64/vm-x64.cc',
+              './src/platform/x64/failure-x64.cc'
+            ]
+          }
+        ] ### PLATFORM=x64
       ]
+      
     }
   ]
 }
