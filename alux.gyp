@@ -15,7 +15,7 @@
   }, 
   'targets': [
     {
-      'target_name': 'learnos.a',
+      'target_name': 'os',
       'type': 'static_library',
       'sources': [
         './src/platform/general/vm.cc'
