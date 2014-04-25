@@ -2,7 +2,7 @@
   'target_defaults': {
     'include_dirs': [
       './src/stdlib/cppheaders',
-      './src/stdlib/headers',
+      './src/stdlib/cheaders',
       './src/'
     ],
     'cflags': [

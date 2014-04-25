@@ -69,3 +69,4 @@ initial_pdpt:
 
 ; pad the result file to 0x100 bytes
 times (0x4000 - ($ - multiboot_header)) db 0x0
+

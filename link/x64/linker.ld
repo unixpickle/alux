@@ -15,6 +15,4 @@ SECTIONS {
     *(.data)
   }
   
-  _bss_size = SIZEOF(*(.bss))
-
 }

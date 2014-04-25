@@ -11,7 +11,7 @@ export TARGET_ARCH
 all: ./build
 	$(MAKE) -C ./build
 	$(MAKE) -C ./src/custom/$(TARGET_ARCH)
-	$(MAKE) -C ./link/$(TARGET_ARCH) LIBOS=$(PROJECT_ROOT)/build/out/Default/libos.a OUTPUT_FILE=$(PROJECT_ROOT)/build/$(BINFILE)
+	$(MAKE) -C ./link/$(TARGET_ARCH) LIBOS=$(PROJECT_ROOT)/build/out/Default/obj.target/libos.a OUTPUT_FILE=$(PROJECT_ROOT)/build/$(BINFILE)
 
 ./build: dependencies
 	./dependencies/gyp/gyp --depth=. -f make --generator-output=./build -D PLATFORM=$(TARGET_ARCH) alux.gyp

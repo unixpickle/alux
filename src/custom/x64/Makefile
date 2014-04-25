@@ -1,7 +1,8 @@
-NASM = nasm
-OBJFORMAT = $(shell bash ./native_objformat.sh)
-BINFORMAT = bin
-OUTDIR = $(CUSTOM_OUTDIR)
+NASM ?= nasm
+OBJFORMAT ?= $(shell bash ./native_objformat.sh)
+BINFORMAT ?= bin
+CUSTOM_OUTDIR ?= ./out
+OUTDIR := $(CUSTOM_OUTDIR)
 
 all: $(OUTDIR) $(OUTDIR)/x64-proc-init.o $(OUTDIR)/x64-entry.o $(OUTDIR)/x64-multiboot-init.bin
 
