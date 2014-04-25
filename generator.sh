@@ -26,7 +26,7 @@
 
 
 if [ $# != 2 ]; then
-  echo 'Usage: ./configure TARGET OUTDIR'
+  echo 'Usage: sh generator.sh TARGET OUTDIR'
   exit
 fi
 
