@@ -1,16 +1,21 @@
 NASM = nasm
 OBJFORMAT = $(shell bash ./native_objformat.sh)
+BINFORMAT = bin
+OUTDIR = $(CUSTOM_OUTDIR)
 
-all: out out/multiboot_entry.o out/proc_entry.o
+all: $(OUTDIR) $(OUTDIR)/x64-proc-init.o $(OUTDIR)/x64-entry.o $(OUTDIR)/x64-multiboot-init.bin
 
-out:
-	mkdir out
+$(OUTDIR):
+	mkdir $(OUTDIR)
 
-out/multiboot_entry.o: multiboot_entry.s
-	nasm -f $(OBJFORMAT) $^ -o $@
+$(OUTDIR)/x64-proc-init.o: x64-proc-init.s
+	$(NASM) -f $(OBJFORMAT) $^ -o $@
 
-out/proc_entry.o: proc_entry.s
-	nasm -f $(OBJFORMAT) $^ -o $@
+$(OUTDIR)/x64-entry.o: x64-entry.s
+	$(NASM) -f $(OBJFORMAT) $^ -o $@
+
+$(OUTDIR)/x64-multiboot-init.bin: x64-multiboot-init.s
+	$(NASM) -f $(BINFORMAT) $^ -o $@
 
 clean:
-	rm -rf out
+	rm -rf $(OUTDIR)
