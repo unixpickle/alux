@@ -58,6 +58,12 @@ fi
 
 # generate Makefile
 
+printf "all:" >>$2/Makefile
+for file in $SOURCES; do
+  printf " `basename $file .cc`.o" >>$2/Makefile
+done
+printf "\n\n" >>$2/Makefile
+
 for file in $SOURCES; do
   printf "`basename $file .cc`.o: $file\n" >>$2/Makefile
   printf "\t" >>$2/Makefile
