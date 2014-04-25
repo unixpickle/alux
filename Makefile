@@ -41,7 +41,7 @@ export CC
 export LD
 
 $(BUILD_DIR)/$(BINFILE): $(BUILD_DIR)
-	$(MAKE) -C ./build/obj
+	$(MAKE) -C $(BUILD_DIR)/obj
 	$(MAKE) -C ./src/custom/$(TARGET_ARCH)
 	$(MAKE) -C ./link/$(TARGET_ARCH) OBJS=$(BUILD_DIR)/obj OUTPUT_FILE=$(BUILD_DIR)/$(BINFILE)
 
