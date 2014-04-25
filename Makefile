@@ -22,7 +22,7 @@ dependencies:
 	svn checkout http://gyp.googlecode.com/svn/trunk/ dependencies/gyp
 
 image: $(BUILD_DIR)/$(BINFILE) $(BUILD_DIR)/grub_root
-	grub-mkrescue -o $(BUILD_DIR)/learnos.iso $(BUILD_DIR)/grub_root
+	grub-mkrescue -o $(BUILD_DIR)/alux.iso $(BUILD_DIR)/grub_root
 
 $(BUILD_DIR)/grub_root:
 	mkdir $(BUILD_DIR)/grub_root
