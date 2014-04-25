@@ -11,7 +11,8 @@
       '-Wno-long-long',
       '-fno-stack-protector',
       '-mno-red-zone'
-    ]
+    ],
+    'product_dir': '<(BUILD_DIR)'
   }, 
   'targets': [
     {

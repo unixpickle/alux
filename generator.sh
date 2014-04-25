@@ -1,3 +1,5 @@
+#!/bin/bash
+#
 # Copyright (c) 2014, Alex Nichol and Alux contributors.
 # All rights reserved.
 #
@@ -22,48 +24,43 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-PROJECT_ROOT = $(shell pwd)
-TARGET_ARCH ?= x64
-BINFILE ?= alux.bin
-BUILD_DIR ?= $(PROJECT_ROOT)/build
-CUSTOM_OUTDIR ?= $(BUILD_DIR)/custom-out
 
-CXX ?= "g++"
-CC ?= gcc
-LD ?= ld
+if [ $# != 2 ]; then
+  echo 'Usage: ./configure TARGET OUTDIR'
+  exit
+fi
 
-export CUSTOM_OUTDIR
-export PROJECT_ROOT
-export BINFILE
-export TARGET_ARCH
-export CXX
-export CC
-export LD
+# generate the $SOURCES array
 
-$(BUILD_DIR)/$(BINFILE): $(BUILD_DIR)
-	$(MAKE) -C ./build/obj
-	$(MAKE) -C ./src/custom/$(TARGET_ARCH)
-	$(MAKE) -C ./link/$(TARGET_ARCH) OBJS=$(BUILD_DIR)/obj OUTPUT_FILE=$(BUILD_DIR)/$(BINFILE)
+SOURCES=`echo $PWD/src/platform/general/*.cc`
 
-$(BUILD_DIR): dependencies
-	mkdir $(BUILD_DIR)
-	sh generator.sh $(TARGET_ARCH) $(BUILD_DIR)/obj
+if [ $1 == 'x64' ]; then
+  SOURCES=${SOURCES}\ `echo $PWD/src/platform/x64/*.cc`
+else
+  echo 'Unknown TARGET ' $1
+  exit
+fi
 
-dependencies:
-	mkdir dependencies
-	# here, I will download external libs to use
+# generate the $INCLUDES array
 
-image: $(BUILD_DIR)/$(BINFILE) $(BUILD_DIR)/grub_root
-	grub-mkrescue -o $(BUILD_DIR)/alux.iso $(BUILD_DIR)/grub_root
+INCLUDES="$INCLUDES -I$PWD/src -I$PWD/src/stdlib/cheaders -I$PWD/src/stdlib/cppheaders"
 
-$(BUILD_DIR)/grub_root:
-	mkdir $(BUILD_DIR)/grub_root
-	mkdir $(BUILD_DIR)/grub_root/boot
-	mkdir $(BUILD_DIR)/grub_root/boot/grub
-	cp $(PROJECT_ROOT)/src/custom/$(TARGET_ARCH)/grub.cfg $(BUILD_DIR)/grub_root/boot/grub
+# generate output location
 
-clean:
-	rm -rf build
+if [ -d $2 ]; then
+  echo 'warning: output directory already exists'
+elif [ -f $2 ]; then
+  echo 'error: output directory is a file!'
+  exit
+else
+  mkdir $2
+fi
 
-clean-all: clean
-	rm -rf dependencies
+# generate Makefile
+
+for file in $SOURCES; do
+  printf "`basename $file .cc`.o: $file\n" >>$2/Makefile
+  printf "\t" >>$2/Makefile
+  printf "$CXX -c $CFLAGS $CXXFLAGS $INCLUDES $file -o `basename $file .cc`.o\n" >>$2/Makefile
+  echo >>$2/Makefile
+done
