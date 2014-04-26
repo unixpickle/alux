@@ -1,12 +1,18 @@
-Alux
-====
+# Alux
 
-Alux is a small Hobby Operating System.
+Alux is a small Hobby Operating System. The purpose of this project is to create a lightweight microkernel on top of which you may place a language interpreter like V8.
+
+General architectual ideas that I am playing around with:
+
+ * A unified address space to reduce latency due to TLB misses
+ * CPU pinning for tasks/threads
+ * Cross-platform abstractions
+ * Memory allocation and VMM completely in user-space
 
 
-## License ##
+## License
 
-Alux is licensed under the BSD 2-clause license. See LICENSE.
+Alux is licensed under the BSD 2-clause license. See [LICENSE](https://github.com/unixpickle/alux/blob/master/LICENSE).
 
 ```
 Copyright (c) 2014, Alex Nichol and Alux contributors.

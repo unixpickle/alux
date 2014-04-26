@@ -10,11 +10,11 @@ On the x86-64 platform, Alux uses NASM to assemble code for initialization and c
 
 Download [binutils](http://www.gnu.org/software/binutils/). Then go into the source directory and run the following:
 
-    ./configure --program-prefix=gelf64- --prefix=/usr/local --enable-multilib --enable-ld=yes --target=x86_64-unknown-elf --disable-werror
+    ./configure --program-prefix=x86_64-unknown-elf- --prefix=/usr/local --enable-multilib --enable-ld=yes --target=x86_64-unknown-elf --disable-werror
     make
     make install
 
-Now, you should have the `gelf64-ld` command installed on your machine.
+Now, you should have the `x86_64-unknown-elf-ld` command installed on your machine.
 
 ## Installing NASM with Homebrew
 
