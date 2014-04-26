@@ -49,7 +49,7 @@ $(BUILD_DIR)/$(BINFILE): $(BUILD_DIR)
 
 $(BUILD_DIR): dependencies
 	mkdir $(BUILD_DIR)
-	sh generator.sh $(TARGET_ARCH) $(BUILD_DIR)/obj
+	bash generator.sh $(TARGET_ARCH) $(BUILD_DIR)/obj
 
 dependencies:
 	mkdir dependencies
