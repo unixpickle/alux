@@ -24,13 +24,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "entry.h"
+#include <platform/failure.h>
+#include <platform/printing.h>
 
 namespace OS {
 
-void EntryPoint() {
-  InitializePrinting();
-  PrintString("EntryPoint() has been called!");
-}
+void EntryPoint();
 
 }

@@ -24,13 +24,13 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "entry.h"
+extern "C" {
 
-namespace OS {
+void MbootEntry(void * mbootPtr);
 
-void EntryPoint() {
-  InitializePrinting();
-  PrintString("EntryPoint() has been called!");
-}
+/**
+ * Only used when not compiling on OS X.
+ */
+void _MbootEntry(void * ptr);
 
 }

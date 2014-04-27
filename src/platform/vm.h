@@ -45,6 +45,18 @@ public:
    * triggered.
    */
   virtual void * Allocate(uint64_t size, size_t alignment);
+  
+  /**
+   * Free a buffer by passing its virtual address.
+   */
+  virtual void Free(void * ptr);
+  
+  /**
+   * Return the physical address of a virtual address that was just allocated.
+   * The virtual address is really an address in the current page mapping,
+   * but the object using this instance might not know that.
+   */
+  virtual void * PhysicalAddress(void * virt);
 };
 
 class VirtualMapping {
@@ -53,15 +65,25 @@ private:
   PhysicalAllocator * allocator;
 
 public:
-  static uintptr_t * pageSizes;
-  static uintptr_t * physicalAligns;
-  static uintptr_t * virtualAligns;
-  static int numPageSizes;
+  static int NumPageSizes();
+  static uintptr_t * PageSizes();
+  static uintptr_t * PhysicalAlignments();
+  static uintptr_t * VirtualAlignments();
+  
+  enum PageFlags {
+    PageFlagExecute = 1 << 0,
+    PageFlagGlobal = 1 << 1
+  };
 
-  VirtualMapping(void * tableRoot, PhysicalAllocator * allocator) {
-    this->tableRoot = tableRoot;
-    this->allocator = allocator;
-  }
+  /**
+   * Create a new virtual mapping.
+   */
+  VirtualMapping(PhysicalAllocator * allocator);
+  
+  /**
+   * Free all resources associated with this virtual mapping.
+   */
+  ~VirtualMapping();
 
   /**
    * Unmap the page table entry containing a virtual address.
@@ -73,7 +95,7 @@ public:
    * @return false if something is already mapped between address and
    * address+size.
    */
-  bool Map(void * address, void * phys, uint64_t size);
+  bool Map(void * address, void * phys, uint64_t size, int flags);
   
   /**
    * Searches for an entry in the page tables corresponding to a virtual
@@ -86,7 +108,16 @@ public:
    * @param size The number of bytes contained by this page table entry.
    * @return true if an entry was found, false otherwise.
    */
-  bool Lookup(void * address, void ** phys, void ** start, uint64_t * size);
+  bool Lookup(void * address,
+              void ** phys,
+              void ** start,
+              int * flags,
+              uint64_t * size);
+
+  /**
+   * Start using this mapping on the current CPU.
+   */
+  void MakeCurrent();
 
   // TODO: here, there will be smaller methods to initialize the address
   // space etc.

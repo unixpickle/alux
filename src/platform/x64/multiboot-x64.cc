@@ -24,13 +24,16 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "entry.h"
+#include <startup/entry.h>
 
-namespace OS {
+extern "C" {
 
-void EntryPoint() {
-  InitializePrinting();
-  PrintString("EntryPoint() has been called!");
+void MbootEntry(void * mbootPtr) {
+  OS::EntryPoint();
+}
+
+void _MbootEntry(void * ptr) {
+  MbootEntry(ptr);
 }
 
 }
