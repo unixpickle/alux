@@ -28,6 +28,7 @@ Finally, you will need to compile and link Alux with your custom toolchain. You 
 
     export LD=your-linker-or-gcc
     export CXXFLAGS="-integrated-as -target x86_64-pc-none-elf64"
+    export CFLAGS="-integrated-as -target x86_64-pc-none-elf64"
 
 You may additionally wish to add:
 

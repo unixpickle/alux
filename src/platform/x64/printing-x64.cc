@@ -25,7 +25,7 @@
  */
 
 #include <platform/printing.h>
-#include "common.h"
+#include "common-x64.h"
 
 namespace OS {
 

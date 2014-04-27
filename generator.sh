@@ -76,7 +76,7 @@ printf "\n\n" >>$2/Makefile
 for file in $CXXSOURCES; do
   printf "`basename $file .cc`.o: $file\n" >>$2/Makefile
   printf "\t" >>$2/Makefile
-  printf "$CXX -c $CFLAGS $CXXFLAGS $INCLUDES $file -o `basename $file .cc`.o\n" >>$2/Makefile
+  printf "$CXX -c $CXXFLAGS $INCLUDES $file -o `basename $file .cc`.o\n" >>$2/Makefile
   echo >>$2/Makefile
 done
 
