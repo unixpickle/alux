@@ -32,7 +32,7 @@ namespace OS {
 static int color = 0xa;
 static int x = 0, y = 0;
 static uint16_t * buffer = (uint16_t *)(0xb8000);
-static uint64_t mainLock = 0;
+static uint64_t mainLock OS_ALIGNED(8) = 0;
 
 static void SetPosition(unsigned short x, unsigned short y);
 static void ScrollUp();

@@ -31,12 +31,6 @@ namespace OS {
 
 class OutStream {
 public:
-  OutStream() {
-  }
-  
-  ~OutStream() {
-  }
-
   virtual OutStream & operator<<(const char * str);
   virtual OutStream & operator<<(long long number);
   virtual OutStream & operator<<(unsigned long long number);
@@ -44,24 +38,16 @@ public:
 
 class OutStreamErr : public OutStream {
 public:
-  OutStreamErr() : OutStream() {}
-  ~OutStreamErr() {}
-  
   virtual OutStream & operator<<(const char * str);
 };
 
 class OutStreamOut : public OutStream {
 public:
-  OutStreamOut() : OutStream() {}
-  ~OutStreamOut() {}
-  
   virtual OutStream & operator<<(const char * str);
 };
 
 extern OutStreamOut cout;
 extern OutStreamErr cerr;
 extern const char * endl;
-
-void InitializeStreams();
 
 }

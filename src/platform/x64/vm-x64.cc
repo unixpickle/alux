@@ -25,8 +25,54 @@
  */
 
 #include <platform/vm.h>
+#include "common-x64.h"
+#include <utilities/lock.h>
 
 namespace OS {
+
+static uint64_t mappingLock OS_ALIGNED(8) = 0;
+static bool hasPageInfo = false;
+static uint64_t numPageSizes;
+static uintptr_t pageSizes[3];
+
+static void _calculate_page_sizes() {
+  // here, use CPUID to find page sizes etc.
+  uint64_t edx1, edx2;
+  __asm__("cpuid" : "=d" (edx1) : "a" (1) : "ecx");
+  __asm__("cpuid" : "=d" (edx2) : "a" (0x80000001) : "ecx");
+  
+  numPageSizes = 1;
+  pageSizes[0] = 0x1000;
+  
+  if (edx1 & (1 << 3)) {
+    pageSizes[numPageSizes++] = 0x200000;
+  }
+  if (edx2 & (1 << 26)) {
+    pageSizes[numPageSizes++] = 0x40000000;
+  }
+  
+  hasPageInfo = true;
+}
+
+int VirtualMapping::NumPageSizes() {
+  ScopeLock scope(&mappingLock);
+  if (!hasPageInfo) _calculate_page_sizes();
+  return numPageSizes;
+}
+
+uintptr_t * VirtualMapping::PageSizes() {
+  ScopeLock scope(&mappingLock);
+  if (!hasPageInfo) _calculate_page_sizes();
+  return pageSizes;
+}
+
+uintptr_t * VirtualMapping::PhysicalAlignments() {
+  return PageSizes();
+}
+
+uintptr_t * VirtualMapping::VirtualAlignments() {
+  return PageSizes();
+}
 
 VirtualMapping::VirtualMapping(PhysicalAllocator * alloc) {
   allocator = alloc;
@@ -38,7 +84,47 @@ VirtualMapping::~VirtualMapping() {
 }
 
 void VirtualMapping::Unmap(void * address) {
-  // here, use our standard x64 page table logic to unmap the address
+  uintptr_t pageIdx = (uintptr_t)address >> 12;
+  uintptr_t * table = (uintptr_t *)tableRoot;
+  
+  bool wasVacated[4];
+  uintptr_t * tables[4] = {0};
+  
+  int i;
+  for (i = 0; i < 4; i++) {
+    // find the entry in the table
+    int index = (pageIdx >> (27 - (i * 9))) & 0x1ff;
+    uintptr_t entry = table[index];
+    
+    int j;
+    wasVacated[i] = true;
+    tables[i] = table;
+    for (j = 0; j < 0x200; j++) {
+      if (j == index) continue;
+      if (table[j]) {
+        wasVacated[i] = false;
+        break;
+      }
+    }
+    
+    if ((entry | (1 << 7)) || i == 3) {
+      // this is the deepest entry
+      table[index] = 0;
+      break;
+    }
+    
+    void * physAddr = (void *)(entry & ~0xfff);
+    table = (uintptr_t *)allocator->VirtualAddress(physAddr);
+  }
+  
+  // `i` is set to the deepest table we went to
+  for (; i > 0; i--) {
+    if (!wasVacated[i]) break;
+    // free this table
+    int lastIndex = (pageIdx >> (27 - ((i - 1) * 9))) & 0x1ff;
+    allocator->Free(tables[i]);
+    tables[i - 1][lastIndex] = 0;
+  }
 }
 
 bool VirtualMapping::Map(void * address,
@@ -47,6 +133,11 @@ bool VirtualMapping::Map(void * address,
                          int flags) {
   // here, map the address using standard x64 page table logic
   return false;
+  // TODO: mapping logic here
+  (void)address;
+  (void)phys;
+  (void)size;
+  (void)flags;
 }
 
 bool VirtualMapping::Lookup(void * address,
@@ -56,6 +147,11 @@ bool VirtualMapping::Lookup(void * address,
                             uint64_t * size) {
   // here, use the typical x64 page table walk
   return false;
+  (void)address;
+  (void)phys;
+  (void)start;
+  (void)flags;
+  (void)size;
 }
 
 }

@@ -26,6 +26,8 @@
 
 #include <stdint.h>
 
+#define OS_ALIGNED(x) __attribute__((aligned(x)))
+
 namespace OS {
 
 void OutB(uint16_t port, uint8_t byte);

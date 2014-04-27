@@ -29,6 +29,7 @@
 extern "C" {
 
 void MbootEntry(void * mbootPtr) {
+  (void)mbootPtr;
   OS::EntryPoint();
 }
 

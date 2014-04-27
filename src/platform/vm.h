@@ -57,6 +57,11 @@ public:
    * but the object using this instance might not know that.
    */
   virtual void * PhysicalAddress(void * virt);
+  
+  /**
+   * Returns the virtual address for a physical one.
+   */
+  virtual void * VirtualAddress(void * phys);
 };
 
 class VirtualMapping {
@@ -72,7 +77,8 @@ public:
   
   enum PageFlags {
     PageFlagExecute = 1 << 0,
-    PageFlagGlobal = 1 << 1
+    PageFlagGlobal = 1 << 1,
+    PageFlagUser = 1 << 2
   };
 
   /**

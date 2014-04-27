@@ -30,7 +30,6 @@ namespace OS {
 
 void EntryPoint() {
   InitializePrinting();
-  InitializeStreams();
   cout << "EntryPoint() has been called!";
 }
 
