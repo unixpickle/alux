@@ -27,7 +27,7 @@ Simply run this and you're done!
 Finally, you will need to compile and link Alux with your custom toolchain. You can still use the default Clang compiler, you just need to give it some options. To do this, run these commands before running the normal `make` command:
 
     export LD=your-linker-or-gcc
-    export CXXFLAGS=-integrated-as -target x86_64-pc-none-elf64
+    export CXXFLAGS="-integrated-as -target x86_64-pc-none-elf64"
 
 You may additionally wish to add:
 
