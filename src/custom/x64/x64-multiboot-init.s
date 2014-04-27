@@ -55,6 +55,14 @@ start:
   mov esp, initial_stack.end
   mov ebp, esp
 
+  ; ebx contains the multiboot info structure, so we push it along with
+  ; a null dword so that the stack stays 64-bit aligned
+  push ebx
+  push dword 0
+
+  ; NOTE: I may need to reset EFLAGS here, but I don't think so
+
+  ; check CPUID(1)
   mov eax, 1
   cpuid
   mov eax, CPUID_1_FEATURES
@@ -62,12 +70,31 @@ start:
   cmp eax, CPUID_1_FEATURES
   jne .errCPUID
 
+  ; check CPUID(0x80000001)
   mov eax, 0x80000001
   cpuid
   mov eax, CPUID_80000001_FEATURES
   and eax, edx
   cmp eax, CPUID_80000001_FEATURES
   jne .errCPUID
+
+  ; enable PAE and PGE
+  mov eax, cr4
+  or eax, 0xa0
+  mov cr4, eax
+
+  ; set Long Mode bit
+  mov ecx, 0xc0000080
+  rdmsr
+  or eax, 0x101
+  wrmsr
+
+  ; configure paging
+  mov esi, initial_pml4
+  mov cr3, esi
+  mov eax, cr0
+  bts eax, 31
+  mov cr0, eax
 
   ; print NYI error
   mov edi, .initialError
@@ -81,8 +108,7 @@ start:
 .cpuidMsg:
   db 'CPUID -- missing features!', 0
 
-
-; move error string to edi
+; pass the error string pointer in %edi
 print_error:
   mov ah, 0x0a ; green
   mov edx, 0xb8000
@@ -101,9 +127,52 @@ print_error:
 
 ; static data area
 
+align 8
+
 initial_stack:
   times 0x1000 db 0x0
 .end:
+
+global_gdt:
+    .null: equ $ - global_gdt
+    dw 0                         ; Limit (low).
+    dw 0                         ; Base (low).
+    db 0                         ; Base (middle)
+    db 0                         ; Access.
+    db 0                         ; Granularity.
+    db 0                         ; Base (high).
+    .code: equ $ - global_gdt
+    dw 0                         ; Limit (low).
+    dw 0                         ; Base (low).
+    db 0                         ; Base (middle)
+    db 10011000b                 ; Access.
+    db 00100000b                 ; Granularity & 64-bit mode flag
+    db 0                         ; Base (high).
+    .data: equ $ - global_gdt
+    dw 0                         ; Limit (low).
+    dw 0                         ; Base (low).
+    db 0                         ; Base (middle)
+    db 10010010b                 ; Access.
+    db 00000000b                 ; Granularity.
+    db 0                         ; Base (high).
+    .code_user: equ $ - global_gdt
+    dw 0                         ; Limit (low).
+    dw 0                         ; Base (low).
+    db 0                         ; Base (middle)
+    db 11111000b                 ; Access with DPL = 3
+    db 00100000b                 ; Granularity.
+    db 0                         ; Base (high).
+    .data_user: equ $ - global_gdt
+    dw 0                         ; Limit (low).
+    dw 0                         ; Base (low).
+    db 0                         ; Base (middle)
+    db 11110010b                 ; Access.
+    db 00000000b                 ; Granularity.
+    db 0                         ; Base (high).
+global global_gdt_pointer
+global_gdt_pointer:
+    dw $ - global_gdt - 1        ; Limit.
+    dq global_gdt                ; Base.
 
 align 0x1000
 initial_pml4:
