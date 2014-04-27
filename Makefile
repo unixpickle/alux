@@ -56,13 +56,14 @@ dependencies:
 	# here, I will download external libs to use
 
 image: $(BUILD_DIR)/$(BINFILE) $(BUILD_DIR)/grub_root
-	grub-mkrescue -o $(BUILD_DIR)/alux.iso $(BUILD_DIR)/grub_root
+	grub-mkrescue -o $(BUILD_DIR)/alux.iso $(BUILD_DIR)/grub_root/
 
 $(BUILD_DIR)/grub_root:
 	mkdir $(BUILD_DIR)/grub_root
 	mkdir $(BUILD_DIR)/grub_root/boot
 	mkdir $(BUILD_DIR)/grub_root/boot/grub
 	cp $(PROJECT_ROOT)/src/custom/$(TARGET_ARCH)/grub.cfg $(BUILD_DIR)/grub_root/boot/grub
+	cp $(BUILD_DIR)/$(BINFILE) $(BUILD_DIR)/grub_root/boot
 
 clean:
 	rm -rf build

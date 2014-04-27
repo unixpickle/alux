@@ -68,7 +68,7 @@ print_error:
   jz .donePrint
   
   mov [edx], ax
-  add ecx, 2
+  add edx, 2
   
   inc edi
   jmp .mainLoop
