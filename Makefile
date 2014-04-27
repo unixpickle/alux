@@ -41,6 +41,7 @@ export TARGET_ARCH
 export CXX
 export CC
 export LD
+export CXXFLAGS
 
 $(BUILD_DIR)/$(BINFILE): $(BUILD_DIR)
 	$(MAKE) -C $(BUILD_DIR)/obj
