@@ -23,15 +23,45 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-
-#include "entry.h"
+ 
+#include <platform/printing.h>
+#include <stdlib/runtime.h>
 
 namespace OS {
 
-void EntryPoint() {
-  InitializePrinting();
-  InitializeStreams();
-  cout << "EntryPoint() has been called!";
-}
+class OutStream {
+public:
+  OutStream() {
+  }
+  
+  ~OutStream() {
+  }
+
+  virtual OutStream & operator<<(const char * str);
+  virtual OutStream & operator<<(long long number);
+  virtual OutStream & operator<<(unsigned long long number);
+};
+
+class OutStreamErr : public OutStream {
+public:
+  OutStreamErr() : OutStream() {}
+  ~OutStreamErr() {}
+  
+  virtual OutStream & operator<<(const char * str);
+};
+
+class OutStreamOut : public OutStream {
+public:
+  OutStreamOut() : OutStream() {}
+  ~OutStreamOut() {}
+  
+  virtual OutStream & operator<<(const char * str);
+};
+
+extern OutStreamOut cout;
+extern OutStreamErr cerr;
+extern const char * endl;
+
+void InitializeStreams();
 
 }

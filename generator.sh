@@ -35,6 +35,7 @@ fi
 CXXSOURCES=`echo $PWD/src/platform/general/*.cc`
 CXXSOURCES=${CXXSOURCES}\ `echo $PWD/src/startup/*.cc`
 CXXSOURCES=${CXXSOURCES}\ `echo $PWD/src/utilities/*.cc`
+CXXSOURCES=${CXXSOURCES}\ `echo $PWD/src/stdlib/*.cc`
 
 if [ $1 == 'x64' ]; then
   CXXSOURCES=${CXXSOURCES}\ `echo $PWD/src/platform/x64/*.cc`
@@ -46,6 +47,7 @@ fi
 # generate the $CSOURCES array
 
 CSOURCES=`echo $PWD/dependencies/anlock/src/*.c`
+CSOURCES=${CSOURCES}\ `echo $PWD/src/stdlib/*.c`
 
 # generate the $INCLUDES array
 

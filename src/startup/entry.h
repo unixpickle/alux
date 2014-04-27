@@ -25,7 +25,7 @@
  */
 
 #include <platform/failure.h>
-#include <platform/printing.h>
+#include <iostream>
 
 namespace OS {
 

@@ -28,7 +28,7 @@ BINFILE ?= alux.bin
 BUILD_DIR ?= $(PROJECT_ROOT)/build
 CUSTOM_OUTDIR ?= $(BUILD_DIR)/custom-out
 
-override CXXFLAGS += -nostdlib -ffreestanding -mno-red-zone -fno-exceptions -Wno-long-long -Wextra
+override CXXFLAGS += -nostdlib -ffreestanding -mno-red-zone -fno-exceptions -fno-rtti -Wno-long-long -Wextra
 
 CXX ?= "g++"
 CC ?= gcc
