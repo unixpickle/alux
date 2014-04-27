@@ -96,6 +96,10 @@ start:
   bts eax, 31
   mov cr0, eax
 
+  ; switch to 64-bit code segment
+  lgdt [gdt_pointer]
+  jmp gdt.code:entry64
+
   ; print NYI error
   mov edi, .initialError
   call print_error
@@ -125,6 +129,28 @@ print_error:
 .donePrint:
   hlt
 
+bits 64
+
+entry64:
+  ; find signature '_X64_ENTRYPOINT!'
+  mov rsi, LOADBASE + 0x5000
+  mov rax, 0x544e455f3436585f ; first qword
+  mov rbx, 0x21544e494f505952 ; second qword
+
+.findLoop:
+  cmp [rsi], rax
+  je .testUpper ; only jump if we're basically sure we found it; branching hax
+.continue:
+  inc rsi
+  jmp .findLoop
+.testUpper:
+  cmp [rsi + 8], rbx
+  jne .continue
+
+  ; entry point found!
+  add rsi, 0x10
+  jmp rsi
+
 ; static data area
 
 align 8
@@ -133,46 +159,46 @@ initial_stack:
   times 0x1000 db 0x0
 .end:
 
-global_gdt:
-    .null: equ $ - global_gdt
+gdt:
+    .null: equ $ - gdt
     dw 0                         ; Limit (low).
     dw 0                         ; Base (low).
     db 0                         ; Base (middle)
     db 0                         ; Access.
     db 0                         ; Granularity.
     db 0                         ; Base (high).
-    .code: equ $ - global_gdt
+    .code: equ $ - gdt
     dw 0                         ; Limit (low).
     dw 0                         ; Base (low).
     db 0                         ; Base (middle)
     db 10011000b                 ; Access.
     db 00100000b                 ; Granularity & 64-bit mode flag
     db 0                         ; Base (high).
-    .data: equ $ - global_gdt
+    .data: equ $ - gdt
     dw 0                         ; Limit (low).
     dw 0                         ; Base (low).
     db 0                         ; Base (middle)
     db 10010010b                 ; Access.
     db 00000000b                 ; Granularity.
     db 0                         ; Base (high).
-    .code_user: equ $ - global_gdt
+    .code_user: equ $ - gdt
     dw 0                         ; Limit (low).
     dw 0                         ; Base (low).
     db 0                         ; Base (middle)
     db 11111000b                 ; Access with DPL = 3
     db 00100000b                 ; Granularity.
     db 0                         ; Base (high).
-    .data_user: equ $ - global_gdt
+    .data_user: equ $ - gdt
     dw 0                         ; Limit (low).
     dw 0                         ; Base (low).
     db 0                         ; Base (middle)
     db 11110010b                 ; Access.
     db 00000000b                 ; Granularity.
     db 0                         ; Base (high).
-global global_gdt_pointer
-global_gdt_pointer:
-    dw $ - global_gdt - 1        ; Limit.
-    dq global_gdt                ; Base.
+global gdt_pointer
+gdt_pointer:
+    dw $ - gdt - 1        ; Limit.
+    dq gdt                ; Base.
 
 align 0x1000
 initial_pml4:
