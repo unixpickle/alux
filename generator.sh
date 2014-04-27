@@ -30,20 +30,26 @@ if [ $# != 2 ]; then
   exit
 fi
 
-# generate the $SOURCES array
+# generate the $CXXSOURCES array
 
-SOURCES=`echo $PWD/src/platform/general/*.cc`
+CXXSOURCES=`echo $PWD/src/platform/general/*.cc`
+CXXSOURCES=${CXXSOURCES}\ `echo $PWD/src/startup/*.cc`
+CXXSOURCES=${CXXSOURCES}\ `echo $PWD/src/utilities/*.cc`
 
 if [ $1 == 'x64' ]; then
-  SOURCES=${SOURCES}\ `echo $PWD/src/platform/x64/*.cc`
+  CXXSOURCES=${CXXSOURCES}\ `echo $PWD/src/platform/x64/*.cc`
 else
-  echo 'Unknown TARGET ' $1
+  echo Unknown TARGET $1
   exit
 fi
 
+# generate the $CSOURCES array
+
+CSOURCES=`echo $PWD/dependencies/anlock/src/*.c`
+
 # generate the $INCLUDES array
 
-INCLUDES="$INCLUDES -I$PWD/src -I$PWD/src/stdlib/cheaders -I$PWD/src/stdlib/cppheaders"
+INCLUDES="$INCLUDES -I$PWD/src -I$PWD/src/stdlib/cheaders -I$PWD/src/stdlib/cppheaders -I$PWD/dependencies/anlock/src"
 
 # generate output location
 
@@ -59,14 +65,24 @@ fi
 # generate Makefile
 
 printf "all:" >>$2/Makefile
-for file in $SOURCES; do
+for file in $CXXSOURCES; do
   printf " `basename $file .cc`.o" >>$2/Makefile
+done
+for file in $CSOURCES; do
+  printf " `basename $file .c`.o" >>$2/Makefile
 done
 printf "\n\n" >>$2/Makefile
 
-for file in $SOURCES; do
+for file in $CXXSOURCES; do
   printf "`basename $file .cc`.o: $file\n" >>$2/Makefile
   printf "\t" >>$2/Makefile
   printf "$CXX -c $CFLAGS $CXXFLAGS $INCLUDES $file -o `basename $file .cc`.o\n" >>$2/Makefile
+  echo >>$2/Makefile
+done
+
+for file in $CSOURCES; do
+  printf "`basename $file .c`.o: $file\n" >>$2/Makefile
+  printf "\t" >>$2/Makefile
+  printf "$CC -c $CFLAGS $INCLUDES $file -o `basename $file .c`.o\n" >>$2/Makefile
   echo >>$2/Makefile
 done

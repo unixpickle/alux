@@ -24,24 +24,25 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-OUTPUT_FORMAT("binary")
+#ifndef __UTILITIES_LOCK_H__
+#define __UTILITIES_LOCK_H__
 
-SECTIONS {
+extern "C" {
 
-  . = 0x105000;
+#include <anlock.h>
 
-  .text BLOCK(16) : ALIGN(16) {
-    *(.text)
-  }
-  
-  .rodata BLOCK(16) : ALIGN(16) {
-    *(.rodata)
-  }
-  
-  .data BLOCK(16) : ALIGN(16) {
-    *(.data)
-    *(COMMON)
-    *(.bss)
-  }
-  
 }
+
+namespace OS {
+
+class ScopeLock {
+private:
+  anlock_t theLock;
+public:
+  ScopeLock(anlock_t lock);
+  ~ScopeLock();
+};
+
+}
+
+#endif

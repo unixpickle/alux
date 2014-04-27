@@ -24,24 +24,12 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-OUTPUT_FORMAT("binary")
+#include "common.h"
 
-SECTIONS {
+namespace OS {
 
-  . = 0x105000;
+void OutB(uint16_t port, uint8_t byte) {
+  __asm__("outb %%al, %%dx" : : "a" (byte), "d" (port));
+}
 
-  .text BLOCK(16) : ALIGN(16) {
-    *(.text)
-  }
-  
-  .rodata BLOCK(16) : ALIGN(16) {
-    *(.rodata)
-  }
-  
-  .data BLOCK(16) : ALIGN(16) {
-    *(.data)
-    *(COMMON)
-    *(.bss)
-  }
-  
 }

@@ -53,7 +53,7 @@ $(BUILD_DIR): dependencies
 
 dependencies:
 	mkdir dependencies
-	# here, I will download external libs to use
+	git clone https://github.com/unixpickle/anlock.git dependencies/anlock
 
 image: $(BUILD_DIR)/$(BINFILE) $(BUILD_DIR)/grub_root
 	grub-mkrescue -o $(BUILD_DIR)/alux.iso $(BUILD_DIR)/grub_root/

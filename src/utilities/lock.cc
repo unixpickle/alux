@@ -24,24 +24,17 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-OUTPUT_FORMAT("binary")
+#include "lock.h"
 
-SECTIONS {
+namespace OS {
 
-  . = 0x105000;
+ScopeLock::ScopeLock(anlock_t lock) {
+  theLock = lock;
+  anlock_lock(theLock);
+}
 
-  .text BLOCK(16) : ALIGN(16) {
-    *(.text)
-  }
-  
-  .rodata BLOCK(16) : ALIGN(16) {
-    *(.rodata)
-  }
-  
-  .data BLOCK(16) : ALIGN(16) {
-    *(.data)
-    *(COMMON)
-    *(.bss)
-  }
-  
+ScopeLock::~ScopeLock() {
+  anlock_unlock(theLock);
+}
+
 }

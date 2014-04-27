@@ -24,24 +24,29 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-OUTPUT_FORMAT("binary")
+#ifndef __PLATFORM_PRINTING_H__
+#define __PLATFORM_PRINTING_H__
 
-SECTIONS {
+#include <utilities/lock.h>
 
-  . = 0x105000;
+namespace OS {
+  
+typedef enum {
+  PrintColorBlack = 0,
+  PrintColorBlue = 1,
+  PrintColorGreen = 2,
+  PrintColorCyan = 3,
+  PrintColorRed = 4,
+  PrintColorMagenta = 5,
+  PrintColorBrown = 6,
+  PrintColorLightGray = 7,
+  PrintColorBrightMask = 8
+} PrintColor;
 
-  .text BLOCK(16) : ALIGN(16) {
-    *(.text)
-  }
-  
-  .rodata BLOCK(16) : ALIGN(16) {
-    *(.rodata)
-  }
-  
-  .data BLOCK(16) : ALIGN(16) {
-    *(.data)
-    *(COMMON)
-    *(.bss)
-  }
-  
+void InitializePrinting();
+void PrintString(const char * string);
+void SetColor(int color);
+
 }
+
+#endif

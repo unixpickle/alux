@@ -26,12 +26,14 @@ section .text
 
 bits 64
 
+extern _EntryPoint
+
 db '_X64_ENTRYPOINT!'
+
 global x64_entrypoint
 x64_entrypoint:
   ; here, we will be in long mode and everything!
-  mov rdi, 0xb8000
-  mov word [rdi], 0x0a21
+  call _EntryPoint
   cli
   hlt
 
