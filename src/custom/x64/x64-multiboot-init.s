@@ -38,6 +38,9 @@ FLAGS equ LINKINFO | MEMINFO
 MAGIC equ 0x1BADB002
 CHECKSUM equ -(MAGIC + FLAGS)
 
+CPUID_1_FEATURES equ (1 << 3) | (1 << 6) | (1 << 24) | (1 << 26)
+CPUID_80000001_FEATURES equ (1 << 11) | (1 << 29) | (1 << 20)
+
 multiboot_header:
   dd MAGIC
   dd FLAGS
@@ -51,12 +54,33 @@ multiboot_header:
 start:
   mov esp, initial_stack.end
   mov ebp, esp
-  
-  ; generate page tables
+
+  mov eax, 1
+  cpuid
+  mov eax, CPUID_1_FEATURES
+  and eax, edx
+  cmp eax, CPUID_1_FEATURES
+  jne .errCPUID
+
+  mov eax, 0x80000001
+  cpuid
+  mov eax, CPUID_80000001_FEATURES
+  and eax, edx
+  cmp eax, CPUID_80000001_FEATURES
+  jne .errCPUID
+
+  ; print NYI error
   mov edi, .initialError
   call print_error
 .initialError:
   db 'Not yet implemented :(', 0
+
+.errCPUID:
+  mov edi, .cpuidMsg
+  call print_error
+.cpuidMsg:
+  db 'CPUID -- missing features!', 0
+
 
 ; move error string to edi
 print_error:
@@ -88,9 +112,12 @@ initial_pml4:
 
 align 0x1000
 initial_pdpt:
-  dq 0b110000011 ; global, granularity (1GB), writable, user
+  dq initial_pdt + 3
   times 0x1ff dq 0x0
 
+initial_pdt:
+  times 0x200 dq 0x83 + ((($ - initial_pdt) >> 3) << 0x200000)
+
 ; pad the result file to 0x100 bytes
-times (0x4000 - ($ - multiboot_header)) db 0x0
+times (0x5000 - ($ - multiboot_header)) db 0x0
 
