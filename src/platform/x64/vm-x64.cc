@@ -78,6 +78,18 @@ uintptr_t * VirtualMapping::VirtualAlignments() {
   return PageSizes();
 }
 
+void * VirtualMapping::AddPtr(void * ptr1, uintptr_t val) {
+  uintptr_t sum = (uintptr_t)ptr1 + val;
+  if (sum & (1L << 47)) {
+    sum |= 0xFFFFL << 48;
+  }
+  return (void *)sum;
+}
+
+uintptr_t VirtualMapping::VirtualByteCount() {
+  return 1L << 48;
+}
+
 VirtualMapping * VirtualMapping::NewMappingIP(PhysicalAllocator * allocator,
                                               void * base) {
   StandaloneMapping * sa = new(base) StandaloneMapping(allocator);
@@ -225,12 +237,57 @@ bool StandaloneMapping::Lookup(void * address,
                                int * flags,
                                uint64_t * size) {
   // here, use the typical x64 page table walk
-  return false;
-  (void)address;
-  (void)phys;
-  (void)start;
-  (void)flags;
-  (void)size;
+  uintptr_t pageIdx = (uintptr_t)address >> 12;
+  uintptr_t * table = pml4;
+  
+  uintptr_t i;
+  uintptr_t offset;
+  uintptr_t pointerValue = 0;
+  
+  for (i = 0; i < 4; i++) {
+    offset = (pageIdx >> (27L - (i * 9))) & 0x1ffL;
+    if (!(table[offset] & 1)) {
+      return false;
+    }
+    pointerValue += offset << (12L + 27L - (i * 9));
+    if (i == 3 || (table[i] & 0x80)) {
+      break;
+    }
+    void * physAddr = PHYS_ADDR(table[offset]);
+    table = (uintptr_t *)allocator->VirtualAddress(physAddr);
+  }
+  
+  void * physicalStart = PHYS_ADDR(table[offset]);
+
+  // get a canonical address
+  void * virtualStart = VirtualMapping::AddPtr((void *)pointerValue, 0);
+  
+  // copy out the arguments
+  if (size) {
+    *size = (0x1000 << ((3 - i) * 9));
+  }
+  if (flags) {
+    int vals = PageFlagExecute;
+    if (table[offset] & 4) {
+      vals |= PageFlagUser;
+    }
+    if (table[offset] & 0x100) {
+      vals |= PageFlagGlobal;
+    }
+    if (table[offset] & (1L << 63)) {
+      vals ^= PageFlagExecute;
+    }
+    *flags = vals;
+  }
+  if (phys) {
+    uintptr_t difference = (uintptr_t)address - (uintptr_t)virtualStart;
+    *phys = VirtualMapping::AddPtr(physicalStart, difference);
+  }
+  if (start) {
+    *start = virtualStart;
+  }
+  
+  return true;
 }
 
 void StandaloneMapping::MakeCurrent() {
@@ -284,12 +341,24 @@ ReferenceMapping::~ReferenceMapping() {
 }
 
 void ReferenceMapping::Unmap(void * address) {
-  // TODO: here, if the address is in a PDPT that hasn't been copied, Panic().
+  uintptr_t pageIdx = (uintptr_t)address >> 12;
+  uintptr_t pml4Off = (pageIdx >> 27);
+  if (IsReferenced(pml4Off)) {
+    Panic("ReferenceMapping::Unmap() - passed referenced address");
+  }
+  
+  StandaloneMapping::Unmap(address);
 }
 
-bool ReferenceMapping::Map(void * address) {
-  // TODO: here, if the address is in an uncopied PDPT, Panic()
-  return false;
+bool ReferenceMapping::Map(void * address, void * phys,
+                           uint64_t size, int flags) {
+  uintptr_t pageIdx = (uintptr_t)address >> 12;
+  uintptr_t pml4Off = (pageIdx >> 27);
+  if (IsReferenced(pml4Off)) {
+    Panic("ReferenceMapping::Map() - passed referenced address");
+  }
+  
+  return StandaloneMapping::Map(address, phys, size, flags);
 }
 
 }

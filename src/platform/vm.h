@@ -91,6 +91,17 @@ public:
   static uintptr_t * VirtualAlignments();
   
   /**
+   * Adds a pointer to an integer and returns the result. This is needed in
+   * the case of canonical-form addresses.
+   */
+  static void * AddPtr(void * ptr1, uintptr_t val);
+  
+  /**
+   * Returns the total number of virtually-addressable bytes.
+   */
+  static uintptr_t VirtualByteCount();
+  
+  /**
    * Create a new VirtualMapping with nothing mapped yet.
    */
   static VirtualMapping * NewMappingIP(PhysicalAllocator * allocator,

@@ -24,47 +24,4 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <platform/vm.h>
-#include <utilities/lock.h>
-#include <new>
-#include <platform/failure.h>
-#include "common-x64.h"
-
-namespace OS {
-
-class StandaloneMapping : public VirtualMapping {
-protected:
-  uintptr_t * pml4;
-  PhysicalAllocator * allocator;
-
-  void FreeTable(uintptr_t * table, int depth);
-  friend class ReferenceMapping;
-  
-public:
-  StandaloneMapping(PhysicalAllocator * allocator);
-  virtual ~StandaloneMapping();
-  virtual void Unmap(void * address);
-  virtual bool Map(void * address, void * phys, uint64_t size, int flags);
-  virtual bool Lookup(void * address,
-              void ** phys,
-              void ** start,
-              int * flags,
-              uint64_t * size);
-  virtual void MakeCurrent();
-};
-
-class ReferenceMapping : public StandaloneMapping {
-private:
-  uint64_t refs[8]; // bitmap
-  bool IsReferenced(int idx);
-  void SetIsReferenced(int idx, bool flag);
-
-public:
-  ReferenceMapping(PhysicalAllocator * allocator, StandaloneMapping * map);
-  virtual ~ReferenceMapping();
-  
-  virtual void Unmap(void * address);
-  virtual bool Map(void * address, void * phys, uint64_t size, int flags);
-};
-
-}
+#include <stdlib/runtime.h>
