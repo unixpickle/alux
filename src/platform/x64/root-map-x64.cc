@@ -28,19 +28,18 @@
 
 namespace OS {
 
-static RootMapper * mapper = NULL;
+static MultibootRootMapper mapper(0);
 
-void MultibootRootMapper::SetRootMapper(RootMapper * x) {
-  mapper = x;
+void MultibootRootMapper::InitRootMapper(MultibootBootInfo ptr) {
+  new(&mapper) MultibootRootMapper(ptr);
 }
 
 RootMapper * RootMapper::GetRootMapper() {
-  return mapper;
+  return static_cast<RootMapper *>(&mapper);
 }
 
-MultibootRootMapper::MultibootRootMapper(void * multibootPtr) {
-  // TODO: here, calculate the physical regions using the multiboot
-  // information.
+MultibootRootMapper::MultibootRootMapper(MultibootBootInfo multibootPtr) {
+  regionCount = 0;
 }
 
 MemoryRegion * MultibootRootMapper::PhysicalRegions() {

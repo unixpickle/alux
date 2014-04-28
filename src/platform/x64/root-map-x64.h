@@ -28,6 +28,8 @@
 #define __PLATFORM_X64_ROOT_MAP_X64_H__
 
 #include <platform/root-map.h>
+#include <new>
+#include "multiboot-x64.h"
 
 namespace OS {
 
@@ -37,9 +39,9 @@ protected:
   int regionCount;
 
 public:
-  static void SetRootMapper(RootMapper * mapper);
+  static void InitRootMapper(MultibootBootInfo multibootPtr);
   
-  MultibootRootMapper(void * multibootPtr);
+  MultibootRootMapper(MultibootBootInfo multibootPtr);
   
   virtual MemoryRegion * PhysicalRegions();
   virtual int PhysicalRegionCount();

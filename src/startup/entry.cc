@@ -30,7 +30,14 @@ namespace OS {
 
 void EntryPoint() {
   InitializePrinting();
-  cout << "EntryPoint() has been called!";
+  InitializeOutStream();
+  
+  cout << "printing initialized!" << endl;
+  
+  cout << "creating kernel mapping..." << endl;
+  bool result = RootMapper::GetRootMapper()->CreateKernelMapping(NULL, NULL);
+  if (!result) Panic("failed to create kernel mapping");
+  cout << "created kernel mapping" << endl;
 }
 
 }

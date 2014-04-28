@@ -95,7 +95,7 @@ MemoryRegion * VirtualMapping::VirtualMemoryRegions() {
   if (regionsInitialized) return regions;
   
   new(&regions[0]) MemoryRegion(NULL, 1L << 47);
-  new(&regions[1]) MemoryRegion((void *)0xFFFF800000000000, 1L << 47);
+  new(&regions[1]) MemoryRegion((void *)0xFFFF800000000000L, 1L << 47);
   regionsInitialized = true;
   return regions;
 }

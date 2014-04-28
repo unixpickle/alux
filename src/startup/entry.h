@@ -26,6 +26,7 @@
 
 #include <platform/failure.h>
 #include <iostream>
+#include <platform/root-map.h>
 
 namespace OS {
 

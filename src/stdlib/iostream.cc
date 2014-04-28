@@ -56,4 +56,9 @@ OutStreamErr cerr;
 OutStreamOut cout;
 const char * endl = "\n";
 
+void InitializeOutStream() {
+  new(&cerr) OutStreamErr;
+  new(&cout) OutStreamOut;
+}
+
 }

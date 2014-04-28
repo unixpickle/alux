@@ -50,4 +50,6 @@ extern OutStreamOut cout;
 extern OutStreamErr cerr;
 extern const char * endl;
 
+void InitializeOutStream();
+
 }

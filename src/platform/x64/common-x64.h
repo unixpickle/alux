@@ -27,6 +27,7 @@
 #include <stdint.h>
 
 #define OS_ALIGNED(x) __attribute__((aligned(x)))
+#define OS_PACKED __attribute__((packed))
 
 namespace OS {
 

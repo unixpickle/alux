@@ -24,13 +24,38 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <stdint.h>
+#include "common-x64.h"
+
+namespace OS {
+
+typedef struct {
+  uint32_t flags;
+  uint32_t mem_lower;
+  uint32_t mem_upper;
+  uint32_t boot_device;
+  uint32_t cmdline;
+  uint32_t mods_count;
+  uint32_t mods_addr;
+  char syms[12];
+  uint32_t mmap_length;
+  uint32_t mmap_addr;
+  uint32_t drives_length;
+  uint32_t drives_addr;
+  uint32_t config_table;
+  uint32_t boot_loader_name;
+  uint32_t apm_table;
+} OS_PACKED * MultibootBootInfo;
+
+}
+
 extern "C" {
 
-void MbootEntry(void * mbootPtr);
+void MbootEntry(OS::MultibootBootInfo mbootPtr);
 
 /**
  * Only used when not compiling on OS X.
  */
-void _MbootEntry(void * ptr);
+void _MbootEntry(OS::MultibootBootInfo mbootPtr);
 
 }
