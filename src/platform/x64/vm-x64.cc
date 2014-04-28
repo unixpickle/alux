@@ -24,9 +24,9 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <platform/vm.h>
-#include "common-x64.h"
-#include <utilities/lock.h>
+#include "vm-x64.h"
+
+#define PHYS_ADDR(x) (void *)((uintptr_t)x & 0x7FFFFFFFFFFFF000)
 
 namespace OS {
 
@@ -54,6 +54,10 @@ static void _calculate_page_sizes() {
   hasPageInfo = true;
 }
 
+/*********************************
+ * Static VirtualMapping Methods *
+ *********************************/
+
 int VirtualMapping::NumPageSizes() {
   ScopeLock scope(&mappingLock);
   if (!hasPageInfo) _calculate_page_sizes();
@@ -74,29 +78,63 @@ uintptr_t * VirtualMapping::VirtualAlignments() {
   return PageSizes();
 }
 
-VirtualMapping::VirtualMapping(PhysicalAllocator * alloc) {
+VirtualMapping * VirtualMapping::NewMappingIP(PhysicalAllocator * allocator,
+                                              void * base) {
+  StandaloneMapping * sa = new(base) StandaloneMapping(allocator);
+  return static_cast<VirtualMapping *>(sa);
+}
+  
+VirtualMapping * VirtualMapping::NewSubmapping(PhysicalAllocator * allocator,
+                                               VirtualMapping * mapping) {
+  StandaloneMapping * sa = static_cast<StandaloneMapping *>(mapping);
+  ReferenceMapping * map = new ReferenceMapping(allocator, sa);
+  return static_cast<VirtualMapping *>(map);
+}
+
+/*********************
+ * StandaloneMapping *
+ *********************/
+
+void StandaloneMapping::FreeTable(uintptr_t * table, int depth) {
+  if (depth == 3) {
+    allocator->Free(table);
+    return;
+  }
+  
+  for (int i = 0; i < 0x200; i++) {
+    if ((table[i] & 1) && !(table[i] & (1 << 7))) {
+      void * physAddr = PHYS_ADDR(table[i]);
+      uintptr_t * next = (uintptr_t *)allocator->VirtualAddress(physAddr);
+      FreeTable(next, depth + 1);
+    }
+  }
+  
+  allocator->Free(table);
+}
+
+StandaloneMapping::StandaloneMapping(PhysicalAllocator * alloc) {
   allocator = alloc;
-  tableRoot = alloc->Allocate(0x1000, 0x1000);
+  pml4 = (uintptr_t *)alloc->Allocate(0x1000, 0x1000);
 }
 
-VirtualMapping::~VirtualMapping() {
-  allocator->Free(tableRoot);
+StandaloneMapping::~StandaloneMapping() {
+  FreeTable(pml4, 0);
 }
 
-void VirtualMapping::Unmap(void * address) {
+void StandaloneMapping::Unmap(void * address) {
   uintptr_t pageIdx = (uintptr_t)address >> 12;
-  uintptr_t * table = (uintptr_t *)tableRoot;
+  uintptr_t * table = pml4;
   
   bool wasVacated[4];
   uintptr_t * tables[4] = {0};
   
-  int i;
+  uintptr_t i;
   for (i = 0; i < 4; i++) {
     // find the entry in the table
-    int index = (pageIdx >> (27 - (i * 9))) & 0x1ff;
+    uintptr_t index = (pageIdx >> (27 - (i * 9))) & 0x1ff;
     uintptr_t entry = table[index];
     
-    int j;
+    uintptr_t j;
     wasVacated[i] = true;
     tables[i] = table;
     for (j = 0; j < 0x200; j++) {
@@ -113,7 +151,7 @@ void VirtualMapping::Unmap(void * address) {
       break;
     }
     
-    void * physAddr = (void *)(entry & ~0xfff);
+    void * physAddr = PHYS_ADDR(entry);
     table = (uintptr_t *)allocator->VirtualAddress(physAddr);
   }
   
@@ -127,24 +165,65 @@ void VirtualMapping::Unmap(void * address) {
   }
 }
 
-bool VirtualMapping::Map(void * address,
-                         void * phys,
-                         uint64_t size,
-                         int flags) {
-  // here, map the address using standard x64 page table logic
-  return false;
-  // TODO: mapping logic here
-  (void)address;
-  (void)phys;
-  (void)size;
-  (void)flags;
+bool StandaloneMapping::Map(void * address,
+                            void * phys,
+                            uint64_t size,
+                            int flags) {
+  if ((uint64_t)address & (size - 1)) return false;
+  if ((uint64_t)phys & (size - 1)) return false;
+  
+  // calculate the number of levels of page table to use for this size
+  int levelCount = 4;
+  while (((uint64_t)0x1000 << (9 * (4 - levelCount))) < size) {
+    levelCount--;
+  }
+  if (levelCount <= 1) return false;
+  
+  // figure out the flags we need
+  uintptr_t parentFlags = 3;
+  uintptr_t childFlags = 3;
+  if (flags & PageFlagUser) {
+    parentFlags |= 4;
+    childFlags |= 4;
+  }
+  if (flags & PageFlagGlobal) {
+    childFlags |= 0x100;
+  }
+  if (!(flags & PageFlagExecute)) {
+    childFlags |= (1L << 63);
+  }
+  
+  // map each level
+  uintptr_t pageIdx = (uintptr_t)address << 12;
+  uintptr_t * table = pml4;
+  int i;
+  for (i = 0; i < levelCount - 1; i++) {
+    uintptr_t index = (pageIdx >> (27 - (i * 9))) & 0x1ff;
+    uintptr_t entry = table[index];
+    
+    if (!(entry & 1)) {
+      uintptr_t * nextTable = (uintptr_t *)allocator->Allocate(0x1000, 0x1000);
+      entry = (uintptr_t)allocator->PhysicalAddress(nextTable);
+      entry |= parentFlags;
+      table[index] = entry;
+      table = nextTable;
+    } else {
+      table[index] |= childFlags;
+      void * physAddr = PHYS_ADDR(entry);
+      table = (uintptr_t *)allocator->VirtualAddress(physAddr);
+    }
+  }
+  
+  uintptr_t thisIndex = (pageIdx >> (27L - (i * 9))) & 0x1ffL;
+  table[thisIndex] = childFlags | (uintptr_t)phys;
+  return true;
 }
 
-bool VirtualMapping::Lookup(void * address,
-                            void ** phys,
-                            void ** start,
-                            int * flags,
-                            uint64_t * size) {
+bool StandaloneMapping::Lookup(void * address,
+                               void ** phys,
+                               void ** start,
+                               int * flags,
+                               uint64_t * size) {
   // here, use the typical x64 page table walk
   return false;
   (void)address;
@@ -152,6 +231,65 @@ bool VirtualMapping::Lookup(void * address,
   (void)start;
   (void)flags;
   (void)size;
+}
+
+void StandaloneMapping::MakeCurrent() {
+  void * physPML4 = allocator->PhysicalAddress(pml4);
+  __asm__("mov %%rax, %%cr3" : : "a" (physPML4));
+}
+
+/********************
+ * ReferenceMapping *
+ ********************/
+
+bool ReferenceMapping::IsReferenced(int idx) {
+  int bitIndex = idx & 0x40;
+  int cellIndex = idx >> 6;
+  return (refs[cellIndex] & (1L << bitIndex)) != 0;
+}
+
+void ReferenceMapping::SetIsReferenced(int idx, bool flag) {
+  int bitIndex = idx & 0x40;
+  int cellIndex = idx >> 6;
+  
+  if (!flag) {
+    if (IsReferenced(idx)) {
+      refs[cellIndex] ^= (1L << bitIndex);
+    }
+  } else {
+    refs[cellIndex] |= (1L << bitIndex);
+  }
+}
+
+ReferenceMapping::ReferenceMapping(PhysicalAllocator * allocator,
+                                   StandaloneMapping * map)
+                                   : StandaloneMapping(allocator) {
+  for (int i = 0; i < 0x200; i++) {
+    if (map->pml4[i] & 1) {
+      SetIsReferenced(i, true);
+      pml4[i] = map->pml4[i];
+    } else {
+      SetIsReferenced(i, false);
+    }
+  }
+}
+
+ReferenceMapping::~ReferenceMapping() {
+  // unreference PDPTs that we don't own
+  for (int i = 0; i < 0x200; i++) {
+    if (IsReferenced(i)) {
+      pml4[i] = 0;
+    }
+  }
+}
+
+void ReferenceMapping::Unmap(void * address) {
+  // TODO: here, if the address is in a PDPT that hasn't been copied, Panic().
+}
+
+bool ReferenceMapping::Map(void * address) {
+  // TODO: here, if the address is in an uncopied PDPT, Panic()
+  return false;
 }
 
 }

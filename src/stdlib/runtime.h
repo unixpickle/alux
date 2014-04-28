@@ -1,7 +1,13 @@
 #include <cstddef>
 
-void * operator new(size_t, void * p) throw();
-void * operator new[](size_t, void * p) throw();
+void * operator new(size_t, void * p);
+void * operator new[](size_t, void * p);
+void * operator new(size_t);
+void * operator new[](size_t);
+void operator delete(void * ptr);
+void operator delete[](void * ptr);
+void operator delete(void * ptr , void * place);
+void operator delete[](void * ptr, void * place);
 
 extern "C" {
 

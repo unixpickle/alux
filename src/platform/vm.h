@@ -65,43 +65,78 @@ public:
 };
 
 class VirtualMapping {
-private:
-  void * tableRoot;
-  PhysicalAllocator * allocator;
-
 public:
+  /**
+   * Returns the number of page sizes supported by the platform.
+   */
   static int NumPageSizes();
+  
+  /**
+   * Returns the list of page sizes in ascending order.
+   */
   static uintptr_t * PageSizes();
+  
+  /**
+   * For each element in the page sizes array, the corresponding one in the
+   * PhysicalAlignments array indicates the alignment that physical pieces
+   * of memory must have when mapped using a certain page size.
+   */
   static uintptr_t * PhysicalAlignments();
+  
+  /**
+   * For each element in the page sizes array, the corresponding one in the
+   * VirtualAligments array indicates the alignment that a virtual address must
+   * have in order to map it with a given page size.
+   */
   static uintptr_t * VirtualAlignments();
+  
+  /**
+   * Create a new VirtualMapping with nothing mapped yet.
+   */
+  static VirtualMapping * NewMappingIP(PhysicalAllocator * allocator,
+                                       void * base);
+  
+  /**
+   * Create a new mapping which will build off of an existing VirtualMapping.
+   * @param allocator The physical allocator to use.
+   * @param mapping The virtual address map to build on. This mapping must stay
+   * allocated for the duration of the returned mapping's lifetime. At least
+   * some of the contents of this mapping should be *referenced* instead of
+   * copied in order to provide for less memory overhead.
+   */
+  static VirtualMapping * NewSubmapping(PhysicalAllocator * allocator,
+                                        VirtualMapping * mapping);
+  
+  /**
+   * Returns the number of bytes which should stand between the existing
+   * mapping (passed to NewSubmapping()) and new addresses being mapped.
+   */
+  static uintptr_t BestDivide();
   
   enum PageFlags {
     PageFlagExecute = 1 << 0,
     PageFlagGlobal = 1 << 1,
     PageFlagUser = 1 << 2
   };
-
-  /**
-   * Create a new virtual mapping.
-   */
-  VirtualMapping(PhysicalAllocator * allocator);
   
   /**
    * Free all resources associated with this virtual mapping.
    */
-  ~VirtualMapping();
+  virtual ~VirtualMapping() {
+  }
 
   /**
    * Unmap the page table entry containing a virtual address.
    */
-  void Unmap(void * address);
+  virtual void Unmap(void *) {
+  }
   
   /**
    * Map a virtual address to a physical address.
    * @return false if something is already mapped between address and
    * address+size.
    */
-  bool Map(void * address, void * phys, uint64_t size, int flags);
+  virtual bool Map(void * address, void * phys, uint64_t size, int flags) = 0;
   
   /**
    * Searches for an entry in the page tables corresponding to a virtual
@@ -114,19 +149,16 @@ public:
    * @param size The number of bytes contained by this page table entry.
    * @return true if an entry was found, false otherwise.
    */
-  bool Lookup(void * address,
+  virtual bool Lookup(void * address,
               void ** phys,
               void ** start,
               int * flags,
-              uint64_t * size);
+              uint64_t * size) = 0;
 
   /**
    * Start using this mapping on the current CPU.
    */
-  void MakeCurrent();
-
-  // TODO: here, there will be smaller methods to initialize the address
-  // space etc.
+  virtual void MakeCurrent() {}
 };
 
 }

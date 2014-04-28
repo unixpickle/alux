@@ -1,12 +1,34 @@
 #include "runtime.h"
 #include <platform/failure.h>
 
-void * operator new(size_t, void * p) throw() {
+void * operator new(size_t, void * p) {
   return p;
 }
 
-void * operator new[](size_t, void * p) throw() {
+void * operator new[](size_t, void * p) {
   return p;
+}
+
+void * operator new(size_t) {
+  return NULL;
+}
+
+void * operator new[](size_t) {
+  
+}
+
+void operator delete(void *) {
+}
+
+void operator delete[](void *) {
+}
+
+void operator delete(void *, void *) {
+  
+}
+
+void operator delete[](void *, void *) {
+  
 }
 
 extern "C" {
