@@ -24,10 +24,40 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <platform/vm.h>
+#include "root-map-x64.h"
 
 namespace OS {
 
-  // TODO: here, i'll implement address space initialization
+static RootMapper * mapper = NULL;
+
+void MultibootRootMapper::SetRootMapper(RootMapper * x) {
+  mapper = x;
+}
+
+RootMapper * RootMapper::GetRootMapper() {
+  return mapper;
+}
+
+MultibootRootMapper::MultibootRootMapper(void * multibootPtr) {
+  // TODO: here, calculate the physical regions using the multiboot
+  // information.
+}
+
+MemoryRegion * MultibootRootMapper::PhysicalRegions() {
+  return regions;
+}
+
+int MultibootRootMapper::PhysicalRegionCount() {
+  return regionCount;
+}
+
+void * MultibootRootMapper::FirstFreeVirtual() {
+  // TODO: here, use some sort of symbol to calculate this
+  return (void *)0x1000000; // 16MB mark
+}
+
+void * MultibootRootMapper::FirstFreePhysical() {
+  return FirstFreeVirtual();
+}
 
 }

@@ -29,6 +29,7 @@
 
 #include <cstdint>
 #include <cstddef>
+#include <memory/region.h>
 
 namespace OS {
   
@@ -44,24 +45,25 @@ public:
    * @discussion If the allocation cannot be performed, a panic should be
    * triggered.
    */
-  virtual void * Allocate(uint64_t size, size_t alignment);
+  virtual void * Allocate(uint64_t size, size_t alignment) = 0;
   
   /**
    * Free a buffer by passing its virtual address.
    */
-  virtual void Free(void * ptr);
+  virtual void Free(void *) {
+  }
   
   /**
    * Return the physical address of a virtual address that was just allocated.
    * The virtual address is really an address in the current page mapping,
    * but the object using this instance might not know that.
    */
-  virtual void * PhysicalAddress(void * virt);
+  virtual void * PhysicalAddress(void * virt) = 0;
   
   /**
    * Returns the virtual address for a physical one.
    */
-  virtual void * VirtualAddress(void * phys);
+  virtual void * VirtualAddress(void * phys) = 0;
 };
 
 class VirtualMapping {
@@ -97,15 +99,25 @@ public:
   static void * AddPtr(void * ptr1, uintptr_t val);
   
   /**
-   * Returns the total number of virtually-addressable bytes.
+   * Returns a list of mappable virtual memory regions.
    */
-  static uintptr_t VirtualByteCount();
+  static MemoryRegion * VirtualMemoryRegions();
+  
+  /**
+   * Returns the number of non-contiguous chunks of mappable addresses.
+   */
+  static int VirtualMemoryRegionCount();
   
   /**
    * Create a new VirtualMapping with nothing mapped yet.
    */
   static VirtualMapping * NewMappingIP(PhysicalAllocator * allocator,
                                        void * base);
+  
+  /**
+   * Returns the size of a new virtual in-place mapping.
+   */
+  static intptr_t IPMappingSize();
   
   /**
    * Create a new mapping which will build off of an existing VirtualMapping.
@@ -134,6 +146,9 @@ public:
    * Free all resources associated with this virtual mapping.
    */
   virtual ~VirtualMapping() {
+  }
+
+  virtual void SetAllocator(PhysicalAllocator *) {
   }
 
   /**

@@ -24,54 +24,48 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "runtime.h"
-#include <platform/failure.h>
+#ifndef __MEMORY_REGION_H__
+#define __MEMORY_REGION_H__
 
-void * operator new(size_t, void * p) {
-  return p;
-}
+namespace OS {
 
-void * operator new[](size_t, void * p) {
-  return p;
-}
+class MemoryRegion {
+private:
+  void * start;
+  uintptr_t size;
 
-void * operator new(size_t) {
-  return NULL;
-}
-
-void * operator new[](size_t) {
-  return NULL;
-}
-
-void operator delete(void *) {
-}
-
-void operator delete[](void *) {
-}
-
-void operator delete(void *, void *) {
-}
-
-void operator delete[](void *, void *) {
-}
-
-extern "C" {
-
-void * __dso_handle = 0;
-
-int __cxa_atexit(void (* destructor) (void *), void * arg, void * dso) {
-  (void)destructor;
-  (void)arg;
-  (void)dso;
-  return 0;
-}
-
-void __cxa_finalize(void * f) {
-  (void)f;
-}
-
-void __cxa_pure_virtual() {
-  OS::Panic("__cxa_pure_virtual() has been called");
-}
+public:
+  MemoryRegion(void * start, uintptr_t size) {
+    this->start = start;
+    this->size = size;
+  }
+  
+  MemoryRegion(const MemoryRegion & region) {
+    start = region.start;
+    size = region.size;
+  }
+  
+  MemoryRegion() {
+    this->start = 0;
+    this->size = 0;
+  }
+  
+  void * GetStart() const {
+    return start;
+  }
+  
+  uintptr_t GetSize() const {
+    return size;
+  }
+  
+  MemoryRegion & operator=(const MemoryRegion & region) {
+    start = region.start;
+    size = region.size;
+    return *this;
+  }
+  
+};
 
 }
+
+#endif

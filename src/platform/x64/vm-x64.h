@@ -24,6 +24,9 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#ifndef __PLATFORM_X64_VM_X64_H__
+#define __PLATFORM_X64_VM_X64_H__
+
 #include <platform/vm.h>
 #include <utilities/lock.h>
 #include <new>
@@ -43,6 +46,7 @@ protected:
 public:
   StandaloneMapping(PhysicalAllocator * allocator);
   virtual ~StandaloneMapping();
+  virtual void SetAllocator(PhysicalAllocator * alloc);
   virtual void Unmap(void * address);
   virtual bool Map(void * address, void * phys, uint64_t size, int flags);
   virtual bool Lookup(void * address,
@@ -68,3 +72,5 @@ public:
 };
 
 }
+
+#endif

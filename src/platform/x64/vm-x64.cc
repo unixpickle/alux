@@ -35,6 +35,10 @@ static bool hasPageInfo = false;
 static uint64_t numPageSizes;
 static uintptr_t pageSizes[3];
 
+static MemoryRegion regions[2];
+static uint64_t regionsLock OS_ALIGNED(8) = 0;
+static bool regionsInitialized = false;
+
 static void _calculate_page_sizes() {
   // here, use CPUID to find page sizes etc.
   uint64_t edx1, edx2;
@@ -86,8 +90,18 @@ void * VirtualMapping::AddPtr(void * ptr1, uintptr_t val) {
   return (void *)sum;
 }
 
-uintptr_t VirtualMapping::VirtualByteCount() {
-  return 1L << 48;
+MemoryRegion * VirtualMapping::VirtualMemoryRegions() {
+  ScopeLock scope(&regionsLock);
+  if (regionsInitialized) return regions;
+  
+  new(&regions[0]) MemoryRegion(NULL, 1L << 47);
+  new(&regions[1]) MemoryRegion((void *)0xFFFF800000000000, 1L << 47);
+  regionsInitialized = true;
+  return regions;
+}
+
+int VirtualMapping::VirtualMemoryRegionCount() {
+  return 2;
 }
 
 VirtualMapping * VirtualMapping::NewMappingIP(PhysicalAllocator * allocator,
@@ -95,7 +109,11 @@ VirtualMapping * VirtualMapping::NewMappingIP(PhysicalAllocator * allocator,
   StandaloneMapping * sa = new(base) StandaloneMapping(allocator);
   return static_cast<VirtualMapping *>(sa);
 }
-  
+
+intptr_t VirtualMapping::IPMappingSize() {
+  return sizeof(StandaloneMapping);
+}
+
 VirtualMapping * VirtualMapping::NewSubmapping(PhysicalAllocator * allocator,
                                                VirtualMapping * mapping) {
   StandaloneMapping * sa = static_cast<StandaloneMapping *>(mapping);
@@ -131,6 +149,10 @@ StandaloneMapping::StandaloneMapping(PhysicalAllocator * alloc) {
 
 StandaloneMapping::~StandaloneMapping() {
   FreeTable(pml4, 0);
+}
+
+void StandaloneMapping::SetAllocator(PhysicalAllocator * alloc) {
+  allocator = alloc;
 }
 
 void StandaloneMapping::Unmap(void * address) {
