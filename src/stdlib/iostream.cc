@@ -36,9 +36,10 @@ OutStream & OutStream::operator<<(unsigned long number) {
 
 OutStream & OutStream::operator<<(unsigned long long number) {
   const char * chars = "0123456789abcdef";
-  unsigned char buf[32] = {0};
-  buf[0] = '0';
-  buf[1] = 'x';
+  unsigned char _buf[32] = {0};
+  _buf[0] = '0';
+  _buf[1] = 'x';
+  unsigned char * buf = _buf + 2;
   unsigned char len = 2, i;
   do {
     unsigned char nextDig = (unsigned char)(number & 0xf);
@@ -50,7 +51,7 @@ OutStream & OutStream::operator<<(unsigned long long number) {
     buf[len - i - 1] = buf[i];
     buf[i] = a;
   }
-  (*this) << (const char *)buf;
+  (*this) << (const char *)_buf;
   
   return *this;
 }

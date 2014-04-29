@@ -24,6 +24,9 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#ifndef __PLATFORM_X64_MULTIBOOT_X64_H__
+#define __PLATFORM_X64_MULTIBOOT_X64_H__
+
 #include <cstdint>
 #include "common-x64.h"
 
@@ -45,7 +48,7 @@ typedef struct {
   uint32_t config_table;
   uint32_t boot_loader_name;
   uint32_t apm_table;
-} OS_PACKED * MultibootBootInfo;
+} OS_PACKED MultibootBootInfo;
 
 typedef struct {
   uint32_t size;
@@ -58,11 +61,14 @@ typedef struct {
 
 extern "C" {
 
-void MbootEntry(OS::MultibootBootInfo mbootPtr);
+void MbootEntry(OS::MultibootBootInfo * mbootPtr);
 
 /**
  * Only used when not compiling on OS X.
  */
-void _MbootEntry(OS::MultibootBootInfo mbootPtr);
+void _MbootEntry(OS::MultibootBootInfo * mbootPtr);
 
 }
+
+#endif
+

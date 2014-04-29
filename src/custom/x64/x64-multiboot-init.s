@@ -57,8 +57,8 @@ start:
 
   ; ebx contains the multiboot info structure, so we push it along with
   ; a null dword so that the stack stays 64-bit aligned
+  push dword 0x0
   push ebx
-  push dword 0
 
   ; NOTE: I may need to reset EFLAGS here, but I don't think so
 
@@ -99,12 +99,6 @@ start:
   ; switch to 64-bit code segment
   lgdt [gdt_pointer]
   jmp gdt.code:entry64
-
-  ; print NYI error
-  mov edi, .initialError
-  call print_error
-.initialError:
-  db 'Not yet implemented :(', 0
 
 .errCPUID:
   mov edi, .cpuidMsg
@@ -221,7 +215,9 @@ initial_pdpt:
   times 0x1ff dq 0x0
 
 initial_pdt:
-  times 0x200 dq 0x83 + ((($ - initial_pdt) >> 3) << 0x200000)
+%rep 0x200
+  dq 0x83 + (($ - initial_pdt) << 18)
+%endrep
 
 ; pad the result file to 0x100 bytes
 times (0x5000 - ($ - multiboot_header)) db 0x0

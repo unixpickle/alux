@@ -30,7 +30,7 @@ namespace OS {
 
 static MultibootRootMapper mapper(0);
 
-void MultibootRootMapper::InitRootMapper(MultibootBootInfo ptr) {
+void MultibootRootMapper::InitRootMapper(MultibootBootInfo * ptr) {
   new(&mapper) MultibootRootMapper(ptr);
 }
 
@@ -57,7 +57,7 @@ void MultibootRootMapper::AddRegion(MemoryRegion & region) {
   regionCount++;
 }
 
-MultibootRootMapper::MultibootRootMapper(MultibootBootInfo multibootPtr) {
+MultibootRootMapper::MultibootRootMapper(MultibootBootInfo * multibootPtr) {
   regionCount = 0;
   
   PrintString("in MultibootRootMapper\n");

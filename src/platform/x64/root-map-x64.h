@@ -42,9 +42,9 @@ protected:
   void AddRegion(MemoryRegion & region);
 
 public:
-  static void InitRootMapper(MultibootBootInfo multibootPtr);
+  static void InitRootMapper(MultibootBootInfo * multibootPtr);
   
-  MultibootRootMapper(MultibootBootInfo multibootPtr);
+  MultibootRootMapper(MultibootBootInfo * multibootPtr);
   
   virtual MemoryRegion * PhysicalRegions();
   virtual int PhysicalRegionCount();

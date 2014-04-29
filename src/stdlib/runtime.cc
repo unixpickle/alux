@@ -36,11 +36,11 @@ void * operator new[](size_t, void * p) {
 }
 
 void * operator new(size_t) {
-  return NULL;
+  return (void *)1;
 }
 
 void * operator new[](size_t) {
-  return NULL;
+  return (void *)1;
 }
 
 void operator delete(void *) {
