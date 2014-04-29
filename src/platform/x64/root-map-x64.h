@@ -29,6 +29,7 @@
 
 #include <platform/root-map.h>
 #include <new>
+#include <iostream>
 #include "multiboot-x64.h"
 
 namespace OS {
@@ -37,6 +38,8 @@ class MultibootRootMapper : public RootMapper {
 protected:
   MemoryRegion regions[0x40];
   int regionCount;
+
+  void AddRegion(MemoryRegion & region);
 
 public:
   static void InitRootMapper(MultibootBootInfo multibootPtr);

@@ -38,8 +38,69 @@ RootMapper * RootMapper::GetRootMapper() {
   return static_cast<RootMapper *>(&mapper);
 }
 
+void MultibootRootMapper::AddRegion(MemoryRegion & region) {
+  if (regionCount == 0x40) {
+    Panic("RootMapper::AddRegion() - region overflow");
+  }
+  
+  int insertIndex = 0;
+  for (int i = 0; i < regionCount; i++) {
+    if (regions[i].GetStart() > region.GetStart()) {
+      insertIndex = i;
+      break;
+    }
+  }
+  for (int i = regionCount; i > insertIndex; i++) {
+    regions[i] = regions[i - 1];
+  }
+  regions[insertIndex] = region;
+  regionCount++;
+}
+
 MultibootRootMapper::MultibootRootMapper(MultibootBootInfo multibootPtr) {
   regionCount = 0;
+  
+  PrintString("in MultibootRootMapper\n");
+  // TODO: remove all of this
+  InitializeOutStream();
+  cout << "multibootPtr is " << (unsigned long)multibootPtr;
+  
+  // loop through and generate the regions
+  uint32_t mmapLen = multibootPtr->mmap_length;
+  uint32_t mmapAddr = multibootPtr->mmap_addr;
+  if (mmapAddr + mmapLen > 0x100000) {
+    Panic("GRUB memory map is placed beyond 1MB -- might be destroyed!");
+  }
+  
+  uintptr_t longAddr = (uintptr_t)mmapAddr;
+  MultibootMmapInfo * info = NULL;
+  MultibootMmapInfo * next = (MultibootMmapInfo *)longAddr;
+  while (mmapLen > 0) {
+    info = next;
+    next = (MultibootMmapInfo *)((uintptr_t)info + info->size + 4);
+    mmapLen -= info->size + 4;
+    
+    if (info->type != 1) continue;
+    
+    // simplify the process by assuming that the first MB is contiguous (even)
+    // though really it's not at all.
+    if (info->base_addr + info->length <= 0x100000) continue;
+    
+    // get the range
+    uint64_t start = info->base_addr;
+    uint64_t len = info->length;
+    
+    // if this region is in the lower MB, we will stretch it out to the
+    // beginning of the address space.
+    if (start <= 0x100000) {
+      len += start;
+      start = 0;
+    }
+    
+    MemoryRegion region((void *)start, len);
+    AddRegion(region);
+  }
+  if (!regionCount) Panic("MultibootRootMapper() - no regions found");
 }
 
 MemoryRegion * MultibootRootMapper::PhysicalRegions() {

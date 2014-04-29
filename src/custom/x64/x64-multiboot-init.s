@@ -132,6 +132,16 @@ print_error:
 bits 64
 
 entry64:
+  ; set segment registers
+  mov ax, gdt.data
+  mov ds, ax
+  mov es, ax
+  mov fs, ax
+  mov gs, ax
+  
+  xor ax, ax
+  mov ss, ax
+
   ; find signature '_X64_ENTRYPOINT!'
   mov rsi, LOADBASE + 0x5000
   mov rax, 0x544e455f3436585f ; first qword

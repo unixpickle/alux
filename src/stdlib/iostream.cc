@@ -9,6 +9,13 @@ OutStream & OutStream::operator<<(const char * ch) {
     << endl;
 }
 
+OutStream & OutStream::operator<<(int number) {
+  return *this << (long long)number;
+}
+
+OutStream & OutStream::operator<<(long number) {
+  return *this << (long long)number;
+}
 
 OutStream & OutStream::operator<<(long long number) {
   if (number < 0) {
@@ -17,6 +24,14 @@ OutStream & OutStream::operator<<(long long number) {
   } else {
     return (*this) << (unsigned long long)number;
   }
+}
+
+OutStream & OutStream::operator<<(unsigned int number) {
+  return *this << (unsigned long long)number;
+}
+
+OutStream & OutStream::operator<<(unsigned long number) {
+  return *this << (unsigned long long)number;
 }
 
 OutStream & OutStream::operator<<(unsigned long long number) {

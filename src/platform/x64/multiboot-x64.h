@@ -47,6 +47,13 @@ typedef struct {
   uint32_t apm_table;
 } OS_PACKED * MultibootBootInfo;
 
+typedef struct {
+  uint32_t size;
+  uint64_t base_addr;
+  uint64_t length;
+  uint32_t type;
+} OS_PACKED MultibootMmapInfo;
+
 }
 
 extern "C" {
