@@ -24,7 +24,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <stdint.h>
+#include <cstdint>
 #include "common-x64.h"
 
 namespace OS {

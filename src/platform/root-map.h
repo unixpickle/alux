@@ -28,6 +28,7 @@
 #define __PLATFORM_ROOT_MAP_H__
 
 #include <platform/vm.h>
+#include <platform/failure.h>
 #include <memory/region.h>
 
 namespace OS {

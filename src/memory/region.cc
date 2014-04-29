@@ -24,13 +24,45 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <cstdint>
-
-#define OS_ALIGNED(x) __attribute__((aligned(x)))
-#define OS_PACKED __attribute__((packed))
+#include "region.h"
 
 namespace OS {
 
-void OutB(uint16_t port, uint8_t byte);
+MemoryRegion::MemoryRegion(void * start, uintptr_t size) {
+  this->start = start;
+  this->size = size;
+}
+
+MemoryRegion::MemoryRegion(const MemoryRegion & region) {
+  start = region.start;
+  size = region.size;
+}
+
+MemoryRegion::MemoryRegion() {
+  this->start = 0;
+  this->size = 0;
+}
+
+void * MemoryRegion::GetStart() const {
+  return start;
+}
+
+uintptr_t MemoryRegion::GetSize() const {
+  return size;
+}
+
+void * MemoryRegion::GetEnd() const {
+  return GetOffset(size);
+}
+
+void * MemoryRegion::GetOffset(uintptr_t aSize) const {
+  return (void *)((uintptr_t)start + aSize);
+}
+
+MemoryRegion & MemoryRegion::operator=(const MemoryRegion & region) {
+  start = region.start;
+  size = region.size;
+  return *this;
+}
 
 }

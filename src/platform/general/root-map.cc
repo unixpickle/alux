@@ -82,12 +82,55 @@ void * LinearPhysicalAllocator::Allocate(uint64_t size, size_t alignment) {
 }
 
 void * LinearPhysicalAllocator::PhysicalAddress(void * virt) {
-  // TODO: NYI
+  // go through the virtual regions to find the physical *offset*
+  uintptr_t physOffset = 0;
+  for (int i = 0; i < virtRegCount; i++) {
+    if (virt < virtRegs[i].GetStart()) {
+      Panic("LinearPhysicalAllocator::PhysicalAddress() - not found");
+    }
+    if (virt >= virtRegs[i].GetEnd()) {
+      physOffset += virtRegs[i].GetSize();
+    } else {
+      physOffset += (uintptr_t)virt - (uintptr_t)virtRegs[i].GetStart();
+      break;
+    }
+  }
+  
+  // go through the physical regions to find the physical *address*.
+  for (int i = 0; i < physRegCount; i++) {
+    if (physRegs[i].GetSize() > physOffset) {
+      return physRegs[i].GetOffset(physOffset);
+    }
+    physOffset -= physRegs[i].GetSize();
+  }
+  
+  Panic("LinearPhysicalAllocator::PhysicalAddress() - phys out of bounds");
   return NULL;
 }
 
 void * LinearPhysicalAllocator::VirtualAddress(void * phys) {
-  // TODO: NYI
+  // go through the physical regions to find the *offset* in virtual space
+  uintptr_t virtOffset = 0;
+  for (int i = 0; i < physRegCount; i++) {
+    if (phys < physRegs[i].GetStart()) {
+      Panic("LinearPhysicalAllocator::VirtualAddress() - not found");
+    }
+    if (phys >= physRegs[i].GetEnd()) {
+      virtOffset += physRegs[i].GetSize();
+    } else {
+      virtOffset += (uintptr_t)phys - (uintptr_t)physRegs[i].GetStart();
+      break;
+    }
+  }
+  
+  // go through the virtual regions to find the *address* in virtual space
+  for (int i = 0; i < virtRegCount; i++) {
+    if (virtRegs[i].GetSize() > virtOffset) {
+      return virtRegs[i].GetOffset(virtOffset);
+    }
+    virtOffset -= physRegs[i].GetSize();
+  }
+  
   return NULL;
 }
 

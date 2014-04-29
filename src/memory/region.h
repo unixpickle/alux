@@ -27,6 +27,8 @@
 #ifndef __MEMORY_REGION_H__
 #define __MEMORY_REGION_H__
 
+#include <cstdint>
+
 namespace OS {
 
 class MemoryRegion {
@@ -35,35 +37,16 @@ private:
   uintptr_t size;
 
 public:
-  MemoryRegion(void * start, uintptr_t size) {
-    this->start = start;
-    this->size = size;
-  }
+  MemoryRegion(void * start, uintptr_t size);
+  MemoryRegion(const MemoryRegion & region);
+  MemoryRegion();
   
-  MemoryRegion(const MemoryRegion & region) {
-    start = region.start;
-    size = region.size;
-  }
+  void * GetStart() const;
+  uintptr_t GetSize() const;
+  void * GetEnd() const;
+  void * GetOffset(uintptr_t size) const;
   
-  MemoryRegion() {
-    this->start = 0;
-    this->size = 0;
-  }
-  
-  void * GetStart() const {
-    return start;
-  }
-  
-  uintptr_t GetSize() const {
-    return size;
-  }
-  
-  MemoryRegion & operator=(const MemoryRegion & region) {
-    start = region.start;
-    size = region.size;
-    return *this;
-  }
-  
+  MemoryRegion & operator=(const MemoryRegion & region);
 };
 
 }
