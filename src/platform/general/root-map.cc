@@ -25,6 +25,7 @@
  */
 
 #include <platform/root-map.h>
+#include <iostream>
 
 namespace OS {
 
@@ -52,7 +53,11 @@ bool RootMapper::CreateKernelMapping(void ** firstVirt, void ** firstPhys) {
   LinearPhysicalAllocator allocator(FirstFreeVirtual(), *this);
   void * mapData = allocator.Allocate(VirtualMapping::IPMappingSize(), 0x10);
   VirtualMapping * mapping = VirtualMapping::NewMappingIP(&allocator, mapData);
-  
+  for (int i = 0; i < PhysicalRegionCount(); i++) {
+    MemoryRegion & r = PhysicalRegions()[i];
+    cout << "(" << (unsigned long long)r.GetStart()
+      << "," << r.GetSize() << ")" << endl;
+  }
   // TODO: here, make maps from the initial physical memory to initial virtual
   // memory, making sure to use the largest page sizes available.
   return false;

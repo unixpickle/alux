@@ -43,14 +43,14 @@ void MultibootRootMapper::AddRegion(MemoryRegion & region) {
     Panic("RootMapper::AddRegion() - region overflow");
   }
   
-  int insertIndex = 0;
+  int insertIndex = regionCount;
   for (int i = 0; i < regionCount; i++) {
     if (regions[i].GetStart() > region.GetStart()) {
       insertIndex = i;
       break;
     }
   }
-  for (int i = regionCount; i > insertIndex; i++) {
+  for (int i = regionCount; i > insertIndex; i--) {
     regions[i] = regions[i - 1];
   }
   regions[insertIndex] = region;
