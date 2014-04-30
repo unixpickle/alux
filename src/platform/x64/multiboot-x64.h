@@ -40,7 +40,7 @@ typedef struct {
   uint32_t cmdline;
   uint32_t mods_count;
   uint32_t mods_addr;
-  char syms[12];
+  char syms[0x10];
   uint32_t mmap_length;
   uint32_t mmap_addr;
   uint32_t drives_length;

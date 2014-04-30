@@ -35,15 +35,6 @@ void MbootEntry(OS::MultibootBootInfo * mbootPtr) {
 }
 
 void _MbootEntry(OS::MultibootBootInfo * ptr) {
-  uint64_t * stack;
-  __asm__("mov %%rsp, %0" : "=r" (stack));
-  OS::InitializeOutStream();
-  OS::cout << "stack is " << (unsigned long long)stack << OS::endl;
-  OS::cout << "welp ptr is " << (unsigned long long)ptr << OS::endl;
-  for (int i = 0; i < 20; i++) {
-    OS::cout << "stack[" << i << "] = " << stack[i] << OS::endl;
-  }
-  OS::Panic("bye bye");
   MbootEntry(ptr);
 }
 

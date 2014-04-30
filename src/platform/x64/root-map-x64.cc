@@ -60,11 +60,6 @@ void MultibootRootMapper::AddRegion(MemoryRegion & region) {
 MultibootRootMapper::MultibootRootMapper(MultibootBootInfo * multibootPtr) {
   regionCount = 0;
   
-  PrintString("in MultibootRootMapper\n");
-  // TODO: remove all of this
-  InitializeOutStream();
-  cout << "multibootPtr is " << (unsigned long)multibootPtr;
-  
   // loop through and generate the regions
   uint32_t mmapLen = multibootPtr->mmap_length;
   uint32_t mmapAddr = multibootPtr->mmap_addr;
