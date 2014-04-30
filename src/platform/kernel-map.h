@@ -24,8 +24,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef __PLATFORM_ROOT_MAP_H__
-#define __PLATFORM_ROOT_MAP_H__
+#ifndef __PLATFORM_KERNEL_MAP_H__
+#define __PLATFORM_KERNEL_MAP_H__
 
 #include <platform/vm.h>
 #include <platform/failure.h>
@@ -33,7 +33,7 @@
 
 namespace OS {
 
-class RootMapper {
+class KernelMapper {
 public:
   /**
    * The number of bytes we would like to have for the kernel.
@@ -51,7 +51,7 @@ public:
    * @discussion You should create a subclass of RootMapper which in the very
    * least returns the list of physical regions on the system.
    */
-  static RootMapper * GetRootMapper();
+  static KernelMapper * GetKernelMapper();
   
   /**
    * Number of bytes to use in the kernel's address space.
@@ -95,7 +95,7 @@ protected:
   int virtRegCount;
 
 public:
-  LinearPhysicalAllocator(void * curPtr, RootMapper & mapper);
+  LinearPhysicalAllocator(void * curPtr, KernelMapper & mapper);
   
   virtual void * Allocate(uint64_t size, size_t alignment);
   virtual void * PhysicalAddress(void * virt);

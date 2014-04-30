@@ -24,17 +24,17 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef __PLATFORM_X64_ROOT_MAP_X64_H__
-#define __PLATFORM_X64_ROOT_MAP_X64_H__
+#ifndef __PLATFORM_X64_KERNEL_MAP_X64_H__
+#define __PLATFORM_X64_KERNEL_MAP_X64_H__
 
-#include <platform/root-map.h>
+#include <platform/kernel-map.h>
 #include <new>
 #include <iostream>
 #include "multiboot-x64.h"
 
 namespace OS {
 
-class MultibootRootMapper : public RootMapper {
+class MultibootMapper : public KernelMapper {
 protected:
   MemoryRegion regions[0x40];
   int regionCount;
@@ -42,9 +42,9 @@ protected:
   void AddRegion(MemoryRegion & region);
 
 public:
-  static void InitRootMapper(MultibootBootInfo * multibootPtr);
+  static void InitMapper(MultibootBootInfo * multibootPtr);
   
-  MultibootRootMapper(MultibootBootInfo * multibootPtr);
+  MultibootMapper(MultibootBootInfo * multibootPtr);
   
   virtual MemoryRegion * PhysicalRegions();
   virtual int PhysicalRegionCount();

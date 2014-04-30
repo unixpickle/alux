@@ -35,9 +35,11 @@ void EntryPoint() {
   cout << "printing initialized!" << endl;
   
   cout << "creating kernel mapping..." << endl;
-  bool result = RootMapper::GetRootMapper()->CreateKernelMapping(NULL, NULL);
+  KernelMapper * mapper = KernelMapper::GetKernelMapper();
+  bool result = mapper->CreateKernelMapping(NULL, NULL);
   if (!result) Panic("failed to create kernel mapping");
   cout << "created kernel mapping" << endl;
+  
 }
 
 }

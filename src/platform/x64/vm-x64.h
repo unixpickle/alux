@@ -55,6 +55,7 @@ public:
               int * flags,
               uint64_t * size);
   virtual void MakeCurrent();
+  virtual void * FirstMappable();
 };
 
 class ReferenceMapping : public StandaloneMapping {
@@ -69,6 +70,7 @@ public:
   
   virtual void Unmap(void * address);
   virtual bool Map(void * address, void * phys, uint64_t size, int flags);
+  virtual void * FirstMappable();
 };
 
 }

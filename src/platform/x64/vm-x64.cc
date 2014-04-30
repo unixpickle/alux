@@ -90,7 +90,7 @@ void * VirtualMapping::AddPtr(void * ptr1, uintptr_t val) {
   return (void *)sum;
 }
 
-MemoryRegion * VirtualMapping::VirtualMemoryRegions() {
+MemoryRegion * VirtualMapping::VirtualRegions() {
   ScopeLock scope(&regionsLock);
   if (regionsInitialized) return regions;
   
@@ -100,7 +100,7 @@ MemoryRegion * VirtualMapping::VirtualMemoryRegions() {
   return regions;
 }
 
-int VirtualMapping::VirtualMemoryRegionCount() {
+int VirtualMapping::VirtualRegionCount() {
   return 2;
 }
 
@@ -317,6 +317,10 @@ void StandaloneMapping::MakeCurrent() {
   __asm__("mov %%rax, %%cr3" : : "a" (physPML4));
 }
 
+void * StandaloneMapping::FirstMappable() {
+  return 0;
+}
+
 /********************
  * ReferenceMapping *
  ********************/
@@ -381,6 +385,18 @@ bool ReferenceMapping::Map(void * address, void * phys,
   }
   
   return StandaloneMapping::Map(address, phys, size, flags);
+}
+
+void * ReferenceMapping::FirstMappable() {
+  int firstRefd = 0;
+  for (int i = 0x1ff; i >= 0; i--) {
+    if (IsReferenced(i)) {
+      firstRefd = i;
+      break;
+    }
+  }
+  uintptr_t endValue = (((uintptr_t)firstRefd + 1L) << 39);
+  return AddPtr(NULL, endValue);
 }
 
 }

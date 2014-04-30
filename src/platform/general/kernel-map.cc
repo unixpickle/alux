@@ -24,32 +24,40 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <platform/root-map.h>
+#include <platform/kernel-map.h>
 #include <iostream>
 
 namespace OS {
 
-uintptr_t RootMapper::KernelMemorySize() {
-  // TODO: here, make sure we map less than half of the virtual address space!
-  
+uintptr_t KernelMapper::KernelMemorySize() {  
   // calculate the physical memory size
   uintptr_t physSize = 0;
-  uintptr_t regCount = PhysicalRegionCount();
+  int regCount = PhysicalRegionCount();
   MemoryRegion * regs = PhysicalRegions();
-  for (int i = 0; i < PhysicalRegionCount(); i++) {
+  for (int i = 0; i < regCount; i++) {
     physSize += regs[i].GetSize();
   }
   
+  uintptr_t virSize = 0;
+  regCount = VirtualMapping::VirtualRegionCount();
+  regs = VirtualMapping::VirtualRegions();
+  for (int i = 0; i < regCount; i++) {
+    virSize += regs[i].GetSize();
+  }
+  
+  // MIN(physSize, virSize)
+  uintptr_t maxSize = (virSize > physSize ? physSize : virSize);
+  
   // if we don't have enough memory to fill all our desires
-  if (physSize < (DESIRED_SIZE << DESIRED_SHIFT)) {
-    if (physSize < DESIRED_SIZE) return physSize;
+  if (maxSize < (DESIRED_SIZE << DESIRED_SHIFT)) {
+    if (maxSize < DESIRED_SIZE) return maxSize;
     return DESIRED_SIZE;
   }
   
-  return physSize << DESIRED_SHIFT;
+  return maxSize << DESIRED_SHIFT;
 }
 
-bool RootMapper::CreateKernelMapping(void ** firstVirt, void ** firstPhys) {
+bool KernelMapper::CreateKernelMapping(void ** firstVirt, void ** firstPhys) {
   LinearPhysicalAllocator allocator(FirstFreeVirtual(), *this);
   void * mapData = allocator.Allocate(VirtualMapping::IPMappingSize(), 0x10);
   VirtualMapping * mapping = VirtualMapping::NewMappingIP(&allocator, mapData);
@@ -68,12 +76,12 @@ bool RootMapper::CreateKernelMapping(void ** firstVirt, void ** firstPhys) {
  ***************************/
 
 LinearPhysicalAllocator::LinearPhysicalAllocator(void * curPtr,
-                                                 RootMapper & mapper) {
+                                                 KernelMapper & mapper) {
   this->curPtr = (char *)curPtr;
   physRegs = mapper.PhysicalRegions();
   physRegCount = mapper.PhysicalRegionCount();
-  virtRegs = VirtualMapping::VirtualMemoryRegions();
-  virtRegCount = VirtualMapping::VirtualMemoryRegionCount();
+  virtRegs = VirtualMapping::VirtualRegions();
+  virtRegCount = VirtualMapping::VirtualRegionCount();
 }
 
 void * LinearPhysicalAllocator::Allocate(uint64_t size, size_t alignment) {

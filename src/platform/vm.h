@@ -101,12 +101,12 @@ public:
   /**
    * Returns a list of mappable virtual memory regions.
    */
-  static MemoryRegion * VirtualMemoryRegions();
+  static MemoryRegion * VirtualRegions();
   
   /**
    * Returns the number of non-contiguous chunks of mappable addresses.
    */
-  static int VirtualMemoryRegionCount();
+  static int VirtualRegionCount();
   
   /**
    * Create a new VirtualMapping with nothing mapped yet.
@@ -130,12 +130,6 @@ public:
   static VirtualMapping * NewSubmapping(PhysicalAllocator * allocator,
                                         VirtualMapping * mapping);
   
-  /**
-   * Returns the number of bytes which should stand between the existing
-   * mapping (passed to NewSubmapping()) and new addresses being mapped.
-   */
-  static uintptr_t BestDivide();
-  
   enum PageFlags {
     PageFlagExecute = 1 << 0,
     PageFlagGlobal = 1 << 1,
@@ -148,14 +142,12 @@ public:
   virtual ~VirtualMapping() {
   }
 
-  virtual void SetAllocator(PhysicalAllocator *) {
-  }
+  virtual void SetAllocator(PhysicalAllocator *) = 0;
 
   /**
    * Unmap the page table entry containing a virtual address.
    */
-  virtual void Unmap(void *) {
-  }
+  virtual void Unmap(void *) = 0;
   
   /**
    * Map a virtual address to a physical address.
@@ -184,7 +176,14 @@ public:
   /**
    * Start using this mapping on the current CPU.
    */
-  virtual void MakeCurrent() {}
+  virtual void MakeCurrent() = 0;
+  
+  /**
+   * For regular mappings, this should be (void *)0. For mappings which are
+   * submappings, this should be the lowest virtual address which can be
+   * mapped to without overwriting the submapping.
+   */
+  virtual void * FirstMappable() = 0;
 };
 
 }

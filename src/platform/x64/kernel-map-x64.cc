@@ -24,21 +24,21 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "root-map-x64.h"
+#include "kernel-map-x64.h"
 
 namespace OS {
 
-static MultibootRootMapper mapper(0);
+static MultibootMapper mapper(0);
 
-void MultibootRootMapper::InitRootMapper(MultibootBootInfo * ptr) {
-  new(&mapper) MultibootRootMapper(ptr);
+void MultibootMapper::InitMapper(MultibootBootInfo * ptr) {
+  new(&mapper) MultibootMapper(ptr);
 }
 
-RootMapper * RootMapper::GetRootMapper() {
-  return static_cast<RootMapper *>(&mapper);
+KernelMapper * KernelMapper::GetKernelMapper() {
+  return static_cast<KernelMapper *>(&mapper);
 }
 
-void MultibootRootMapper::AddRegion(MemoryRegion & region) {
+void MultibootMapper::AddRegion(MemoryRegion & region) {
   if (regionCount == 0x40) {
     Panic("RootMapper::AddRegion() - region overflow");
   }
@@ -57,7 +57,7 @@ void MultibootRootMapper::AddRegion(MemoryRegion & region) {
   regionCount++;
 }
 
-MultibootRootMapper::MultibootRootMapper(MultibootBootInfo * multibootPtr) {
+MultibootMapper::MultibootMapper(MultibootBootInfo * multibootPtr) {
   regionCount = 0;
   
   // loop through and generate the regions
@@ -95,23 +95,23 @@ MultibootRootMapper::MultibootRootMapper(MultibootBootInfo * multibootPtr) {
     MemoryRegion region((void *)start, len);
     AddRegion(region);
   }
-  if (!regionCount) Panic("MultibootRootMapper() - no regions found");
+  if (!regionCount) Panic("MultibootMapper() - no regions found");
 }
 
-MemoryRegion * MultibootRootMapper::PhysicalRegions() {
+MemoryRegion * MultibootMapper::PhysicalRegions() {
   return regions;
 }
 
-int MultibootRootMapper::PhysicalRegionCount() {
+int MultibootMapper::PhysicalRegionCount() {
   return regionCount;
 }
 
-void * MultibootRootMapper::FirstFreeVirtual() {
+void * MultibootMapper::FirstFreeVirtual() {
   // TODO: here, use some sort of symbol to calculate this
   return (void *)0x1000000; // 16MB mark
 }
 
-void * MultibootRootMapper::FirstFreePhysical() {
+void * MultibootMapper::FirstFreePhysical() {
   return FirstFreeVirtual();
 }
 
