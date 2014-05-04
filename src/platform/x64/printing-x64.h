@@ -24,19 +24,10 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "multiboot-x64.h"
+#include <platform/printing.h>
 
-extern "C" {
+namespace OS {
 
-void MbootEntry(void * mbootPtr) {
-  (void)mbootPtr;
-  OS::InitializePrinting();
-  OS::InitializeOutStream();
-  OS::EntryPoint();
-}
-
-void _MbootEntry(void * ptr) {
-  MbootEntry(ptr);
-}
+void InitializePrinting();
 
 }

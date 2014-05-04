@@ -29,11 +29,7 @@
 namespace OS {
 
 void EntryPoint() {
-  InitializePrinting();
-  InitializeOutStream();
-  
-  cout << "printing initialized!" << endl;
-  
+  cout << "general entry point reached!" << endl;
   Panic("yeah i'm not doing anything");
 }
 

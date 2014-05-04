@@ -27,6 +27,9 @@
 #ifndef __PLATFORM_MEMORY_H__
 #define __PLATFORM_MEMORY_H__
 
+#include <cstddef>
+#include <cstdint>
+
 namespace OS {
 
 typedef uintptr_t PhysAddr;

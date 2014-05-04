@@ -28,7 +28,9 @@
 #define __PLATFORM_X64_MULTIBOOT_X64_H__
 
 #include <cstdint>
+#include <startup/entry.h>
 #include "common-x64.h"
+#include "printing-x64.h"
 
 namespace OS {
 

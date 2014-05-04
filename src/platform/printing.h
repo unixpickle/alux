@@ -43,7 +43,6 @@ typedef enum {
   PrintColorBrightMask = 8
 } PrintColor;
 
-void InitializePrinting();
 void PrintString(const char * string);
 void SetColor(int color);
 

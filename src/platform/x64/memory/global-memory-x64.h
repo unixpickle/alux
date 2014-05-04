@@ -28,6 +28,7 @@
 #define __PLATFORM_X64_GLOBAL_MEMORY_X64_H__
 
 #include "../multiboot-x64.h"
+#include <platform/memory.h>
 #include <memory/region.h>
 #include <analloc2.h>
 
