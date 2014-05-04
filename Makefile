@@ -55,6 +55,7 @@ $(BUILD_DIR): dependencies
 dependencies:
 	mkdir dependencies
 	git clone https://github.com/unixpickle/anlock.git dependencies/anlock
+	git clone https://github.com/unixpickle/analloc2.git dependencies/analloc2
 
 image: $(BUILD_DIR)/$(BINFILE) $(BUILD_DIR)/grub_root
 	grub-mkrescue -o $(BUILD_DIR)/alux.iso $(BUILD_DIR)/grub_root/

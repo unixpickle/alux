@@ -25,16 +25,15 @@
  */
 
 #include <startup/entry.h>
-#include "kernel-map-x64.h"
 
 extern "C" {
 
-void MbootEntry(OS::MultibootBootInfo * mbootPtr) {
-  OS::MultibootMapper::InitMapper(mbootPtr);
+void MbootEntry(void * mbootPtr) {
+  (void)mbootPtr;
   OS::EntryPoint();
 }
 
-void _MbootEntry(OS::MultibootBootInfo * ptr) {
+void _MbootEntry(void * ptr) {
   MbootEntry(ptr);
 }
 

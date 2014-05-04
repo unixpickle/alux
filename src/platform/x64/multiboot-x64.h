@@ -61,12 +61,12 @@ typedef struct {
 
 extern "C" {
 
-void MbootEntry(OS::MultibootBootInfo * mbootPtr);
+void MbootEntry(void * mbootPtr);
 
 /**
  * Only used when not compiling on OS X.
  */
-void _MbootEntry(OS::MultibootBootInfo * mbootPtr);
+void _MbootEntry(void * mbootPtr);
 
 }
 

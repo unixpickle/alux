@@ -32,7 +32,7 @@ fi
 
 # generate the $CXXSOURCES array
 
-CXXSOURCES=`echo $PWD/src/platform/general/*.cc`
+CXXSOURCES=''
 CXXSOURCES=${CXXSOURCES}\ `echo $PWD/src/startup/*.cc`
 CXXSOURCES=${CXXSOURCES}\ `echo $PWD/src/utilities/*.cc`
 CXXSOURCES=${CXXSOURCES}\ `echo $PWD/src/stdlib/*.cc`
