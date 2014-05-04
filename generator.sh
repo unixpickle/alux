@@ -40,6 +40,7 @@ CXXSOURCES=${CXXSOURCES}\ `echo $PWD/src/memory/*.cc`
 
 if [ $1 == 'x64' ]; then
   CXXSOURCES=${CXXSOURCES}\ `echo $PWD/src/platform/x64/*.cc`
+  CXXSOURCES=${CXXSOURCES}\ `echo $PWD/src/platform/x64/memory/*.cc`
 else
   echo Unknown TARGET $1
   exit
@@ -52,7 +53,7 @@ CSOURCES=${CSOURCES}\ `echo $PWD/src/stdlib/*.c`
 
 # generate the $INCLUDES array
 
-INCLUDES="$INCLUDES -I$PWD/src -I$PWD/src/stdlib/cheaders -I$PWD/src/stdlib/cppheaders -I$PWD/dependencies/anlock/src"
+INCLUDES="$INCLUDES -I$PWD/src -I$PWD/src/stdlib/cheaders -I$PWD/src/stdlib/cppheaders -I$PWD/dependencies/anlock/src -I$PWD/dependencies/analloc2/include"
 
 # generate output location
 
