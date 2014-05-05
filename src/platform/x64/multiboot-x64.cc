@@ -25,6 +25,7 @@
  */
 
 #include "multiboot-x64.h"
+#include "memory/global-memory-x64.h"
 
 extern "C" {
 
@@ -32,6 +33,8 @@ void MbootEntry(void * mbootPtr) {
   (void)mbootPtr;
   OS::InitializePrinting();
   OS::InitializeOutStream();
+  OS::GlobalMap::InitializeGlobalMap(mbootPtr);
+  OS::GlobalMap::GetGlobalMap().CreateInitialMapping();
   OS::EntryPoint();
 }
 

@@ -31,8 +31,23 @@
 #include <platform/memory.h>
 #include <memory/region.h>
 #include <analloc2.h>
+#include <cassert>
 
 namespace OS {
+
+struct AllocatorDescription {
+  uintptr_t start;
+  size_t depth;
+  
+  AllocatorDescription(const AllocatorDescription & desc) {
+    *this = desc;
+  }
+  
+  AllocatorDescription & operator=(const AllocatorDescription & desc) {
+    physStart = desc.physStart;
+    depth = desc.depth;
+  }
+};
 
 class GlobalMap {
 private:
@@ -41,12 +56,24 @@ private:
   
   ANAlloc::BBTree trees[0x80];
   ANAlloc::Allocator<ANAlloc::BBTree> allocators[0x80];
+  int allocatorCount;
+  
+  AllocatorDescription descriptions[0x80];
+  int descriptionCount;
+  
+  void AddRegion(MemoryRegion & region);
+  void AddDescription(AllocatorDescription & desc);
   
   /**
    * Returns the number of bytes used by the kernel and BIOS at the beginning
    * of the virtual address space.
    */
   uintptr_t VirtualUsed();
+  
+  /**
+   * Generates the descriptions[] array.
+   */
+  void GenerateDescriptions();
   
   /**
    * Returns the number of bytes that the system must initially map in order to
@@ -64,15 +91,17 @@ public:
   static GlobalMap & GetGlobalMap();
   static void InitializeGlobalMap(void * mbootPtr);
   
+  GlobalMap() {}
+  
   /**
    * Create a new GlobalMap, passing in the multiboot information pointer.
    */
   GlobalMap(void * mbootPtr);
   
   /**
-   * Create the initial global mapping.
+   * Create the initial global mapping and generate physical allocators.
    */
-  void CreateInitialMapping();
+  void Setup();
   
   /**
    * Returns the root page table for the pure kernel mapping.
