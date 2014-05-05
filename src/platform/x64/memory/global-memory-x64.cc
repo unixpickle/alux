@@ -30,16 +30,12 @@ namespace OS {
 
 static GlobalMap map;
 
-GlobalMap & GlobalMap::GetGlobalMap() {
-  return map;
-}
+/******************
+ * PhysRegionList *
+ ******************/
 
-void GlobalMap::InitializeGlobalMap(void * mbootPtr) {
-  new(&map) GlobalMap(mbootPtr);
-}
-
-void GlobalMap::AddRegion(MemoryRegion & region) {
-  if (regionCount == 0x40) {
+void PhysRegionList::AddRegion(MemoryRegion & region) {
+  if (regionCount == MaximumPhysicalRegions) {
     Panic("GlobalMap::AddRegion() - region overflow");
   }
   
@@ -57,15 +53,8 @@ void GlobalMap::AddRegion(MemoryRegion & region) {
   regionCount++;
 }
 
-void AddDescription(AllocatorDescription & desc) {
-  if (descriptionCount == 0x80) {
-    Panic("GlobalMap::AddDescription() - description overflow");
-  }
-  descriptions[descriptionCount++] = desc;
-}
-
-GlobalMap::GlobalMap(void * mbootPtr) {
-  regionCount = allocatorCount = descriptionCount = 0;
+PhysRegionList::PhysRegionList(void * mbootPtr) {
+  regionCount = 0;
   MultibootBootInfo * multibootPtr = (MultibootBootInfo *)mbootPtr;
   
   // loop through and generate the regions
@@ -100,34 +89,40 @@ GlobalMap::GlobalMap(void * mbootPtr) {
       start = 0;
     }
     
-    MemoryRegion region((void *)start, len);
+    MemoryRegion region((uintptr_t)start, (size_t)len);
     AddRegion(region);
   }
   if (!regionCount) Panic("GlobalMap() - no regions found");
 }
 
-uintptr_t GlobalMap::VirtualUsed() {
-  return 0x1000000; // TODO: use symbol here
+PhysRegionList::MemoryRegion * PhysRegionList::GetRegions() {
+  return regions;
 }
 
-void GlobalMap::GenerateDescriptions() {
-  // TODO: make an ANAlloc API for this :'(
+int PhysRegionList::GetRegionCount() {
+  return regionCount;
 }
 
-size_t GlobalMap::InitialBytes() {
-  size_t size = (size_t)VirtualUsed();
-  for (int i = 0; i < descriptionCount; i++) {
-    size += ANAlloc::BBTree::MemorySize(descriptions[i].depth);
-  }
-  if (size & 0xfff) {
-    size += 0x1000 - (size & 0xfff);
-  }
-  return size;
+/*************
+ * GlobalMap *
+ *************/
+
+GlobalMap & GlobalMap::GetGlobalMap() {
+  return map;
 }
 
-size_t GlobalMap::RequiredPhysical() {
-  size_t size = InitialBytes();
-  
+void GlobalMap::InitializeGlobalMap(void * mbootPtr) {
+  new(&map) GlobalMap(mbootPtr);
+}
+
+GlobalMap::GlobalMap(void * mbootPtr)
+  : regions(mbootPtr),
+    allocators(0x100000, 0x1000, 0x1000,
+               regions.GetRegions(),
+               regions.GetRegionCount()) {
+}
+
+static size_t PageTableSize(size_t size) {
   size_t ptCount = 1;
   size_t pdtCount = (size >> 21) + (size % (1L << 21) ? 1L : 0L);
   size_t pdptCount = (size >> 30) + (size % (1L << 30) ? 1L : 0L);
@@ -139,11 +134,41 @@ size_t GlobalMap::RequiredPhysical() {
   pdptCount++;
   pdtCount++;
   
-  return size + (ptCount + pdtCount + pdptCount + pml4Count) * 0x1000;
+  return (ptCount + pdtCount + pdptCount + pml4Count) << 12;
+}
+
+size_t GlobalMap::MemoryForKernel() {
+  return 0x1000000; // TODO: use symbol here
+}
+
+size_t GlobalMap::MemoryForBitmaps() {
+  size_t val = allocators.BitmapByteCount();
+  if (val & 0xfff) {
+    val += 0x1000 - (val & 0xfff);
+  }
+  return val;
+}
+
+size_t GlobalMap::MemoryForPageTables() {
+  size_t size = MemoryForKernel() + MemoryForBitmaps();
+  size_t pageTableSize = 0;
+  while (1) {
+    size_t newSize = PageTableSize(size + pageTableSize);
+    if (newSize == pageTableSize) break;
+    pageTableSize = newSize;
+  }
+  return pageTableSize;
 }
 
 void GlobalMap::Setup() {
-  cout << "TODO: create an initial mapping!" << endl;
+  allocators.GenerateDescriptions();
+  size_t physicalSize = MemoryForPageTables() + MemoryForBitmaps()
+    + MemoryForKernel();
+  cout << "reserving " << physicalSize
+    << " bytes of physical memory..." << endl;
+  
+  // TODO: here, start generating a physical page table, and switch to it once
+  // it covers more memory than it uses
 }
 
 }

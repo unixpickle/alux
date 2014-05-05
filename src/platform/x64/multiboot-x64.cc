@@ -34,7 +34,7 @@ void MbootEntry(void * mbootPtr) {
   OS::InitializePrinting();
   OS::InitializeOutStream();
   OS::GlobalMap::InitializeGlobalMap(mbootPtr);
-  OS::GlobalMap::GetGlobalMap().CreateInitialMapping();
+  OS::GlobalMap::GetGlobalMap().Setup();
   OS::EntryPoint();
 }
 

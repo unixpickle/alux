@@ -29,72 +29,67 @@
 
 #include "../multiboot-x64.h"
 #include <platform/memory.h>
-#include <memory/region.h>
 #include <analloc2.h>
 #include <cassert>
 
 namespace OS {
 
-struct AllocatorDescription {
-  uintptr_t start;
-  size_t depth;
+const int MaximumPhysicalRegions = 8;
+const int MaximumAllocators = 0x10;
+typedef ANAlloc::BBTree TreeType;
+
+class PhysRegionList {
+public:
+  typedef ANAlloc::Region MemoryRegion;
   
-  AllocatorDescription(const AllocatorDescription & desc) {
-    *this = desc;
-  }
+private:
+  MemoryRegion regions[MaximumPhysicalRegions];
+  int regionCount;
   
-  AllocatorDescription & operator=(const AllocatorDescription & desc) {
-    physStart = desc.physStart;
-    depth = desc.depth;
-  }
+  void AddRegion(MemoryRegion & region);
+  
+public:
+  PhysRegionList() {}
+  PhysRegionList(void * mbootPtr);
+  MemoryRegion * GetRegions();
+  int GetRegionCount();
+  
 };
 
 class GlobalMap {
 private:
-  MemoryRegion regions[0x40];
-  int regionCount;
-  
-  ANAlloc::BBTree trees[0x80];
-  ANAlloc::Allocator<ANAlloc::BBTree> allocators[0x80];
-  int allocatorCount;
-  
-  AllocatorDescription descriptions[0x80];
-  int descriptionCount;
-  
-  void AddRegion(MemoryRegion & region);
-  void AddDescription(AllocatorDescription & desc);
+  PhysRegionList regions;
+  ANAlloc::AllocatorList<MaximumAllocators, TreeType> allocators;
   
   /**
    * Returns the number of bytes used by the kernel and BIOS at the beginning
    * of the virtual address space.
    */
-  uintptr_t VirtualUsed();
+  size_t MemoryForKernel();
   
   /**
-   * Generates the descriptions[] array.
+   * Returns the number of bytes that the system needs for ANAlloc bitmaps.
    */
-  void GenerateDescriptions();
-  
-  /**
-   * Returns the number of bytes that the system must initially map in order to
-   * properly setup the physical memory allocator.
-   */
-  size_t InitialBytes();
+  size_t MemoryForBitmaps();
  
   /**
-   * Returns the number of physical bytes of memory that will be required to
-   * create the initial mappings.
+   * Returns the number of bytes that the system needs for page tables in order
+   * to map all the kernel memory, bitmap memory, and memory for page tables.
+   * Obviously, this method basically solves a discrete differential equation,
+   * since the amount of memory used for page tables may increase given the
+   * other memory needed for the page tables.
    */
-  size_t RequiredPhysical();
+  size_t MemoryForPageTables();
   
 public:
   static GlobalMap & GetGlobalMap();
   static void InitializeGlobalMap(void * mbootPtr);
   
+  // for the static variable
   GlobalMap() {}
   
   /**
-   * Create a new GlobalMap, passing in the multiboot information pointer.
+   * Create a new GlobalMap, passing in the parsed regions
    */
   GlobalMap(void * mbootPtr);
   
