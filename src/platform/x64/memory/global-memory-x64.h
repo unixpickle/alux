@@ -27,112 +27,17 @@
 #ifndef __PLATFORM_X64_GLOBAL_MEMORY_X64_H__
 #define __PLATFORM_X64_GLOBAL_MEMORY_X64_H__
 
-#include "../multiboot-x64.h"
-#include <platform/memory.h>
-#include <analloc2.h>
-#include <cassert>
+#include "map-creator-x64.h"
 
 namespace OS {
-
-const int MaximumPhysicalRegions = 8;
-const int MaximumAllocators = 0x10;
-typedef ANAlloc::BBTree TreeType;
-typedef ANAlloc::AllocatorList<MaximumAllocators, TreeType> AllocatorList;
-typedef ANAlloc::Region MemoryRegion;
-
-class PhysRegionList {
-private:
-  MemoryRegion regions[MaximumPhysicalRegions];
-  int regionCount;
-  
-  void AddRegion(MemoryRegion & region);
-  
-public:
-  PhysRegionList() {}
-  PhysRegionList(void * mbootPtr);
-  MemoryRegion * GetRegions();
-  int GetRegionCount();
-  MemoryRegion * FindRegion(uintptr_t ptr);
-  MemoryRegion * NextRegion(MemoryRegion * reg);
-  
-};
-
-class MapCreator {
-private:
-  /**
-   * Starts at end of kernel section and increments by a page each time a new
-   * page table is allocated. There may be jumps in this value when jumping to
-   * a new region of physical memory.
-   */
-  uintptr_t physOffset;
-  
-  /**
-   * Starts at end of kernel section and always increments by one page for each
-   * page table allocation.
-   */
-  uintptr_t virtOffset;
-  
-  /**
-   * The amount of virtual memory which has been mapped to physical memory.
-   * This will go up by 2MB at a time (currently).
-   */
-  uintptr_t virtMapped;
-  
-  /**
-   * Starts out as false. Once virtMapped > virtOffset + 0x4000 this will
-   * become true, cr3 will be reloaded with the new mappings, and we will start
-   * using virtOffset instead of physOffset to modify page tables.
-   */
-  bool hasSwitched;
-  
-  PhysAddr pml4;
-  PhysAddr pdpt;
-  
-  PhysRegionList * regions;
-  AllocatorList * allocators;
-  
-  // before hasSwitched, this is used
-  uint64_t * physPDT = NULL;
-  uint64_t * virtPDT = NULL;
-  
-  uint64_t * virtScratchPT;
-  
-  int pdtOffset;
-  int pdptOffset;
-  
-  void IncrementPhysOffset();
-  
-  void InitializeTables();
-  void MapNextPage();
-  void Switch();
-  void AllocatePage(uint64_t ** phys, uint64_t ** virt);
-  
-  uint64_t * VisiblePDT();
-  uint64_t * VisiblePDPT();
-  
-public:
-  MapCreator(PhysRegionList *, AllocatorList *);
-  
-  /**
-   * @param total The total amount of memory to map. This must be a multiple
-   * of 2MB.
-   * @param current The amount of linear memory which is already reserved.
-   * This must be a multiple of 2MB.
-   */
-  void Map(uintptr_t total, uintptr_t current);
-  
-  /**
-   * Returns the "scratch" page table at the end of kernel address space, used
-   * for quickly mapping in physical memory in order to access it.
-   */
-  uint64_t * ScratchPageTable();
-  
-};
 
 class GlobalMap {
 private:
   PhysRegionList regions;
   AllocatorList allocators;
+  PhysAddr pml4;
+  PhysAddr pdpt;
+  uint64_t * scratchTable;
   
   /**
    * Returns the number of bytes used by the kernel and BIOS at the beginning
@@ -187,6 +92,11 @@ public:
    * of the PML4 in every task's address space.
    */
   PhysAddr GetPDPT();
+
+  /**
+   * Map a physical page to the virtual address space.
+   */
+  void * MapPhysicalPage(int scratchIndex, PhysAddr addr);
   
 };
 
