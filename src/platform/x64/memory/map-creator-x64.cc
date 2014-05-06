@@ -134,8 +134,11 @@ void MapCreator::Map(uintptr_t total, uintptr_t current) {
   virtScratchPDT[0x1ff] = (uint64_t)physScratchPT | 3;
   VisiblePDPT()[0x1ff] = (uint64_t)physScratchPDT | 3;
 
+  
+
   // mark space as used
   MemoryRegion region(0, physOffset);
+  cout << "calling allocators->Reserve(region)" << endl;
   allocators->Reserve(region);
 }
 
