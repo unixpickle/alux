@@ -5,6 +5,8 @@
 #ifndef __ASSERT_H__
 #define __ASSERT_H__
 
+#include <platform/failure.h>
+
 #ifdef NDEBUG
 #define assert(x)
 #else
