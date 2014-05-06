@@ -44,6 +44,24 @@ void MapCreator::IncrementPhysOffset() {
   }
 }
 
+void MapCreator::AddPhysOffset(size_t size) {
+  MemoryRegion * reg = regions->FindRegion(physOffset);
+  if (!reg) {
+    Panic("MapCreator::IncrementPhysOffset() - physOffset out of bounds.");
+  }
+  while (physOffset + size > reg->GetEnd()) {
+    physOffset += reg->GetEnd() - physOffset;
+    size -= reg->GetEnd() - physOffset;
+
+    reg = regions->NextRegion(reg);
+    if (!reg) {
+      Panic("MapCreator::IncrementPhysOffset() - out of ranges.");
+    }
+    physOffset = reg->GetStart();
+  }
+  physOffset += size;
+}
+
 void MapCreator::InitializeTables() {
   pdtOffset = 0;
   pdptOffset = 0;
@@ -134,11 +152,10 @@ void MapCreator::Map(uintptr_t total, uintptr_t current) {
   virtScratchPDT[0x1ff] = (uint64_t)physScratchPT | 3;
   VisiblePDPT()[0x1ff] = (uint64_t)physScratchPDT | 3;
 
-  
-
   // mark space as used
+  AddPhysOffset(allocators->BitmapByteCount());
+  allocators->GenerateAllocators((uint8_t *)virtOffset);
   MemoryRegion region(0, physOffset);
-  cout << "calling allocators->Reserve(region)" << endl;
   allocators->Reserve(region);
 }
 

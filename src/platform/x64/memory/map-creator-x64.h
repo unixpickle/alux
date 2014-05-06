@@ -80,6 +80,7 @@ private:
   int pdptOffset;
   
   void IncrementPhysOffset();
+  void AddPhysOffset(size_t size);
   
   void InitializeTables();
   void MapNextPage();
