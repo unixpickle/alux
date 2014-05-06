@@ -50,13 +50,13 @@ void MapCreator::AddPhysOffset(size_t size) {
     Panic("MapCreator::IncrementPhysOffset() - physOffset out of bounds.");
   }
   while (physOffset + size > reg->GetEnd()) {
-    physOffset += reg->GetEnd() - physOffset;
     size -= reg->GetEnd() - physOffset;
 
     reg = regions->NextRegion(reg);
     if (!reg) {
       Panic("MapCreator::IncrementPhysOffset() - out of ranges.");
     }
+
     physOffset = reg->GetStart();
   }
   physOffset += size;
@@ -91,7 +91,7 @@ void MapCreator::MapNextPage() {
 void MapCreator::Switch() {
   hasSwitched = true;
   __asm__("mov %%cr3, %0" : : "r" (pml4));
-  cout << "switched to new address space" << endl;
+  cout << "MapCreator::Switch() - set CR3 to " << pml4 << endl;
 }
 
 void MapCreator::AllocatePage(uint64_t ** phys, uint64_t ** virt) {
@@ -137,12 +137,12 @@ void MapCreator::Map(uintptr_t total, uintptr_t current) {
     }
     
   }
+
+  cout << "MapCreator::Map() - mapped " << virtMapped << " bytes" << endl;
   
   if (!hasSwitched) {
     Switch();
   }
-  
-  cout << "mapped a total of " << virtMapped << " bytes" << endl;
   
   // create our scratch space
   uint64_t * physScratchPDT, * physScratchPT;
@@ -172,4 +172,3 @@ PhysAddr MapCreator::GetPDPT() {
 }
 
 }
-

@@ -87,6 +87,22 @@ PhysRegionList::PhysRegionList(void * mbootPtr) {
     AddRegion(region);
   }
   if (!regionCount) Panic("GlobalMap() - no regions found");
+  
+  /**
+   * Setup test regions. This is useful only when you have at least 0x3010000
+   * bytes of contiguous physical memory at the beginning of your address space.
+   * This test essentially sees if the MapCreator can properly work with
+   * fragmented memory.
+   */
+  /** TEST **
+  MemoryRegion r1(0, 0x1001003); // 1 page for first allocation, weird alignment
+  MemoryRegion r2(0x2000000, 0xfff);
+  MemoryRegion r3(0x3000000, 0x10000);
+  regions[0] = r1;
+  regions[1] = r2;
+  regions[2] = r3;
+  regionCount = 3;
+  ** END TEST **/
 }
 
 MemoryRegion * PhysRegionList::GetRegions() {

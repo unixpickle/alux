@@ -85,13 +85,16 @@ size_t GlobalMap::MemoryForPageTables() {
 
 void GlobalMap::Setup() {
   allocators.GenerateDescriptions();
+  
+  cout << "table memory=" << MemoryForPageTables()
+    << " bitmap memory=" << MemoryForBitmaps()
+    << " kernel memory=" << MemoryForKernel() << endl;
+  
   size_t physicalSize = MemoryForPageTables() + MemoryForBitmaps()
     + MemoryForKernel();
   if (physicalSize & 0x1fffff) {
     physicalSize += 0x200000 - (physicalSize & 0x1fffff);
   }
-  cout << "reserving " << physicalSize
-    << " bytes of physical memory..." << endl;
   
   MapCreator creator(&regions, &allocators);
   creator.Map((uintptr_t)physicalSize, (uintptr_t)MemoryForKernel());
