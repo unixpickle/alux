@@ -9,6 +9,9 @@ General architectual ideas that I am playing around with:
  * Cross-platform abstractions
  * Memory allocation and VMM completely in user-space
 
+## TODO
+
+ * Test MapCreator with segmented initial physical memory regions to verify that it adds addresses correctly.
 
 ## License
 
