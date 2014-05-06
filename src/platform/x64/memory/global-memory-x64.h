@@ -37,11 +37,10 @@ namespace OS {
 const int MaximumPhysicalRegions = 8;
 const int MaximumAllocators = 0x10;
 typedef ANAlloc::BBTree TreeType;
+typedef ANAlloc::AllocatorList<MaximumAllocators, TreeType> AllocatorList;
+typedef ANAlloc::Region MemoryRegion;
 
 class PhysRegionList {
-public:
-  typedef ANAlloc::Region MemoryRegion;
-  
 private:
   MemoryRegion regions[MaximumPhysicalRegions];
   int regionCount;
@@ -53,22 +52,100 @@ public:
   PhysRegionList(void * mbootPtr);
   MemoryRegion * GetRegions();
   int GetRegionCount();
+  MemoryRegion * FindRegion(uintptr_t ptr);
+  MemoryRegion * NextRegion(MemoryRegion * reg);
+  
+};
+
+class MapCreator {
+private:
+  /**
+   * Starts at end of kernel section and increments by a page each time a new
+   * page table is allocated. There may be jumps in this value when jumping to
+   * a new region of physical memory.
+   */
+  uintptr_t physOffset;
+  
+  /**
+   * Starts at end of kernel section and always increments by one page for each
+   * page table allocation.
+   */
+  uintptr_t virtOffset;
+  
+  /**
+   * The amount of virtual memory which has been mapped to physical memory.
+   * This will go up by 2MB at a time (currently).
+   */
+  uintptr_t virtMapped;
+  
+  /**
+   * Starts out as false. Once virtMapped > virtOffset + 0x4000 this will
+   * become true, cr3 will be reloaded with the new mappings, and we will start
+   * using virtOffset instead of physOffset to modify page tables.
+   */
+  bool hasSwitched;
+  
+  PhysAddr pml4;
+  PhysAddr pdpt;
+  
+  PhysRegionList * regions;
+  AllocatorList * allocators;
+  
+  // before hasSwitched, this is used
+  uint64_t * physPDT = NULL;
+  uint64_t * virtPDT = NULL;
+  
+  uint64_t * virtScratchPT;
+  
+  int pdtOffset;
+  int pdptOffset;
+  
+  void IncrementPhysOffset();
+  
+  void InitializeTables();
+  void MapNextPage();
+  void Switch();
+  void AllocatePage(uint64_t ** phys, uint64_t ** virt);
+  
+  uint64_t * VisiblePDT();
+  uint64_t * VisiblePDPT();
+  
+public:
+  MapCreator(PhysRegionList *, AllocatorList *);
+  
+  /**
+   * @param total The total amount of memory to map. This must be a multiple
+   * of 2MB.
+   * @param current The amount of linear memory which is already reserved.
+   * This must be a multiple of 2MB.
+   */
+  void Map(uintptr_t total, uintptr_t current);
+  
+  /**
+   * Returns the "scratch" page table at the end of kernel address space, used
+   * for quickly mapping in physical memory in order to access it.
+   */
+  uint64_t * ScratchPageTable();
   
 };
 
 class GlobalMap {
 private:
   PhysRegionList regions;
-  ANAlloc::AllocatorList<MaximumAllocators, TreeType> allocators;
+  AllocatorList allocators;
   
   /**
    * Returns the number of bytes used by the kernel and BIOS at the beginning
    * of the virtual address space.
+   *
+   * This must be a multiple of 2M.
    */
   size_t MemoryForKernel();
   
   /**
    * Returns the number of bytes that the system needs for ANAlloc bitmaps.
+   *
+   * This must be a multiple of 4K.
    */
   size_t MemoryForBitmaps();
  
@@ -78,6 +155,8 @@ private:
    * Obviously, this method basically solves a discrete differential equation,
    * since the amount of memory used for page tables may increase given the
    * other memory needed for the page tables.
+   *
+   * This must be a multiple of 4K.
    */
   size_t MemoryForPageTables();
   
