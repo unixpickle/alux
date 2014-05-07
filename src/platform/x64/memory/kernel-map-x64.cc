@@ -25,33 +25,36 @@
  */
 
 #include <platform/memory.h>
+#include <platform/failure.h>
 
 namespace OS {
 
 namespace KernMap {
 
 bool Map(PhysAddr phys, size_t bytes, VirtAddr & addr) {
-  
+  return false;
 }
 
 void Unmap(VirtAddr addr, size_t bytes) {
-  
+  Panic("NYI");
 }
 
 void InvalidateCache(VirtAddr addr, size_t bytes) {
-  
+  Panic("NYI");
 }
 
 int GetNumPageSizes() {
-  
+  return 0;
 }
 
 size_t GetPageSize(int idx) {
-  
+  Panic("Out of bounds");
+  return 0;
 }
 
 size_t GetPageAlignment(int idx) {
-  
+  Panic("Out of bounds");
+  return 0;
 }
 
 }

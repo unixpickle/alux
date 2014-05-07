@@ -38,11 +38,14 @@ typedef uintptr_t VirtAddr;
 /**
  * Allocate a physically-contiguous chunk of physical memory.
  * @param size The minimum number of bytes to allocate.
+ * @param align The alignment to use. Must be a power of 2.
  * @param addr On success, this is the beginning of the physical buffer.
  * @param realSize On success, this is set to the number of usable bytes.
  * @return true on success
  */
-bool PhysicalAlloc(size_t size, PhysAddr & addr, size_t * realSize);
+bool PhysicalAlloc(size_t size,
+                   PhysAddr & addr,
+                   size_t * realSize);
 
 /**
  * Like PhysicalAlloc(), but the resulting `addr` is a multiple of `align`.
@@ -112,15 +115,12 @@ public:
   static size_t GetPageSize(int idx);
   static size_t GetPageAlignment(int idx);
   
-  /**
-   * Create a new memory map. This will allocate everything it needs to.
-   */
-  virtual MemoryMap();
+  static UserMap * CreateUserMap();
   
   /**
    * Destroy a memory map. This will free everything it needs to.
    */
-  virtual ~MemoryMap();
+  virtual ~UserMap();
   
   /**
    * Same as MapKernel(), but the mapping will be local to *this* page table.

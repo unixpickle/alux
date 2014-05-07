@@ -106,7 +106,7 @@ void GlobalMap::Setup() {
   scratchTable = creator.ScratchPageTable();
 }
 
-void * ReserveScratch(PhysAddr addr) {
+void * GlobalMap::ReserveScratch(PhysAddr addr) {
   assert(!(addr & 0xfff));
   
   ScopeLock scope(&scratchLock);
@@ -130,16 +130,16 @@ void * ReserveScratch(PhysAddr addr) {
   if (scratchIdx < 0) return NULL;
   
   scratchTable[scratchIdx] = 3 | addr;
-  void * addr = (void *)(0x8000000000L - (0x200L - scratchIdx) * 0x1000);
-  __asm__("invlpg %0" : : "r" (addr));
-  return addr;
+  void * res = (void *)(0x8000000000L - (0x200L - scratchIdx) * 0x1000);
+  __asm__("invlpg (%0)" : : "r" (res));
+  return res;
 }
 
 
 /**
  * Release a scratch map that you made earlier.
  */
-void FreeScratchIndex(void * virt) {
+void GlobalMap::FreeScratchIndex(void * virt) {
   ScopeLock scope(&scratchLock);
   
   uintptr_t num = (uintptr_t)virt;

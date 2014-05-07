@@ -30,19 +30,25 @@
 namespace OS {
 
 bool PhysicalAlloc(size_t size, PhysAddr & addr, size_t * realSize) {
-  AllocatorList & list = GlobalMap::GetGlobalMap().GetAllocatorList();
-  
+  return PhysicalAlign(size, 1, addr, realSize);
 }
 
 bool PhysicalAlign(size_t size,
                    size_t align,
                    PhysAddr & addr,
                    size_t * realSize) {
-                     
+  AllocatorList & list = GlobalMap::GetGlobalMap().GetAllocatorList();
+  uintptr_t value;
+  if (!list.AllocPointer(size, align, value, realSize)) {
+    return false;
+  }
+  addr = (PhysAddr)value;
+  return true;
 }
 
 void PhysicalFree(PhysAddr addr) {
-  
+  AllocatorList & list = GlobalMap::GetGlobalMap().GetAllocatorList();
+  list.FreePointer((uintptr_t)addr);
 }
 
 }
