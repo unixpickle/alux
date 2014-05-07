@@ -84,7 +84,9 @@ void MapCreator::MapNextPage() {
     AllocatePage(&physPDT, &virtPDT);
     VisiblePDPT()[pdptOffset] = (uint64_t)physPDT | 3;
   }
-  VisiblePDT()[pdtOffset++] = virtMapped | 3;
+  
+  // flags: present 1, read/write 2, global 0x100, page size (big) 0x80
+  VisiblePDT()[pdtOffset++] = virtMapped | 0x183;
   virtMapped += 0x200000;
 }
 

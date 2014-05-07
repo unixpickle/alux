@@ -37,41 +37,29 @@ typedef uintptr_t VirtAddr;
 
 /**
  * Allocate a physically-contiguous chunk of physical memory.
- * @param size The minimum number of bytes to allocate
+ * @param size The minimum number of bytes to allocate.
  * @param addr On success, this is the beginning of the physical buffer.
+ * @param realSize On success, this is set to the number of usable bytes.
  * @return true on success
  */
-bool PhysicalAlloc(size_t size, PhysAddr & addr);
+bool PhysicalAlloc(size_t size, PhysAddr & addr, size_t * realSize);
 
 /**
  * Like PhysicalAlloc(), but the resulting `addr` is a multiple of `align`.
  */
-bool PhysicalAlign(size_t size, size_t align, PhysAddr & addr);
+bool PhysicalAlign(size_t size,
+                   size_t align,
+                   PhysAddr & addr,
+                   size_t * realSize);
 
 /**
  * Frees an address allocated with PhysicalAlign() or PhysicalAlloc().
+ * @param addr The pointer returned by PhysicalAlign() or PhysicalAlloc().
  */
-void PhysicalFree(PhysAddr addr, size_t size);
+void PhysicalFree(PhysAddr addr);
 
-/**
- * Represents an application's memory map. This memory map includes a section
- * of virtual memory which is shared between every task for the kernel.
- */
-class MemoryMap {
-public:
-  static int PageSizeCount();
-  static size_t * PageSizes();
-  
-  /**
-   * Create a new memory map. This will allocate everything it needs to.
-   */
-  MemoryMap();
-  
-  /**
-   * Destroy a memory map. This will free everything it needs to.
-   */
-  ~MemoryMap();
-  
+namespace KernMap {
+
   /**
    * @param phys The beginning of the physical segment to map.
    * @param bytes The number of bytes to map. This must be a multiple of a
@@ -79,29 +67,76 @@ public:
    * @param addr On success, this will be the beginning of the new virtual
    * buffer that was mapped.
    * @return true on success.
+   * @discussion Your implementation of this method ought not to rely on the
+   * virtual memory allocation system, because this will be *used* by said
+   * system.
    */
-  bool MapKernel(PhysAddr phys, size_t bytes, VirtAddr & addr);
+  bool Map(PhysAddr phys, size_t bytes, VirtAddr & addr);
+
+  /**
+   * Unmap a virtual address that was returned by Map().
+   * @param addr The virtual address returned by Map().
+   * @param bytes The exact argument you passed for Map()'s `bytes`.
+   */
+  void Unmap(VirtAddr addr, size_t bytes);
+
+  /**
+   * Invalidate the page caches starting at a certain address.
+   */
+  void InvalidateCache(VirtAddr addr, size_t bytes);
+  
+  /**
+   * Returns the number of available page sizes.
+   */
+  int GetNumPageSizes();
+  
+  /**
+   * Returns the page size at index `idx`.
+   */
+  size_t GetPageSize(int idx);
+  
+  /**
+   * Returns the required physical alignment for pages of the size at `idx`.
+   */
+  size_t GetPageAlignment(int idx);
+  
+}
+
+/**
+ * Represents an application's memory map. This memory map includes a section
+ * of virtual memory which is shared between every task for the kernel.
+ */
+class UserMap {
+public:
+  static int GetNumPageSizes();
+  static size_t GetPageSize(int idx);
+  static size_t GetPageAlignment(int idx);
+  
+  /**
+   * Create a new memory map. This will allocate everything it needs to.
+   */
+  virtual MemoryMap();
+  
+  /**
+   * Destroy a memory map. This will free everything it needs to.
+   */
+  virtual ~MemoryMap();
   
   /**
    * Same as MapKernel(), but the mapping will be local to *this* page table.
    */
-  bool MapUser(PhysAddr phys, size_t bytes, VirtAddr & addr);
+  bool Map(PhysAddr phys, size_t bytes, VirtAddr & addr);
   
   /**
    * Same as MapUser(), but the mapped pages cannot be executed.
    */
-  bool MapUserNoExec(PhysAddr phys, size_t bytes, VirtAddr & addr);
+  bool MapNoExec(PhysAddr phys, size_t bytes, VirtAddr & addr);
   
   /**
-   * Map "lazy" addresses in the kernel space. When the page is accessed, a
-   * page fault will be triggered.
+   * Map non-present pages at a certain address so that a page fault will be
+   * triggered when the memory is accessed.
    */
-  bool MapKernelLazy(PhysAddr phys, size_t bytes, VirtAddr & addr);
-  
-  /**
-   * Same as MapKernelLazy(), but for user-space local addresses.
-   */
-  bool MapUserReserved(PhysAddr phys, size_t bytes, VirtAddr & addr);
+  bool MapReserved(PhysAddr phys, size_t bytes, VirtAddr & addr);
   
   /**
    * Unmap the pages at a virtual address. The address must be an address
@@ -114,13 +149,7 @@ public:
    * Invalidate the page table caches for a given address extending `bytes`
    * bytes.
    */
-  void InvalidateUserCache(VirtAddr addr, size_t bytes);
-  
-  /**
-   * Same as InvalidateUserCache(), but some architectures may do this
-   * differently because of global pages.
-   */
-  void InvalidateKernelCache(VirtAddr addr, size_t bytes);
+  void InvalidateCache(VirtAddr addr, size_t bytes);
   
 };
 

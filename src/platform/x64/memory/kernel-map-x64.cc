@@ -28,6 +28,32 @@
 
 namespace OS {
 
+namespace KernMap {
 
+bool Map(PhysAddr phys, size_t bytes, VirtAddr & addr) {
+  
+}
+
+void Unmap(VirtAddr addr, size_t bytes) {
+  
+}
+
+void InvalidateCache(VirtAddr addr, size_t bytes) {
+  
+}
+
+int GetNumPageSizes() {
+  
+}
+
+size_t GetPageSize(int idx) {
+  
+}
+
+size_t GetPageAlignment(int idx) {
+  
+}
+
+}
 
 }

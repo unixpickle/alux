@@ -43,6 +43,8 @@ GlobalMap::GlobalMap(void * mbootPtr)
     allocators(0x100000, 0x1000, 0x1000,
                regions.GetRegions(),
                regions.GetRegionCount()) {
+  scratchLock = 0;
+  bzero(scratchBitmap, sizeof(scratchBitmap));
 }
 
 static size_t PageTableSize(size_t size) {
@@ -104,10 +106,53 @@ void GlobalMap::Setup() {
   scratchTable = creator.ScratchPageTable();
 }
 
-void * GlobalMap::MapPhysicalPage(int scratchIndex, PhysAddr addr) {
+void * ReserveScratch(PhysAddr addr) {
   assert(!(addr & 0xfff));
-  scratchTable[scratchIndex] = 3 | addr;
-  return (void *)(0x8000000000L - (0x200L - scratchIndex) * 0x1000);
+  
+  ScopeLock scope(&scratchLock);
+  int scratchIdx = -1;
+  
+  // find a free bit and set it, and then set scratchIdx accordingly
+  for (int i = 0; i < 8; i++) {
+    if (!~scratchBitmap[i]) continue;
+    
+    int freeIndex;
+    for (freeIndex = 0; freeIndex < 0x40; freeIndex++) {
+      if (!(scratchBitmap[i] & (1L << freeIndex))) {
+        break;
+      }
+    }
+    scratchBitmap[i] |= (1L << freeIndex);
+    scratchIdx = (i * 0x40) + freeIndex;
+    
+    break;
+  }
+  if (scratchIdx < 0) return NULL;
+  
+  scratchTable[scratchIdx] = 3 | addr;
+  void * addr = (void *)(0x8000000000L - (0x200L - scratchIdx) * 0x1000);
+  __asm__("invlpg %0" : : "r" (addr));
+  return addr;
+}
+
+
+/**
+ * Release a scratch map that you made earlier.
+ */
+void FreeScratchIndex(void * virt) {
+  ScopeLock scope(&scratchLock);
+  
+  uintptr_t num = (uintptr_t)virt;
+  num -= (0x8000000000L - 0x200000L);
+  num >>= 12;
+  
+  int byteIndex = (int)(num >> 6);
+  int bitIndex = (int)(num & 0x3f);
+  scratchBitmap[byteIndex] ^= (1L << bitIndex);
+}
+
+AllocatorList & GlobalMap::GetAllocatorList() {
+  return allocators;
 }
 
 }

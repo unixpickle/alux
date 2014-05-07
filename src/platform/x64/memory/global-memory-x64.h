@@ -28,6 +28,7 @@
 #define __PLATFORM_X64_GLOBAL_MEMORY_X64_H__
 
 #include "map-creator-x64.h"
+#include <utilities/lock.h>
 
 namespace OS {
 
@@ -37,7 +38,10 @@ private:
   AllocatorList allocators;
   PhysAddr pml4;
   PhysAddr pdpt;
+  
   uint64_t * scratchTable;
+  uint64_t scratchLock;
+  uint64_t scratchBitmap[8];
   
   /**
    * Returns the number of bytes used by the kernel and BIOS at the beginning
@@ -94,9 +98,25 @@ public:
   PhysAddr GetPDPT();
 
   /**
-   * Map a physical page to the virtual address space.
+   * Maps a physical address to a temporary address. This will automatically
+   * clear the cache for the returned page. NULL will be returned if no slots
+   * are available.
+   *
+   * @discussion Since this is a rapid change to the kernel page table, you
+   * should lock yourself to one CPU before using your reserved page. That way
+   * you don't get switched to a different CPU that has a stale TLB entry.
    */
-  void * MapPhysicalPage(int scratchIndex, PhysAddr addr);
+  void * ReserveScratch(PhysAddr addr);
+
+  /**
+   * Release a scratch map that you made earlier.
+   */
+  void FreeScratchIndex(void * virt);
+  
+  /**
+   * Returns the internal allocator list.
+   */
+  AllocatorList & GetAllocatorList();
   
 };
 
