@@ -56,7 +56,8 @@ public:
   KernelMap();
   
   /**
-   * Returns the first physical address which may be used.
+   * Returns the first physical address which may be used. You should call
+   * Set() immediately after this.
    */
   PhysAddr Setup(PhysRegionList * regs);
   

@@ -30,6 +30,8 @@ namespace OS {
 
 namespace x64 {
 
+static const VirtAddr ScratchStartAddr = 0x7FC0000000L;
+
 KernelMap::KernelMap() {
   scratchLock = 0;
   bzero(scratchBitmaps, sizeof(scratchBitmaps));
@@ -40,7 +42,7 @@ PhysAddr KernelMap::Setup(PhysRegionList * regs) {
   setup.Map();
   
   assert(ScratchPTCount <= 0x200);
-  assert(setup.GetFirstUnmapped() <= 0x7FC0000000);
+  assert(setup.GetFirstUnmapped() <= ScratchStartAddr);
   
   PhysAddr scratchPDT = setup.AllocPage();
   ((uint64_t *)setup.GetPDPT())[0x1ff] = scratchPDT | 3;
@@ -69,11 +71,41 @@ VirtAddr KernelMap::Map(PhysAddr start, size_t size, bool largePages) {
 }
 
 VirtAddr KernelMap::AllocScratch(PhysAddr start) {
-  return 0;
+  ScopeLock scope(&scratchLock);
+  
+  assert(!(start & 0xfff));
+  
+  int bitIndex = -1;
+  for (int i = 0; i < ScratchPTCount * 8; i++) {
+    if (!~scratchBitmaps[i]) continue;
+    // find the first free NULL
+    for (int j = 0; j < 0x40; j++) {
+      if (scratchBitmaps[i] & (1L << j)) continue;
+      
+      bitIndex = j + (i * 0x40);
+      scratchBitmaps[i] |= (1L << j);
+      break;
+    }
+    break;
+  }
+  if (bitIndex < 0) return 0;
+  
+  VirtAddr virt = ScratchStartAddr + (bitIndex << 12);
+  int scratchTableIdx = bitIndex >> 9;
+  uint64_t * table = (uint64_t *)((uint64_t)ScratchPTStart()
+    + (scratchTableIdx << 12));
+  table[bitIndex & 0x1ff] = start | 3;
+  __asm__("invlpg (%0)" : : "r" (virt));
+  
+  return virt;
 }
 
 void KernelMap::FreeScratch(VirtAddr ptr) {
+  ScopeLock scope(&scratchLock);
   
+  int bitIndex = (int)((ptr - ScratchStartAddr) >> 12);
+  int fieldIndex = bitIndex / 0x40;
+  scratchBitmaps[fieldIndex] ^= 1L << (bitIndex & 0x3f);
 }
 
 }
