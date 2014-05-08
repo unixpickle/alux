@@ -25,7 +25,6 @@
  */
 
 #include <platform/memory.h>
-#include "global-memory-x64.h"
 
 namespace OS {
 
@@ -37,18 +36,10 @@ bool PhysicalAlign(size_t size,
                    size_t align,
                    PhysAddr & addr,
                    size_t * realSize) {
-  AllocatorList & list = GlobalMap::GetGlobalMap().GetAllocatorList();
-  uintptr_t value;
-  if (!list.AllocPointer(size, align, value, realSize)) {
-    return false;
-  }
-  addr = (PhysAddr)value;
-  return true;
+  return false;
 }
 
 void PhysicalFree(PhysAddr addr) {
-  AllocatorList & list = GlobalMap::GetGlobalMap().GetAllocatorList();
-  list.FreePointer((uintptr_t)addr);
 }
 
 }

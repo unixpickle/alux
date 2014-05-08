@@ -24,18 +24,14 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef __PLATFORM_X64_MAP_CREATOR_X64_H__
-#define __PLATFORM_X64_MAP_CREATOR_X64_H__
+#ifndef __PLATFORM_X64_KERNEL_MAP_X64_H__
+#define __PLATFORM_X64_KERNEL_MAP_X64_H__
 
-#include "phys-region-list-x64.h"
-#include <cstring>
+#include "map-setup-x64.h"
 
 namespace OS {
 
-const int MaximumAllocators = 0x10;
-const int ScratchPTCount = 0x1;
-typedef ANAlloc::BBTree TreeType;
-typedef ANAlloc::AllocatorList<MaximumAllocators, TreeType> AllocatorList;
+namespace x64 {
 
 typedef struct {
   uintptr_t start;
@@ -50,50 +46,51 @@ typedef struct {
 
 class KernelMap {
 private:
-  PhysAddr pml4;
-  PhysAddr pdpt;
+  PhysAddr pdpt, pml4;
   
-  PhysRegionList * regions;
-  uint64_t * virtScratchPT;
-
-  uint64_t scratchPTBitmap[ScratchPTCount * 8];
-  uint64_t scratch
-  
-  int pdtOffset;
-  PhysAddr currentPDT;
-
-  PhysAddr nextPage;
-
-  void IncrementPhysPage();
+  uint64_t * virtScratchPTs[ScratchPTCount];
+  uint64_t scratchBitmaps[ScratchPTCount * 8];
+  uint64_t scratchLock OS_ALIGNED(8);
 
 public:
-  MapCreator(PhysRegionList *, AllocatorList *);
+  KernelMap();
   
   /**
-   * @param total The total amount of memory to map. This must be a multiple
-   * of 2MB.
-   * @param current The amount of linear memory which is already reserved.
-   * This must be a multiple of 2MB.
+   * Returns the first physical address which may be used.
    */
-  void Map(uintptr_t total, uintptr_t current);
+  PhysAddr Setup(PhysRegionList * regs);
   
   /**
-   * Returns the "scratch" page table at the end of kernel address space, used
-   * for quickly mapping in physical memory in order to access it.
+   * Sets CR3 to this map's PML4.
    */
-  uint64_t * ScratchPageTable();
-
-  /**
-   * Returns the physical PML4.
-   */
-  PhysAddr GetPML4();
+  void Set();
 
   /**
    * Returns the kernel PDPT.
    */
   PhysAddr GetPDPT();
+  
+  /**
+   * Attempts to map a physical address to a virtual address. If the map fails,
+   * (VirtualAddr)0 is returned.
+   */
+  VirtAddr Map(PhysAddr start, size_t size, bool largePages);
+
+  /**
+   * Temporarily map a 4K physical page into a virtual address. You should lock
+   * yourself to this CPU since the caches on other CPUs may have stale entires
+   * for this address.
+   */
+  VirtAddr AllocScratch(PhysAddr start);
+  
+  /**
+   * Release a virtual address returned by AllocScratch to be used elsewhere.
+   */
+  void FreeScratch(VirtAddr ptr);
 
 };
+
+}
 
 }
 

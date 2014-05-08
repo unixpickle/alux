@@ -33,6 +33,8 @@ extern "C" {
 
 }
 
+#include <cassert>
+
 namespace OS {
 
 class ScopeLock {

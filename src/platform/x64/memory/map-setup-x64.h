@@ -24,19 +24,50 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "multiboot-x64.h"
+#ifndef __PLATFORM_X64_MAP_SETUP_X64_H__
+#define __PLATFORM_X64_MAP_SETUP_X64_H__
 
-extern "C" {
+#include "phys-region-list-x64.h"
+#include "size-config-x64.h"
+#include <cstring>
+#include <platform/memory.h>
 
-void MbootEntry(void * mbootPtr) {
-  (void)mbootPtr;
-  OS::InitializePrinting();
-  OS::InitializeOutStream();
-  OS::EntryPoint();
+namespace OS {
+
+namespace x64 {
+
+/**
+ * The lifecycle of this class assumes you are in the physical address space--
+ * that is, an identity mapped virtual address space. In reality, only the
+ * first GB is identity mapped, but that ought to be enough.
+ */
+class MapSetup {
+private:
+  PhysRegionList * regions;
+  
+  PhysAddr pdpt, pml4;
+  int pdtOffset, pdptOffset;
+  PhysAddr currentPDT;
+  
+  PhysAddr nextPage;
+  VirtAddr firstUnmappedVirtual;
+  
+  void MapNextVirtual();
+  
+public:
+  MapSetup(PhysRegionList * regs);
+  void Map();
+  PhysAddr AllocPage();
+  PhysAddr GetFirstFree();
+  VirtAddr GetFirstUnmapped();
+  PhysAddr GetPDPT();
+  PhysAddr GetPML4();
+  
+};
+
 }
 
-void _MbootEntry(void * ptr) {
-  MbootEntry(ptr);
 }
 
-}
+#endif
+

@@ -24,19 +24,22 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "multiboot-x64.h"
+#ifndef __PLATFORM_X64_SIZE_CONFIG_X64_H__
+#define __PLATFORM_X64_SIZE_CONFIG_X64_H__
 
-extern "C" {
+#include <cstddef>
 
-void MbootEntry(void * mbootPtr) {
-  (void)mbootPtr;
-  OS::InitializePrinting();
-  OS::InitializeOutStream();
-  OS::EntryPoint();
-}
+namespace OS {
 
-void _MbootEntry(void * ptr) {
-  MbootEntry(ptr);
-}
+namespace x64 {
+
+const int ScratchPTCount = 1;
+size_t KernelDataSize();
+void * ScratchPTStart();
 
 }
+
+}
+
+#endif
+

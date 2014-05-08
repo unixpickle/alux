@@ -34,6 +34,8 @@
 
 namespace OS {
 
+namespace x64 {
+
 const int MaximumPhysicalRegions = 8;
 typedef ANAlloc::Region MemoryRegion;
 
@@ -53,6 +55,8 @@ public:
   MemoryRegion * NextRegion(MemoryRegion * reg);
   
 };
+
+}
 
 }
 

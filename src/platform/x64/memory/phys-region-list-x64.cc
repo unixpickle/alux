@@ -28,6 +28,8 @@
 
 namespace OS {
 
+namespace x64 {
+
 void PhysRegionList::AddRegion(MemoryRegion & region) {
   if (regionCount == MaximumPhysicalRegions) {
     Panic("PhysRegionList::AddRegion() - region overflow");
@@ -130,3 +132,4 @@ MemoryRegion * PhysRegionList::NextRegion(MemoryRegion * reg) {
 
 }
 
+}
