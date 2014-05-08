@@ -13,6 +13,16 @@ General architectual ideas that I am playing around with:
 
  * Test MapCreator with segmented initial physical memory regions to verify that it adds addresses correctly.
 
+Here's the way I am going to make the kernel map work:
+
+ * Initially, figure out how much memory is needed for the kernel code, and make a topological map of the physical address space.
+ * Generate the page tables covering the kernel using the identity-mapped lower GiB of physical memory.
+ * Additionally, map in `n` extra page tables, where n is probably 1 or 2 on systems with many CPUs.
+ * Switch to the new address space. Note that none of the page tables we just used to create our map are probably mapped in except for the `n` scratch PTs.
+ * Now, allow a higher-level object to map in the physical memory needed to represent the physical memory buddy allocator bitmaps. We can modify the physical page tables using our `n` scratch PTs.
+ * Use a higher-level object to generate the physical allocators; this object will provide an API for allocating physical memory. 
+ * This object will report the last physical address used to the *next* higher up object, which will track mapped regions of kernel virtual memory.
+
 ## License
 
 Alux is licensed under the BSD 2-clause license. See [LICENSE](https://github.com/unixpickle/alux/blob/master/LICENSE).
