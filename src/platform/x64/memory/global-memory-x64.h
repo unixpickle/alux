@@ -28,6 +28,7 @@
 #define __PLATFORM_X64_GLOBAL_MEMORY_X64_H__
 
 #include "map-creator-x64.h"
+#include "common-x64.h"
 #include <utilities/lock.h>
 
 namespace OS {
@@ -40,7 +41,7 @@ private:
   PhysAddr pdpt;
   
   uint64_t * scratchTable;
-  uint64_t scratchLock;
+  uint64_t scratchLock OS_ALIGNED(8);
   uint64_t scratchBitmap[8];
   
   /**
@@ -111,13 +112,13 @@ public:
   /**
    * Release a scratch map that you made earlier.
    */
-  void FreeScratchIndex(void * virt);
+  void FreeScratch(void * virt);
   
   /**
    * Returns the internal allocator list.
    */
   AllocatorList & GetAllocatorList();
-  
+
 };
 
 }

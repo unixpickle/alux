@@ -136,10 +136,7 @@ void * GlobalMap::ReserveScratch(PhysAddr addr) {
 }
 
 
-/**
- * Release a scratch map that you made earlier.
- */
-void GlobalMap::FreeScratchIndex(void * virt) {
+void GlobalMap::FreeScratch(void * virt) {
   ScopeLock scope(&scratchLock);
   
   uintptr_t num = (uintptr_t)virt;

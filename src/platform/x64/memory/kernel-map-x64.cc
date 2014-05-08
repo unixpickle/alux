@@ -26,12 +26,20 @@
 
 #include <platform/memory.h>
 #include <platform/failure.h>
+#include "global-map-x64.h"
 
 namespace OS {
 
 namespace KernMap {
 
+static PhysAddr freeRegionList = 0;
+static uint64_t freeRegionLock OS_ALIGNED(8) = 0;
+
 bool Map(PhysAddr phys, size_t bytes, VirtAddr & addr) {
+  ScopeLock lock(&freeRegionLock);
+  if (!freeRegionList) {
+    // generate the list
+  }
   return false;
 }
 

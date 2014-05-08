@@ -30,6 +30,7 @@ namespace OS {
 
 ScopeLock::ScopeLock(anlock_t lock) {
   theLock = lock;
+  assert(!((uint64_t)lock & 7));
   anlock_lock(theLock);
 }
 
