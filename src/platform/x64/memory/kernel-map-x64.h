@@ -33,63 +33,39 @@
 namespace OS {
 
 const int MaximumAllocators = 0x10;
+const int ScratchPTCount = 0x1;
 typedef ANAlloc::BBTree TreeType;
 typedef ANAlloc::AllocatorList<MaximumAllocators, TreeType> AllocatorList;
 
-class MapCreator {
+typedef struct {
+  uintptr_t start;
+  uintptr_t length;
+} OS_PACKED UnusedRegion;
+
+typedef struct {
+  uint64_t count;
+  PhysAddr next; // 0 = no next
+  UnusedRegion regions[0xff];
+} OS_PACKED RegionLink;
+
+class KernelMap {
 private:
-  /**
-   * Starts at end of kernel section and increments by a page each time a new
-   * page table is allocated. There may be jumps in this value when jumping to
-   * a new region of physical memory.
-   */
-  uintptr_t physOffset;
-  
-  /**
-   * Starts at end of kernel section and always increments by one page for each
-   * page table allocation.
-   */
-  uintptr_t virtOffset;
-  
-  /**
-   * The amount of virtual memory which has been mapped to physical memory.
-   * This will go up by 2MB at a time (currently).
-   */
-  uintptr_t virtMapped;
-  
-  /**
-   * Starts out as false. Once virtMapped > virtOffset + 0x4000 this will
-   * become true, cr3 will be reloaded with the new mappings, and we will start
-   * using virtOffset instead of physOffset to modify page tables.
-   */
-  bool hasSwitched;
-  
   PhysAddr pml4;
   PhysAddr pdpt;
   
   PhysRegionList * regions;
-  AllocatorList * allocators;
-  
-  // before hasSwitched, this is used
-  uint64_t * physPDT;
-  uint64_t * virtPDT;
-  
   uint64_t * virtScratchPT;
+
+  uint64_t scratchPTBitmap[ScratchPTCount * 8];
+  uint64_t scratch
   
   int pdtOffset;
-  int pdptOffset;
-  
-  void IncrementPhysOffset();
-  void AddPhysOffset(size_t size);
-  
-  void InitializeTables();
-  void MapNextPage();
-  void Switch();
-  void AllocatePage(uint64_t ** phys, uint64_t ** virt);
-  
-  uint64_t * VisiblePDT();
-  uint64_t * VisiblePDPT();
-  
+  PhysAddr currentPDT;
+
+  PhysAddr nextPage;
+
+  void IncrementPhysPage();
+
 public:
   MapCreator(PhysRegionList *, AllocatorList *);
   
