@@ -25,6 +25,7 @@
  */
 
 #include "multiboot-x64.h"
+#include "memory/physical-alloc-x64.h"
 
 extern "C" {
 
@@ -32,6 +33,7 @@ void MbootEntry(void * mbootPtr) {
   (void)mbootPtr;
   OS::InitializePrinting();
   OS::InitializeOutStream();
+  OS::x64::InitializeKernAllocator(mbootPtr);
   OS::EntryPoint();
 }
 

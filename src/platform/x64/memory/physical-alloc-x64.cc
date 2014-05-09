@@ -43,8 +43,8 @@ namespace x64 {
     new(&regions) PhysRegionList(mbootPtr);
     new(&kernMap) KernelMap();
     
-    PhysAddr firstFree = kernelMap.Setup(&regions);
-    kernelMap.Set();
+    PhysAddr firstFree = kernMap.Setup(&regions);
+    kernMap.Set();
     
     new(&allocators) AllocatorList(0x1000000, 0x1000, 0x1000,
                                    regions.GetRegions(),
@@ -67,7 +67,7 @@ namespace x64 {
     // figure out where we are
     MemoryRegion * reg = regions.FindRegion(firstFree);
     if (!reg) {
-      if (!(reg = regions->FindRegion(firstFree - 1))) {
+      if (!(reg = regions.FindRegion(firstFree - 1))) {
         Panic("x64::GrabMore() - firstFree out of bounds.");
       }
     }
@@ -81,31 +81,33 @@ namespace x64 {
     }
     
     // make sure there's enough space in this region
-    size_t availSpace = reg.GetEnd() - firstFree;
+    size_t availSpace = reg->GetEnd() - firstFree;
     if (availSpace < reqSize) {
       reg = regions.NextRegion(reg);
       if (!reg) return false;
-      firstFree = reg->start;
+      firstFree = reg->GetStart();
       return true;
     }
     
     // figure out how many pages we can actually map
     size_t canGet = availSpace > remaining ? remaining : availSpace;
-    if (canGet % reqSize) canGet -= reqSize - (canGet % reqSize);
+    if (canGet % reqSize) canGet -= canGet % reqSize;
     PhysAddr newAddr = firstFree;
     firstFree += canGet;
     
     // map it
     if (firstAddr) {
-      bool res = kernMap.MapAt(contAddr, newAddr, canGet, usingLargePages);
-      if (!res) return false;
+      kernMap.MapAt(contAddr, newAddr, canGet, usingLargePages);
       contAddr += canGet;
     } else {
+      cout << "calling Map(" << newAddr << "," << canGet << ","
+        << usingLargePages << ")" << endl;
       firstAddr = kernMap.Map(newAddr, canGet, usingLargePages);
       if (!firstAddr) return false;
       contAddr = firstAddr + canGet;
     }
     remaining -= canGet;
+    return true;
   }
 
 }

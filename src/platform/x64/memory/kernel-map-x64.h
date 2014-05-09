@@ -33,17 +33,6 @@ namespace OS {
 
 namespace x64 {
 
-typedef struct {
-  uintptr_t start;
-  uintptr_t length;
-} OS_PACKED UnusedRegion;
-
-typedef struct {
-  uint64_t count;
-  PhysAddr next; // 0 = no next
-  UnusedRegion regions[0xff];
-} OS_PACKED RegionLink;
-
 class KernelMap {
 private:
   PhysAddr pdpt, pml4;
@@ -51,6 +40,11 @@ private:
   uint64_t * virtScratchPTs[ScratchPTCount];
   uint64_t scratchBitmaps[ScratchPTCount * 8];
   uint64_t scratchLock OS_ALIGNED(8);
+
+  // the "biggest unmapped" region of memory
+  VirtAddr buStart;
+  size_t buSize;
+  uint64_t mapLock OS_ALIGNED(8);
 
 public:
   KernelMap();
@@ -78,9 +72,10 @@ public:
   VirtAddr Map(PhysAddr start, size_t size, bool largePages);
 
   /**
-   * Map a physical address to a specified virtual address, or fail.
+   * Map a physical address to a specified virtual address. If something was
+   * already mapped there, this will Panic().
    */
-  bool MapAt(VirtAddr virt, PhysAddr start, size_t size, bool largePages);
+  void MapAt(VirtAddr virt, PhysAddr start, size_t size, bool largePages);
 
   /**
    * Temporarily map a 4K physical page into a virtual address. You should lock
@@ -93,6 +88,42 @@ public:
    * Release a virtual address returned by AllocScratch to be used elsewhere.
    */
   void FreeScratch(VirtAddr ptr);
+
+private:
+  /**
+   * Sets the buStart and buSize fields by searching the page tables.
+   */
+  void FindNewBU();
+ 
+  /**
+   * A call used by FindNewBU() to find the biggest region.
+   * @param table A physical table of any depth (i.e. PML4, etc.)
+   * @param depth The depth of the table (0 = PML4)
+   * @param mapAddr The first virtual address this table controls.
+   * @param regStart A virtual address which is controlled by this table. The
+   * function looks at memory starting at this address.
+   * @param contigSize On return, this is set to the number of bytes starting
+   * from regStart that are unmapped.
+   * @return true if the big chunk did NOT end in this table--that is, starting
+   * from the entry belonging to regStart upwards, every entry contained no
+   * mappings to physical memory.
+   */
+  bool FollowBigChunk(PhysAddr table,
+                      int depth,
+                      VirtAddr mapAddr,
+                      VirtAddr regStart,
+                      size_t & contigSize);
+
+  /**
+   * Finds the next unmapped page or region starting at a ceratin address.
+   */
+  bool FindNextUnmapped(PhysAddr table,
+                        int depth,
+                        VirtAddr mapAddr,
+                        VirtAddr start,
+                        VirtAddr & result);
+
+  bool CanFitRegion(size_t size, bool bigPages);
 
 };
 
