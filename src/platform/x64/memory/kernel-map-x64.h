@@ -78,6 +78,11 @@ public:
   VirtAddr Map(PhysAddr start, size_t size, bool largePages);
 
   /**
+   * Map a physical address to a specified virtual address, or fail.
+   */
+  bool MapAt(VirtAddr virt, PhysAddr start, size_t size, bool largePages);
+
+  /**
    * Temporarily map a 4K physical page into a virtual address. You should lock
    * yourself to this CPU since the caches on other CPUs may have stale entires
    * for this address.

@@ -67,7 +67,16 @@ PhysAddr KernelMap::GetPDPT() {
 }
 
 VirtAddr KernelMap::Map(PhysAddr start, size_t size, bool largePages) {
+  assert(!(size & (largePages ? 0x1fffff : 0xfff)));
+  assert(!(start & (largePages ? 0x1fffff : 0xfff)));
   return 0;
+}
+
+bool MapAt(VirtAddr virt, PhysAddr start, size_t size, bool largePages) {
+  assert(!(size & (largePages ? 0x1fffff : 0xfff)));
+  assert(!(start & (largePages ? 0x1fffff : 0xfff)));
+  assert(!(virt & (largePages ? 0x1fffff : 0xfff)));
+  return false;
 }
 
 VirtAddr KernelMap::AllocScratch(PhysAddr start) {

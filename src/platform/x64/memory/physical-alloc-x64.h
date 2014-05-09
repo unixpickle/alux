@@ -24,60 +24,20 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "physical-alloc-x64.h"
+#include <platform/memory.h>
+#include <analloc2.h>
+#include "kernel-map-x64.h"
 
 namespace OS {
 
-static x64::PhysRegionList regions;
-static x64::AllocatorList allocators;
-static x64::KernelMap kernMap;
-
 namespace x64 {
 
-  static VirtAddr firstAddr = 0;
-  static VirtAddr contAddr = 0;
-  static bool GrabMore(PhysAddr & firstFree, size_t & remaining);
+const int MaximumAllocators = 0x10;
+typedef ANAlloc::BBTree TreeType;
+typedef ANAlloc::AllocatorList<MaximumAllocators, TreeType> AllocatorList;
 
-  void InitializeKernAllocator(void * mbootPtr) {
-    new(&regions) PhysRegionList(mbootPtr);
-    new(&kernMap) KernelMap();
-    
-    PhysAddr firstFree = kernelMap.Setup(&regions);
-    kernelMap.Set();
-    
-    new(&allocators) AllocatorList(0x1000000, 0x1000, 0x1000,
-                                   regions.GetRegions(),
-                                   regions.GetRegionCount());
-    allocators.GenerateDescriptions();
-    
-    size_t remaining = allocators.BitmapByteCount();
-    while (remaining) {
-      if (!GrabMore(firstFree, remaining)) {
-        Panic("x64::InitializeKernAllocator() - GrabMore failed");
-      }
-    }
-    allocators.GenerateAllocators(uint8_t * );
-  }
+void InitializeKernAllocator(void * mbootPtr);
 
-  static bool GrabMore(PhysAddr & firstFree, size_t & remaining) {
-    // figure out where we are
-    
-  }
-
-}
-
-bool PhysicalAlloc(size_t size, PhysAddr & addr, size_t * realSize) {
-  return PhysicalAlign(size, 1, addr, realSize);
-}
-
-bool PhysicalAlign(size_t size,
-                   size_t align,
-                   PhysAddr & addr,
-                   size_t * realSize) {
-  return false;
-}
-
-void PhysicalFree(PhysAddr addr) {
 }
 
 }
