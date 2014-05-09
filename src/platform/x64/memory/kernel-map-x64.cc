@@ -286,7 +286,14 @@ void KernelMap::MapAtLocked(VirtAddr virt, PhysAddr start,
   assert(!(size & (largePages ? 0x1fffff : 0xfff)));
   assert(!(start & (largePages ? 0x1fffff : 0xfff)));
   assert(!(virt & (largePages ? 0x1fffff : 0xfff)));
-  Panic("KernelMap::MapAtLocked() - NYI");
+  assert(virt < 0x8000000000L);
+  
+  int minPDT = (int)((start >> 30) & 0x1ff);
+  int minPT = (int)((start >> 21) & 0x1ff);
+  
+  int maxPDT = (int)(((start + size) >> 30) & 0x1ff);
+  int maxPT = (int)(((start + size) >> 21) & 0x1ff);
+  
 }
 
 }

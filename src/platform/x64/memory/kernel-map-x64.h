@@ -33,6 +33,9 @@ namespace OS {
 
 namespace x64 {
 
+  // TODO: define some sort of page allocator interface here that will reflect
+  // back to the physical-alloc-x64.h stuff during initialization and runtime.
+
 class KernelMap {
 private:
   PhysAddr pdpt, pml4;
