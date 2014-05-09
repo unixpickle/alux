@@ -124,6 +124,12 @@ private:
                         VirtAddr & result);
 
   bool CanFitRegion(size_t size, bool bigPages);
+  
+  /**
+   * The implementation of MapAt, assuming that the lock is already held.
+   */
+  void MapAtLocked(VirtAddr virt, PhysAddr start,
+                   size_t size, bool largePages);
 
 };
 

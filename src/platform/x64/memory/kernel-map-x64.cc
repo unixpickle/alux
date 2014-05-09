@@ -84,24 +84,31 @@ VirtAddr KernelMap::Map(PhysAddr start, size_t size, bool largePages) {
   if (largePages) {
     buSize -= 0x20000 - (buStart & 0x1fffff);
     buStart += 0x20000 - (buStart & 0x1fffff);
-    
-    // map starting at buStart
-    MapAt(buStart, start, size, largePages);
-    buStart += size;
-    buSize -= size;
   }
+  
+  // map starting at buStart
+  MapAtLocked(buStart, start, size, largePages);
+  buStart += size;
+  buSize -= size;
   
   return 0;
 }
 
 void KernelMap::MapAt(VirtAddr virt, PhysAddr start,
                       size_t size, bool largePages) {
-  assert(!(size & (largePages ? 0x1fffff : 0xfff)));
-  assert(!(start & (largePages ? 0x1fffff : 0xfff)));
-  assert(!(virt & (largePages ? 0x1fffff : 0xfff)));
+  ScopeLock scope(&mapLock);
+  MapAtLocked(virt, start, size, largePages);
   
-  // here, manually manipulate the page tables
-  Panic("KernelMap::MapAt() - NYI");
+  // if we are in the BU, we need to modify the BU.
+  if (start >= buStart && start < buStart + buSize) {
+    if (start + size >= buStart + buSize) {
+      buStart = 0;
+      buSize = 0;
+    } else {
+      buSize = buStart + buSize - (start + size);
+      buStart = start + size;
+    }
+  }
 }
 
 VirtAddr KernelMap::AllocScratch(PhysAddr start) {
@@ -170,6 +177,7 @@ bool KernelMap::FollowBigChunk(PhysAddr _table,
                                size_t & contigSize) {
   assert(!(regStart & 0xfff));
   assert(!(mapAddr & 0xfff));
+  
   // check for data entries
   if (depth == 4) {
     if (_table) {
@@ -182,8 +190,12 @@ bool KernelMap::FollowBigChunk(PhysAddr _table,
   } else if (_table & 0x80) {
     contigSize = 0;
     return false;
+  } else if (!_table) {
+    contigSize = (0x1000L << ((4 - depth) * 9)) - (regStart - mapAddr);
+    return true;
   }
   
+  // get the actual table address without any flags
   PhysAddr table = _table & 0x7ffffffffffff000L;
   
   size_t segmentSize = 0x1000L << ((3 - depth) * 9);
@@ -203,7 +215,7 @@ bool KernelMap::FollowBigChunk(PhysAddr _table,
                               resSize);
     contigSize += resSize;
     if (!res) {
-      FreeScratch(table);
+      FreeScratch((VirtAddr)scratch);
       return false;
     }
   }
@@ -219,7 +231,7 @@ bool KernelMap::FindNextUnmapped(PhysAddr _table,
                                  VirtAddr & result) {
   assert(!(start & 0xfff));
   assert(!(mapAddr & 0xfff));
-  
+    
   // check for data entries
   if (depth == 4) {
     if (!_table) {
@@ -230,6 +242,9 @@ bool KernelMap::FindNextUnmapped(PhysAddr _table,
     }
   } else if (_table & 0x80) {
     return false;
+  } else if (!_table) {
+    result = mapAddr;
+    return true;
   }
   
   PhysAddr table = _table & 0x7ffffffffffff000L;
@@ -248,7 +263,7 @@ bool KernelMap::FindNextUnmapped(PhysAddr _table,
                                 start < newMapAddr ? newMapAddr : start,
                                 result);
     if (res) {
-      FreeScratch(table);
+      FreeScratch((VirtAddr)scratch);
       return true;
     }
   }
@@ -264,6 +279,14 @@ bool KernelMap::CanFitRegion(size_t size, bool bigPages) {
   if (buSize < 0x200000) return false;
   size_t realSize = buSize - (0x200000 - (buStart & 0x1fffff));
   return size <= realSize;
+}
+
+void KernelMap::MapAtLocked(VirtAddr virt, PhysAddr start,
+                            size_t size, bool largePages) {
+  assert(!(size & (largePages ? 0x1fffff : 0xfff)));
+  assert(!(start & (largePages ? 0x1fffff : 0xfff)));
+  assert(!(virt & (largePages ? 0x1fffff : 0xfff)));
+  Panic("KernelMap::MapAtLocked() - NYI");
 }
 
 }
