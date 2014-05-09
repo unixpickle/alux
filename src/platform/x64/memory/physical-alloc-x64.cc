@@ -36,6 +36,7 @@ namespace x64 {
 
   static VirtAddr firstAddr = 0;
   static VirtAddr contAddr = 0;
+  static bool usingLargePages = false;
   static bool GrabMore(PhysAddr & firstFree, size_t & remaining);
 
   void InitializeKernAllocator(void * mbootPtr) {
@@ -51,17 +52,60 @@ namespace x64 {
     allocators.GenerateDescriptions();
     
     size_t remaining = allocators.BitmapByteCount();
+    if (remaining >= 0x200000) usingLargePages = true;
+    
     while (remaining) {
       if (!GrabMore(firstFree, remaining)) {
         Panic("x64::InitializeKernAllocator() - GrabMore failed");
       }
     }
-    allocators.GenerateAllocators(uint8_t * );
+    
+    allocators.GenerateAllocators((uint8_t *)firstAddr);
   }
 
   static bool GrabMore(PhysAddr & firstFree, size_t & remaining) {
     // figure out where we are
+    MemoryRegion * reg = regions.FindRegion(firstFree);
+    if (!reg) {
+      if (!(reg = regions->FindRegion(firstFree - 1))) {
+        Panic("x64::GrabMore() - firstFree out of bounds.");
+      }
+    }
     
+    size_t reqSize = usingLargePages ? 0x200000 : 0x1000;
+    
+    // align firstFree or don't use this region
+    if (firstFree % reqSize) {
+      firstFree += reqSize - (firstFree % reqSize);
+      if (firstFree > reg->GetEnd()) firstFree = reg->GetEnd();
+    }
+    
+    // make sure there's enough space in this region
+    size_t availSpace = reg.GetEnd() - firstFree;
+    if (availSpace < reqSize) {
+      reg = regions.NextRegion(reg);
+      if (!reg) return false;
+      firstFree = reg->start;
+      return true;
+    }
+    
+    // figure out how many pages we can actually map
+    size_t canGet = availSpace > remaining ? remaining : availSpace;
+    if (canGet % reqSize) canGet -= reqSize - (canGet % reqSize);
+    PhysAddr newAddr = firstFree;
+    firstFree += canGet;
+    
+    // map it
+    if (firstAddr) {
+      bool res = kernMap.MapAt(contAddr, newAddr, canGet, usingLargePages);
+      if (!res) return false;
+      contAddr += canGet;
+    } else {
+      firstAddr = kernMap.Map(newAddr, canGet, usingLargePages);
+      if (!firstAddr) return false;
+      contAddr = firstAddr + canGet;
+    }
+    remaining -= canGet;
   }
 
 }
