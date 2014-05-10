@@ -33,19 +33,16 @@ namespace x64 {
 void MapSetup::MapNextVirtual() {
   if (pdtOffset == 0x200) {
     pdtOffset = 0;
-    currentPDT = AllocPage();
+    currentPDT = allocator->AllocPage();
+    bzero((void *)currentPDT, 0x1000);
     ((uint64_t *)pdpt)[++pdptOffset] = currentPDT | 3;
   }
   ((uint64_t *)currentPDT)[pdtOffset++] = firstUnmappedVirtual | 0x183;
   firstUnmappedVirtual += 0x200000;
 }
 
-MapSetup::MapSetup(PhysRegionList * regs) {
-  regions = regs;
-  nextPage = KernelDataSize();
-  if (nextPage & 0xfff) {
-    nextPage += 0x1000 - (nextPage & 0xfff);
-  }
+MapSetup::MapSetup(PageAllocator * _allocator) {
+  allocator = _allocator;
   firstUnmappedVirtual = 0;
 }
 
@@ -53,8 +50,11 @@ void MapSetup::Map() {
   size_t kernSize = KernelDataSize();
   
   // setup the initial state
-  pml4 = AllocPage();
-  pdpt = AllocPage();
+  pml4 = allocator->AllocPage();
+  pdpt = allocator->AllocPage();
+  
+  bzero((void *)pml4, 0x1000);
+  bzero((void *)pdpt, 0x1000);
   
   uint64_t * pml4Buf = (uint64_t *)pml4;
   pml4Buf[0] = pdpt | 3;
@@ -64,33 +64,6 @@ void MapSetup::Map() {
   while (firstUnmappedVirtual < kernSize) {
     MapNextVirtual();
   }
-}
-
-PhysAddr MapSetup::AllocPage() {
-  // find the next place after or equal to nextPage where a 4K chunk is
-  // readily available
-  MemoryRegion * reg = regions->FindRegion(nextPage);
-  if (!reg) {
-    if (!(reg = regions->FindRegion(nextPage - 1))) {
-      Panic("MapSetup::AllocPage() - nextPage out of bounds.");
-    }
-  }
-  while (nextPage + 0x1000 > reg->GetEnd()) {
-    reg = regions->NextRegion(reg);
-    if (!reg) {
-      Panic("MapCreator::IncrementPhysOffset() - out of ranges.");
-    }
-    nextPage = reg->GetStart();
-  }
-  
-  PhysAddr res = nextPage;
-  nextPage += 0x1000;
-  bzero((void *)res, 0x1000);
-  return res;
-}
-
-PhysAddr MapSetup::GetFirstFree() {
-  return nextPage;
 }
 
 VirtAddr MapSetup::GetFirstUnmapped() {

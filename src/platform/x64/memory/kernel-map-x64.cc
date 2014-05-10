@@ -37,14 +37,16 @@ KernelMap::KernelMap() {
   bzero(scratchBitmaps, sizeof(scratchBitmaps));
 }
 
-PhysAddr KernelMap::Setup(PhysRegionList * regs) {
-  MapSetup setup(regs);
+void KernelMap::Setup() {
+  MapSetup setup(allocator);
   setup.Map();
   
   assert(ScratchPTCount <= 0x200);
   assert(setup.GetFirstUnmapped() <= ScratchStartAddr);
   
-  PhysAddr scratchPDT = setup.AllocPage();
+  PhysAddr scratchPDT = allocator->AllocPage();
+  bzero((void *)scratchPDT, 0x1000);
+  
   ((uint64_t *)setup.GetPDPT())[0x1ff] = scratchPDT | 3;
   uint64_t scratchStart = (uint64_t)ScratchPTStart();
   for (int i = 0; i < ScratchPTCount; i++) {
@@ -54,8 +56,6 @@ PhysAddr KernelMap::Setup(PhysRegionList * regs) {
   
   pml4 = setup.GetPML4();
   pdpt = setup.GetPDPT();
-  
-  return setup.GetFirstFree();
 }
 
 void KernelMap::Set() {
@@ -147,6 +147,12 @@ void KernelMap::FreeScratch(VirtAddr ptr) {
   int bitIndex = (int)((ptr - ScratchStartAddr) >> 12);
   int fieldIndex = bitIndex / 0x40;
   scratchBitmaps[fieldIndex] ^= 1L << (bitIndex & 0x3f);
+}
+
+void KernelMap::SetAllocator(PageAllocator * _allocator) {
+  ScopeLock scope(&mapLock);
+  
+  allocator = _allocator;
 }
 
 /***********
@@ -294,6 +300,7 @@ void KernelMap::MapAtLocked(VirtAddr virt, PhysAddr start,
   int maxPDT = (int)(((start + size) >> 30) & 0x1ff);
   int maxPT = (int)(((start + size) >> 21) & 0x1ff);
   
+  // TODO: here, do the actual raw mapping :|
 }
 
 }

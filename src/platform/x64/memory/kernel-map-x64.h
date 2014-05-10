@@ -28,13 +28,14 @@
 #define __PLATFORM_X64_KERNEL_MAP_X64_H__
 
 #include "map-setup-x64.h"
+#include "../common-x64.h"
+#include <platform/failure.h>
+#include <cassert>
+#include <utilities/lock.h>
 
 namespace OS {
 
 namespace x64 {
-
-  // TODO: define some sort of page allocator interface here that will reflect
-  // back to the physical-alloc-x64.h stuff during initialization and runtime.
 
 class KernelMap {
 private:
@@ -44,19 +45,21 @@ private:
   uint64_t scratchBitmaps[ScratchPTCount * 8];
   uint64_t scratchLock OS_ALIGNED(8);
 
+  uint64_t mapLock OS_ALIGNED(8); // fields under this are applicable
+  
   // the "biggest unmapped" region of memory
   VirtAddr buStart;
   size_t buSize;
-  uint64_t mapLock OS_ALIGNED(8);
+  // the current allocator to use
+  PageAllocator * allocator;
 
 public:
   KernelMap();
   
   /**
-   * Returns the first physical address which may be used. You should call
-   * Set() immediately after this.
+   * Sets up the paging system using the current allocator
    */
-  PhysAddr Setup(PhysRegionList * regs);
+  void Setup();
   
   /**
    * Sets CR3 to this map's PML4.
@@ -91,6 +94,11 @@ public:
    * Release a virtual address returned by AllocScratch to be used elsewhere.
    */
   void FreeScratch(VirtAddr ptr);
+  
+  /**
+   * Set the current page allocator to use.
+   */
+  void SetAllocator(PageAllocator * allocator);
 
 private:
   /**

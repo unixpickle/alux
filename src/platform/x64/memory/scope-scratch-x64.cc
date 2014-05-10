@@ -24,26 +24,36 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef __PLATFORM_X64_PHYSICAL_ALLOC_X64_H__
-#define __PLATFORM_X64_PHYSICAL_ALLOC_X64_H__
-
-#include <platform/memory.h>
-#include <analloc2.h>
-#include "kernel-map-x64.h"
-#include "step-allocator-x64.h"
+#include "scope-scratch-x64.h"
 
 namespace OS {
 
 namespace x64 {
 
-const int MaximumAllocators = 0x10;
-typedef ANAlloc::BBTree TreeType;
-typedef ANAlloc::AllocatorList<MaximumAllocators, TreeType> AllocatorList;
+ScopeScratch::ScopeScratch(KernelMap * _map, PhysAddr address) {
+  map = _map;
+  addr = map->AllocScratch(address);
+  if (!addr) {
+    Panic("ScopeScratch::ScopeScratch() - failed to allocate!");
+  }
+}
 
-void InitializeKernAllocator(void * mbootPtr);
+ScopeScratch::~ScopeScratch() {
+  map->FreeScratch(addr);
+}
 
+void * ScopeScratch::GetPointer() {
+  return (void *)addr;
+}
+
+VirtAddr ScopeScratch::GetVirtAddr() {
+  return addr;
+}
+
+uint64_t & ScopeScratch::operator[](const int index) {
+  return ((uint64_t *)addr)[index];
 }
 
 }
 
-#endif
+}

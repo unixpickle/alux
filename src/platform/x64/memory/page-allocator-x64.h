@@ -24,23 +24,30 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef __PLATFORM_X64_PHYSICAL_ALLOC_X64_H__
-#define __PLATFORM_X64_PHYSICAL_ALLOC_X64_H__
+#ifndef __PLATFORM_X64_PAGE_ALLOCATOR_X64_H__
+#define __PLATFORM_X64_PAGE_ALLOCATOR_X64_H__
 
 #include <platform/memory.h>
-#include <analloc2.h>
-#include "kernel-map-x64.h"
-#include "step-allocator-x64.h"
 
 namespace OS {
 
 namespace x64 {
 
-const int MaximumAllocators = 0x10;
-typedef ANAlloc::BBTree TreeType;
-typedef ANAlloc::AllocatorList<MaximumAllocators, TreeType> AllocatorList;
-
-void InitializeKernAllocator(void * mbootPtr);
+class PageAllocator {
+public:
+  virtual ~PageAllocator() {}
+  
+  /**
+   * Returns (PhysAddr)0 on failure.
+   */
+  virtual PhysAddr AllocPage() = 0;
+  
+  /**
+   * Free a page.
+   */
+  virtual void FreePage(PhysAddr p) = 0;
+  
+};
 
 }
 

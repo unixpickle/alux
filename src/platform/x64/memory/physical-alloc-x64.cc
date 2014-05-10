@@ -37,15 +37,24 @@ namespace x64 {
   static VirtAddr firstAddr = 0;
   static VirtAddr contAddr = 0;
   static bool usingLargePages = false;
-  static bool GrabMore(PhysAddr & firstFree, size_t & remaining);
+  
+  /**
+   * Grabs chunks of physical memory and maps them to virtual memory so that we
+   * can use them for our bitmaps.
+   */
+  static bool GrabMore(StepAllocator & allocator, size_t & remaining);
 
   void InitializeKernAllocator(void * mbootPtr) {
     new(&regions) PhysRegionList(mbootPtr);
     new(&kernMap) KernelMap();
     
-    PhysAddr firstFree = kernMap.Setup(&regions);
+    // setup and use the kernel map
+    StepAllocator stepper(&regions, KernelDataSize());
+    kernMap.SetAllocator(&stepper);
+    kernMap.Setup();
     kernMap.Set();
     
+    // figure out the allocator topology
     new(&allocators) AllocatorList(0x1000000, 0x1000, 0x1000,
                                    regions.GetRegions(),
                                    regions.GetRegionCount());
@@ -54,17 +63,22 @@ namespace x64 {
     size_t remaining = allocators.BitmapByteCount();
     if (remaining >= 0x200000) usingLargePages = true;
     
+    // 
     while (remaining) {
-      if (!GrabMore(firstFree, remaining)) {
+      if (!GrabMore(stepper, remaining)) {
         Panic("x64::InitializeKernAllocator() - GrabMore failed");
       }
     }
     
     allocators.GenerateAllocators((uint8_t *)firstAddr);
+    
+    kernMap.SetAllocator(NULL); // TODO: here, create a new allocator for this
   }
 
-  static bool GrabMore(PhysAddr & firstFree, size_t & remaining) {
+  static bool GrabMore(StepAllocator & allocator, size_t & remaining) {
     // figure out where we are
+    PhysAddr & firstFree = allocator.LastAddress();
+    
     MemoryRegion * reg = regions.FindRegion(firstFree);
     if (!reg) {
       if (!(reg = regions.FindRegion(firstFree - 1))) {

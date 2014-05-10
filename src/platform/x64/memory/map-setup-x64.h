@@ -27,10 +27,9 @@
 #ifndef __PLATFORM_X64_MAP_SETUP_X64_H__
 #define __PLATFORM_X64_MAP_SETUP_X64_H__
 
-#include "phys-region-list-x64.h"
-#include "size-config-x64.h"
 #include <cstring>
-#include <platform/memory.h>
+#include "page-allocator-x64.h"
+#include "size-config-x64.h"
 
 namespace OS {
 
@@ -43,22 +42,18 @@ namespace x64 {
  */
 class MapSetup {
 private:
-  PhysRegionList * regions;
+  PageAllocator * allocator;
   
   PhysAddr pdpt, pml4;
   int pdtOffset, pdptOffset;
   PhysAddr currentPDT;
   
-  PhysAddr nextPage;
   VirtAddr firstUnmappedVirtual;
-  
   void MapNextVirtual();
   
 public:
-  MapSetup(PhysRegionList * regs);
+  MapSetup(PageAllocator * allocator);
   void Map();
-  PhysAddr AllocPage();
-  PhysAddr GetFirstFree();
   VirtAddr GetFirstUnmapped();
   PhysAddr GetPDPT();
   PhysAddr GetPML4();
