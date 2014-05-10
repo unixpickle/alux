@@ -50,7 +50,7 @@ namespace x64 {
     
     // setup and use the kernel map
     StepAllocator stepper(&regions, KernelDataSize());
-    kernMap.SetAllocator(&stepper);
+    kernMap.allocator = &stepper;
     kernMap.Setup();
     kernMap.Set();
     
@@ -77,7 +77,7 @@ namespace x64 {
     Panic("cannot generate allocators");
     allocators.GenerateAllocators((uint8_t *)firstAddr);
     
-    kernMap.SetAllocator(NULL); // TODO: here, create a new allocator for this
+    kernMap.allocator = NULL; // TODO: here, create a new allocator for this
   }
 
   static bool GrabMore(StepAllocator & allocator, size_t & remaining) {

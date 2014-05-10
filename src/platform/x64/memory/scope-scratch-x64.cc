@@ -25,6 +25,7 @@
  */
 
 #include "scope-scratch-x64.h"
+#include "kernel-map-x64.h"
 
 namespace OS {
 
@@ -48,10 +49,6 @@ void * ScopeScratch::GetPointer() {
 
 VirtAddr ScopeScratch::GetVirtAddr() {
   return addr;
-}
-
-uint64_t & ScopeScratch::operator[](const int index) {
-  return ((uint64_t *)addr)[index];
 }
 
 }

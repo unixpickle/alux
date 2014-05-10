@@ -32,7 +32,7 @@ namespace x64 {
 
 static const VirtAddr ScratchStartAddr = 0x7FC0000000L;
 
-KernelMap::KernelMap() {
+KernelMap::KernelMap() : manager() {
   scratchLock = 0;
   bzero(scratchBitmaps, sizeof(scratchBitmaps));
 }
@@ -54,16 +54,12 @@ void KernelMap::Setup() {
     ((uint64_t *)scratchPDT)[i] = scratchPT | 3;
   }
   
-  pml4 = setup.GetPML4();
-  pdpt = setup.GetPDPT();
+  TableMgr man(this, setup.GetPML4());
+  manager = man;
 }
 
 void KernelMap::Set() {
-  __asm__("mov %0, %%cr3" : : "r" (pml4));
-}
-
-PhysAddr KernelMap::GetPDPT() {
-  return pdpt;
+  manager.Set();
 }
 
 VirtAddr KernelMap::Map(PhysAddr start, size_t size, bool largePages) {
@@ -74,7 +70,7 @@ VirtAddr KernelMap::Map(PhysAddr start, size_t size, bool largePages) {
   
   // see if we can find a place in our biggest unused
   if (!CanFitRegion(size, largePages)) {
-    FindNewBU();
+    manager.FindNewBU(buStart, buSize);
     if (!CanFitRegion(size, largePages)) {
       return 0;
     }
@@ -87,7 +83,7 @@ VirtAddr KernelMap::Map(PhysAddr start, size_t size, bool largePages) {
   }
   
   // map starting at buStart
-  MapAtLocked(buStart, start, size, largePages);
+  manager.Map(buStart, start, size, largePages, 3, 0x103);
   VirtAddr result = buStart;
   buStart += size;
   buSize -= size;
@@ -98,7 +94,7 @@ VirtAddr KernelMap::Map(PhysAddr start, size_t size, bool largePages) {
 void KernelMap::MapAt(VirtAddr virt, PhysAddr start,
                       size_t size, bool largePages) {
   ScopeLock scope(&mapLock);
-  MapAtLocked(virt, start, size, largePages);
+  manager.Map(virt, start, size, largePages, 3, 0x103);
   
   // if we are in the BU, we need to modify the BU.
   if (start >= buStart && start < buStart + buSize) {
@@ -150,134 +146,9 @@ void KernelMap::FreeScratch(VirtAddr ptr) {
   scratchBitmaps[fieldIndex] ^= 1L << (bitIndex & 0x3f);
 }
 
-void KernelMap::SetAllocator(PageAllocator * _allocator) {
-  ScopeLock scope(&mapLock);
-  
-  allocator = _allocator;
-}
-
 /***********
  * PRIVATE *
  ***********/
-
-void KernelMap::FindNewBU() {
-  VirtAddr lastAddress = 0;
-  buStart = 0;
-  buSize = 0;
-  while (lastAddress + buSize < 0x8000000000L) {
-    bool res = FindNextUnmapped(pml4, 0, 0, lastAddress, lastAddress);
-    if (!res) break;
-    size_t retSize = 0;
-    FollowBigChunk(pml4, 0, 0, lastAddress, retSize);
-    if (retSize > buSize) {
-      buStart = lastAddress;
-      buSize = retSize;
-    }
-    lastAddress += retSize;
-  }
-}
-
-bool KernelMap::FollowBigChunk(PhysAddr _table,
-                               int depth,
-                               VirtAddr mapAddr,
-                               VirtAddr regStart,
-                               size_t & contigSize) {
-  assert(!(regStart & 0xfff));
-  assert(!(mapAddr & 0xfff));
-  
-  // check for data entries
-  if (depth == 4) {
-    if (_table) {
-      contigSize = 0;
-      return false;
-    } else {
-      contigSize = 0x1000;
-      return true;
-    }
-  } else if (_table & 0x80) {
-    contigSize = 0;
-    return false;
-  } else if (!_table) {
-    contigSize = (0x1000L << ((4 - depth) * 9)) - (regStart - mapAddr);
-    return true;
-  }
-  
-  // get the actual table address without any flags
-  PhysAddr table = _table & 0x7ffffffffffff000L;
-  
-  size_t segmentSize = 0x1000L << ((3 - depth) * 9);
-  int startIndex = (int)((regStart - mapAddr) / segmentSize);
-  contigSize = 0;
-  
-  uint64_t * scratch = (uint64_t *)AllocScratch(table);
-  if (!scratch) Panic("KernelMap::FollowBigChunk() - no scratch");
-  
-  // loop through entries
-  for (int i = startIndex; i < 0x200; i++) {
-    uint64_t entry = scratch[i];
-    size_t resSize;
-    VirtAddr newMapAddr = mapAddr + (i * segmentSize);
-    bool res = FollowBigChunk(entry, depth + 1, newMapAddr,
-                              regStart < newMapAddr ? newMapAddr : regStart,
-                              resSize);
-    contigSize += resSize;
-    if (!res) {
-      FreeScratch((VirtAddr)scratch);
-      return false;
-    }
-  }
-  
-  FreeScratch((VirtAddr)scratch);
-  return true;
-}
-
-bool KernelMap::FindNextUnmapped(PhysAddr _table,
-                                 int depth,
-                                 VirtAddr mapAddr,
-                                 VirtAddr start,
-                                 VirtAddr & result) {
-  assert(!(start & 0xfff));
-  assert(!(mapAddr & 0xfff));
-    
-  // check for data entries
-  if (depth == 4) {
-    if (!_table) {
-      result = mapAddr;
-      return true;
-    } else {
-      return false;
-    }
-  } else if (_table & 0x80) {
-    return false;
-  } else if (!_table) {
-    result = mapAddr;
-    return true;
-  }
-  
-  PhysAddr table = _table & 0x7ffffffffffff000L;
-  
-  size_t segmentSize = 0x1000L << ((3 - depth) * 9);
-  int startIndex = (int)((start - mapAddr) / segmentSize);
-  
-  uint64_t * scratch = (uint64_t *)AllocScratch(table);
-  if (!scratch) Panic("KernelMap::FollowBigChunk() - no scratch");
-  
-  // loop through entries
-  for (int i = startIndex; i < 0x200; i++) {
-    uint64_t entry = scratch[i];
-    VirtAddr newMapAddr = mapAddr + (i * segmentSize);
-    bool res = FindNextUnmapped(entry, depth + 1, newMapAddr,
-                                start < newMapAddr ? newMapAddr : start,
-                                result);
-    if (res) {
-      FreeScratch((VirtAddr)scratch);
-      return true;
-    }
-  }
-  
-  FreeScratch((VirtAddr)scratch);
-  return false;
-}
 
 bool KernelMap::CanFitRegion(size_t size, bool bigPages) {
   if (!bigPages) {
@@ -286,22 +157,6 @@ bool KernelMap::CanFitRegion(size_t size, bool bigPages) {
   if (buSize < 0x200000) return false;
   size_t realSize = buSize - (0x200000 - (buStart & 0x1fffff));
   return size <= realSize;
-}
-
-void KernelMap::MapAtLocked(VirtAddr virt, PhysAddr start,
-                            size_t size, bool largePages) {
-  assert(!(size & (largePages ? 0x1fffff : 0xfff)));
-  assert(!(start & (largePages ? 0x1fffff : 0xfff)));
-  assert(!(virt & (largePages ? 0x1fffff : 0xfff)));
-  assert(virt < 0x8000000000L);
-  
-  int minPDT = (int)((start >> 30) & 0x1ff);
-  int minPT = (int)((start >> 21) & 0x1ff);
-  
-  int maxPDT = (int)(((start + size) >> 30) & 0x1ff);
-  int maxPT = (int)(((start + size) >> 21) & 0x1ff);
-  
-  // TODO: here, do the actual raw mapping :|
 }
 
 }

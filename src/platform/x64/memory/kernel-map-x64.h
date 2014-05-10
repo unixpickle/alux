@@ -29,6 +29,7 @@
 
 #include "map-setup-x64.h"
 #include "../common-x64.h"
+#include "table-mgr-x64.h"
 #include <platform/failure.h>
 #include <cassert>
 #include <utilities/lock.h>
@@ -39,19 +40,16 @@ namespace x64 {
 
 class KernelMap {
 private:
-  PhysAddr pdpt, pml4;
-  
   uint64_t * virtScratchPTs[ScratchPTCount];
   uint64_t scratchBitmaps[ScratchPTCount * 8];
   uint64_t scratchLock OS_ALIGNED(8);
 
-  uint64_t mapLock OS_ALIGNED(8); // fields under this are applicable
+  uint64_t mapLock OS_ALIGNED(8); // applies to bu and TableMgr
   
   // the "biggest unmapped" region of memory
   VirtAddr buStart;
   size_t buSize;
-  // the current allocator to use
-  PageAllocator * allocator;
+  TableMgr manager;
 
 public:
   KernelMap();
@@ -65,11 +63,6 @@ public:
    * Sets CR3 to this map's PML4.
    */
   void Set();
-
-  /**
-   * Returns the kernel PDPT.
-   */
-  PhysAddr GetPDPT();
   
   /**
    * Attempts to map a physical address to a virtual address. If the map fails,
@@ -94,53 +87,14 @@ public:
    * Release a virtual address returned by AllocScratch to be used elsewhere.
    */
   void FreeScratch(VirtAddr ptr);
+
+protected:
+  friend class TableMgr;
+  friend void InitializeKernAllocator(void *);
   
-  /**
-   * Set the current page allocator to use.
-   */
-  void SetAllocator(PageAllocator * allocator);
-
-private:
-  /**
-   * Sets the buStart and buSize fields by searching the page tables.
-   */
-  void FindNewBU();
- 
-  /**
-   * A call used by FindNewBU() to find the biggest region.
-   * @param table A physical table of any depth (i.e. PML4, etc.)
-   * @param depth The depth of the table (0 = PML4)
-   * @param mapAddr The first virtual address this table controls.
-   * @param regStart A virtual address which is controlled by this table. The
-   * function looks at memory starting at this address.
-   * @param contigSize On return, this is set to the number of bytes starting
-   * from regStart that are unmapped.
-   * @return true if the big chunk did NOT end in this table--that is, starting
-   * from the entry belonging to regStart upwards, every entry contained no
-   * mappings to physical memory.
-   */
-  bool FollowBigChunk(PhysAddr table,
-                      int depth,
-                      VirtAddr mapAddr,
-                      VirtAddr regStart,
-                      size_t & contigSize);
-
-  /**
-   * Finds the next unmapped page or region starting at a ceratin address.
-   */
-  bool FindNextUnmapped(PhysAddr table,
-                        int depth,
-                        VirtAddr mapAddr,
-                        VirtAddr start,
-                        VirtAddr & result);
-
+  PageAllocator * allocator;
+  
   bool CanFitRegion(size_t size, bool bigPages);
-  
-  /**
-   * The implementation of MapAt, assuming that the lock is already held.
-   */
-  void MapAtLocked(VirtAddr virt, PhysAddr start,
-                   size_t size, bool largePages);
 
 };
 

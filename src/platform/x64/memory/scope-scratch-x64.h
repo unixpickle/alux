@@ -27,11 +27,13 @@
 #ifndef __PLATFORM_X64_SCOPE_SCRATCH_X64_H__
 #define __PLATFORM_X64_SCOPE_SCRATCH_X64_H__
 
-#include "kernel-map-x64.h"
+#include <platform/memory.h>
 
 namespace OS {
 
 namespace x64 {
+  
+class KernelMap;
 
 class ScopeScratch {
 private:
@@ -44,8 +46,22 @@ public:
   
   void * GetPointer();
   VirtAddr GetVirtAddr();
-  uint64_t & operator[](const int index);
   
+};
+
+template <class T>
+class TypedScratch : public ScopeScratch {
+public:
+  TypedScratch(KernelMap * map, PhysAddr address)
+    : ScopeScratch(map, address) {}
+  
+  T * GetTypedPointer() {
+    return (T *)GetPointer();
+  }
+  
+  T & operator[](int idx) {
+    return GetTypedPointer()[idx];
+  }
 };
 
 }
