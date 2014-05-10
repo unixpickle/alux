@@ -46,18 +46,20 @@ void Unmap(VirtAddr addr, size_t bytes) {
 }
 
 void InvalidateCache(VirtAddr addr, size_t bytes, size_t pageSize) {
-  size_t count = bytes / pageSize;
+  (void)pageSize;
+  size_t count = bytes / 0x1000;
   if (count > 0x100) { // TODO: find a better number than 0x100
     // There are enough that it's more efficient to just flush the TLB.
-    __asm__("mov %cr4, %rax\n"
-            "xor $0x80, %rax\n"
-            "mov %rax, %cr4\n"
-            "or $0x80, %rax\n"
-            "mov %rax, %cr4");
-    // TODO: make sure this is all we have to do; AMD64 manual pg. 142
+    __asm__("mov %%cr4, %%rax\n"
+            "xor $0x80, %%rax\n"
+            "mov %%rax, %%cr4\n"
+            "or $0x80, %%rax\n"
+            "mov %%rax, %%cr4" : : : "rax");
   } else {
+    // according to http://forum.osdev.org/viewtopic.php?f=1&t=18222, MTRR's
+    // are still 4K, so we might need to invlpg for each 4K
     for (size_t i = 0; i < count; i++) {
-      VirtAddr theAddr = addr + (i * pageSize);
+      VirtAddr theAddr = addr + (i << 12);
       __asm__("invlpg (%0)" : : "r" (theAddr));
     }
   }
