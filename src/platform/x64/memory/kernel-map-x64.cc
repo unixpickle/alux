@@ -83,7 +83,8 @@ VirtAddr KernelMap::Map(PhysAddr start, size_t size, bool largePages) {
   }
   
   // map starting at buStart
-  manager.Map(buStart, start, size, largePages, 3, 0x103);
+  uint64_t flags = 0x103 | (largePages ? 0x80 : 0);
+  manager.Map(buStart, start, size, largePages, flags, 3);
   VirtAddr result = buStart;
   buStart += size;
   buSize -= size;
@@ -94,7 +95,8 @@ VirtAddr KernelMap::Map(PhysAddr start, size_t size, bool largePages) {
 void KernelMap::MapAt(VirtAddr virt, PhysAddr start,
                       size_t size, bool largePages) {
   ScopeLock scope(&mapLock);
-  manager.Map(virt, start, size, largePages, 3, 0x103);
+  uint64_t flags = 0x103 | (largePages ? 0x80 : 0);
+  manager.Map(virt, start, size, largePages, flags, 3);
   
   // if we are in the BU, we need to modify the BU.
   if (start >= buStart && start < buStart + buSize) {

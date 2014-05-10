@@ -26,6 +26,7 @@
 
 #include "table-mgr-x64.h"
 #include "kernel-map-x64.h"
+#include <iostream>
 
 namespace OS {
 
