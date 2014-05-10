@@ -110,6 +110,22 @@ void KernelMap::MapAt(VirtAddr virt, PhysAddr start,
   }
 }
 
+void KernelMap::Unmap(VirtAddr virt, size_t size) {
+  ScopeLock scope(&mapLock);
+  manager.Unmap(virt, size);
+  
+  // see what we should do about the biggest unmapped region
+  if (size > buSize) {
+    buStart = virt;
+    buSize = size;
+  } else if (buStart + buSize == virt) {
+    buSize += size;
+  } else if (virt + size == buStart) {
+    buSize += size;
+    buStart -= size;
+  }
+}
+
 VirtAddr KernelMap::AllocScratch(PhysAddr start) {
   ScopeLock scope(&scratchLock);
   

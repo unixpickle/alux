@@ -24,15 +24,59 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "entry.h"
+#include "physical-alloc-x64.h"
 
 namespace OS {
 
-void EntryPoint() {
-  size_t amountFree = PhysicalFree();
-  size_t amountTaken = PhysicalUsed();
-  cout << "OS::EntryPoint() - using " << amountTaken
-    << " bytes out of " << amountTaken + amountFree << endl;
+namespace KernMap {
+
+bool Map(PhysAddr phys, size_t bytes, VirtAddr & addr) {
+  bool largePages = false;
+  if (!(phys & 0x1fffff) && !(bytes & 0x1fffff)) {
+    largePages = true;
+  }
+  VirtAddr res = x64::GetGlobalKernelMap()->Map(phys, bytes, largePages);
+  if (!res) return false;
+  addr = res;
+  return true;
+}
+
+void Unmap(VirtAddr addr, size_t bytes) {
+  x64::GetGlobalKernelMap()->Unmap(addr, bytes);
+}
+
+void InvalidateCache(VirtAddr addr, size_t bytes, size_t pageSize) {
+  size_t count = bytes / pageSize;
+  if (count > 0x100) { // TODO: find a better number than 0x100
+    // There are enough that it's more efficient to just flush the TLB.
+    __asm__("mov %cr4, %rax\n"
+            "xor $0x80, %rax\n"
+            "mov %rax, %cr4\n"
+            "or $0x80, %rax\n"
+            "mov %rax, %cr4");
+    // TODO: make sure this is all we have to do; AMD64 manual pg. 142
+  } else {
+    for (size_t i = 0; i < count; i++) {
+      VirtAddr theAddr = addr + (i * pageSize);
+      __asm__("invlpg (%0)" : : "r" (theAddr));
+    }
+  }
+}
+
+int GetNumPageSizes() {
+  return 2;
+}
+
+size_t GetPageSize(int idx) {
+  size_t arr[2] = {0x1000, 0x200000};
+  return arr[idx];
+}
+
+size_t GetPageAlignment(int idx) {
+  size_t arr[2] = {0x1000, 0x200000};
+  return arr[idx];
+}
+
 }
 
 }

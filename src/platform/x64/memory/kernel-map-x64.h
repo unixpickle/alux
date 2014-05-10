@@ -75,6 +75,11 @@ public:
    * already mapped there, this will Panic().
    */
   void MapAt(VirtAddr virt, PhysAddr start, size_t size, bool largePages);
+  
+  /**
+   * Unmap a virtual region of memory.
+   */
+  void Unmap(VirtAddr virt, size_t size);
 
   /**
    * Temporarily map a 4K physical page into a virtual address. You should lock

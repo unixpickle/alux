@@ -56,6 +56,16 @@ bool PhysicalAlign(size_t size,
                    size_t * realSize);
 
 /**
+ * Returns the amount of phyiscal memory currently available for allocation.
+ */
+size_t PhysicalFree();
+
+/**
+ * Returns the amount of physical memory that is allocated.
+ */
+size_t PhysicalUsed();
+
+/**
  * Frees an address allocated with PhysicalAlign() or PhysicalAlloc().
  * @param addr The pointer returned by PhysicalAlign() or PhysicalAlloc().
  */
@@ -86,7 +96,7 @@ namespace KernMap {
   /**
    * Invalidate the page caches starting at a certain address.
    */
-  void InvalidateCache(VirtAddr addr, size_t bytes);
+  void InvalidateCache(VirtAddr addr, size_t bytes, size_t pageSize);
   
   /**
    * Returns the number of available page sizes.
@@ -149,7 +159,7 @@ public:
    * Invalidate the page table caches for a given address extending `bytes`
    * bytes.
    */
-  void InvalidateCache(VirtAddr addr, size_t bytes);
+  void InvalidateCache(VirtAddr addr, size_t bytes, size_t pageSize);
   
 };
 

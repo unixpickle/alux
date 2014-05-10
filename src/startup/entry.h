@@ -25,6 +25,7 @@
  */
 
 #include <platform/failure.h>
+#include <platform/memory.h>
 #include <iostream>
 
 namespace OS {

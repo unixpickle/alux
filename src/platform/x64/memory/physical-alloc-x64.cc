@@ -32,6 +32,8 @@ namespace OS {
 static x64::PhysRegionList regions;
 static x64::AllocatorList allocators;
 static x64::KernelMap kernMap;
+static uint64_t lock OS_ALIGNED(8) = 0;
+static size_t totalSpace = 0;
 
 namespace x64 {
 
@@ -49,6 +51,10 @@ namespace x64 {
   void InitializeKernAllocator(void * mbootPtr) {
     new(&regions) PhysRegionList(mbootPtr);
     new(&kernMap) KernelMap();
+    
+    for (int i = 0; i < regions.GetRegionCount(); i++) {
+      totalSpace += regions.GetRegions()[i].GetSize();
+    }
     
     // setup and use the kernel map
     StepAllocator stepper(&regions, KernelDataSize());
@@ -82,6 +88,13 @@ namespace x64 {
     
     new(&realAllocator) RealAllocator();
     kernMap.allocator = &realAllocator;
+    
+    cout << "InitializeKernAllocator() - reserved to "
+      << stepper.LastAddress() << endl;
+  }
+  
+  KernelMap * GetGlobalKernelMap() {
+    return &kernMap;
   }
 
   static bool GrabMore(StepAllocator & allocator, size_t & remaining) {
@@ -141,11 +154,22 @@ bool PhysicalAlign(size_t size,
                    size_t align,
                    PhysAddr & addr,
                    size_t * realSize) {
+  ScopeLock scope(&lock);
   return allocators.AllocPointer(size, align, (uintptr_t &)addr, realSize);
 }
 
 void PhysicalFree(PhysAddr addr) {
+  ScopeLock scope(&lock);
   allocators.FreePointer(addr);
+}
+
+size_t PhysicalFree() {
+  ScopeLock scope(&lock);
+  return allocators.AvailableSpace();
+}
+
+size_t PhysicalUsed() {
+  return totalSpace - PhysicalFree();
 }
 
 }

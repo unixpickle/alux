@@ -41,6 +41,7 @@ typedef ANAlloc::BBTree TreeType;
 typedef ANAlloc::AllocatorList<MaximumAllocators, TreeType> AllocatorList;
 
 void InitializeKernAllocator(void * mbootPtr);
+KernelMap * GetGlobalKernelMap();
 
 }
 
