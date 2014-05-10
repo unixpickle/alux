@@ -69,6 +69,12 @@ namespace x64 {
     allocators.GenerateDescriptions();
     
     size_t remaining = allocators.BitmapByteCount();
+    // Use this to test that large page bitmaps work
+    /*** TEST ***/
+    /*
+    remaining = 0x400000;
+    */
+    /*** END TEST ***/
     if (remaining >= 0x200000) usingLargePages = true;
     if (remaining & 0xfff) {
       remaining += 0x1000 - (remaining & 0xfff);
@@ -100,6 +106,7 @@ namespace x64 {
   static bool GrabMore(StepAllocator & allocator, size_t & remaining) {
     // figure out where we are
     PhysAddr & firstFree = allocator.LastAddress();
+    cout << "GrabMore() with firstFree=" << firstFree << endl;
     
     MemoryRegion * reg = regions.FindRegion(firstFree);
     if (!reg) {
@@ -130,6 +137,9 @@ namespace x64 {
     if (canGet % reqSize) canGet -= canGet % reqSize;
     PhysAddr newAddr = firstFree;
     firstFree += canGet;
+    
+    cout << "using " << canGet << " bytes; " << remaining << " needed."
+      << endl;
     
     // map it
     if (firstAddr) {

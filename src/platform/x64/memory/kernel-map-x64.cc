@@ -78,8 +78,8 @@ VirtAddr KernelMap::Map(PhysAddr start, size_t size, bool largePages) {
   
   // align our BU
   if (largePages) {
-    buSize -= 0x20000 - (buStart & 0x1fffff);
-    buStart += 0x20000 - (buStart & 0x1fffff);
+    buSize -= 0x200000 - (buStart & 0x1fffff);
+    buStart += 0x200000 - (buStart & 0x1fffff);
   }
   
   // map starting at buStart
