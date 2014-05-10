@@ -88,10 +88,11 @@ VirtAddr KernelMap::Map(PhysAddr start, size_t size, bool largePages) {
   
   // map starting at buStart
   MapAtLocked(buStart, start, size, largePages);
+  VirtAddr result = buStart;
   buStart += size;
   buSize -= size;
   
-  return 0;
+  return result;
 }
 
 void KernelMap::MapAt(VirtAddr virt, PhysAddr start,

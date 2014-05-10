@@ -62,14 +62,19 @@ namespace x64 {
     
     size_t remaining = allocators.BitmapByteCount();
     if (remaining >= 0x200000) usingLargePages = true;
+    if (remaining & 0xfff) {
+      remaining += 0x1000 - (remaining & 0xfff);
+    }
     
-    // 
+    // allocate the memory
     while (remaining) {
       if (!GrabMore(stepper, remaining)) {
         Panic("x64::InitializeKernAllocator() - GrabMore failed");
       }
     }
     
+    cout << "firstAddr is " << firstAddr << endl;
+    Panic("cannot generate allocators");
     allocators.GenerateAllocators((uint8_t *)firstAddr);
     
     kernMap.SetAllocator(NULL); // TODO: here, create a new allocator for this
@@ -114,8 +119,6 @@ namespace x64 {
       kernMap.MapAt(contAddr, newAddr, canGet, usingLargePages);
       contAddr += canGet;
     } else {
-      cout << "calling Map(" << newAddr << "," << canGet << ","
-        << usingLargePages << ")" << endl;
       firstAddr = kernMap.Map(newAddr, canGet, usingLargePages);
       if (!firstAddr) return false;
       contAddr = firstAddr + canGet;
