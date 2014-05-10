@@ -75,7 +75,6 @@ namespace x64 {
       }
     }
     
-    Panic("cannot generate allocators");
     allocators.GenerateAllocators((uint8_t *)firstAddr);
     
     MemoryRegion reg(0, stepper.LastAddress());
