@@ -142,11 +142,11 @@ bool PhysicalAlign(size_t size,
                    size_t align,
                    PhysAddr & addr,
                    size_t * realSize) {
-  return false;
+  return allocators.AllocPointer(size, align, (uintptr_t &)addr, realSize);
 }
 
 void PhysicalFree(PhysAddr addr) {
-  Panic("PhysicalFree() - NYI");
+  allocators.FreePointer(addr);
 }
 
 }
