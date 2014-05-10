@@ -67,9 +67,32 @@ public:
   void Unmap(VirtAddr virt, size_t size);
   
   /**
+   * Maps a 4K page.
+   */
+  void MapSmallPage(VirtAddr virt,
+                    PhysAddr phys,
+                    uint64_t entryMask,
+                    uint64_t tableMask);
+  
+  /**
+   * Maps a 2MB page.
+   */
+  void MapLargePage(VirtAddr virt,
+                    PhysAddr phys,
+                    uint64_t entryMask,
+                    uint64_t tableMask);
+  
+  /**
+   * Unmap the page starting at addr. The thing is, this page could have been
+   * 2MB, or 1GB, or plain old 4K. To deal with this, this function returns the
+   * size of the page that was unmapped.
+   */
+  size_t UnmapPage(VirtAddr addr);
+  
+  /**
    * Sets the buStart and buSize fields by searching the page tables.
    */
-  void FindNewBU(VirtAddr & buStart, size_t & buSize);
+  void FindNewBU(VirtAddr & buStart, size_t & buSize, VirtAddr maxAddr);
 
   /**
    * A call used by FindNewBU() to find the biggest region.

@@ -46,6 +46,7 @@ public:
   
   void * GetPointer();
   VirtAddr GetVirtAddr();
+  void Reassign(PhysAddr newAddr);
   
 };
 

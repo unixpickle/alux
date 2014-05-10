@@ -52,23 +52,173 @@ void TableMgr::Set() {
 }
 
 void TableMgr::Map(VirtAddr virt, PhysAddr phys, size_t size, bool largePages,
-                   uint64_t entryMask, uint64_t tablesMask) {
-  Panic("TableMgr::Map() -- NYI");
+                   uint64_t entryMask, uint64_t tableMask) {
+  assert(size > 0);
+  assert(3 == (tableMask & 3));
+  
+  // loop this way
+  if (!largePages) {
+    assert(!(size & 0xfff));
+    for (size_t offset = 0; offset < size; offset += 0x1000) {
+      MapSmallPage(virt + offset, phys + offset, entryMask, tableMask);
+    }
+  } else {
+    assert(!(size & 0x1fffff));
+    for (size_t offset = 0; offset < size; offset += 0x200000) {
+      MapLargePage(virt + offset, phys + offset, entryMask, tableMask);
+    }
+  }
 }
 
 void TableMgr::Unmap(VirtAddr virt, size_t size) {
-  Panic("TableMgr::Unmap() -- NYI");
+  while (size) {
+    size_t gotSize = UnmapPage(virt);
+    assert(gotSize <= size);
+    virt += gotSize;
+    size -= gotSize;
+  }
 }
 
-void TableMgr::FindNewBU(VirtAddr & buStart, size_t & buSize) {
+void TableMgr::MapSmallPage(VirtAddr virt,
+                            PhysAddr phys,
+                            uint64_t entryMask,
+                            uint64_t tableMask) {
+  VirtAddr nonCanon = virt & 0x0000FFFFFFFFFFFFL;
+  assert(!(virt & 0xfff));
+  assert(!(phys & 0xfff));
+  assert(3 == (tableMask & 3));
+  int indexes[4] = {
+    (int)((nonCanon >> 39) & 0x1ff),
+    (int)((nonCanon >> 30) & 0x1ff),
+    (int)((nonCanon >> 21) & 0x1ff),
+    (int)((nonCanon >> 12) & 0x1ff)
+  };
+  
+  TypedScratch<uint64_t> scratch(kernMap, pml4);
+  for (int depth = 0; depth < 3; depth++) {
+    uint64_t nextPage = scratch[indexes[depth]];
+    if (!(nextPage & 1)) {
+      nextPage = kernMap->allocator->AllocPage();
+      
+      TypedScratch<uint64_t> temp(kernMap, nextPage);
+      for (int i = 0; i < 0x200; i++) {
+        temp[i] = 0;
+      }
+      
+      scratch[indexes[depth]] = nextPage | tableMask;
+    } else if (nextPage & 0x80) {
+      Panic("TableMgr::MapSmallPage() - large page in the way!");
+    } else {
+      scratch[indexes[depth]] |= tableMask;
+    }
+    scratch.Reassign(nextPage & 0x7ffffffffffff000);
+  }
+  
+  assert(!scratch[indexes[3]]);
+  scratch[indexes[3]] = phys | entryMask;
+}
+
+void TableMgr::MapLargePage(VirtAddr virt,
+                            PhysAddr phys,
+                            uint64_t entryMask,
+                            uint64_t tableMask) {
+  VirtAddr nonCanon = virt & 0x0000FFFFFFFFFFFFL;
+  assert(!(virt & 0x1fffff));
+  assert(!(phys & 0x1fffff));
+  assert(3 == (tableMask & 3));
+  assert(0x80 & entryMask);
+  
+  int indexes[3] = {
+    (int)((nonCanon >> 39) & 0x1ff),
+    (int)((nonCanon >> 30) & 0x1ff),
+    (int)((nonCanon >> 21) & 0x1ff)
+  };
+  
+  TypedScratch<uint64_t> scratch(kernMap, pml4);
+  for (int depth = 0; depth < 2; depth++) {
+    uint64_t nextPage = scratch[indexes[depth]];
+    if (!(nextPage & 1)) {
+      nextPage = kernMap->allocator->AllocPage();
+      
+      TypedScratch<uint64_t> temp(kernMap, nextPage);
+      for (int i = 0; i < 0x200; i++) {
+        temp[i] = 0;
+      }
+      
+      scratch[indexes[depth]] = nextPage | tableMask;
+    } else if (nextPage & 0x80) {
+      Panic("TableMgr::MapLargePage() - large page in the way!");
+    } else {
+      scratch[indexes[depth]] |= tableMask;
+    }
+    scratch.Reassign(nextPage & 0x7ffffffffffff000);
+  }
+  
+  assert(!scratch[indexes[2]]);
+  scratch[indexes[2]] = phys | entryMask;
+}
+
+size_t TableMgr::UnmapPage(VirtAddr addr) {
+  VirtAddr nonCanon = addr & 0x0000FFFFFFFFFFFFL;
+  assert(!(addr & 0xfff));
+  int indexes[4] = {
+    (int)((nonCanon >> 39) & 0x1ff),
+    (int)((nonCanon >> 30) & 0x1ff),
+    (int)((nonCanon >> 21) & 0x1ff),
+    (int)((nonCanon >> 12) & 0x1ff)
+  };
+  
+  PhysAddr tableAddresses[4] = {pml4, 0, 0, 0};
+  
+  TypedScratch<uint64_t> scratch(kernMap, pml4);
+  int maxDepth = 3;
+  for (int depth = 0; depth < 3; depth++) {
+    uint64_t nextPage = scratch[indexes[depth]];
+    if (nextPage & 0x80) {
+      maxDepth = depth;
+      break;
+    } else if (!(nextPage & 1)) {
+      Panic("TableMgr::UnmapPage() - page not mapped!");
+    }
+    tableAddresses[depth + 1] = nextPage & 0x7ffffffffffff000;
+    scratch.Reassign(tableAddresses[depth + 1]);
+  }
+  
+  assert(scratch[indexes[maxDepth]]);
+  scratch[indexes[maxDepth]] = 0;
+  for (int i = maxDepth; i > 0; i--) {
+    bool allGone = true;
+    for (int j = 0; j < 0x200; j++) {
+      if (scratch[j]) {
+        allGone = false;
+        break;
+      }
+    }
+    if (!allGone) break;
+    
+    scratch.Reassign(tableAddresses[i - 1]);
+    scratch[indexes[i - 1]] = 0;
+  }
+  return 0x1000L << ((3 - maxDepth) * 9);
+}
+
+void TableMgr::FindNewBU(VirtAddr & buStart, size_t & buSize,
+                         VirtAddr maxAddr) {
   VirtAddr lastAddress = 0;
   buStart = 0;
   buSize = 0;
-  while (lastAddress + buSize < 0x8000000000L) {
+  while (lastAddress + buSize < maxAddr) {
     bool res = FindNextUnmapped(pml4, 0, 0, lastAddress, lastAddress);
     if (!res) break;
+    if (lastAddress >= maxAddr) break;
+    
     size_t retSize = 0;
     FollowBigChunk(pml4, 0, 0, lastAddress, retSize);
+    
+    if (retSize + lastAddress > maxAddr) {
+      retSize = maxAddr - lastAddress;
+    }
+    
     if (retSize > buSize) {
       buStart = lastAddress;
       buSize = retSize;

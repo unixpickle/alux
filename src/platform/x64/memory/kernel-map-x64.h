@@ -84,6 +84,11 @@ public:
   VirtAddr AllocScratch(PhysAddr start);
   
   /**
+   * Reuse the same scratch for a different address.
+   */
+  void ReassignScratch(VirtAddr addr, PhysAddr newAddr);
+  
+  /**
    * Release a virtual address returned by AllocScratch to be used elsewhere.
    */
   void FreeScratch(VirtAddr ptr);

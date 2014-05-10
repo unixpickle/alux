@@ -51,6 +51,10 @@ VirtAddr ScopeScratch::GetVirtAddr() {
   return addr;
 }
 
+void ScopeScratch::Reassign(PhysAddr newAddr) {
+  map->ReassignScratch(addr, newAddr);
+}
+
 }
 
 }

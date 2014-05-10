@@ -70,7 +70,7 @@ VirtAddr KernelMap::Map(PhysAddr start, size_t size, bool largePages) {
   
   // see if we can find a place in our biggest unused
   if (!CanFitRegion(size, largePages)) {
-    manager.FindNewBU(buStart, buSize);
+    manager.FindNewBU(buStart, buSize, ScratchStartAddr);
     if (!CanFitRegion(size, largePages)) {
       return 0;
     }
@@ -136,6 +136,15 @@ VirtAddr KernelMap::AllocScratch(PhysAddr start) {
   __asm__("invlpg (%0)" : : "r" (virt));
   
   return virt;
+}
+
+void KernelMap::ReassignScratch(VirtAddr addr, PhysAddr newAddr) {
+  int bitIndex = (int)((addr - ScratchStartAddr) >> 12);
+  int scratchTableIdx = bitIndex >> 9;
+  uint64_t * table = (uint64_t *)((uint64_t)ScratchPTStart()
+    + (scratchTableIdx << 12));
+  table[bitIndex & 0x1ff] = newAddr | 3;
+  __asm__("invlpg (%0)" : : "r" (addr));
 }
 
 void KernelMap::FreeScratch(VirtAddr ptr) {
