@@ -25,6 +25,7 @@
  */
 
 #include "physical-alloc-x64.h"
+#include "real-allocator-x64.h"
 
 namespace OS {
 
@@ -37,6 +38,7 @@ namespace x64 {
   static VirtAddr firstAddr = 0;
   static VirtAddr contAddr = 0;
   static bool usingLargePages = false;
+  static RealAllocator realAllocator;
   
   /**
    * Grabs chunks of physical memory and maps them to virtual memory so that we
@@ -73,11 +75,14 @@ namespace x64 {
       }
     }
     
-    cout << "firstAddr is " << firstAddr << endl;
     Panic("cannot generate allocators");
     allocators.GenerateAllocators((uint8_t *)firstAddr);
     
-    kernMap.allocator = NULL; // TODO: here, create a new allocator for this
+    MemoryRegion reg(0, stepper.LastAddress());
+    allocators.Reserve(reg);
+    
+    new(&realAllocator) RealAllocator();
+    kernMap.allocator = &realAllocator;
   }
 
   static bool GrabMore(StepAllocator & allocator, size_t & remaining) {
@@ -141,6 +146,7 @@ bool PhysicalAlign(size_t size,
 }
 
 void PhysicalFree(PhysAddr addr) {
+  Panic("PhysicalFree() - NYI");
 }
 
 }

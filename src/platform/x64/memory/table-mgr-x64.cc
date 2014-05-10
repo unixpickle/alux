@@ -57,7 +57,7 @@ void TableMgr::Map(VirtAddr virt, PhysAddr phys, size_t size, bool largePages,
 }
 
 void TableMgr::Unmap(VirtAddr virt, size_t size) {
-  
+  Panic("TableMgr::Unmap() -- NYI");
 }
 
 void TableMgr::FindNewBU(VirtAddr & buStart, size_t & buSize) {
