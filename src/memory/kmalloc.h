@@ -24,16 +24,42 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "common-x64.h"
+#ifndef __MEMORY_KMALLOC_H__
+#define __MEMORY_KMALLOC_H__
+
+#include <platform/failure.h>
+#include <analloc2.h>
 
 namespace OS {
 
-namespace x64 {
+void * Kmalloc(size_t size);
+void Kfree(void * ptr);
+void InitializeKmalloc();
 
-void OutB(uint16_t port, uint8_t byte) {
-  __asm__("outb %%al, %%dx" : : "a" (byte), "d" (port));
+class KmallocRegion {
+private:
+  typedef ANAlloc::BBTree Tree;
+  typedef ANAlloc::Allocator<Tree> Allocator;
+  const size_t PageSize = 0x40;
+  
+  void * start;
+  size_t length;
+  
+  Tree tree;
+  Allocator allocator;
+  
+protected:
+  KmallocRegion * next;
+  friend void * Kmalloc(size_t size);
+
+public:
+  KmallocRegion(void * start, size_t length);
+  
+  void * Allocate(size_t size);
+  void Free(void * buff);
+  
+};
+
 }
 
-}
-
-}
+#endif

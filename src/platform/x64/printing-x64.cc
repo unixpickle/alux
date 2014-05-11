@@ -92,11 +92,11 @@ void SetColor(int _color) {
 static void SetPosition(unsigned short x, unsigned short y) {
   unsigned short position = (y * 80) + x;
   // tell the VGA index register we are sending the `low` byte
-  OutB(0x3D4, 0x0f);
-  OutB(0x3D5, (unsigned char)(position & 0xff));
+  x64::OutB(0x3D4, 0x0f);
+  x64::OutB(0x3D5, (unsigned char)(position & 0xff));
   // and now send the `high` byte
-  OutB(0x3D4, 0x0e);
-  OutB(0x3D5, (unsigned char)((position >> 8) & 0xff));
+  x64::OutB(0x3D4, 0x0e);
+  x64::OutB(0x3D5, (unsigned char)((position >> 8) & 0xff));
 
   buffer[position] = color << 8;
 }

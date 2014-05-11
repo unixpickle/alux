@@ -83,7 +83,7 @@ namespace x64 {
     // allocate the memory
     while (remaining) {
       if (!GrabMore(stepper, remaining)) {
-        Panic("x64::InitializeKernAllocator() - GrabMore failed");
+        Panic("OS::x64::InitializeKernAllocator() - GrabMore failed");
       }
     }
     
@@ -95,7 +95,7 @@ namespace x64 {
     new(&realAllocator) RealAllocator();
     kernMap.allocator = &realAllocator;
     
-    cout << "InitializeKernAllocator() - reserved to "
+    cout << "OS::x64::InitializeKernAllocator() - LastAddress() = "
       << stepper.LastAddress() << endl;
   }
   
@@ -106,12 +106,12 @@ namespace x64 {
   static bool GrabMore(StepAllocator & allocator, size_t & remaining) {
     // figure out where we are
     PhysAddr & firstFree = allocator.LastAddress();
-    cout << "GrabMore() with firstFree=" << firstFree << endl;
+    cout << "OS::x64::GrabMore() with firstFree=" << firstFree << endl;
     
     MemoryRegion * reg = regions.FindRegion(firstFree);
     if (!reg) {
       if (!(reg = regions.FindRegion(firstFree - 1))) {
-        Panic("x64::GrabMore() - firstFree out of bounds.");
+        Panic("OS::x64::GrabMore() - firstFree out of bounds.");
       }
     }
     
@@ -138,8 +138,8 @@ namespace x64 {
     PhysAddr newAddr = firstFree;
     firstFree += canGet;
     
-    cout << "using " << canGet << " bytes; " << remaining << " needed."
-      << endl;
+    cout << "OS::x64::GrabMore() - canGet=" << canGet << "; remaining="
+      << remaining << endl;
     
     // map it
     if (firstAddr) {

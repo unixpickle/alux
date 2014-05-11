@@ -31,6 +31,10 @@
 
 namespace OS {
 
+namespace x64 {
+
 void OutB(uint16_t port, uint8_t byte);
+
+}
 
 }

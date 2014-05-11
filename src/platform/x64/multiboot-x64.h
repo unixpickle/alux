@@ -34,6 +34,8 @@
 
 namespace OS {
 
+namespace x64 {
+
 typedef struct {
   uint32_t flags;
   uint32_t mem_lower;
@@ -58,6 +60,8 @@ typedef struct {
   uint64_t length;
   uint32_t type;
 } OS_PACKED MultibootMmapInfo;
+
+}
 
 }
 
