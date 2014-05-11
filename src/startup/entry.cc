@@ -34,34 +34,9 @@ void EntryPoint() {
   cout << "OS::EntryPoint() - using " << amountTaken
     << " bytes out of " << amountTaken + amountFree << endl;
   
+  cout << "Running OS::InitializeMalloc()..."
   InitializeMalloc();
-  
-  // test our memory allocator
-  cout << "attempting to allocate 50 bytes" << endl;
-  uint8_t * buffer = new uint8_t[50];
-  cout << "returned pointer is " << (uintptr_t)buffer << endl;
-  delete buffer;
-  buffer = new uint8_t[50];
-  cout << "new buffer is " << (uintptr_t)buffer << endl;
-  delete buffer;
-  
-  amountFree = PhysicalAvailable();
-  amountTaken = PhysicalUsed();
-  cout << "OS::EntryPoint() - using " << amountTaken
-    << " bytes out of " << amountTaken + amountFree << endl;
-  
-  cout << "allocating 0x100000 bytes, two times" << endl;
-  uint8_t * b1 = new uint8_t[0x100000];
-  uint8_t * b2 = new uint8_t[0x100000];
-  
-  cout << "b1=" << (uintptr_t)b1 << " b2=" << (uintptr_t)b2 << endl;
-  delete b1;
-  delete b2;
-  
-  amountFree = PhysicalAvailable();
-  amountTaken = PhysicalUsed();
-  cout << "OS::EntryPoint() - using " << amountTaken
-    << " bytes out of " << amountTaken + amountFree << endl;
+  cout << " [OK]" << endl;
   
   Panic("nothing to do now");
 }
