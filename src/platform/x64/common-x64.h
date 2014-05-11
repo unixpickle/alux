@@ -25,9 +25,7 @@
  */
 
 #include <cstdint>
-
-#define OS_ALIGNED(x) __attribute__((aligned(x)))
-#define OS_PACKED __attribute__((packed))
+#include <utilities/common.h>
 
 namespace OS {
 

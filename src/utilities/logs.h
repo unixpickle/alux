@@ -24,43 +24,17 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef __MEMORY_KMALLOC_H__
-#define __MEMORY_KMALLOC_H__
+#ifndef __UTILITIES_LOGS_H__
+#define __UTILITIES_LOGS_H__
 
-#include <platform/failure.h>
-#include <analloc2.h>
-#include <utilities/common.h>
-#include <utilities/logs.h>
+#include <cassert>
 
 namespace OS {
 
-void InitializeMalloc();
-void * Malloc(size_t size);
-void Free(void * ptr);
-
-class MallocRegion;
-
-class MallocRegion {
-private:
-  typedef ANAlloc::BBTree Tree;
-  typedef ANAlloc::Allocator<Tree> Allocator;
-  const size_t PageSize = 0x40;
-  const int PageSizeLog = 6;
-  
-  void * start;
-  size_t length;
-  
-  Tree tree;
-  Allocator allocator;
-
-public:
-  MallocRegion(void * start, size_t length, size_t used);
-  
-  void * Allocate(size_t size);
-  void Free(void * buff);
-  
-  MallocRegion * next;
-};
+int Log2Ceil(uint64_t num);
+int Log2Floor(uint64_t num);
+int Log2Ceil(uint32_t num);
+int Log2Floor(uint32_t num);
 
 }
 
