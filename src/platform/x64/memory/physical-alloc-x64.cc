@@ -173,13 +173,13 @@ void PhysicalFree(PhysAddr addr) {
   allocators.FreePointer(addr);
 }
 
-size_t PhysicalFree() {
+size_t PhysicalAvailable() {
   ScopeLock scope(&lock);
   return allocators.AvailableSpace();
 }
 
 size_t PhysicalUsed() {
-  return totalSpace - PhysicalFree();
+  return totalSpace - PhysicalAvailable();
 }
 
 }

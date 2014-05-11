@@ -24,7 +24,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <memory/kmalloc.h>
+#include <new>
 
 namespace OS {
 

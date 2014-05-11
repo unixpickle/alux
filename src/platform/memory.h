@@ -58,7 +58,7 @@ bool PhysicalAlign(size_t size,
 /**
  * Returns the amount of phyiscal memory currently available for allocation.
  */
-size_t PhysicalFree();
+size_t PhysicalAvailable();
 
 /**
  * Returns the amount of physical memory that is allocated.
