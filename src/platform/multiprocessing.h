@@ -24,33 +24,15 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <scheduler/cpu.h>
+
 namespace OS {
 
-typedef uintptr_t ProcessorID;
+typedef uint64_t ProcessorID;
 
 class Processor {
-private:
-  void * ui;
-  ProcessorID identifier;
-  int priority;
-  bool isActive;
-  
 public:
-  
-  /**
-   * Initialize the processor list. This method should be synchronous.
-   */
-  static void InitializeProcessors();
-  
-  /**
-   * Return the number of processors on the system.
-   */
-  static int ProcessorCount();
-  
-  /**
-   * Returns an array of processors that are on the system.
-   */
-  static Processor * ProcessorList();
+  CPUInfo info;
   
   /**
    * Returns the current processor structure.
@@ -58,47 +40,40 @@ public:
   static Processor * CurrentProcessor();
   
   /**
-   * Construct a new processor.
-   */
-  Processor(void * ui, ProcessorID identifier, int priority);
-  
-  /**
    * Returns a unique identifier for this CPU.
    */
-  ProcessorID GetID() const;
+  virtual ProcessorID GetID() = 0;
   
   /**
    * Returns the "priority" of the CPU. The lower the priority, the more likely
    * the scheduler is to use this CPU for running tasks. This can be used to
    * eliminate the usage of hypercores unless it becomes necessary.
    */
-  int GetPriority() const;
-  
-  /**
-   * Returns the user info pointer.
-   */
-  void * GetUserInfo() const;
-  
-  /**
-   * Returns whether or not the CPU is active. This ought to be atomic.
-   */
-  bool GetIsActive() const;
-  
-  /**
-   * Set whether or not the CPU is active. This ought to be atomic.
-   */
-  void SetIsActive(bool flag);
-  
-  /**
-   * Hangs this CPU until it gets an interrupt.
-   */
-  void Halt();
+  virtual int GetPriority() = 0;
   
   /**
    * Sends an IPI to this CPU indicating that a piece of memory has been
-   * modified. The OS::HandleMemoryIPI method should be called.
+   * modified. The OS::HandleMemoryIPI method should be called on the given CPU
+   * with interrupts disabled.
    */
-  void SendMemoryIPI();
+  virtual void SendMemoryIPI() = 0;
+  
 };
+
+/**
+ * Initialize the entire multiprocessing system. This will be called by the
+ * kernel entry point after the system memory allocator has been configured.
+ */
+void InitializeProcessors();
+
+/**
+ * Returns the number of processors on the system.
+ */
+int ProcessorCount();
+
+/**
+ * Returns a reference to a processor at a given index.
+ */
+Processor & GetProcessor(int index);
 
 }
