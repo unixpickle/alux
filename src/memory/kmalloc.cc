@@ -39,7 +39,7 @@ void InitializeMalloc() {
   // calculate the proper chunk alignment to use with 2MB
   for (int i = 0; i < KernMap::GetNumPageSizes(); i++) {
     size_t s = KernMap::GetPageSize(i);
-    if (s <= 0x200000 && s > size) {
+    if (s <= 0x200000) {
       chunkAlignment = KernMap::GetPageAlignment(i);
     }
   }
@@ -50,47 +50,31 @@ void InitializeMalloc() {
 }
 
 void * Malloc(size_t size) {
+  ScopeLock scope(&mallocLock);
+  assert(size <= 0x100000);
   
+  MallocRegion * reg = firstRegion;
+  while (reg) {
+    void * ptr = reg->AllocBuf(size);
+    if (ptr) return ptr;
+    reg = reg->next;
+  }
+  
+  GenerateNewRegion();
+  return firstRegion->AllocBuf(size);
 }
 
 void Free(void * ptr) {
-  
-}
-
-/****************
- * MallocRegion *
- ****************/
-
-MallocRegion::MallocRegion(void * _start, size_t _length, size_t used)
-  : start(_start), length(_length), 
-    tree(Log2Floor(length / PageSize) + 1, (uint8_t *)start + used),
-    allocator(&tree) {
-  Path p;
-  allocator.Alloc(0, p);
-  size_t realUsed = used + Tree::MemorySize(tree.Depth());
-  if (realUsed % PageSize) {
-    realUsed += PageSize - (realUsed % PageSize);
+  MallocRegion * reg = firstRegion;
+  while (reg) {
+    if (reg->OwnsPointer(ptr)) {
+      reg->FreeBuf(ptr);
+      return;
+    }
+    reg = reg->next;
   }
-  allocator.Reserve(p, 0, realUsed / PageSize);
-  next = NULL;
-}
-
-
-void * MallocRegion::Allocate(size_t size) {
-  if (size > (PageSize << (tree.Depth() - 2))) {
-    return NULL;
-  }
-  
-  int power = Log2Ceil(size) - PageSizeLog;
-  if (power < 0) power = 0;
-  
-  int depth = tree.Depth() - power - 1;
-  Path p = 0;
-  // TODO: NYI
-}
-
-void MallocRegion::Free(void * buff) {
-  // TODO: NYI
+  cerr << "attempt to free unowned pointer " << (uintptr_t)ptr << endl;
+  Panic("Free(): fatal warning!");
 }
 
 /***********

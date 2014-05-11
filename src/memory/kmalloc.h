@@ -28,9 +28,13 @@
 #define __MEMORY_KMALLOC_H__
 
 #include <platform/failure.h>
-#include <analloc2.h>
+#include <platform/memory.h>
 #include <utilities/common.h>
 #include <utilities/logs.h>
+#include <utilities/lock.h>
+#include <analloc2.h>
+#include <new>
+#include <iostream>
 
 namespace OS {
 
@@ -38,26 +42,14 @@ void InitializeMalloc();
 void * Malloc(size_t size);
 void Free(void * ptr);
 
-class MallocRegion;
-
-class MallocRegion {
+class MallocRegion : public ANAlloc::Malloc<ANAlloc::BBTree> {
 private:
-  typedef ANAlloc::BBTree Tree;
-  typedef ANAlloc::Allocator<Tree> Allocator;
-  const size_t PageSize = 0x40;
-  const int PageSizeLog = 6;
-  
-  void * start;
-  size_t length;
-  
-  Tree tree;
-  Allocator allocator;
+  typedef ANAlloc::Malloc<ANAlloc::BBTree> super;
+  static const size_t PageSize = 0x40;
 
 public:
-  MallocRegion(void * start, size_t length, size_t used);
-  
-  void * Allocate(size_t size);
-  void Free(void * buff);
+  MallocRegion(void * _start, size_t _length, size_t _used)
+    : super(_start, PageSize, _used, _length) {}
   
   MallocRegion * next;
 };
