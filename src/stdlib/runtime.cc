@@ -26,6 +26,7 @@
 
 #include "runtime.h"
 #include <platform/failure.h>
+#include <memory/kmalloc.h>
 
 void * operator new(size_t, void * p) {
   return p;
@@ -35,18 +36,20 @@ void * operator new[](size_t, void * p) {
   return p;
 }
 
-void * operator new(size_t) {
-  return (void *)1;
+void * operator new(size_t s) {
+  return OS::Malloc(s);
 }
 
-void * operator new[](size_t) {
-  return (void *)1;
+void * operator new[](size_t s) {
+  return OS::Malloc(s);
 }
 
-void operator delete(void *) {
+void operator delete(void * p) {
+  OS::Free(p);
 }
 
-void operator delete[](void *) {
+void operator delete[](void * p) {
+  OS::Free(p);
 }
 
 void operator delete(void *, void *) {

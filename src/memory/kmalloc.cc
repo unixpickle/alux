@@ -43,10 +43,6 @@ void InitializeMalloc() {
       chunkAlignment = KernMap::GetPageAlignment(i);
     }
   }
-  
-  size_t realSize;
-  void * reg = AllocatePermanentRegion(&realSize);
-  firstRegion = new(reg) MallocRegion(reg, realSize, sizeof(MallocRegion));
 }
 
 void * Malloc(size_t size) {

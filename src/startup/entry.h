@@ -24,9 +24,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <platform/failure.h>
-#include <platform/memory.h>
-#include <iostream>
+#include <memory/kmalloc.h>
 
 namespace OS {
 

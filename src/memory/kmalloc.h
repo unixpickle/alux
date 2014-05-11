@@ -33,7 +33,7 @@
 #include <utilities/logs.h>
 #include <utilities/lock.h>
 #include <analloc2.h>
-#include <new>
+#include <stdlib/runtime.h>
 #include <iostream>
 
 namespace OS {

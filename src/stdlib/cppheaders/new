@@ -25,3 +25,4 @@
  */
 
 #include <stdlib/runtime.h>
+#include <memory/kmalloc.h>

@@ -33,6 +33,8 @@ void EntryPoint() {
   size_t amountTaken = PhysicalUsed();
   cout << "OS::EntryPoint() - using " << amountTaken
     << " bytes out of " << amountTaken + amountFree << endl;
+  
+  InitializeMalloc();
 }
 
 }
