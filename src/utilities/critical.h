@@ -24,37 +24,21 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef __PLATFORM_X64_INT_HANDLERS_X64_H__
-#define __PLATFORM_X64_INT_HANDLERS_X64_H__
+#ifndef __UTILITIES_CRITICAL_H__
+#define __UTILITIES_CRITICAL_H__
 
-#include "idt-x64.h"
-#include "raw-handlers-x64.h"
-#include "../common-x64.h"
-#include <platform/failure.h>
-#include <iostream>
-
-extern "C" {
-
-void InterruptCoded(void * caller, uint64_t vector, uint64_t code);
-void InterruptRegular(void * caller, uint64_t vector);
-void InterruptDummy(void * caller, uint64_t vector);
-
-void _InterruptCoded(void * caller, uint64_t vector, uint64_t code);
-void _InterruptRegular(void * caller, uint64_t vector);
-void _InterruptDummy(void * caller, uint64_t vector);
-
-}
+#include <platform/interrupts.h>
 
 namespace OS {
 
-namespace x64 {
-
-void InitializeIDT();
-InterruptTable & GetGlobalIDT();
-void ConfigureDummyIDT();
-void ConfigureRealIDT();
-
-}
+class ScopeCritical {
+private:
+  bool wereEnabled;
+  
+public:
+  ScopeCritical();
+  ~ScopeCritical();
+};
 
 }
 

@@ -24,38 +24,23 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef __PLATFORM_X64_INT_HANDLERS_X64_H__
-#define __PLATFORM_X64_INT_HANDLERS_X64_H__
-
-#include "idt-x64.h"
-#include "raw-handlers-x64.h"
-#include "../common-x64.h"
-#include <platform/failure.h>
-#include <iostream>
-
-extern "C" {
-
-void InterruptCoded(void * caller, uint64_t vector, uint64_t code);
-void InterruptRegular(void * caller, uint64_t vector);
-void InterruptDummy(void * caller, uint64_t vector);
-
-void _InterruptCoded(void * caller, uint64_t vector, uint64_t code);
-void _InterruptRegular(void * caller, uint64_t vector);
-void _InterruptDummy(void * caller, uint64_t vector);
-
-}
+#include <platform/interrupts.h>
 
 namespace OS {
 
-namespace x64 {
+bool GetInterruptsEnabled() {
+  unsigned long value;
+  __asm__("pushfq\n"
+          "pop %0" : "=r" (value));
+  return (value & (1 << 9)) != 0;
+}
 
-void InitializeIDT();
-InterruptTable & GetGlobalIDT();
-void ConfigureDummyIDT();
-void ConfigureRealIDT();
-
+void SetInterruptsEnabled(bool flag) {
+  if (flag) {
+    __asm__("sti");
+  } else {
+    __asm__("cli");
+  }
 }
 
 }
-
-#endif

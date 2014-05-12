@@ -28,6 +28,7 @@
 #define __PLATFORM_X64_SCOPE_SCRATCH_X64_H__
 
 #include <platform/memory.h>
+#include <utilities/critical.h>
 
 namespace OS {
 
@@ -35,7 +36,7 @@ namespace x64 {
   
 class KernelMap;
 
-class ScopeScratch {
+class ScopeScratch : public ScopeCritical {
 private:
   VirtAddr addr;
   KernelMap * map;

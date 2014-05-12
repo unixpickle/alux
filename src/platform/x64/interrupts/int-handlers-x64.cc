@@ -41,9 +41,12 @@ void InterruptRegular(void * caller, uint64_t vector) {
 }
 
 void InterruptDummy(void * caller, uint64_t vector) {
-  OS::cout << "OS::x64::InterruptDummy() - caller=" << (uintptr_t)caller
-    << " vector=" << vector << OS::endl;
-  OS::Panic("nothing to do in interrupt handler");
+  // send EOI to the PIC so it backs off
+  (void)caller;
+  if (vector > 0xf) {
+    OS::x64::OutB(0xa0, 0x20);
+  }
+  OS::x64::OutB(0x20, 0x20);
 }
 
 void _InterruptCoded(void * caller, uint64_t vector, uint64_t code) {
@@ -81,7 +84,14 @@ void ConfigureDummyIDT() {
 }
 
 void ConfigureRealIDT() {
-  // TODO: set RawCodedHandler and RawNonCodedHandler
+  for (int i = 0; i < 0x100; i++) {
+    bool hasCode = (i == 0x8 || i == 0x11 || (i >= 0xa && i <= 0xe));
+    if (hasCode) {
+      globalIdt.SetHandler(i, (void *)RawCodedHandler, 0x8e);
+    } else {
+      globalIdt.SetHandler(i, (void *)RawNonCodedHandler, 0x8e);
+    }
+  }
 }
 
 }

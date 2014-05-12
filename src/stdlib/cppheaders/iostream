@@ -50,27 +50,27 @@ public:
   virtual OutStream & operator<<(const char * str);
 
   virtual OutStream & operator<<(int number) {
-    super::operator<<(number);
+    return super::operator<<(number);
   }
 
   virtual OutStream & operator<<(unsigned int number) {
-    super::operator<<(number);
+    return super::operator<<(number);
   }
 
   virtual OutStream & operator<<(long number) {
-    super::operator<<(number);
+    return super::operator<<(number);
   }
 
   virtual OutStream & operator<<(unsigned long number) {
-    super::operator<<(number);
+    return super::operator<<(number);
   }
 
   virtual OutStream & operator<<(long long number) {
-    super::operator<<(number);
+    return super::operator<<(number);
   }
 
   virtual OutStream & operator<<(unsigned long long number) {
-    super::operator<<(number);
+    return super::operator<<(number);
   }
 };
 
@@ -81,27 +81,27 @@ public:
   virtual OutStream & operator<<(const char * str);
 
   virtual OutStream & operator<<(int number) {
-    super::operator<<(number);
+    return super::operator<<(number);
   }
 
   virtual OutStream & operator<<(unsigned int number) {
-    super::operator<<(number);
+    return super::operator<<(number);
   }
 
   virtual OutStream & operator<<(long number) {
-    super::operator<<(number);
+    return super::operator<<(number);
   }
 
   virtual OutStream & operator<<(unsigned long number) {
-    super::operator<<(number);
+    return super::operator<<(number);
   }
 
   virtual OutStream & operator<<(long long number) {
-    super::operator<<(number);
+    return super::operator<<(number);
   }
 
   virtual OutStream & operator<<(unsigned long long number) {
-    super::operator<<(number);
+    return super::operator<<(number);
   }
 };
 
