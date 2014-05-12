@@ -24,47 +24,77 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef __PLATFORM_X64_SCOPE_SCRATCH_X64_H__
-#define __PLATFORM_X64_SCOPE_SCRATCH_X64_H__
-
-#include <platform/memory.h>
-#include <utilities/critical.h>
+#include "sdt-x64.h"
 
 namespace OS {
 
 namespace x64 {
 
-class ScopeScratch : public ScopeCritical {
-private:
-  VirtAddr addr;
+namespace ACPI {
 
-public:
-  ScopeScratch(PhysAddr address);
-  ~ScopeScratch();
-  
-  void * GetPointer();
-  VirtAddr GetVirtAddr();
-  void Reassign(PhysAddr newAddr);
-  
-};
+static bool hasFound = false;
+static RSDP * rsdp = NULL;
 
-template <class T>
-class TypedScratch : public ScopeScratch {
-public:
-  TypedScratch(PhysAddr address)
-    : ScopeScratch(address) {}
+static bool FindSDT();
+static uint8_t MemChecksum(uint8_t * ptr, int len);
+
+RSDP & GetRSDP() {
+  if (!hasFound) {
+    if (!FindSDT()) {
+      Panic("OS::x64::ACPI::GetRSDP() - not found");
+    }
+    hasFound = true;
+  }
+  return *rsdp;
+}
+
+uint64_t RSDP::TableCount() {
+  return 0; // TODO: nyi
+}
+
+void * RSDP::GetTable(uint64_t idx) {
+  return NULL; // TODO: nyi
+}
+
+/***********
+ * Private *
+ ***********/
+
+static bool FindSDT() {
+  // find the RSDP in the BIOS areas.
+  const char * signature = "RSD PTR ";
+  uintptr_t ptr;
   
-  T * GetTypedPointer() {
-    return (T *)GetPointer();
+  // the whole potential EBDA
+  for (ptr = 0x80000; ptr < 0x9fc00; ptr++) {
+    if (memcmp(signature, (void *)ptr, 8) == 0) {
+      if (MemChecksum((uint8_t *)ptr, 0x14) != 0) continue;
+      rsdp = (RSDP *)ptr;
+      return true;
+    }
+  }
+  for (ptr = 0xe0000; ptr < 0x100000; ptr++) {
+    if (memcmp(signature, (void *)ptr, 8) == 0) {
+      if (MemChecksum((uint8_t *)ptr, 0x14) != 0) continue;
+      rsdp = (RSDP *)ptr;
+      return true;
+    }
   }
   
-  T & operator[](int idx) {
-    return GetTypedPointer()[idx];
-  }
-};
+  return false;
+}
 
+static uint8_t MemChecksum(uint8_t * ptr, int len) {
+  uint8_t sum = 0;
+  while (len-- > 0) {
+    sum += (*ptr);
+    ptr++;
+  }
+  return sum;
 }
 
 }
 
-#endif
+}
+
+}

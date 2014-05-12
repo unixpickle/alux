@@ -24,47 +24,34 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef __PLATFORM_X64_SCOPE_SCRATCH_X64_H__
-#define __PLATFORM_X64_SCOPE_SCRATCH_X64_H__
-
-#include <platform/memory.h>
-#include <utilities/critical.h>
+#include <cstdint>
+#include <utilities/common.h>
+#include <platform/failure.h>
+#include <platform/x64/memory/scope-scratch-x64.h>
 
 namespace OS {
 
 namespace x64 {
 
-class ScopeScratch : public ScopeCritical {
-private:
-  VirtAddr addr;
+namespace ACPI {
 
-public:
-  ScopeScratch(PhysAddr address);
-  ~ScopeScratch();
+class RSDP {
+  uint64_t signature;
+  uint8_t checksum;
+  char oemid[6];
+  uint8_t revision;
+  uint32_t ptrRSDT;
+  uint32_t length;
+  uint64_t ptrXSDT;
+  uint8_t xChecksum;
+  char reserved[3];
   
-  void * GetPointer();
-  VirtAddr GetVirtAddr();
-  void Reassign(PhysAddr newAddr);
-  
-};
-
-template <class T>
-class TypedScratch : public ScopeScratch {
-public:
-  TypedScratch(PhysAddr address)
-    : ScopeScratch(address) {}
-  
-  T * GetTypedPointer() {
-    return (T *)GetPointer();
-  }
-  
-  T & operator[](int idx) {
-    return GetTypedPointer()[idx];
-  }
-};
+  uint64_t TableCount();
+  void * GetTable(uint64_t idx);
+} OS_PACKED;
 
 }
 
 }
 
-#endif
+}

@@ -95,13 +95,13 @@ void TableMgr::MapSmallPage(VirtAddr virt,
     (int)((nonCanon >> 12) & 0x1ff)
   };
   
-  TypedScratch<uint64_t> scratch(kernMap, pml4);
+  TypedScratch<uint64_t> scratch(pml4);
   for (int depth = 0; depth < 3; depth++) {
     uint64_t nextPage = scratch[indexes[depth]];
     if (!(nextPage & 1)) {
       nextPage = kernMap->allocator->AllocPage();
       
-      TypedScratch<uint64_t> temp(kernMap, nextPage);
+      TypedScratch<uint64_t> temp(nextPage);
       for (int i = 0; i < 0x200; i++) {
         temp[i] = 0;
       }
@@ -135,13 +135,13 @@ void TableMgr::MapLargePage(VirtAddr virt,
     (int)((nonCanon >> 21) & 0x1ff)
   };
   
-  TypedScratch<uint64_t> scratch(kernMap, pml4);
+  TypedScratch<uint64_t> scratch(pml4);
   for (int depth = 0; depth < 2; depth++) {
     uint64_t nextPage = scratch[indexes[depth]];
     if (!(nextPage & 1)) {
       nextPage = kernMap->allocator->AllocPage();
       
-      TypedScratch<uint64_t> temp(kernMap, nextPage);
+      TypedScratch<uint64_t> temp(nextPage);
       for (int i = 0; i < 0x200; i++) {
         temp[i] = 0;
       }
@@ -171,7 +171,7 @@ size_t TableMgr::UnmapPage(VirtAddr addr) {
   
   PhysAddr tableAddresses[4] = {pml4, 0, 0, 0};
   
-  TypedScratch<uint64_t> scratch(kernMap, pml4);
+  TypedScratch<uint64_t> scratch(pml4);
   int maxDepth = 3;
   for (int depth = 0; depth < 3; depth++) {
     uint64_t nextPage = scratch[indexes[depth]];
@@ -261,7 +261,7 @@ bool TableMgr::FollowBigChunk(PhysAddr _table,
   contigSize = 0;
   
   // loop through entries
-  TypedScratch<uint64_t> scratch(kernMap, table);
+  TypedScratch<uint64_t> scratch(table);
   for (int i = startIndex; i < 0x200; i++) {
     uint64_t entry = scratch[i];
     size_t resSize;
@@ -305,7 +305,7 @@ bool TableMgr::FindNextUnmapped(PhysAddr _table,
   int startIndex = (int)((start - mapAddr) / segmentSize);
   
   // loop through entries
-  TypedScratch<uint64_t> scratch(kernMap, table);
+  TypedScratch<uint64_t> scratch(table);
   for (int i = startIndex; i < 0x200; i++) {
     uint64_t entry = scratch[i];
     VirtAddr newMapAddr = mapAddr + (i * segmentSize);
