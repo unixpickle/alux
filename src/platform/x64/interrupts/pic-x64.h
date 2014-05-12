@@ -24,27 +24,24 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <platform/multiprocessing.h>
-#include <platform/interrupts.h>
-#include "interrupts/int-handlers-x64.h"
-#include "interrupts/pic-x64.h"
+#ifndef __PLATFORM_X64_PIC_X64_H__
+#define __PLATFORM_X64_PIC_X64_H__
+
+#include <cstdint>
+#include "../common-x64.h"
 
 namespace OS {
 
-void InitializeProcessors() {
-  x64::InitializeIDT();
-  x64::ConfigureDummyIDT();
-  x64::GetGlobalIDT().Load();
-  cout << "OS::InitializeProcessors() - disabling PIC..." << endl;
-  x64::RemapPIC(0xf0, 0xf8, 0xff, 0xff);
-  SetInterruptsEnabled(true);
-  // if there are a few interrupts masked, we can trigger our handlers for all
-  // of them and send appropriate EOIs to the PIC.
-  __asm__("nop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\nnop");
-  SetInterruptsEnabled(false);
-  x64::ConfigureRealIDT();
-  
-  Panic("TODO: initialize I/O APIC and local APIC");
+namespace x64 {
+
+void RemapPIC(uint8_t masterBase,
+              uint8_t slaveBase,
+              uint8_t masterMask,
+              uint8_t slaveMask);
+void MaskPIC(uint8_t masterMask, uint8_t slaveMask);
+
 }
 
 }
+
+#endif
