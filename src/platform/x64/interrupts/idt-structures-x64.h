@@ -63,7 +63,8 @@ public:
     memcpy(code1, "\x48\x87\x04\x24\xC3", 5);
     argument = function = 0;
   }
-} OS_PACKED; // size should == 0x20
+} OS_PACKED;
+static_assert(sizeof(IntHandler) == 0x20, "IntHandler size == 0x20");
 
 class IdtEntry {
 public:
@@ -86,13 +87,15 @@ public:
     midOffset = (exc >> 16) & 0xffff;
     highOffset = exc >> 32;
   }
-} OS_PACKED; // size should == 0x10
+} OS_PACKED;
+static_assert(sizeof(IdtEntry) == 0x10, "IdtEntry size == 0x10");
 
 class IdtPointer {
 public:
   uint16_t limit;
   uint64_t virtualAddress;
-} OS_PACKED; // size should == 0xa0
+} OS_PACKED;
+static_assert(sizeof(IdtPointer) == 0xa0, "IdtPointer size == 0xa0");
 
 }
 
