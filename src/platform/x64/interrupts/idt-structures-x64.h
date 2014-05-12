@@ -89,7 +89,8 @@ public:
 } OS_PACKED; // size should == 0x10
 
 class IdtPointer {
-  
+  uint16_t limit;
+  uint64_t virtualAddress;
 } OS_PACKED; // size should == 0xa0
 
 }

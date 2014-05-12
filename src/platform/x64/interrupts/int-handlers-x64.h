@@ -24,38 +24,17 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "idt-x64.h"
+#ifndef __PLATFORM_X64_INT_HANDLERS_X64_H__
+#define __PLATFORM_X64_INT_HANDLERS_X64_H__
 
-namespace OS {
+extern "C" {
 
-namespace x64 {
+void InterruptCoded(void * caller, uint64_t vector, uint64_t code);
+void InterruptRegular(void * caller, uint64_t vector);
 
-InterruptTable::InterruptTable() {
-  bzero((void *)entries, sizeof(entries));
-  bzero((void *)handlers, sizeof(handlers));
-  assert(sizeof(IdtEntry) == 0x10);
-  assert(sizeof(IntHandler) == 0x20);
-  assert(sizeof(IdtPointer) == 0xa);
-}
-
-void InterruptTable::SetHandler(int idx, void * fn, uint8_t flags) {
-  handlers[idx].function = (uint64_t)fn;
-  handlers[idx].argument = (uint64_t)idx;
-  entries[idx].SetOffset((uint64_t)&handlers[idx]);
-  entries[idx].flags = flags;
-}
-
-void InterruptTable::LoadIdt() {
-  idtPtr.limit = 0xfff; // TODO: see if this should be 0x1000
-  idtPtr.virtualAddress = (uint64_t)entries;
-  assert(!((uint64_t)idtPtr & 0x7));
-  assert(!((uint64_t)entries & 0x7));
-  __asm__("lidt (%0)" : : "r" (idtPtr));
-}
-
-}
+void _InterruptCoded(void * caller, uint64_t vector, uint64_t code);
+void _InterruptRegular(void * caller, uint64_t vector);
 
 }
 
 #endif
-

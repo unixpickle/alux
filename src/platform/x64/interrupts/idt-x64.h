@@ -37,11 +37,12 @@ class InterruptTable {
 private:
   IdtEntry entries[0x100];
   IntHandler handlers[0x100];
-
+  IdtPointer idtPtr;
+  
 public:
   InterruptTable();
   
-  void SetHandler(int idx, void * fn, uint64_t arg, uint8_t flags);
+  void SetHandler(int idx, void * fn, uint8_t flags);
   void LoadIdt();
 };
 
