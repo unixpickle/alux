@@ -26,10 +26,12 @@ section .text
 
 global RawNonCodedHandler
 global RawCodedHandler
+global RawDummyHandler
 global _RawNonCodedHandler
 global _RawCodedHandler
+global _RawDummyHandler
 
-extern _InterruptCoded, _InterruptRegular
+extern _InterruptCoded, _InterruptRegular, _InterruptDummy
 
 %macro pushunpres 0
   push rdi
@@ -78,8 +80,23 @@ RawCodedHandler:
   add rsp, 0x10
   iretq
 
+RawDummyHandler:
+  pushunpres
+  
+  mov rsi, [rsp + 0x48] ; vector number
+  mov rdi, [rsp + 0x50] ; caller RIP
+  call _InterruptDummy
+  
+  popunpres
+  add rsp, 0x8
+  iretq
+
 _RawNonCodedHandler:
   jmp RawNonCodedHandler
 
 _RawCodedHandler:
   jmp RawCodedHandler
+
+_RawDummyHandler:
+  jmp RawDummyHandler
+

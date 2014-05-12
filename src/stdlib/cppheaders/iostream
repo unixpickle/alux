@@ -45,12 +45,64 @@ public:
 
 class OutStreamErr : public OutStream {
 public:
+  typedef OutStream super;
+
   virtual OutStream & operator<<(const char * str);
+
+  virtual OutStream & operator<<(int number) {
+    super::operator<<(number);
+  }
+
+  virtual OutStream & operator<<(unsigned int number) {
+    super::operator<<(number);
+  }
+
+  virtual OutStream & operator<<(long number) {
+    super::operator<<(number);
+  }
+
+  virtual OutStream & operator<<(unsigned long number) {
+    super::operator<<(number);
+  }
+
+  virtual OutStream & operator<<(long long number) {
+    super::operator<<(number);
+  }
+
+  virtual OutStream & operator<<(unsigned long long number) {
+    super::operator<<(number);
+  }
 };
 
 class OutStreamOut : public OutStream {
 public:
+  typedef OutStream super;
+
   virtual OutStream & operator<<(const char * str);
+
+  virtual OutStream & operator<<(int number) {
+    super::operator<<(number);
+  }
+
+  virtual OutStream & operator<<(unsigned int number) {
+    super::operator<<(number);
+  }
+
+  virtual OutStream & operator<<(long number) {
+    super::operator<<(number);
+  }
+
+  virtual OutStream & operator<<(unsigned long number) {
+    super::operator<<(number);
+  }
+
+  virtual OutStream & operator<<(long long number) {
+    super::operator<<(number);
+  }
+
+  virtual OutStream & operator<<(unsigned long long number) {
+    super::operator<<(number);
+  }
 };
 
 extern OutStreamOut cout;

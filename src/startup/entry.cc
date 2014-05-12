@@ -37,6 +37,8 @@ void EntryPoint() {
   cout << "Running OS::InitializeMalloc()...";
   InitializeMalloc();
   cout << " [OK]" << endl;
+
+  InitializeProcessors();
   
   Panic("nothing to do now");
 }

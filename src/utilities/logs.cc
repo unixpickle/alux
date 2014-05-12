@@ -5,6 +5,7 @@ namespace OS {
 int Log2Ceil(uint64_t num) {
   assert(num);
   // TODO: binary search here!
+  // TODO: fix sign comparison warnings
   for (int i = 0; i < 64; i++) {
     if ((1L << i) >= num) return i;
   }

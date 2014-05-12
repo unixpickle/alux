@@ -31,6 +31,7 @@ extern "C" {
 
 void RawNonCodedHandler();
 void RawCodedHandler();
+void RawDummyHandler();
 
 }
 

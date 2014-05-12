@@ -28,16 +28,19 @@
 #define __PLATFORM_X64_INT_HANDLERS_X64_H__
 
 #include "idt-x64.h"
-#include <iostream>
+#include "raw-handlers-x64.h"
 #include <platform/failure.h>
+#include <iostream>
 
 extern "C" {
 
 void InterruptCoded(void * caller, uint64_t vector, uint64_t code);
 void InterruptRegular(void * caller, uint64_t vector);
+void InterruptDummy(void * caller, uint64_t vector);
 
 void _InterruptCoded(void * caller, uint64_t vector, uint64_t code);
 void _InterruptRegular(void * caller, uint64_t vector);
+void _InterruptDummy(void * caller, uint64_t vector);
 
 }
 

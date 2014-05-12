@@ -31,8 +31,6 @@ namespace OS {
 namespace x64 {
 
 InterruptTable::InterruptTable() {
-  bzero((void *)entries, sizeof(entries));
-  bzero((void *)handlers, sizeof(handlers));
   assert(sizeof(IdtEntry) == 0x10);
   assert(sizeof(IntHandler) == 0x20);
   assert(sizeof(IdtPointer) == 0xa);
@@ -45,7 +43,7 @@ void InterruptTable::SetHandler(int idx, void * fn, uint8_t flags) {
   entries[idx].flags = flags;
 }
 
-void InterruptTable::LoadIdt() {
+void InterruptTable::Load() {
   idtPtr.limit = 0xfff; // TODO: see if this should be 0x1000
   idtPtr.virtualAddress = (uint64_t)entries;
   assert(!((uint64_t)&idtPtr & 0x7));

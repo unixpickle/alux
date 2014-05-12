@@ -25,6 +25,7 @@
  */
 
 #include <new>
+#include <platform/multiprocessing.h>
 
 namespace OS {
 

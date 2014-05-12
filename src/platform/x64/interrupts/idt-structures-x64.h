@@ -60,7 +60,7 @@ public:
   IntHandler() {
     memcpy(code1, "\x50\x50\x48\xB8", 4);
     memcpy(code2, "\x48\x89\x44\x24\x08\x48\xB8", 7);
-    memcpy(code1, "\x48\x87\x04\x24\xC3", 5);
+    memcpy(code3, "\x48\x87\x04\x24\xC3", 5);
     argument = function = 0;
   }
 } OS_PACKED; // size should == 0x20

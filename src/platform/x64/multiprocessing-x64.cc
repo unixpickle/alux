@@ -32,9 +32,11 @@ namespace OS {
 void InitializeProcessors() {
   x64::InitializeIDT();
   x64::ConfigureDummyIDT();
+  x64::GetGlobalIDT().Load();
+  cout << "demonstrating the h4x0ring" << endl;
   // demonstrate the h4x0ring
-  __asm__("int $0x13");
-  __asm__("int $0x37");
+  __asm__("int $0x80");
+  __asm__("int $0x81");
 }
 
 }

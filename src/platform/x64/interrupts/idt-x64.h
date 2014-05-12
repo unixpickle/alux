@@ -44,7 +44,7 @@ public:
   InterruptTable();
   
   void SetHandler(int idx, void * fn, uint8_t flags);
-  void LoadIdt();
+  void Load();
 };
 
 }
