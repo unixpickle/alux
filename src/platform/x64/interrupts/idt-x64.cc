@@ -48,14 +48,11 @@ void InterruptTable::SetHandler(int idx, void * fn, uint8_t flags) {
 void InterruptTable::LoadIdt() {
   idtPtr.limit = 0xfff; // TODO: see if this should be 0x1000
   idtPtr.virtualAddress = (uint64_t)entries;
-  assert(!((uint64_t)idtPtr & 0x7));
+  assert(!((uint64_t)&idtPtr & 0x7));
   assert(!((uint64_t)entries & 0x7));
-  __asm__("lidt (%0)" : : "r" (idtPtr));
+  __asm__("lidt (%0)" : : "r" (&idtPtr));
 }
 
 }
 
 }
-
-#endif
-

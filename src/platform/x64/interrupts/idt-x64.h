@@ -28,6 +28,7 @@
 #define __PLATFORM_X64_IDT_X64_H__
 
 #include "idt-structures-x64.h"
+#include <cassert>
 
 namespace OS {
 

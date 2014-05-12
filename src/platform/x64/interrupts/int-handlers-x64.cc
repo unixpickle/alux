@@ -29,15 +29,15 @@
 extern "C" {
 
 void InterruptCoded(void * caller, uint64_t vector, uint64_t code) {
-  cout << "OS::x64::InterruptCoded() - caller=" << (uintptr_t)caller
-    << " vector=" << vector << " code=" << code << endl;
-  Panic("nothing to do in interrupt handler");
+  OS::cout << "OS::x64::InterruptCoded() - caller=" << (uintptr_t)caller
+    << " vector=" << vector << " code=" << code << OS::endl;
+  OS::Panic("nothing to do in interrupt handler");
 }
 
 void InterruptRegular(void * caller, uint64_t vector) {
-  cout << "OS::x64::InterruptRegular() - caller=" << (uintptr_t)caller
-    << " vector=" << vector << endl;
-  Panic("nothing to do in interrupt handler");
+  OS::cout << "OS::x64::InterruptRegular() - caller=" << (uintptr_t)caller
+    << " vector=" << vector << OS::endl;
+  OS::Panic("nothing to do in interrupt handler");
 }
 
 void _InterruptCoded(void * caller, uint64_t vector, uint64_t code) {
@@ -46,6 +46,40 @@ void _InterruptCoded(void * caller, uint64_t vector, uint64_t code) {
 
 void _InterruptRegular(void * caller, uint64_t vector) {
   InterruptRegular(caller, vector);
+}
+
+}
+
+namespace OS {
+
+namespace x64 {
+
+static InterruptTable globalIdt;
+static void DummyHandler(void * ret, uint64_t vec);
+
+void InitializeIDT() {
+  new(&globalIdt) InterruptTable();
+}
+
+InterruptTable & GetGlobalIDT() {
+  return globalIdt;
+}
+
+void ConfigureDummyIDT() {
+  for (int i = 0; i < 0x100; i++) {
+    globalIdt.SetHandler(i, (void *)DummyHandler, 0x8e);
+  }
+}
+
+void ConfigureRealIDT() {
+  // TODO: set RawCodedHandler and RawNonCodedHandler
+}
+
+static void DummyHandler(void * ret, uint64_t vec) {
+  cout << "OS::x64::DummyHandler(" << (uintptr_t)ret << ", " << vec << ")"
+    << endl;
+}
+
 }
 
 }

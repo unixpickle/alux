@@ -33,6 +33,7 @@ override CXXFLAGS += -nostdlib -nostdinc -ffreestanding -mno-red-zone -fno-excep
 CXX ?= "g++"
 CC ?= gcc
 LD ?= ld
+NASM ?= nasm
 
 export CUSTOM_OUTDIR
 export PROJECT_ROOT
@@ -41,6 +42,7 @@ export TARGET_ARCH
 export CXX
 export CC
 export LD
+export NASM
 export CXXFLAGS
 
 $(BUILD_DIR)/$(BINFILE): $(BUILD_DIR)

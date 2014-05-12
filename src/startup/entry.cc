@@ -34,7 +34,7 @@ void EntryPoint() {
   cout << "OS::EntryPoint() - using " << amountTaken
     << " bytes out of " << amountTaken + amountFree << endl;
   
-  cout << "Running OS::InitializeMalloc()..."
+  cout << "Running OS::InitializeMalloc()...";
   InitializeMalloc();
   cout << " [OK]" << endl;
   

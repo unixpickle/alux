@@ -25,6 +25,7 @@
  */
 
 #include <scheduler/cpu.h>
+#include <cstdint>
 
 namespace OS {
 
