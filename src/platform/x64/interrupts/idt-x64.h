@@ -41,8 +41,6 @@ private:
   IdtPointer idtPtr OS_ALIGNED(8);
   
 public:
-  InterruptTable();
-  
   void SetHandler(int idx, void * fn, uint8_t flags);
   void Load();
 };

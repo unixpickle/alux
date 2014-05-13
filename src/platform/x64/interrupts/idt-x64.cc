@@ -30,12 +30,6 @@ namespace OS {
 
 namespace x64 {
 
-InterruptTable::InterruptTable() {
-  assert(sizeof(IdtEntry) == 0x10);
-  assert(sizeof(IntHandler) == 0x20);
-  assert(sizeof(IdtPointer) == 0xa);
-}
-
 void InterruptTable::SetHandler(int idx, void * fn, uint8_t flags) {
   handlers[idx].function = (uint64_t)fn;
   handlers[idx].argument = (uint64_t)idx;
