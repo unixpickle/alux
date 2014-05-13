@@ -50,7 +50,7 @@ class RSDP {
   char reserved[3];
   
   uint64_t TableCount();
-  void * GetTable(uint64_t idx);
+  PhysAddr GetTable(uint64_t idx);
 } OS_PACKED;
 
 RSDP & GetRSDP();

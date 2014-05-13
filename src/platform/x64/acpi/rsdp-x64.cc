@@ -62,20 +62,20 @@ uint64_t RSDP::TableCount() {
   }
 }
 
-void * RSDP::GetTable(uint64_t idx) {
+PhysAddr RSDP::GetTable(uint64_t idx) {
   if (rsdp->revision == 0) {
     // use RSDT
     uint64_t off = 0x24 + (idx << 2);
     uint64_t res = 0; // must initialize to 0!
     uint64_t offset = (uint64_t)ptrRSDT + off;
     MemcpyToVirt((VirtAddr)&res, (PhysAddr)offset, 4);
-    return (void *)res;
+    return res;
   } else {
     // use XSDT
     uint64_t off = 0x24 + (idx << 3);
     uint64_t res;
     MemcpyToVirt((VirtAddr)&res, (PhysAddr)(ptrXSDT + off), 8);
-    return (void *)res;
+    return res;
   }
 }
 

@@ -95,7 +95,7 @@ public:
   uint16_t limit;
   uint64_t virtualAddress;
 } OS_PACKED;
-static_assert(sizeof(IdtPointer) == 0xa0, "IdtPointer size == 0xa0");
+static_assert(sizeof(IdtPointer) == 0x0a, "IdtPointer size == 0x0a");
 
 }
 
