@@ -32,7 +32,6 @@ namespace x64 {
 
 namespace ACPI {
 
-static bool hasFound = false;
 static RSDP * rsdp = NULL;
 
 static bool FindSDT();

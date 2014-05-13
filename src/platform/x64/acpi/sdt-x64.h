@@ -50,6 +50,8 @@ class RSDP {
   void * GetTable(uint64_t idx);
 } OS_PACKED;
 
+RSDP & GetRSDP();
+
 }
 
 }

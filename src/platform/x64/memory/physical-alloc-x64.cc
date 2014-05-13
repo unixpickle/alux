@@ -124,10 +124,11 @@ namespace x64 {
                                     uint64_t & lastPtr,
                                     uint64_t & firstPtr) {
     // allocate the data
+    KernelMap & kernMap = KernelMap::GetGlobal();
     PhysAddr physPtr = alloc.AllocPage();
     size_t pageSize = large ? 0x200000 : 0x1000;
-    KernelMap & kernMap = KernelMap::GetGlobal();
-    
+
+    // map
     if (hasStarted) {
       kernMap.MapAt(lastPtr, physPtr, pageSize, large);
       lastPtr += pageSize;
@@ -152,18 +153,18 @@ namespace x64 {
     uint64_t lastPtr;
     uint64_t firstPtr;
     if (remaining >= 0x200000) {
-      StepAllocator<0x200000> realAlloc(&regions, alloc.LastAddress());
+      StepAllocator<0x200000, PhysAddr &> realAlloc(&regions, alloc.lastAddr);
       while (remaining > 0) {
         GrabSpace(true, realAlloc, hasStarted, lastPtr, firstPtr);
         remaining -= 0x200000;
       }
-      firstFree = realAlloc.LastAddress();
+      firstFree = realAlloc.lastAddr;
     } else {
       while (remaining > 0) {
         GrabSpace(false, alloc, hasStarted, lastPtr, firstPtr);
         remaining -= 0x1000;
       }
-      firstFree = alloc.LastAddress();
+      firstFree = alloc.lastAddr;
     }
     return firstPtr;
   }
