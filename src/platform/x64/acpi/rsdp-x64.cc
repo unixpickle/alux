@@ -24,7 +24,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "sdt-x64.h"
+#include "rsdp-x64.h"
 
 namespace OS {
 

@@ -24,6 +24,9 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#ifndef __PLATFORM_X64_RSDP_X64_H__
+#define __PLATFORM_X64_RSDP_X64_H__
+
 #include <cstdint>
 #include <utilities/common.h>
 #include <platform/failure.h>
@@ -57,3 +60,5 @@ RSDP & GetRSDP();
 }
 
 }
+
+#endif
