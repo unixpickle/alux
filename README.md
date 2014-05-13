@@ -11,17 +11,19 @@ General architectual ideas that I am playing around with:
 
 ## TODO
 
- * Test MapCreator with segmented initial physical memory regions to verify that it adds addresses correctly.
+Currently, I'm working on getting SMP to work:
 
-Here's the way I am going to make the kernel map work:
+ * Create new kernel interface for reading a buffer from physical memory
+ * Find and parse ACPI tables relating to SMP
+  * actually utilize the damn `new` and `delete` keywords
+ * Use NASM to generate a processor initialization routine
+ * Make inter-processor communication system
+  * Send message, poll for response
 
- * Initially, figure out how much memory is needed for the kernel code, and make a topological map of the physical address space.
- * Generate the page tables covering the kernel using the identity-mapped lower GiB of physical memory.
- * Additionally, map in `n` extra page tables, where n is probably 1 or 2 on systems with many CPUs.
- * Switch to the new address space. Note that none of the page tables we just used to create our map are probably mapped in except for the `n` scratch PTs.
- * Now, allow a higher-level object to map in the physical memory needed to represent the physical memory buddy allocator bitmaps. We can modify the physical page tables using our `n` scratch PTs.
- * Use a higher-level object to generate the physical allocators; this object will provide an API for allocating physical memory. 
- * This object will report the last physical address used to the *next* higher up object, which will track mapped regions of kernel virtual memory.
+Also, there's some miscellaneous stuff I want to do:
+
+ * Implement ACPI shutdown
+ * Create IPI for Panic()
 
 ## License
 
