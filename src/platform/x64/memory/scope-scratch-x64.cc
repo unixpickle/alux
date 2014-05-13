@@ -25,21 +25,21 @@
  */
 
 #include "scope-scratch-x64.h"
-#include "physical-alloc-x64.h"
+#include "kernel-map-x64.h"
 
 namespace OS {
 
 namespace x64 {
 
 ScopeScratch::ScopeScratch(PhysAddr address) {
-  addr = GetGlobalKernelMap()->AllocScratch(address);
+  addr = KernelMap::GetGlobal().AllocScratch(address);
   if (!addr) {
     Panic("ScopeScratch::ScopeScratch() - failed to allocate!");
   }
 }
 
 ScopeScratch::~ScopeScratch() {
-  GetGlobalKernelMap()->FreeScratch(addr);
+  KernelMap::GetGlobal().FreeScratch(addr);
 }
 
 void * ScopeScratch::GetPointer() {
@@ -51,7 +51,7 @@ VirtAddr ScopeScratch::GetVirtAddr() {
 }
 
 void ScopeScratch::Reassign(PhysAddr newAddr) {
-  GetGlobalKernelMap()->ReassignScratch(addr, newAddr);
+  KernelMap::GetGlobal().ReassignScratch(addr, newAddr);
 }
 
 }

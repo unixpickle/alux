@@ -31,6 +31,16 @@ namespace OS {
 namespace x64 {
 
 static const VirtAddr ScratchStartAddr = 0x7FC0000000L;
+static KernelMap globalMap;
+static bool hasInitialized = false;
+
+KernelMap & KernelMap::GetGlobal() {
+  if (!hasInitialized) {
+    hasInitialized = true;
+    new(&globalMap) KernelMap();
+  }
+  return globalMap;
+}
 
 KernelMap::KernelMap() : manager() {
   scratchLock = 0;
@@ -54,7 +64,7 @@ void KernelMap::Setup() {
     ((uint64_t *)scratchPDT)[i] = scratchPT | 3;
   }
   
-  TableMgr man(this, setup.GetPML4());
+  TableMgr man(setup.GetPML4());
   manager = man;
 }
 

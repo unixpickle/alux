@@ -26,24 +26,20 @@
 
 #include "table-mgr-x64.h"
 #include "kernel-map-x64.h"
-#include <iostream>
 
 namespace OS {
 
 namespace x64 {
 
-TableMgr::TableMgr(KernelMap * map, PhysAddr _pml4) {
-  kernMap = map;
+TableMgr::TableMgr(PhysAddr _pml4) {
   pml4 = _pml4;
 }
 
 TableMgr::TableMgr() {
-  kernMap = NULL;
   pml4 = NULL;
 }
 
 TableMgr & TableMgr::operator=(const TableMgr & mgr) {
-  kernMap = mgr.kernMap;
   pml4 = mgr.pml4;
   return *this;
 }
@@ -99,7 +95,7 @@ void TableMgr::MapSmallPage(VirtAddr virt,
   for (int depth = 0; depth < 3; depth++) {
     uint64_t nextPage = scratch[indexes[depth]];
     if (!(nextPage & 1)) {
-      nextPage = kernMap->allocator->AllocPage();
+      nextPage = KernelMap::GetGlobal().allocator->AllocPage();
       
       TypedScratch<uint64_t> temp(nextPage);
       for (int i = 0; i < 0x200; i++) {
@@ -139,7 +135,7 @@ void TableMgr::MapLargePage(VirtAddr virt,
   for (int depth = 0; depth < 2; depth++) {
     uint64_t nextPage = scratch[indexes[depth]];
     if (!(nextPage & 1)) {
-      nextPage = kernMap->allocator->AllocPage();
+      nextPage = KernelMap::GetGlobal().allocator->AllocPage();
       
       TypedScratch<uint64_t> temp(nextPage);
       for (int i = 0; i < 0x200; i++) {

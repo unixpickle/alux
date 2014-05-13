@@ -34,5 +34,6 @@
 #endif
 
 typedef unsigned long int size_t;
+typedef long int ssize_t;
 
 #endif

@@ -36,7 +36,7 @@ namespace x64 {
 
 class InterruptTable {
 private:
-  IdtEntry entries[0x100];
+  IdtEntry entries[0x100] OS_ALIGNED(8);
   IntHandler handlers[0x100];
   IdtPointer idtPtr OS_ALIGNED(8);
   

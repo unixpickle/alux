@@ -25,161 +25,173 @@
  */
 
 #include "physical-alloc-x64.h"
-#include "real-allocator-x64.h"
 
 namespace OS {
 
-static x64::PhysRegionList regions;
-static x64::AllocatorList allocators;
-static x64::KernelMap kernMap;
-static uint64_t lock OS_ALIGNED(8) = 0;
-static size_t totalSpace = 0;
-
 namespace x64 {
-
-  static VirtAddr firstAddr = 0;
-  static VirtAddr contAddr = 0;
-  static bool usingLargePages = false;
-  static RealAllocator realAllocator;
   
-  /**
-   * Grabs chunks of physical memory and maps them to virtual memory so that we
-   * can use them for our bitmaps.
-   */
-  static bool GrabMore(StepAllocator & allocator, size_t & remaining);
-
-  void InitializeKernAllocator(void * mbootPtr) {
-    new(&regions) PhysRegionList(mbootPtr);
-    new(&kernMap) KernelMap();
-    
+  static PhysicalAllocator allocator;
+  
+  void PhysicalAllocator::Initialize(void * mbootPtr) {
+    new(&allocator) PhysicalAllocator(mbootPtr);
+    allocator.Setup();
+  }
+  
+  PhysicalAllocator & PhysicalAllocator::GetGlobal() {
+    return allocator;
+  }
+  
+  PhysicalAllocator::PhysicalAllocator(void * mbootPtr)
+    : regions(mbootPtr), lock(0), totalSpace(0) {
     for (int i = 0; i < regions.GetRegionCount(); i++) {
       totalSpace += regions.GetRegions()[i].GetSize();
     }
-    
-    // setup and use the kernel map
-    StepAllocator stepper(&regions, KernelDataSize());
+  }
+  
+  void PhysicalAllocator::Setup() {
+    KernelMap & kernMap = KernelMap::GetGlobal();
+    StepAllocator<0x1000> stepper(&regions, KernelDataSize());
     kernMap.allocator = &stepper;
     kernMap.Setup();
     kernMap.Set();
     
-    // figure out the allocator topology
-    new(&allocators) AllocatorList(0x1000000, 0x1000, 0x1000,
-                                   regions.GetRegions(),
-                                   regions.GetRegionCount());
+    allocators.SetInformation(0x1000000, 0x1000, 0x1000,
+                              regions.GetRegions(),
+                              regions.GetRegionCount());
     allocators.GenerateDescriptions();
     
-    size_t remaining = allocators.BitmapByteCount();
-    // Use this to test that large page bitmaps work
-    /*** TEST ***/
-    /*
-    remaining = 0x400000;
-    */
-    /*** END TEST ***/
-    if (remaining >= 0x200000) usingLargePages = true;
-    if (remaining & 0xfff) {
-      remaining += 0x1000 - (remaining & 0xfff);
-    }
+    // allocate enough physical memory for the bitmap data
+    PhysAddr firstFree;
+    VirtAddr bitmapPtr = AllocateBitmaps(stepper, firstFree);
     
-    // allocate the memory
-    while (remaining) {
-      if (!GrabMore(stepper, remaining)) {
-        Panic("OS::x64::InitializeKernAllocator() - GrabMore failed");
-      }
-    }
+    allocators.GenerateAllocators((uint8_t *)bitmapPtr);
     
-    allocators.GenerateAllocators((uint8_t *)firstAddr);
-    
-    MemoryRegion reg(0, stepper.LastAddress());
+    MemoryRegion reg(0, firstFree);
     allocators.Reserve(reg);
     
-    new(&realAllocator) RealAllocator();
-    kernMap.allocator = &realAllocator;
+    kernMap.allocator = this;
     
-    cout << "OS::x64::InitializeKernAllocator() - LastAddress() = "
-      << stepper.LastAddress() << endl;
-  }
-  
-  KernelMap * GetGlobalKernelMap() {
-    return &kernMap;
+    cout << "OS::x64::PhysicalAllocator::Setup() - firstFree="
+      << firstFree << endl;
   }
 
-  static bool GrabMore(StepAllocator & allocator, size_t & remaining) {
-    // figure out where we are
-    PhysAddr & firstFree = allocator.LastAddress();
-    cout << "OS::x64::GrabMore() with firstFree=" << firstFree << endl;
+  bool PhysicalAllocator::Alloc(size_t size,
+                                PhysAddr & addr,
+                                size_t * realSize) {
+    return Align(size, 1, addr, realSize);
+  }
+  
+  bool PhysicalAllocator::Align(size_t size,
+                                size_t align,
+                                PhysAddr & addr,
+                                size_t * realSize) {
+    ScopeLock scope(&lock);
+    return allocators.AllocPointer(size, align, (uintptr_t &)addr, realSize);
+  }
+  
+  void PhysicalAllocator::Free(PhysAddr addr) {
+    ScopeLock scope(&lock);
+    allocators.FreePointer(addr);
+  }
+  
+  size_t PhysicalAllocator::Available() {
+    ScopeLock scope(&lock);
+    return allocators.AvailableSpace();
+  }
+  
+  size_t PhysicalAllocator::Used() {
+    return totalSpace - Available();
+  }
+  
+  PhysAddr PhysicalAllocator::AllocPage() {
+    PhysAddr result;
+    bool stat = Align(0x1000, 0x1000, result, NULL);
+    if (!stat) Panic("OS::x64::PhysicalAllocator::AllocPage() - failed");
+    return result;
+  }
+  
+  void PhysicalAllocator::FreePage(PhysAddr p) {
+    Free(p);
+  }
+  
+  /***********
+   * Private *
+   ***********/
+
+  void PhysicalAllocator::GrabSpace(bool large,
+                                    PageAllocator & alloc,
+                                    bool & hasStarted,
+                                    uint64_t & lastPtr,
+                                    uint64_t & firstPtr) {
+    // allocate the data
+    PhysAddr physPtr = alloc.AllocPage();
+    size_t pageSize = large ? 0x200000 : 0x1000;
+    KernelMap & kernMap = KernelMap::GetGlobal();
     
-    MemoryRegion * reg = regions.FindRegion(firstFree);
-    if (!reg) {
-      if (!(reg = regions.FindRegion(firstFree - 1))) {
-        Panic("OS::x64::GrabMore() - firstFree out of bounds.");
-      }
-    }
-    
-    size_t reqSize = usingLargePages ? 0x200000 : 0x1000;
-    
-    // align firstFree or don't use this region
-    if (firstFree % reqSize) {
-      firstFree += reqSize - (firstFree % reqSize);
-      if (firstFree > reg->GetEnd()) firstFree = reg->GetEnd();
-    }
-    
-    // make sure there's enough space in this region
-    size_t availSpace = reg->GetEnd() - firstFree;
-    if (availSpace < reqSize) {
-      reg = regions.NextRegion(reg);
-      if (!reg) return false;
-      firstFree = reg->GetStart();
-      return true;
-    }
-    
-    // figure out how many pages we can actually map
-    size_t canGet = availSpace > remaining ? remaining : availSpace;
-    if (canGet % reqSize) canGet -= canGet % reqSize;
-    PhysAddr newAddr = firstFree;
-    firstFree += canGet;
-    
-    cout << "OS::x64::GrabMore() - canGet=" << canGet << "; remaining="
-      << remaining << endl;
-    
-    // map it
-    if (firstAddr) {
-      kernMap.MapAt(contAddr, newAddr, canGet, usingLargePages);
-      contAddr += canGet;
+    if (hasStarted) {
+      kernMap.MapAt(lastPtr, physPtr, pageSize, large);
+      lastPtr += pageSize;
     } else {
-      firstAddr = kernMap.Map(newAddr, canGet, usingLargePages);
-      if (!firstAddr) return false;
-      contAddr = firstAddr + canGet;
+      hasStarted = true;
+      firstPtr = kernMap.Map(physPtr, pageSize, large);
+      if (!firstPtr) {
+        Panic("OS::x64::PhysicalAllocator::GrabSpace() - Map() failed");
+      }
+      lastPtr = firstPtr + pageSize;
     }
-    remaining -= canGet;
-    return true;
+  }
+  
+  VirtAddr PhysicalAllocator::AllocateBitmaps(StepAllocator<0x1000> & alloc,
+                                              PhysAddr & firstFree) {
+    ssize_t remaining = (ssize_t)allocators.BitmapByteCount();
+    
+    // DEBUG: set this to make sure large pages work
+    // remaining = 0x400000;
+    
+    bool hasStarted = false;
+    uint64_t lastPtr;
+    uint64_t firstPtr;
+    if (remaining >= 0x200000) {
+      StepAllocator<0x200000> realAlloc(&regions, alloc.LastAddress());
+      while (remaining > 0) {
+        GrabSpace(true, realAlloc, hasStarted, lastPtr, firstPtr);
+        remaining -= 0x200000;
+      }
+      firstFree = realAlloc.LastAddress();
+    } else {
+      while (remaining > 0) {
+        GrabSpace(false, alloc, hasStarted, lastPtr, firstPtr);
+        remaining -= 0x1000;
+      }
+      firstFree = alloc.LastAddress();
+    }
+    return firstPtr;
   }
 
 }
 
 bool PhysicalAlloc(size_t size, PhysAddr & addr, size_t * realSize) {
-  return PhysicalAlign(size, 1, addr, realSize);
+  return x64::PhysicalAllocator::GetGlobal().Alloc(size, addr, realSize);
 }
 
 bool PhysicalAlign(size_t size,
                    size_t align,
                    PhysAddr & addr,
                    size_t * realSize) {
-  ScopeLock scope(&lock);
-  return allocators.AllocPointer(size, align, (uintptr_t &)addr, realSize);
+  return x64::PhysicalAllocator::GetGlobal().Align(size, align, addr,
+                                                   realSize);
 }
 
 void PhysicalFree(PhysAddr addr) {
-  ScopeLock scope(&lock);
-  allocators.FreePointer(addr);
+  x64::PhysicalAllocator::GetGlobal().Free(addr);
 }
 
 size_t PhysicalAvailable() {
-  ScopeLock scope(&lock);
-  return allocators.AvailableSpace();
+  return x64::PhysicalAllocator::GetGlobal().Available();
 }
 
 size_t PhysicalUsed() {
-  return totalSpace - PhysicalAvailable();
+  return x64::PhysicalAllocator::GetGlobal().Used();
 }
 
 }

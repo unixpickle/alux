@@ -90,13 +90,8 @@ PhysRegionList::PhysRegionList(void * mbootPtr) {
   }
   if (!regionCount) Panic("GlobalMap() - no regions found");
   
-  /**
-   * Setup test regions. You should have a reasonable amount of memory on your
-   * system -- something like 64MB should be fine.
-   * This test essentially sees if the MapCreator can properly work with
-   * fragmented memory.
-   */
-  /*** TEST ***/
+  // DEBUG: these regions test the OS's ability to deal with random-ass memory
+  // configurations
   /*
   MemoryRegion r1(0, 0x1000003);
   MemoryRegion r2(0x2000000, 0x3000);
@@ -110,7 +105,6 @@ PhysRegionList::PhysRegionList(void * mbootPtr) {
   regions[4] = r5;
   regionCount = 5;
   */
-  /*** END TEST **/
 }
 
 MemoryRegion * PhysRegionList::GetRegions() {

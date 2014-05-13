@@ -33,6 +33,7 @@
 #include <platform/failure.h>
 #include <cassert>
 #include <utilities/lock.h>
+#include <stdlib/runtime.h>
 
 namespace OS {
 
@@ -52,6 +53,8 @@ private:
   TableMgr manager;
 
 public:
+  static KernelMap & GetGlobal();
+  
   KernelMap();
   
   /**
@@ -100,7 +103,7 @@ public:
 
 protected:
   friend class TableMgr;
-  friend void InitializeKernAllocator(void *);
+  friend class PhysicalAllocator;
   
   PageAllocator * allocator;
   

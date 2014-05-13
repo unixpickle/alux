@@ -33,18 +33,15 @@ namespace OS {
 
 namespace x64 {
 
-class KernelMap;
-
 /**
  * This class handles everything that is 4-level page tables.
  */
 class TableMgr {
 protected:
-  KernelMap * kernMap;
   PhysAddr pml4;
 
 public:
-  TableMgr(KernelMap * map, PhysAddr pml4);
+  TableMgr(PhysAddr pml4);
   TableMgr();
   
   TableMgr & operator=(const TableMgr & mgr);

@@ -35,14 +35,14 @@ bool Map(PhysAddr phys, size_t bytes, VirtAddr & addr) {
   if (!(phys & 0x1fffff) && !(bytes & 0x1fffff)) {
     largePages = true;
   }
-  VirtAddr res = x64::GetGlobalKernelMap()->Map(phys, bytes, largePages);
+  VirtAddr res = x64::KernelMap::GetGlobal().Map(phys, bytes, largePages);
   if (!res) return false;
   addr = res;
   return true;
 }
 
 void Unmap(VirtAddr addr, size_t bytes) {
-  x64::GetGlobalKernelMap()->Unmap(addr, bytes);
+  x64::KernelMap::GetGlobal().Unmap(addr, bytes);
 }
 
 void InvalidateCache(VirtAddr addr, size_t bytes, size_t pageSize) {

@@ -36,12 +36,49 @@ namespace OS {
 
 namespace x64 {
 
-const int MaximumAllocators = 0x10;
-typedef ANAlloc::BBTree TreeType;
-typedef ANAlloc::AllocatorList<MaximumAllocators, TreeType> AllocatorList;
-
 void InitializeKernAllocator(void * mbootPtr);
 KernelMap * GetGlobalKernelMap();
+
+class PhysicalAllocator : public PageAllocator {
+public:
+  static const int MaximumAllocators = 0x10;
+  typedef ANAlloc::BBTree TreeType;
+  typedef ANAlloc::AllocatorList<MaximumAllocators, TreeType> AllocatorList;
+  
+  static void Initialize(void * mbootPtr);
+  static PhysicalAllocator & GetGlobal();
+  
+  PhysicalAllocator() {
+    Panic("This is just for the nice compiler.");
+  }
+  
+  PhysicalAllocator(void * mbootPtr);
+  void Setup();
+  
+  bool Alloc(size_t size, PhysAddr & addr, size_t * realSize);
+  bool Align(size_t size, size_t align, PhysAddr & addr, size_t * realSize);
+  void Free(PhysAddr addr);
+  size_t Available();
+  size_t Used();
+  
+  virtual PhysAddr AllocPage();
+  virtual void FreePage(PhysAddr p);
+
+private:
+  PhysRegionList regions;
+  AllocatorList allocators;
+  uint64_t lock OS_ALIGNED(8);
+  size_t totalSpace = 0;
+  
+  VirtAddr AllocateBitmaps(StepAllocator<0x1000> & alloc,
+                           PhysAddr & firstFree);
+  void GrabSpace(bool large,
+                 PageAllocator & alloc,
+                 bool & hasStarted,
+                 uint64_t & lastPtr,
+                 uint64_t & firstPtr);
+
+};
 
 }
 

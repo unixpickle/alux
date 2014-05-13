@@ -33,7 +33,7 @@ void MbootEntry(void * mbootPtr) {
   (void)mbootPtr;
   OS::InitializePrinting();
   OS::InitializeOutStream();
-  OS::x64::InitializeKernAllocator(mbootPtr);
+  OS::x64::PhysicalAllocator::Initialize(mbootPtr);
   OS::EntryPoint();
 }
 
