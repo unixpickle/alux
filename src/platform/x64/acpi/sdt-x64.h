@@ -27,7 +27,7 @@
 #include <cstdint>
 #include <utilities/common.h>
 #include <platform/failure.h>
-#include <platform/x64/memory/scope-scratch-x64.h>
+#include "../memory/phys-memcpy-x64.h"
 
 namespace OS {
 

@@ -34,32 +34,56 @@ namespace ACPI {
 
 static RSDP * rsdp = NULL;
 
-static bool FindSDT();
+static bool FindRSDP();
 static uint8_t MemChecksum(uint8_t * ptr, int len);
 
 RSDP & GetRSDP() {
-  if (!hasFound) {
-    if (!FindSDT()) {
+  if (!rsdp) {
+    if (!FindRSDP()) {
       Panic("OS::x64::ACPI::GetRSDP() - not found");
     }
-    hasFound = true;
   }
   return *rsdp;
 }
 
 uint64_t RSDP::TableCount() {
-  return 0; // TODO: nyi
+  if (revision == 0) {
+    // use RSDT
+    uint32_t lenField = 0;
+    uint64_t offset = (uint64_t)ptrRSDT;
+    MemcpyToVirt((VirtAddr)&lenField, (PhysAddr)(offset + 4), 4);
+    return (lenField - 0x24) >> 2;
+  } else {
+    // use XSDT    
+    uint32_t lenField = 0;
+    uint64_t offset = ptrXSDT;
+    MemcpyToVirt((VirtAddr)&lenField, (PhysAddr)(offset + 4), 4);
+    return (lenField - 0x24) >> 3;
+  }
 }
 
 void * RSDP::GetTable(uint64_t idx) {
-  return NULL; // TODO: nyi
+  if (rsdp->revision == 0) {
+    // use RSDT
+    uint64_t off = 0x24 + (idx << 2);
+    uint64_t res = 0; // must initialize to 0!
+    uint64_t offset = (uint64_t)ptrRSDT + off;
+    MemcpyToVirt((VirtAddr)&res, (PhysAddr)offset, 4);
+    return (void *)res;
+  } else {
+    // use XSDT
+    uint64_t off = 0x24 + (idx << 3);
+    uint64_t res;
+    MemcpyToVirt((VirtAddr)&res, (PhysAddr)(ptrXSDT + off), 8);
+    return (void *)res;
+  }
 }
 
 /***********
  * Private *
  ***********/
 
-static bool FindSDT() {
+static bool FindRSDP() {
   // find the RSDP in the BIOS areas.
   const char * signature = "RSD PTR ";
   uintptr_t ptr;
