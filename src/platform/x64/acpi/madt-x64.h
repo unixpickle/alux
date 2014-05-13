@@ -24,13 +24,12 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef __PLATFORM_X64_RSDP_X64_H__
-#define __PLATFORM_X64_RSDP_X64_H__
+#ifndef __PLATFORM_X64_MADT_X64_H__
+#define __PLATFORM_X64_MADT_X64_H__
 
-#include <cstdint>
-#include <utilities/common.h>
-#include <platform/failure.h>
-#include "../memory/phys-memcpy-x64.h"
+#include "rsdp-x64.h"
+#include <cstring>
+#include <new>
 
 namespace OS {
 
@@ -38,23 +37,49 @@ namespace x64 {
 
 namespace ACPI {
 
-class RSDP {
+class MADTHeader {
 public:
-  uint64_t signature;
+  uint32_t signature;
+  uint32_t length;
+  uint8_t revision;
   uint8_t checksum;
   char oemid[6];
-  uint8_t revision;
-  uint32_t ptrRSDT;
-  uint32_t length;
-  uint64_t ptrXSDT;
-  uint8_t xChecksum;
-  char reserved[3];
-  
-  uint64_t TableCount();
-  PhysAddr GetTable(uint64_t idx);
+  uint64_t oemTableId;
+  uint32_t oemRevision;
+  uint32_t creatorId;
+  uint32_t creatorRev;
+  uint32_t lapicAddr;
+  uint32_t flags;
 } OS_PACKED;
 
-RSDP & GetRSDP();
+class MADT {
+private:
+  MADTHeader header;
+  uint8_t * data;
+  size_t dataSize;
+  
+  int tableCount;
+  
+public:
+  static const size_t HeaderSize = sizeof(MADTHeader);
+  
+  MADT() {}
+  MADT(PhysAddr phyPtr);
+  ~MADT();
+  
+  const MADTHeader & GetHeader();
+  const void * GetData();
+  size_t GetDataSize();
+  
+  int GetTableCount();
+  void * GetTable(int i);
+  
+};
+
+/**
+ * Gets the multiprocessing table descriptor, or returns NULL if none exists.
+ */
+MADT * GetMADT();
 
 }
 
