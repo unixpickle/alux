@@ -24,29 +24,65 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <platform/multiprocessing.h>
-#include <platform/interrupts.h>
-#include "interrupts/int-handlers-x64.h"
-#include "interrupts/pic-x64.h"
-#include "interrupts/ioapic-x64.h"
+#ifndef __PLATFORM_X64_IOAPIC_X64_H__
+#define __PLATFORM_X64_IOAPIC_X64_H__
+
+#include "../acpi/madt-x64.h"
+#include "../common-x64.h"
+#include <platform/failure.h>
+#include <platform/memory.h>
 
 namespace OS {
 
-void InitializeProcessors() {
-  x64::InitializeIDT();
-  x64::ConfigureDummyIDT();
-  x64::GetGlobalIDT().Load();
-  cout << "OS::InitializeProcessors() - disabling PIC..." << endl;
-  x64::RemapPIC(0xf0, 0xf8, 0xff, 0xff);
-  SetInterruptsEnabled(true);
-  // if there are a few interrupts masked, we can trigger our handlers for all
-  // of them and send appropriate EOIs to the PIC.
-  __asm__("nop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\nnop");
-  SetInterruptsEnabled(false);
-  x64::ConfigureRealIDT();
+namespace x64 {
+
+class IOAPIC {
+private:
+  PhysAddr base;
+  ACPI::MADT::IOAPIC madtInfo;
   
-  x64::InitializeIOAPIC();
-  Panic("TODO: initialize Local APIC");
+  volatile uint32_t * regs;
+  
+public:
+  static const int RegVersion = 0x1;
+  
+  static void StartUsing();
+  
+  class TableEntry {
+    unsigned vector : 8; // RW - processor register
+    unsigned delmode : 3; // RW
+    unsigned destmode : 1; // RW - determines type for destfield
+    unsigned delstatus : 1; // RO
+    unsigned intpol : 1; // RW - 0 = high active, 1 = low active
+    unsigned remirr : 1; // RO
+    unsigned triggermode : 1; // 1 = level sensitive, 0 = edge sensitive
+    unsigned imask : 1; // 1 = prevent this interrupt
+    unsigned long long reserved : 39; // set this to 0
+    unsigned destfield : 8; // RW - APIC ID or "set of processors"
+  } OS_PACKED;
+  
+  IOAPIC() {
+    Panic("This is only for the compiler's satisfaction!");
+  }
+  
+  IOAPIC(ACPI::MADT::IOAPIC * _info);
+  ~IOAPIC();
+  
+  void WriteReg(uint8_t reg, uint32_t val);
+  uint32_t ReadReg(uint8_t reg);
+  
+  uint32_t GetVersion();
+  uint32_t GetPinCount();
+  uint32_t GetInterruptBase();
+  
+  void SetRedTable(uint8_t idx, const TableEntry & entry);
+};
+
+void InitializeIOAPIC();
+IOAPIC & GetBaseIOAPIC();
+
 }
 
 }
+
+#endif

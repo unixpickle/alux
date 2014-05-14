@@ -47,8 +47,7 @@ MADT::MADT(PhysAddr physPtr) : tableCount(0) {
     // count the tables
     size_t offset = 0;
     while (offset + 2 < dataSize) {
-      uint8_t len = data[1 + offset];
-      offset += len;
+      offset += data[1 + offset];
       tableCount++;
     }
   } else {
@@ -76,15 +75,62 @@ int MADT::GetTableCount() {
   return tableCount;
 }
 
-void * MADT::GetTable(int i) {
+uint8_t * MADT::GetTable(int i) {
   assert(i >= 0 && i < tableCount);
   
-  int index = 0;
   size_t offset = 0;
   for (int j = 0; j < i; j++) {
     offset += data[1 + offset];
   }
-  return (void *)(data + offset);
+  return data + offset;
+}
+
+bool MADT::SystemHas8259() {
+  return header.flags & 1;
+}
+
+int MADT::CountType(uint8_t type) {
+  int count = 0;
+  size_t offset = 0;
+  for (int i = 0; i < tableCount; i++) {
+    if (data[offset] == type) count++;
+    offset += data[1 + offset];
+  }
+  return count;
+}
+
+int MADT::CountIOAPICEntries() {
+  return CountType(TypeIOAPIC);
+}
+
+int MADT::CountLocalAPICEntries() {
+  return CountType(TypeLAPIC) + CountType(Typex2APIC);
+}
+
+MADT::ISO * MADT::LookupISO(uint8_t physicalIRQ) {
+  size_t offset = 0;
+  for (int i = 0; i < tableCount; i++) {
+    if (data[offset] == TypeISO) {
+      ISO * iso = (ISO *)(data + offset);
+      if (iso->source == physicalIRQ && iso->bus == 0) {
+        return iso;
+      }
+    }
+    offset += data[1 + offset];
+  }
+  return NULL;
+}
+
+MADT::IOAPIC * MADT::GetIOAPICWithBase(uint32_t base) {
+  size_t offset = 0;
+  for (int i = 0; i < tableCount; i++) {
+    if (data[offset] == TypeIOAPIC) {
+      IOAPIC * info = (IOAPIC *)(data + offset);
+      if (info->interruptBase == base) return info;
+    }
+    offset += data[1 + offset];
+  }
+  return NULL;
 }
 
 MADT * GetMADT() {
