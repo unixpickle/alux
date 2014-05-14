@@ -73,6 +73,10 @@ public:
   virtual bool IsRequested(uint8_t vector);
   virtual bool IsInService(uint8_t vector);
 
+  virtual void SendIPI(uint32_t cpu, uint8_t vector,
+                       uint8_t mode, uint8_t level,
+                       uint8_t trigger) = 0;
+
   virtual uint64_t ReadRegister(uint16_t reg) = 0;
   virtual void WriteRegister(uint16_t reg, uint64_t value) = 0;
 };
@@ -89,6 +93,9 @@ public:
   virtual void WriteRegister(uint16_t reg, uint64_t value);
   virtual void Enable();
   virtual uint32_t GetId();
+  virtual void SendIPI(uint32_t cpu, uint8_t vector,
+                       uint8_t mode, uint8_t level,
+                       uint8_t trigger);
 };
 
 class X2APIC : public LAPIC {
@@ -97,10 +104,13 @@ public:
   virtual void WriteRegister(uint16_t reg, uint64_t value);
   virtual void Enable();
   virtual uint32_t GetId();
+  virtual void SendIPI(uint32_t cpu, uint8_t vector,
+                       uint8_t mode, uint8_t level,
+                       uint8_t trigger);
 };
 
 void InitializeLocalAPIC();
-LAPIC & GetBaseAPIC();
+LAPIC & GetLocalAPIC();
 
 }
 

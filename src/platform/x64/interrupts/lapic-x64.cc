@@ -113,6 +113,16 @@ uint32_t XAPIC::GetId() {
   return ReadRegister(RegAPICID) >> 0x18;
 }
 
+void XAPIC::SendIPI(uint32_t cpu, uint8_t vector,
+                    uint8_t mode, uint8_t level,
+                    uint8_t trigger) {
+  uint64_t value = 0;
+  value = (uint64_t)vector | ((uint64_t)mode << 8);
+  value |= ((uint64_t)level << 0xe) | ((uint64_t)trigger << 0xf);
+  value |= ((uint64_t)cpu << 0x38);
+  WriteRegister(0x30, value);
+}
+
 uint64_t X2APIC::ReadRegister(uint16_t reg) {
   return ReadMSR((uint32_t)reg + 0x800);
 }
@@ -131,6 +141,16 @@ uint32_t X2APIC::GetId() {
   return ReadRegister(RegAPICID);
 }
 
+void X2APIC::SendIPI(uint32_t cpu, uint8_t vector,
+                     uint8_t mode, uint8_t level,
+                     uint8_t trigger) {
+  uint64_t value = 0;
+  value = (uint64_t)vector | ((uint64_t)mode << 8);
+  value |= ((uint64_t)level << 0xe) | ((uint64_t)trigger << 0xf);
+  value |= ((uint64_t)cpu << 0x20);
+  WriteRegister(0x30, value);
+}
+
 void InitializeLocalAPIC() {
   uint32_t ecx;
   CPUID(1, NULL, &ecx, NULL);
@@ -144,7 +164,7 @@ void InitializeLocalAPIC() {
   }
 }
 
-LAPIC & GetBaseAPIC() {
+LAPIC & GetLocalAPIC() {
   return *lapic;
 }
 

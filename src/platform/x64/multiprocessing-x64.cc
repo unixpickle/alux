@@ -57,8 +57,13 @@ void InitializeProcessors() {
   x64::IOAPIC::StartUsing();
 
   x64::InitializeLocalAPIC();
+  x64::LAPIC & lapic = x64::GetLocalAPIC();
+
+  cout << "OS::InitializeProcessors() - enabling first LAPIC..." << endl;
+  lapic.SetDefaults();
+  lapic.Enable();
   
-  Panic("TODO: initialize Local APIC");
+  Panic("TODO: send CPU IPIs here");
 }
 
 }
