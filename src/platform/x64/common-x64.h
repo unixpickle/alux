@@ -32,6 +32,9 @@ namespace OS {
 namespace x64 {
 
 void OutB(uint16_t port, uint8_t byte);
+uint64_t ReadMSR(uint32_t cell);
+void WriteMSR(uint32_t cell, uint64_t value);
+void CPUID(uint32_t sel, uint32_t * ebx, uint32_t * ecx, uint32_t * edx);
 
 }
 

@@ -34,6 +34,32 @@ void OutB(uint16_t port, uint8_t byte) {
   __asm__("outb %%al, %%dx" : : "a" (byte), "d" (port));
 }
 
+uint64_t ReadMSR(uint32_t cell) {
+  uint64_t higher;
+  uint64_t lower;
+  __asm__("rdmsr"
+          : "=d" (higher), "=a" (lower)
+          : "c" (cell));
+  return (higher << 0x20) | lower;
+}
+
+void WriteMSR(uint32_t cell, uint64_t value) {
+  uint64_t lower = value & 0xffffffff;
+  uint64_t higher = value >> 0x20;
+  __asm__("wrmsr" : : "c" (cell), "d" (higher), "a" (lower));
+}
+
+void CPUID(uint32_t sel, uint32_t * ebx, uint32_t * ecx, uint32_t * edx) {
+  uint64_t rbx, rcx, rdx;
+  __asm__("cpuid"
+          : "=b" (rbx), "=c" (rcx), "=d" (rdx)
+          : "a" (sel));
+  if (ebx) *ebx = (uint32_t)rbx;
+  if (ecx) *ecx = (uint32_t)rcx;
+  if (edx) *edx = (uint32_t)rdx;
 }
 
 }
+
+}
+

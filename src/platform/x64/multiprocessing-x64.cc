@@ -29,6 +29,7 @@
 #include "interrupts/int-handlers-x64.h"
 #include "interrupts/pic-x64.h"
 #include "interrupts/ioapic-x64.h"
+#include "interrupts/lapic-x64.h"
 
 namespace OS {
 
@@ -54,6 +55,8 @@ void InitializeProcessors() {
   apic.MapIRQ(1, 0x21);
   apic.MapIRQ(6, 0x26);
   x64::IOAPIC::StartUsing();
+
+  x64::InitializeLocalAPIC();
   
   Panic("TODO: initialize Local APIC");
 }
