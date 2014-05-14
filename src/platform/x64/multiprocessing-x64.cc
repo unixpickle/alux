@@ -46,6 +46,15 @@ void InitializeProcessors() {
   x64::ConfigureRealIDT();
   
   x64::InitializeIOAPIC();
+  x64::IOAPIC & apic = x64::GetBaseIOAPIC();
+  for (uint32_t i = 0; i < apic.GetPinCount(); i++) {
+    apic.MaskPin(i);
+  }
+  apic.MapIRQ(0, 0x20);
+  apic.MapIRQ(1, 0x21);
+  apic.MapIRQ(6, 0x26);
+  x64::IOAPIC::StartUsing();
+  
   Panic("TODO: initialize Local APIC");
 }
 

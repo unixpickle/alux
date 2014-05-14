@@ -49,6 +49,7 @@ public:
   static void StartUsing();
   
   class TableEntry {
+  public:
     unsigned vector : 8; // RW - processor register
     unsigned delmode : 3; // RW
     unsigned destmode : 1; // RW - determines type for destfield
@@ -59,6 +60,9 @@ public:
     unsigned imask : 1; // 1 = prevent this interrupt
     unsigned long long reserved : 39; // set this to 0
     unsigned destfield : 8; // RW - APIC ID or "set of processors"
+    
+    TableEntry() : vector(0), delmode(0), destmode(0), delstatus(0), intpol(0),
+      remirr(0), triggermode(0), imask(0), reserved(0), destfield(0) {}
   } OS_PACKED;
   
   IOAPIC() {
@@ -75,7 +79,9 @@ public:
   uint32_t GetPinCount();
   uint32_t GetInterruptBase();
   
-  void SetRedTable(uint8_t idx, const TableEntry & entry);
+  void SetTable(uint8_t idx, const TableEntry & entry);
+  void MapIRQ(uint8_t irq, uint8_t vector);
+  void MaskPin(uint8_t irq);
 };
 
 void InitializeIOAPIC();

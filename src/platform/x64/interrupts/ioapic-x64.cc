@@ -77,11 +77,29 @@ uint32_t IOAPIC::GetInterruptBase() {
   return madtInfo.interruptBase;
 }
 
-void IOAPIC::SetRedTable(uint8_t idx, const TableEntry & entry) {
+void IOAPIC::SetTable(uint8_t idx, const TableEntry & entry) {
   const uint32_t * valPtr = (const uint32_t *)&entry;
   WriteReg(0x10 + (idx * 2), 0x10000); // mask the entry
   WriteReg(0x11 + (idx * 2), valPtr[1]);
   WriteReg(0x10 + (idx * 2), valPtr[0]); 
+}
+
+void IOAPIC::MapIRQ(uint8_t irq, uint8_t vector) {
+  TableEntry entry;
+  entry.vector = vector;
+  
+  ACPI::MADT::ISO * iso = ACPI::GetMADT()->LookupISO(irq);
+  if (iso) {
+    if (iso->flags & 0x3) entry.intpol = 1;
+    if ((iso->flags >> 2) & 0x3) entry.triggermode = 1;
+    SetTable(iso->interrupt, entry);
+  } else {
+    SetTable(irq, entry);
+  }
+}
+
+void IOAPIC::MaskPin(uint8_t irq) {
+  WriteReg(0x10 + (irq * 2), 0x10000);
 }
 
 void InitializeIOAPIC() {
