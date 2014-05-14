@@ -13,12 +13,10 @@ General architectual ideas that I am playing around with:
 
 Currently, I'm working on getting SMP to work:
 
- * Create new kernel interface for reading a buffer from physical memory
- * Find and parse ACPI tables relating to SMP
-  * actually utilize the damn `new` and `delete` keywords
+ * Implement the Local APIC as an abstract base class
  * Use NASM to generate a processor initialization routine
  * Make inter-processor communication system
-  * Send message, poll for response
+  * Send message, poll for response or get callback if desired
 
 Also, there's some miscellaneous stuff I want to do:
 
