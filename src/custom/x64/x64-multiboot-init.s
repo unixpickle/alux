@@ -155,6 +155,10 @@ entry64:
   add rsi, 0x10
   jmp rsi
 
+
+; 16-bit processor entrypoint
+%include "./proc-entry.s"
+
 ; static data area
 
 align 8

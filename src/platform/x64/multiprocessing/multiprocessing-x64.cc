@@ -26,10 +26,10 @@
 
 #include <platform/multiprocessing.h>
 #include <platform/interrupts.h>
-#include "interrupts/int-handlers-x64.h"
-#include "interrupts/pic-x64.h"
-#include "interrupts/ioapic-x64.h"
-#include "interrupts/lapic-x64.h"
+#include "../interrupts/int-handlers-x64.h"
+#include "../interrupts/pic-x64.h"
+#include "../interrupts/ioapic-x64.h"
+#include "../interrupts/lapic-x64.h"
 
 namespace OS {
 
