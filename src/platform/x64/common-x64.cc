@@ -41,10 +41,25 @@ void CPUID(uint32_t eax, uint32_t * ebx, uint32_t * edx, uint32_t * ecx) {
   uint64_t rbxOut, rcxOut, rdxOut;
   __asm__("cpuid"
           : "=b" (rbxOut), "=c" (rcxOut), "=d" (rdxOut)
-          : "b" (ebxIn), "c" (ecxIn), "d" (edxIn));
+          : "b" (ebxIn), "c" (ecxIn), "d" (edxIn), "a" (eax));
   if (ebx) *ebx = (uint32_t)rbxOut;
   if (ecx) *ecx = (uint32_t)rcxOut;
   if (edx) *edx = (uint32_t)rdxOut;
+}
+
+uint64_t ReadMSR(uint32_t cell) {
+  uint64_t higher;
+  uint64_t lower;
+  __asm__("rdmsr"
+          : "=d" (higher), "=a" (lower)
+          : "c" (cell));
+  return (higher << 0x20) | lower;
+}
+
+void WriteMSR(uint32_t cell, uint64_t value) {
+  uint64_t lower = value & 0xffffffff;
+  uint64_t higher = value >> 0x20;
+  __asm__("wrmsr" : : "c" (cell), "d" (higher), "a" (lower));
 }
 
 }

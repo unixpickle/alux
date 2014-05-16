@@ -26,9 +26,10 @@
 
 #include <platform/multiprocessing.h>
 #include <platform/interrupts.h>
-#include "interrupts/int-handlers-x64.h"
-#include "interrupts/pic-x64.h"
-#include "interrupts/ioapic-x64.h"
+#include "../interrupts/int-handlers-x64.h"
+#include "../interrupts/pic-x64.h"
+#include "../interrupts/ioapic-x64.h"
+#include "../interrupts/lapic-x64.h"
 
 namespace OS {
 
@@ -54,8 +55,15 @@ void InitializeProcessors() {
   apic.MapIRQ(1, 0x21);
   apic.MapIRQ(6, 0x26);
   x64::IOAPIC::StartUsing();
+
+  x64::InitializeLocalAPIC();
+  x64::LAPIC & lapic = x64::GetLocalAPIC();
+
+  cout << "OS::InitializeProcessors() - enabling first LAPIC..." << endl;
+  lapic.SetDefaults();
+  lapic.Enable();
   
-  Panic("TODO: initialize Local APIC");
+  Panic("TODO: send CPU IPIs here");
 }
 
 }

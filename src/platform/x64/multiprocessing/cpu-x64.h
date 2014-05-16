@@ -24,19 +24,31 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <cstdint>
-#include <utilities/common.h>
+#ifndef __PLATFORM_X64_CPU_X64_H__
+#define __PLATFORM_X64_CPU_X64_H__
+
+#include <platform/multiprocessing.h>
 
 namespace OS {
 
 namespace x64 {
 
-void OutB(uint16_t port, uint8_t byte);
-void CPUID(uint32_t eax, uint32_t * ebx, uint32_t * edx, uint32_t * ecx);
-uint64_t ReadMSR(uint32_t cell);
-void WriteMSR(uint32_t cell, uint64_t value);
+class CPU : public Processor {
+private:
+  int logicalCPUBits;
+  int coreCPUBits;
+  uint32_t apicId;
+
+public:
+  CPU(uint32_t apicId); // only call this from the current CPU
+
+  int GetIndexInCore();
+  int GetIndexInCPU();
+};
 
 }
 
 }
+
+#ifndef
 
