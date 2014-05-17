@@ -25,12 +25,15 @@
  */
 
 #include "lock.h"
+#include <scheduler/scheduler-init.hpp>
+#include <platform/interrupts.h>
 
 namespace OS {
 
 ScopeLock::ScopeLock(anlock_t lock) {
   theLock = lock;
   assert(!((uint64_t)lock & 7));
+  assert(!HasInitializedScheduler() || GetInterruptsEnabled());
   anlock_lock(theLock);
 }
 

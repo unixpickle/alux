@@ -53,11 +53,16 @@ public:
   virtual int GetPriority() = 0;
   
   /**
-   * Sends an IPI to this CPU indicating that a piece of memory has been
-   * modified. The OS::HandleMemoryIPI method should be called on the given CPU
-   * with interrupts disabled.
+   * Sends an IPI to this CPU and receives a response. Make sure that you are
+   * not holding any locks when you call this, since it will lock the CPU until
+   * a response is received.
    */
-  virtual void SendMemoryIPI() = 0;
+  virtual void * SendSyncIPI(void * object);
+  
+  /**
+   * Sends an IPI to this CPU and does not wait for a response.
+   */
+  virtual void SendAsyncIPI(void * object);
   
 };
 

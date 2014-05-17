@@ -25,7 +25,7 @@
  */
 
 #include <new>
-#include <platform/multiprocessing.h>
+#include <scheduler/scheduler-init.hpp>
 
 namespace OS {
 

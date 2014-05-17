@@ -25,6 +25,7 @@
  */
 
 #include <memory/kmalloc.h>
+#include <scheduler/scheduler-init.hpp>
 
 namespace OS {
 
@@ -61,6 +62,7 @@ void * Malloc(size_t size) {
 }
 
 void Free(void * ptr) {
+  ScopeLock scope(&mallocLock);
   MallocRegion * reg = firstRegion;
   while (reg) {
     if (reg->OwnsPointer(ptr)) {

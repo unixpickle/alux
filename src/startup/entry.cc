@@ -38,7 +38,7 @@ void EntryPoint() {
   InitializeMalloc();
   cout << " [OK]" << endl;
 
-  InitializeProcessors();
+  InitializeScheduler();
   
   Panic("nothing to do now");
 }

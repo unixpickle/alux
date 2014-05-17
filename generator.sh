@@ -37,6 +37,7 @@ CXXSOURCES=${CXXSOURCES}\ `echo $PWD/src/startup/*.cc`
 CXXSOURCES=${CXXSOURCES}\ `echo $PWD/src/utilities/*.cc`
 CXXSOURCES=${CXXSOURCES}\ `echo $PWD/src/stdlib/*.cc`
 CXXSOURCES=${CXXSOURCES}\ `echo $PWD/src/memory/*.cc`
+CXXSOURCES=${CXXSOURCES}\ `echo $PWD/src/scheduler/*.cc`
 CXXSOURCES=${CXXSOURCES}\ `echo $PWD/dependencies/analloc2/src/*.cc`
 CXXSOURCES=${CXXSOURCES}\ `echo $PWD/dependencies/analloc2/src/topology/*.cc`
 
