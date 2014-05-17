@@ -50,15 +50,16 @@ namespace x64 {
   
   void PhysicalAllocator::Setup() {
     KernelMap & kernMap = KernelMap::GetGlobal();
-    StepAllocator<0x1000> stepper(&regions, KernelDataSize());
+    StepAllocator stepper(&regions, KernelDataSize());
     kernMap.allocator = &stepper;
     kernMap.Setup();
     kernMap.Set();
     
-    allocators.SetInformation(0x1000000, 0x1000, 0x1000,
-                              regions.GetRegions(),
-                              regions.GetRegionCount());
-    allocators.GenerateDescriptions();
+    AllocatorList::InitInfo info(0x1000000, 0x1000, 0x1000,
+                                 regions.GetRegions(),
+                                 regions.GetRegionCount());
+    allocators.SetInfo(info);
+    allocators.GenerateDescriptions(true);
     
     // allocate enough physical memory for the bitmap data
     PhysAddr firstFree;
@@ -119,14 +120,14 @@ namespace x64 {
    ***********/
 
   void PhysicalAllocator::GrabSpace(bool large,
-                                    PageAllocator & alloc,
+                                    StepAllocator & alloc,
                                     bool & hasStarted,
                                     uint64_t & lastPtr,
                                     uint64_t & firstPtr) {
     // allocate the data
     KernelMap & kernMap = KernelMap::GetGlobal();
-    PhysAddr physPtr = alloc.AllocPage();
     size_t pageSize = large ? 0x200000 : 0x1000;
+    PhysAddr physPtr = alloc.AllocSize(pageSize);
 
     // map
     if (hasStarted) {
@@ -152,20 +153,12 @@ namespace x64 {
     bool hasStarted = false;
     uint64_t lastPtr;
     uint64_t firstPtr;
-    if (remaining >= 0x200000) {
-      StepAllocator<0x200000, PhysAddr &> realAlloc(&regions, alloc.lastAddr);
-      while (remaining > 0) {
-        GrabSpace(true, realAlloc, hasStarted, lastPtr, firstPtr);
-        remaining -= 0x200000;
-      }
-      firstFree = realAlloc.lastAddr;
-    } else {
-      while (remaining > 0) {
-        GrabSpace(false, alloc, hasStarted, lastPtr, firstPtr);
-        remaining -= 0x1000;
-      }
-      firstFree = alloc.lastAddr;
+    size_t pageSize = (remaining >= 0x200000 ? 0x200000 : 0x1000);
+    while (remaining > 0) {
+      GrabSpace(pageSize == 0x200000, alloc, hasStarted, lastPtr, firstPtr);
+      remaining -= pageSize;
     }
+    firstFree = alloc.lastAddr;
     return firstPtr;
   }
 

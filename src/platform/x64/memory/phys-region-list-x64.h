@@ -29,7 +29,7 @@
 
 #include "../multiboot-x64.h"
 #include <platform/memory.h>
-#include <analloc2.h>
+#include <analloc2>
 #include <cassert>
 
 namespace OS {

@@ -24,36 +24,45 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef __MEMORY_KMALLOC_H__
-#define __MEMORY_KMALLOC_H__
+/*
 
-#include <platform/failure.h>
-#include <platform/memory.h>
-#include <utilities/common.h>
-#include <utilities/logs.h>
-#include <utilities/lock.h>
-#include <analloc2>
-#include <stdlib/runtime.h>
-#include <iostream>
+#include "gdt-x64.h"
 
 namespace OS {
 
-void InitializeMalloc();
-void * Malloc(size_t size);
-void Free(void * ptr);
+namespace x64 {
 
-class MallocRegion : public ANAlloc::Malloc<ANAlloc::BBTree> {
-private:
-  typedef ANAlloc::Malloc<ANAlloc::BBTree> super;
-  static const size_t PageSize = 0x40;
+GDT::DescTSS::DescTSS(TSS * tss)
+  : limit_0(0x67), type(9), res0(0), dpl(0), present(1), limit_16(0),
+    available(1), res1(0), granularity(0), res2(0) {
+  // as much as I love initializer lists, I like code too.
+  uint64_t ptrVal = (uint64_t)tss;
+  base_0 = ptrVal & 0xffff;
+  base_16 = (ptrVal >> 16) & 0xff;
+  base_24 = (ptrVal >> 24) & 0xff;
+  base_32 = ptrVal >> 0x20;
+}
 
-public:
-  MallocRegion(void * _start, size_t _length, size_t _used)
-    : super(_start, PageSize, _used, _length) {}
-  
-  MallocRegion * next;
+GDTPointer & GDT::GetCurrentPtr() {
+  // TODO: nyi
+}
+
+GDT & GDT::GetGlobal() {
+  // TODO: nyi
+}
+
+GDT::GDT(const GDTPointer & currentPtr) {
+  // TODO: nyi
+}
+
+uint16_t GDT::AddTSS(TSS * aTSS) {
+  // TODO: nyi
+}
+
 };
 
 }
 
-#endif
+}
+
+*/

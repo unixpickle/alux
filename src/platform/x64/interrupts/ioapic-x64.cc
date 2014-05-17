@@ -53,6 +53,7 @@ IOAPIC::IOAPIC(ACPI::MADT::IOAPIC * info) : madtInfo(*info) {
 IOAPIC::~IOAPIC() {
   // unmap the address here
   KernMap::Unmap((VirtAddr)regs, 0x1000);
+  // TODO: here, send an invlpg IPI to every CPU
 }
 
 void IOAPIC::WriteReg(uint8_t reg, uint32_t val) {

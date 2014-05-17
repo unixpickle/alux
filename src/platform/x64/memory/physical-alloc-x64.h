@@ -28,7 +28,7 @@
 #define __PLATFORM_X64_PHYSICAL_ALLOC_X64_H__
 
 #include <platform/memory.h>
-#include <analloc2.h>
+#include <analloc2>
 #include "kernel-map-x64.h"
 #include "step-allocator-x64.h"
 
@@ -73,7 +73,7 @@ private:
   VirtAddr AllocateBitmaps(StepAllocator<0x1000> & alloc,
                            PhysAddr & firstFree);
   void GrabSpace(bool large,
-                 PageAllocator & alloc,
+                 StepAllocator & alloc,
                  bool & hasStarted,
                  uint64_t & lastPtr,
                  uint64_t & firstPtr);

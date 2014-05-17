@@ -34,61 +34,22 @@ namespace OS {
 
 namespace x64 {
 
-template <size_t PageSize, typename T = PhysAddr>
 class StepAllocator : public PageAllocator {
 private:
   PhysRegionList * regions;
 
 protected:
-  T lastAddr;
+  PhysAddr lastAddr;
   
 public:
-  StepAllocator(PhysRegionList * _regions, T addr);
+  StepAllocator(PhysRegionList * _regions, PhysAddr addr);
   
   virtual PhysAddr AllocPage();
+  virtual PhysAddr AllocSize(size_t size);
   virtual void FreePage(PhysAddr addr);
 
   friend class PhysicalAllocator;
 };
-
-template <size_t PageSize, typename T>
-StepAllocator<PageSize, T>::StepAllocator(PhysRegionList * _regions, T a)
-  : lastAddr(a), regions(_regions) { }
-
-template <size_t PageSize, typename T>
-PhysAddr StepAllocator<PageSize, T>::AllocPage() {
-  // find the next place after or equal to nextPage where a 4K chunk is
-  // readily available
-  MemoryRegion * reg = regions->FindRegion(lastAddr);
-  if (!reg) {
-    if (!(reg = regions->FindRegion(lastAddr - 1))) {
-      Panic("StepAllocator::AllocPage() - lastAddr out of bounds.");
-    }
-  }
-  
-  if (lastAddr % PageSize) lastAddr += PageSize - (lastAddr % PageSize);
-  if (lastAddr > reg->GetEnd()) lastAddr = reg->GetEnd() - 1;
-  
-  while (lastAddr + PageSize > reg->GetEnd()) {
-    reg = regions->NextRegion(reg);
-    if (!reg) {
-      Panic("StepAllocator::AllocPage() - out of ranges.");
-    }
-    lastAddr = reg->GetStart();
-    if (lastAddr % PageSize) lastAddr += PageSize - (lastAddr % PageSize);
-    if (lastAddr > reg->GetEnd()) lastAddr = reg->GetEnd() - 1;
-  }
-  
-  PhysAddr res = lastAddr;
-  lastAddr += PageSize;
-  return res;
-}
-
-template <size_t PageSize, typename T>
-void StepAllocator<PageSize, T>::FreePage(PhysAddr addr) {
-  (void)addr;
-  Panic("StepAllocator::FreePage() - nothing to do");
-}
 
 }
 
