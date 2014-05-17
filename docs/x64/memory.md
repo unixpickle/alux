@@ -55,11 +55,11 @@ This class handles scratch pages and mapping of memory regions. Additionally, it
 
 Since both kernel page tables and user page tables need to manipulate page table structures directly, it only makes sense to abstract this job out to some other class. The `TableMgr` class manipulates a virtual mapping given the table's PML4. It (indirectly) uses the `KernelMap`'s scratch to read and write physical structures.
 
-## class *StepAllocator&lt;size, type&gt;*
+## class *StepAllocator*
 
-This is a direct subclass of `PageAllocator`. It allocates pages of size `size` and increments an address of type `type`. The type is a template argument so multiple `StepAllocator`s may be used in unison. One allocator should have the type `PhysAddr`, and the other one should have the type `PhysAddr &`, referencing the other allocator's stepper.
+This is a direct subclass of `PageAllocator`. It allocates memory linearly and increments an address for the highest used address. Additionally, the `StepAllocator` class has a method `AllocSize(size_t)`, method to allocate a certain number of aligned bytes.
 
-The `PhysicalAllocator` class uses `StepAllocator`s as the "dummy" allocator for the `KernelMap` until the *real* physical allocator has been configured. Additionally, it may use `StepAllocator<0x200000, PhysAddr &>` if it chooses to use 2MiB pages for the analloc2 bitmaps.
+The `PhysicalAllocator` class uses `StepAllocator`s as the "dummy" allocator for the `KernelMap` until the *real* physical allocator has been configured.
 
 ## class *PhysicalAllocator*
 
