@@ -52,8 +52,8 @@ IOAPIC::IOAPIC(ACPI::MADT::IOAPIC * info) : madtInfo(*info) {
 
 IOAPIC::~IOAPIC() {
   // unmap the address here
-  KernMap::Unmap((VirtAddr)regs, 0x1000);
-  // TODO: here, send an invlpg IPI to every CPU
+  Panic("Destroying an IOAPIC will result in a map leak.");
+  // KernMap::Unmap((VirtAddr)regs, 0x1000);
 }
 
 void IOAPIC::WriteReg(uint8_t reg, uint32_t val) {

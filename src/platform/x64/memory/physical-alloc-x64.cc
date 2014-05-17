@@ -85,7 +85,21 @@ namespace x64 {
                                 PhysAddr & addr,
                                 size_t * realSize) {
     ScopeLock scope(&lock);
-    return allocators.AllocPointer(size, align, (uintptr_t &)addr, realSize);
+    return allocators.AllocDescending(size, align, (uintptr_t &)addr,
+                                      realSize);
+  }
+  
+  bool PhysicalAllocator::AllocBelow(size_t size, PhysAddr & addr,
+                                     size_t * realSize, uintptr_t boundary) {
+    return AlignBelow(size, 1, addr, realSize, boundary);
+  }
+  
+  bool PhysicalAllocator::AlignBelow(size_t size, size_t align,
+                                     PhysAddr & addr, size_t * realSize,
+                                     uintptr_t boundary) {
+    ScopeLock scope(&lock);
+    return allocators.AllocAscending(size, align, (uintptr_t &)addr,
+                                     realSize, boundary - 1);
   }
   
   void PhysicalAllocator::Free(PhysAddr addr) {
@@ -163,15 +177,33 @@ namespace x64 {
 }
 
 bool PhysicalAlloc(size_t size, PhysAddr & addr, size_t * realSize) {
-  return x64::PhysicalAllocator::GetGlobal().Alloc(size, addr, realSize);
+  x64::PhysicalAllocator & alloc = x64::PhysicalAllocator::GetGlobal();
+  return alloc.Alloc(size, addr, realSize);
 }
 
 bool PhysicalAlign(size_t size,
                    size_t align,
                    PhysAddr & addr,
                    size_t * realSize) {
-  return x64::PhysicalAllocator::GetGlobal().Align(size, align, addr,
-                                                   realSize);
+  x64::PhysicalAllocator & alloc = x64::PhysicalAllocator::GetGlobal();
+  return alloc.Align(size, align, addr, realSize);
+}
+
+bool PhysicalAllocBelow(size_t size,
+                        PhysAddr & addr,
+                        size_t * realSize,
+                        PhysAddr boundary) {
+  x64::PhysicalAllocator & alloc = x64::PhysicalAllocator::GetGlobal();
+  return alloc.AllocBelow(size, addr, realSize, boundary);
+}
+
+bool PhysicalAlignBelow(size_t size,
+                        size_t align,
+                        PhysAddr & addr,
+                        size_t * realSize,
+                        PhysAddr boundary) {
+  x64::PhysicalAllocator & alloc = x64::PhysicalAllocator::GetGlobal();
+  return alloc.AlignBelow(size, align, addr, realSize, boundary);
 }
 
 void PhysicalFree(PhysAddr addr) {

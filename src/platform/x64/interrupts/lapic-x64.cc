@@ -80,7 +80,8 @@ XAPIC::XAPIC(uint64_t _base) : base(_base) {
 }
 
 XAPIC::~XAPIC() {
-  KernMap::Unmap((VirtAddr)regs, 0x1000);
+  Panic("Destroying an XAPIC will cause a map leak");
+  // KernMap::Unmap((VirtAddr)regs, 0x1000);
 }
 
 uint64_t XAPIC::ReadRegister(uint16_t reg) {

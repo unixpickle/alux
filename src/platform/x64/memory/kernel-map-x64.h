@@ -80,6 +80,11 @@ public:
   void MapAt(VirtAddr virt, PhysAddr start, size_t size, bool largePages);
   
   /**
+   * Set some mapping to unpresent but keep it non-zero
+   */
+  void ClearMap(VirtAddr virt, size_t size);
+  
+  /**
    * Unmap a virtual region of memory.
    */
   void Unmap(VirtAddr virt, size_t size);

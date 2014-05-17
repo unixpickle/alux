@@ -67,6 +67,15 @@ void TableMgr::Map(VirtAddr virt, PhysAddr phys, size_t size, bool largePages,
   }
 }
 
+void TableMgr::ClearMap(VirtAddr virt, size_t size) {
+  while (size) {
+    size_t gotSize = UnmapPage(virt, false);
+    assert(gotSize <= size);
+    virt += gotSize;
+    size -= gotSize;
+  }
+}
+
 void TableMgr::Unmap(VirtAddr virt, size_t size) {
   while (size) {
     size_t gotSize = UnmapPage(virt);
@@ -119,16 +128,15 @@ void TableMgr::MapLargePage(VirtAddr virt,
                             PhysAddr phys,
                             uint64_t entryMask,
                             uint64_t tableMask) {
-  VirtAddr nonCanon = virt & 0x0000FFFFFFFFFFFFL;
   assert(!(virt & 0x1fffff));
   assert(!(phys & 0x1fffff));
   assert(3 == (tableMask & 3));
   assert(0x80 & entryMask);
   
   int indexes[3] = {
-    (int)((nonCanon >> 39) & 0x1ff),
-    (int)((nonCanon >> 30) & 0x1ff),
-    (int)((nonCanon >> 21) & 0x1ff)
+    (int)((virt >> 39) & 0x1ff),
+    (int)((virt >> 30) & 0x1ff),
+    (int)((virt >> 21) & 0x1ff)
   };
   
   TypedScratch<uint64_t> scratch(pml4);
@@ -155,14 +163,13 @@ void TableMgr::MapLargePage(VirtAddr virt,
   scratch[indexes[2]] = phys | entryMask;
 }
 
-size_t TableMgr::UnmapPage(VirtAddr addr) {
-  VirtAddr nonCanon = addr & 0x0000FFFFFFFFFFFFL;
+size_t TableMgr::UnmapPage(VirtAddr addr, bool setToZero) {
   assert(!(addr & 0xfff));
   int indexes[4] = {
-    (int)((nonCanon >> 39) & 0x1ff),
-    (int)((nonCanon >> 30) & 0x1ff),
-    (int)((nonCanon >> 21) & 0x1ff),
-    (int)((nonCanon >> 12) & 0x1ff)
+    (int)((addr >> 39) & 0x1ff),
+    (int)((addr >> 30) & 0x1ff),
+    (int)((addr >> 21) & 0x1ff),
+    (int)((addr >> 12) & 0x1ff)
   };
   
   PhysAddr tableAddresses[4] = {pml4, 0, 0, 0};
@@ -182,21 +189,59 @@ size_t TableMgr::UnmapPage(VirtAddr addr) {
   }
   
   assert(scratch[indexes[maxDepth]]);
-  scratch[indexes[maxDepth]] = 0;
-  for (int i = maxDepth; i > 0; i--) {
-    bool allGone = true;
-    for (int j = 0; j < 0x200; j++) {
-      if (scratch[j]) {
-        allGone = false;
-        break;
+  
+  if (!setToZero) {
+    scratch[indexes[maxDepth]] = 0x1000; // set it to some non-zero value
+  } else {
+    // zero out the page and delete any parent table indexes
+    scratch[indexes[maxDepth]] = 0;
+  
+    for (int i = maxDepth; i > 0; i--) {
+      bool allGone = true;
+      for (int j = 0; j < 0x200; j++) {
+        if (scratch[j]) {
+          allGone = false;
+          break;
+        }
       }
+      if (!allGone) break;
+      
+      KernelMap::GetGlobal().allocator->FreePage(tableAddresses[i]);
+      scratch.Reassign(tableAddresses[i - 1]);
+      scratch[indexes[i - 1]] = 0;
     }
-    if (!allGone) break;
-    
-    scratch.Reassign(tableAddresses[i - 1]);
-    scratch[indexes[i - 1]] = 0;
   }
   return 0x1000L << ((3 - maxDepth) * 9);
+}
+
+void TableMgr::ReadMap(VirtAddr start, size_t & sizeOut, bool & isMapped) {
+  // get the status at `start`
+  assert(!(start & 0xfff));
+  int indexes[4] = {
+    (int)((start >> 39) & 0x1ff),
+    (int)((start >> 30) & 0x1ff),
+    (int)((start >> 21) & 0x1ff),
+    (int)((start >> 12) & 0x1ff)
+  };
+  
+  TypedScratch<uint64_t> scratch(pml4);
+  int depth = 0;
+  for (depth = 0; depth < 3; depth++) {
+    uint64_t nextPage = scratch[indexes[depth]];
+    if (nextPage & 0x80 || !(nextPage & 1)) {
+      break;
+    }
+    scratch.Reassign(nextPage & 0x7ffffffffffff000);
+  }
+  
+  if (scratch[indexes[depth]] & 0x80 || depth == 3) {
+    isMapped = scratch[indexes[depth]] & 1;
+  } else {
+    isMapped = false;
+  }
+  
+  sizeOut = 0x1000 << ((3 - depth) * 9);
+  assert(!(start & (sizeOut - 1)));
 }
 
 void TableMgr::FindNewBU(VirtAddr & buStart, size_t & buSize,
@@ -205,113 +250,26 @@ void TableMgr::FindNewBU(VirtAddr & buStart, size_t & buSize,
   buStart = 0;
   buSize = 0;
   while (lastAddress + buSize < maxAddr) {
-    bool res = FindNextUnmapped(pml4, 0, 0, lastAddress, lastAddress);
-    if (!res) break;
-    if (lastAddress >= maxAddr) break;
-    
-    size_t retSize = 0;
-    FollowBigChunk(pml4, 0, 0, lastAddress, retSize);
-    
-    if (retSize + lastAddress > maxAddr) {
-      retSize = maxAddr - lastAddress;
+    size_t chunkSize = 0;
+    VirtAddr nextStart = lastAddress;
+    while (1) {
+      size_t size;
+      bool mapped;
+      ReadMap(lastAddress + chunkSize, size, mapped);
+      if (mapped) {
+        nextStart = lastAddress + chunkSize + size;
+        break;
+      }
+      if (lastAddress + chunkSize + size > maxAddr) break;
+      chunkSize += size;
     }
     
-    if (retSize > buSize) {
+    if (chunkSize > buSize) {
       buStart = lastAddress;
-      buSize = retSize;
+      buSize = chunkSize;
     }
-    lastAddress += retSize;
+    lastAddress = nextStart;
   }
-}
-
-bool TableMgr::FollowBigChunk(PhysAddr _table,
-                              int depth,
-                              VirtAddr mapAddr,
-                              VirtAddr regStart,
-                              size_t & contigSize) {
-  assert(!(regStart & 0xfff));
-  assert(!(mapAddr & 0xfff));
-  
-  // check for data entries
-  if (depth == 4) {
-    if (_table) {
-      contigSize = 0;
-      return false;
-    } else {
-      contigSize = 0x1000;
-      return true;
-    }
-  } else if (_table & 0x80) {
-    contigSize = 0;
-    return false;
-  } else if (!_table) {
-    contigSize = (0x1000L << ((4 - depth) * 9)) - (regStart - mapAddr);
-    return true;
-  }
-  
-  // get the actual table address without any flags
-  PhysAddr table = _table & 0x7ffffffffffff000L;
-  
-  size_t segmentSize = 0x1000L << ((3 - depth) * 9);
-  int startIndex = (int)((regStart - mapAddr) / segmentSize);
-  contigSize = 0;
-  
-  // loop through entries
-  TypedScratch<uint64_t> scratch(table);
-  for (int i = startIndex; i < 0x200; i++) {
-    uint64_t entry = scratch[i];
-    size_t resSize;
-    VirtAddr newMapAddr = mapAddr + (i * segmentSize);
-    bool res = FollowBigChunk(entry, depth + 1, newMapAddr,
-                              regStart < newMapAddr ? newMapAddr : regStart,
-                              resSize);
-    contigSize += resSize;
-    if (!res) return false;
-  }
-  
-  return true;
-}
-
-bool TableMgr::FindNextUnmapped(PhysAddr _table,
-                                int depth,
-                                VirtAddr mapAddr,
-                                VirtAddr start,
-                                VirtAddr & result) {
-  assert(!(start & 0xfff));
-  assert(!(mapAddr & 0xfff));
-    
-  // check for data entries
-  if (depth == 4) {
-    if (!_table) {
-      result = mapAddr;
-      return true;
-    } else {
-      return false;
-    }
-  } else if (_table & 0x80) {
-    return false;
-  } else if (!_table) {
-    result = mapAddr;
-    return true;
-  }
-  
-  PhysAddr table = _table & 0x7ffffffffffff000L;
-  
-  size_t segmentSize = 0x1000L << ((3 - depth) * 9);
-  int startIndex = (int)((start - mapAddr) / segmentSize);
-  
-  // loop through entries
-  TypedScratch<uint64_t> scratch(table);
-  for (int i = startIndex; i < 0x200; i++) {
-    uint64_t entry = scratch[i];
-    VirtAddr newMapAddr = mapAddr + (i * segmentSize);
-    bool res = FindNextUnmapped(entry, depth + 1, newMapAddr,
-                                start < newMapAddr ? newMapAddr : start,
-                                result);
-    if (res) return true;
-  }
-  
-  return false;
 }
 
 }

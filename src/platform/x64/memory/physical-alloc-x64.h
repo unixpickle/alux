@@ -57,6 +57,10 @@ public:
   
   bool Alloc(size_t size, PhysAddr & addr, size_t * realSize);
   bool Align(size_t size, size_t align, PhysAddr & addr, size_t * realSize);
+  bool AllocBelow(size_t size, PhysAddr & addr, size_t * realSize,
+                  uintptr_t boundary);
+  bool AlignBelow(size_t size, size_t align, PhysAddr & addr,
+                  size_t * realSize, uintptr_t boundary);
   void Free(PhysAddr addr);
   size_t Available();
   size_t Used();

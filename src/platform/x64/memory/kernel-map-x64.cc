@@ -120,6 +120,11 @@ void KernelMap::MapAt(VirtAddr virt, PhysAddr start,
   }
 }
 
+void KernelMap::ClearMap(VirtAddr virt, size_t size) {
+  ScopeLock scope(&mapLock);
+  manager.ClearMap(virt, size);
+}
+
 void KernelMap::Unmap(VirtAddr virt, size_t size) {
   ScopeLock scope(&mapLock);
   manager.Unmap(virt, size);

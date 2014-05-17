@@ -41,6 +41,10 @@ bool Map(PhysAddr phys, size_t bytes, VirtAddr & addr) {
   return true;
 }
 
+void MarkBlank(VirtAddr addr, size_t bytes) {
+  x64::KernelMap::GetGlobal().ClearMap(addr, bytes);
+}
+
 void Unmap(VirtAddr addr, size_t bytes) {
   x64::KernelMap::GetGlobal().Unmap(addr, bytes);
 }

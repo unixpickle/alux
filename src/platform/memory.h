@@ -55,6 +55,17 @@ bool PhysicalAlign(size_t size,
                    PhysAddr & addr,
                    size_t * realSize);
 
+bool PhysicalAllocBelow(size_t size,
+                        PhysAddr & addr,
+                        size_t * realSize,
+                        PhysAddr boundary);
+
+bool PhysicalAlignBelow(size_t size,
+                        size_t align,
+                        PhysAddr & addr,
+                        size_t * realSize,
+                        PhysAddr boundary);
+
 /**
  * Returns the amount of phyiscal memory currently available for allocation.
  */

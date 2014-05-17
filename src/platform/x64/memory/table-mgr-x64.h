@@ -59,6 +59,11 @@ public:
            uint64_t entryMask, uint64_t tablesMask);
   
   /**
+   * Clear the map for a given region or Panic().
+   */
+  void ClearMap(VirtAddr virt, size_t size);
+  
+  /**
    * Unmap a region or Panic().
    */
   void Unmap(VirtAddr virt, size_t size);
@@ -83,41 +88,22 @@ public:
    * Unmap the page starting at addr. The thing is, this page could have been
    * 2MB, or 1GB, or plain old 4K. To deal with this, this function returns the
    * size of the page that was unmapped.
+   * @param setToZero If this is false, the page will be set to some
+   * non-present but non-zero value (i.e. 0x1000).
    */
-  size_t UnmapPage(VirtAddr addr);
+  size_t UnmapPage(VirtAddr addr, bool setToZero = true);
+  
+  /**
+   * Examine the status of one or more pages in the mapping. This tells you
+   * about consecutive mapped or non-mapped regions.
+   */
+  void ReadMap(VirtAddr start, size_t & sizeOut, bool & isMapped);
   
   /**
    * Sets the buStart and buSize fields by searching the page tables.
    */
   void FindNewBU(VirtAddr & buStart, size_t & buSize, VirtAddr maxAddr);
-
-  /**
-   * A call used by FindNewBU() to find the biggest region.
-   * @param table A physical table of any depth (i.e. PML4, etc.)
-   * @param depth The depth of the table (0 = PML4)
-   * @param mapAddr The first virtual address this table controls.
-   * @param regStart A virtual address which is controlled by this table. The
-   * function looks at memory starting at this address.
-   * @param contigSize On return, this is set to the number of bytes starting
-   * from regStart that are unmapped.
-   * @return true if the big chunk did NOT end in this table--that is, starting
-   * from the entry belonging to regStart upwards, every entry contained no
-   * mappings to physical memory.
-   */
-  bool FollowBigChunk(PhysAddr table,
-                      int depth,
-                      VirtAddr mapAddr,
-                      VirtAddr regStart,
-                      size_t & contigSize);
- 
-  /**
-   * Finds the next unmapped page or region starting at a ceratin address.
-   */
-  bool FindNextUnmapped(PhysAddr table,
-                        int depth,
-                        VirtAddr mapAddr,
-                        VirtAddr start,
-                        VirtAddr & result);
+  
 };
 
 }
