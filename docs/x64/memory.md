@@ -35,7 +35,7 @@ This will be an overview of the various classes that exist and how they are used
 
 This is an abstract base class used by the `KernelMap` and `MapSetup` classes for page allocation. Essentially, a `PageAllocator` allocates aligned pages of physical memory.
 
-## file *size-config-x64.h*
+## file *size-config-x64.hpp*
 
 Defines:
 
@@ -65,7 +65,7 @@ The `PhysicalAllocator` class uses `StepAllocator`s as the "dummy" allocator for
 
 This class manages the analloc2 topological allocator. It is a subclass of `PageAllocator`, and thus may be used by `KernelMap` after configuration is complete. A global instance of the physical allocator may be obtained with `PhysicalAllocator::GetGlobal()`, but most of its facilities may be accessed using the platform-independent abstractions.
 
-## file *scope-scratch-x64.h*
+## file *scope-scratch-x64.hpp*
 
 C++ stack variables are awesome. Especially the fact that a destructor is called when a class instance goes out of scope. While the raw `KernelMap` scratch system is acceptable, it is much safer to use stack-based scratch management.
 
@@ -77,7 +77,7 @@ This class maps a physical address into scratch memory upon initialization, and 
 
 This is a subclass of `ScopeScratch`. The only addition is that you may access it using the `[]` operator. The `TypedScratch<T>` object acts like a C-style array of type `T`.
 
-## file *phys-memcpy-x64.h*
+## file *phys-memcpy-x64.hpp*
 
 This provides a wrapper for the scratch mechanism. The following functions are useful when you may need to access multiple pages of physical memory:
 
