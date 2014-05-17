@@ -87,6 +87,12 @@ namespace KernMap {
   bool Map(PhysAddr phys, size_t bytes, VirtAddr & addr);
 
   /**
+   * Unmap a virtual address but don't let anything else get mapped to it
+   * until we actually call Unmap() on the region.
+   */
+  void MarkBlank(VirtAddr addr, size_t bytes);
+
+  /**
    * Unmap a virtual address that was returned by Map().
    * @param addr The virtual address returned by Map().
    * @param bytes The exact argument you passed for Map()'s `bytes`.
@@ -147,6 +153,12 @@ public:
    * triggered when the memory is accessed.
    */
   bool MapReserved(PhysAddr phys, size_t bytes, VirtAddr & addr);
+  
+  /**
+   * Unmap an address but don't let another thing get mapped there until we
+   * call Unmap().
+   */
+  void MarkBlank(VirtAddr addr, size_t bytes);
   
   /**
    * Unmap the pages at a virtual address. The address must be an address
