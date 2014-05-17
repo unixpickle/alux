@@ -49,6 +49,13 @@ namespace x64 {
   }
   
   void PhysicalAllocator::Setup() {
+    cout << "PhysicalAllocator::Setup() - regions:";
+    for (int i = 0; i < regions.GetRegionCount(); i++) {
+      cout << " [" << regions.GetRegions()[i].GetStart() << ":"
+        << regions.GetRegions()[i].GetEnd() << "]";
+    }
+    cout << endl;
+    
     KernelMap & kernMap = KernelMap::GetGlobal();
     StepAllocator stepper(&regions, KernelDataSize());
     kernMap.allocator = &stepper;
