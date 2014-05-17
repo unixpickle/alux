@@ -24,7 +24,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <platform/failure.h>
+#include <platform/failure.hpp>
 #include <cstddef>
 #include <iostream>
 

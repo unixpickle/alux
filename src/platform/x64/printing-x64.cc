@@ -24,8 +24,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "printing-x64.h"
-#include "common-x64.h"
+#include "printing-x64.hpp"
+#include "common-x64.hpp"
 
 namespace OS {
 

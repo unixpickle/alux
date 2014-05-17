@@ -27,8 +27,8 @@
 #ifndef __PLATFORM_X64_STEP_ALLOCATOR_X64_H__
 #define __PLATFORM_X64_STEP_ALLOCATOR_X64_H__
 
-#include "page-allocator-x64.h"
-#include "phys-region-list-x64.h"
+#include "page-allocator-x64.hpp"
+#include "phys-region-list-x64.hpp"
 
 namespace OS {
 

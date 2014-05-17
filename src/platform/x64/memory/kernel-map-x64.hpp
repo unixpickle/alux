@@ -27,13 +27,13 @@
 #ifndef __PLATFORM_X64_KERNEL_MAP_X64_H__
 #define __PLATFORM_X64_KERNEL_MAP_X64_H__
 
-#include "map-setup-x64.h"
-#include "../common-x64.h"
-#include "table-mgr-x64.h"
-#include <platform/failure.h>
+#include "map-setup-x64.hpp"
+#include "../common-x64.hpp"
+#include "table-mgr-x64.hpp"
+#include <platform/failure.hpp>
 #include <cassert>
-#include <utilities/lock.h>
-#include <stdlib/runtime.h>
+#include <utilities/lock.hpp>
+#include <stdlib/runtime.hpp>
 
 namespace OS {
 

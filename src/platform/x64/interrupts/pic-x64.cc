@@ -24,7 +24,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "pic-x64.h"
+#include "pic-x64.hpp"
 
 namespace OS {
 

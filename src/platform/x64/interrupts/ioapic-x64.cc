@@ -24,7 +24,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "ioapic-x64.h"
+#include "ioapic-x64.hpp"
 
 namespace OS {
 

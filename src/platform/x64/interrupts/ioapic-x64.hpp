@@ -27,10 +27,10 @@
 #ifndef __PLATFORM_X64_IOAPIC_X64_H__
 #define __PLATFORM_X64_IOAPIC_X64_H__
 
-#include "../acpi/madt-x64.h"
-#include "../common-x64.h"
-#include <platform/failure.h>
-#include <platform/memory.h>
+#include "../acpi/madt-x64.hpp"
+#include "../common-x64.hpp"
+#include <platform/failure.hpp>
+#include <platform/memory.hpp>
 
 namespace OS {
 

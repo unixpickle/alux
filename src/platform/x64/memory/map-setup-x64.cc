@@ -24,7 +24,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "map-setup-x64.h"
+#include "map-setup-x64.hpp"
 
 namespace OS {
 

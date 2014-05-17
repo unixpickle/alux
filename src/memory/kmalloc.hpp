@@ -27,13 +27,13 @@
 #ifndef __MEMORY_KMALLOC_H__
 #define __MEMORY_KMALLOC_H__
 
-#include <platform/failure.h>
-#include <platform/memory.h>
-#include <utilities/common.h>
-#include <utilities/logs.h>
-#include <utilities/lock.h>
+#include <platform/failure.hpp>
+#include <platform/memory.hpp>
+#include <utilities/common.hpp>
+#include <utilities/logs.hpp>
+#include <utilities/lock.hpp>
 #include <analloc2>
-#include <stdlib/runtime.h>
+#include <stdlib/runtime.hpp>
 #include <iostream>
 
 namespace OS {

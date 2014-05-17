@@ -24,7 +24,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "common-x64.h"
+#include "common-x64.hpp"
 
 namespace OS {
 

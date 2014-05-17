@@ -24,7 +24,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "phys-region-list-x64.h"
+#include "phys-region-list-x64.hpp"
 
 namespace OS {
 

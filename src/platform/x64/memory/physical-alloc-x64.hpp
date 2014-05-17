@@ -27,10 +27,10 @@
 #ifndef __PLATFORM_X64_PHYSICAL_ALLOC_X64_H__
 #define __PLATFORM_X64_PHYSICAL_ALLOC_X64_H__
 
-#include <platform/memory.h>
+#include <platform/memory.hpp>
 #include <analloc2>
-#include "kernel-map-x64.h"
-#include "step-allocator-x64.h"
+#include "kernel-map-x64.hpp"
+#include "step-allocator-x64.hpp"
 
 namespace OS {
 

@@ -27,7 +27,7 @@
 #ifndef __PLATFORM_X64_IDT_STRUCTURES_X64_H__
 #define __PLATFORM_X64_IDT_STRUCTURES_X64_H__
 
-#include <utilities/common.h>
+#include <utilities/common.hpp>
 #include <cstdint>
 #include <cstring>
 

@@ -27,7 +27,7 @@
 #ifndef __PLATFORM_X64_PAGE_ALLOCATOR_X64_H__
 #define __PLATFORM_X64_PAGE_ALLOCATOR_X64_H__
 
-#include <platform/memory.h>
+#include <platform/memory.hpp>
 
 namespace OS {
 

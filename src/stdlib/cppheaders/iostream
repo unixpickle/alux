@@ -27,8 +27,8 @@
 #ifndef __IOSTREAM_HPP__
 #define __IOSTREAM_HPP__
 
-#include <platform/printing.h>
-#include <stdlib/runtime.h>
+#include <platform/printing.hpp>
+#include <stdlib/runtime.hpp>
 
 namespace OS {
 

@@ -27,7 +27,7 @@
 #ifndef __PLATFORM_X64_CPU_X64_H__
 #define __PLATFORM_X64_CPU_X64_H__
 
-#include <platform/multiprocessing.h>
+#include <platform/multiprocessing.hpp>
 
 namespace OS {
 

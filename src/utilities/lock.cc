@@ -24,9 +24,9 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "lock.h"
+#include "lock.hpp"
 #include <scheduler/scheduler-init.hpp>
-#include <platform/interrupts.h>
+#include <platform/interrupts.hpp>
 
 namespace OS {
 

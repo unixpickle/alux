@@ -24,7 +24,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "madt-x64.h"
+#include "madt-x64.hpp"
 
 namespace OS {
 

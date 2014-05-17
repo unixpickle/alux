@@ -27,8 +27,8 @@
 #ifndef __PLATFORM_X64_LAPIC_X64_H__
 #define __PLATFORM_X64_LAPIC_X64_H__
 
-#include "../acpi/madt-x64.h"
-#include "../common-x64.h"
+#include "../acpi/madt-x64.hpp"
+#include "../common-x64.hpp"
 
 namespace OS {
 

@@ -24,7 +24,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "int-handlers-x64.h"
+#include "int-handlers-x64.hpp"
 
 extern "C" {
 

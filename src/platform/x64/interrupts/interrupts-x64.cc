@@ -24,7 +24,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <platform/interrupts.h>
+#include <platform/interrupts.hpp>
 
 namespace OS {
 

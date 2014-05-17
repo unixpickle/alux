@@ -24,9 +24,9 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "runtime.h"
-#include <platform/failure.h>
-#include <memory/kmalloc.h>
+#include "runtime.hpp"
+#include <platform/failure.hpp>
+#include <memory/kmalloc.hpp>
 
 void * operator new(size_t, void * p) {
   return p;

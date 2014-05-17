@@ -28,8 +28,8 @@
 #define __PLATFORM_X64_MAP_SETUP_X64_H__
 
 #include <cstring>
-#include "page-allocator-x64.h"
-#include "size-config-x64.h"
+#include "page-allocator-x64.hpp"
+#include "size-config-x64.hpp"
 
 namespace OS {
 

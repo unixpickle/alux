@@ -27,8 +27,8 @@
 #ifndef __PLATFORM_X64_SCOPE_SCRATCH_X64_H__
 #define __PLATFORM_X64_SCOPE_SCRATCH_X64_H__
 
-#include <platform/memory.h>
-#include <utilities/critical.h>
+#include <platform/memory.hpp>
+#include <utilities/critical.hpp>
 
 namespace OS {
 

@@ -27,7 +27,7 @@
 #ifndef __PLATFORM_PRINTING_H__
 #define __PLATFORM_PRINTING_H__
 
-#include <utilities/lock.h>
+#include <utilities/lock.hpp>
 
 namespace OS {
   

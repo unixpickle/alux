@@ -24,7 +24,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "step-allocator-x64.h"
+#include "step-allocator-x64.hpp"
 
 namespace OS {
 

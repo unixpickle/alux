@@ -28,9 +28,9 @@
 #define __PLATFORM_X64_RSDP_X64_H__
 
 #include <cstdint>
-#include <utilities/common.h>
-#include <platform/failure.h>
-#include "../memory/phys-memcpy-x64.h"
+#include <utilities/common.hpp>
+#include <platform/failure.hpp>
+#include "../memory/phys-memcpy-x64.hpp"
 
 namespace OS {
 

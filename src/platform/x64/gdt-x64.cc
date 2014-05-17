@@ -26,7 +26,7 @@
 
 /*
 
-#include "gdt-x64.h"
+#include "gdt-x64.hpp"
 
 namespace OS {
 

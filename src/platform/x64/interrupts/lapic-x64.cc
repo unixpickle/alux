@@ -24,7 +24,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "lapic-x64.h"
+#include "lapic-x64.hpp"
 
 namespace OS {
 

@@ -24,7 +24,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <memory/kmalloc.h>
+#include <memory/kmalloc.hpp>
 #include <scheduler/scheduler-init.hpp>
 
 namespace OS {

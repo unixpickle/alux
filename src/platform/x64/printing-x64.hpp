@@ -24,7 +24,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <platform/printing.h>
+#include <platform/printing.hpp>
 
 namespace OS {
 

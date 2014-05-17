@@ -27,7 +27,7 @@
 #ifndef __PLATFORM_X64_TABLE_MGR_X64_H__
 #define __PLATFORM_X64_TABLE_MGR_X64_H__
 
-#include "scope-scratch-x64.h"
+#include "scope-scratch-x64.hpp"
 
 namespace OS {
 

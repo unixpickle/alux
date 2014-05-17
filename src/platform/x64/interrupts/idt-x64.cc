@@ -24,7 +24,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "idt-x64.h"
+#include "idt-x64.hpp"
 
 namespace OS {
 

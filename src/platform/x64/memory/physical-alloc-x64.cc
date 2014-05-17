@@ -24,7 +24,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "physical-alloc-x64.h"
+#include "physical-alloc-x64.hpp"
 
 namespace OS {
 

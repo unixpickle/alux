@@ -24,7 +24,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "kernel-map-x64.h"
+#include "kernel-map-x64.hpp"
 
 namespace OS {
 

@@ -24,7 +24,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "phys-memcpy-x64.h"
+#include "phys-memcpy-x64.hpp"
 
 namespace OS {
 

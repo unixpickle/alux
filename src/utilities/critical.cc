@@ -24,7 +24,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "critical.h"
+#include "critical.hpp"
 
 namespace OS {
 

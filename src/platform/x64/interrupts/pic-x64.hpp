@@ -28,7 +28,7 @@
 #define __PLATFORM_X64_PIC_X64_H__
 
 #include <cstdint>
-#include "../common-x64.h"
+#include "../common-x64.hpp"
 
 namespace OS {
 

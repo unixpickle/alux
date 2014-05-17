@@ -27,10 +27,10 @@
 #ifndef __PLATFORM_X64_INT_HANDLERS_X64_H__
 #define __PLATFORM_X64_INT_HANDLERS_X64_H__
 
-#include "idt-x64.h"
-#include "raw-handlers-x64.h"
-#include "../common-x64.h"
-#include <platform/failure.h>
+#include "idt-x64.hpp"
+#include "raw-handlers-x64.hpp"
+#include "../common-x64.hpp"
+#include <platform/failure.hpp>
 #include <iostream>
 
 extern "C" {

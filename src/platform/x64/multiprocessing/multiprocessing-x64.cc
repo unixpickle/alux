@@ -24,12 +24,12 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <platform/multiprocessing.h>
-#include <platform/interrupts.h>
-#include "../interrupts/int-handlers-x64.h"
-#include "../interrupts/pic-x64.h"
-#include "../interrupts/ioapic-x64.h"
-#include "../interrupts/lapic-x64.h"
+#include <platform/multiprocessing.hpp>
+#include <platform/interrupts.hpp>
+#include "../interrupts/int-handlers-x64.hpp"
+#include "../interrupts/pic-x64.hpp"
+#include "../interrupts/ioapic-x64.hpp"
+#include "../interrupts/lapic-x64.hpp"
 
 namespace OS {
 

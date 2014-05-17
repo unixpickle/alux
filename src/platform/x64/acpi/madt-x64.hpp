@@ -27,7 +27,7 @@
 #ifndef __PLATFORM_X64_MADT_X64_H__
 #define __PLATFORM_X64_MADT_X64_H__
 
-#include "rsdp-x64.h"
+#include "rsdp-x64.hpp"
 #include <cstring>
 #include <new>
 

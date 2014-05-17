@@ -24,7 +24,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "entry.h"
+#include "entry.hpp"
 
 namespace OS {
 

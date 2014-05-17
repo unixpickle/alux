@@ -24,7 +24,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "size-config-x64.h"
+#include "size-config-x64.hpp"
 
 namespace OS {
 

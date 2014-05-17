@@ -25,7 +25,7 @@
  */
 
 #include <cstdint>
-#include <utilities/common.h>
+#include <utilities/common.hpp>
 
 namespace OS {
 

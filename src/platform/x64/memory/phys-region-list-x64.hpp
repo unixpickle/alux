@@ -27,8 +27,8 @@
 #ifndef __PLATFORM_X64_PHYS_REGION_LIST_X64_H__
 #define __PLATFORM_X64_PHYS_REGION_LIST_X64_H__
 
-#include "../multiboot-x64.h"
-#include <platform/memory.h>
+#include "../multiboot-x64.hpp"
+#include <platform/memory.hpp>
 #include <analloc2>
 #include <cassert>
 

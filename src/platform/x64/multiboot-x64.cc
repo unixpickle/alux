@@ -24,8 +24,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "multiboot-x64.h"
-#include "memory/physical-alloc-x64.h"
+#include "multiboot-x64.hpp"
+#include "memory/physical-alloc-x64.hpp"
 
 extern "C" {
 

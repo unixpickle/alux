@@ -1,5 +1,6 @@
 #include <cassert>
 #include <iostream>
+#include <platform/failure.hpp>
 
 extern "C" {
 

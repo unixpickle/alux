@@ -1,4 +1,4 @@
-#include <utilities/logs.h>
+#include <utilities/logs.hpp>
 
 namespace OS {
   

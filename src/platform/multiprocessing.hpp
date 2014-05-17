@@ -24,7 +24,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <scheduler/cpu.h>
+#include <scheduler/cpu.hpp>
 #include <cstdint>
 
 namespace OS {

@@ -24,8 +24,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "scope-scratch-x64.h"
-#include "kernel-map-x64.h"
+#include "scope-scratch-x64.hpp"
+#include "kernel-map-x64.hpp"
 
 namespace OS {
 

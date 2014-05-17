@@ -28,7 +28,7 @@
 #define __PLATFORM_X64_GDT_X64_H__
 
 #include <new>
-#include "common-x64.h"
+#include "common-x64.hpp"
 
 namespace OS {
 
