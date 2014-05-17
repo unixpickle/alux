@@ -23,8 +23,10 @@ void PrintString(const char * string) {
   while (*string) {
     unsigned char theChar = *(string++);
     if (theChar == '\n') {
-      y++;
-      x = 0;
+      if (x != 0) {
+        y++;
+        x = 0;
+      }
     } else if (theChar == '\b') {
       if (x == 0) {
         if (y != 0) {

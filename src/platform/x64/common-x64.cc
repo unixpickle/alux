@@ -22,6 +22,7 @@ void CPUID(uint32_t eax, uint32_t * ebx, uint32_t * edx, uint32_t * ecx) {
 }
 
 uint64_t ReadMSR(uint32_t cell) {
+  AssertCritical();
   uint64_t higher;
   uint64_t lower;
   __asm__("rdmsr"
@@ -31,6 +32,7 @@ uint64_t ReadMSR(uint32_t cell) {
 }
 
 void WriteMSR(uint32_t cell, uint64_t value) {
+  AssertCritical();
   uint64_t lower = value & 0xffffffff;
   uint64_t higher = value >> 0x20;
   __asm__("wrmsr" : : "c" (cell), "d" (higher), "a" (lower));

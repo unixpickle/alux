@@ -158,6 +158,7 @@ namespace x64 {
 }
 
 bool PhysicalAlloc(size_t size, PhysAddr & addr, size_t * realSize) {
+  AssertNoncritical();
   x64::PhysicalAllocator & alloc = x64::PhysicalAllocator::GetGlobal();
   return alloc.Alloc(size, addr, realSize);
 }
@@ -166,6 +167,7 @@ bool PhysicalAlign(size_t size,
                    size_t align,
                    PhysAddr & addr,
                    size_t * realSize) {
+  AssertNoncritical();
   x64::PhysicalAllocator & alloc = x64::PhysicalAllocator::GetGlobal();
   return alloc.Align(size, align, addr, realSize);
 }
@@ -174,6 +176,7 @@ bool PhysicalAllocBelow(size_t size,
                         PhysAddr & addr,
                         size_t * realSize,
                         PhysAddr boundary) {
+  AssertNoncritical();
   x64::PhysicalAllocator & alloc = x64::PhysicalAllocator::GetGlobal();
   return alloc.AllocBelow(size, addr, realSize, boundary);
 }
@@ -183,19 +186,23 @@ bool PhysicalAlignBelow(size_t size,
                         PhysAddr & addr,
                         size_t * realSize,
                         PhysAddr boundary) {
+  AssertNoncritical();
   x64::PhysicalAllocator & alloc = x64::PhysicalAllocator::GetGlobal();
   return alloc.AlignBelow(size, align, addr, realSize, boundary);
 }
 
 void PhysicalFree(PhysAddr addr) {
+  AssertNoncritical();
   x64::PhysicalAllocator::GetGlobal().Free(addr);
 }
 
 size_t PhysicalAvailable() {
+  AssertNoncritical();
   return x64::PhysicalAllocator::GetGlobal().Available();
 }
 
 size_t PhysicalUsed() {
+  AssertNoncritical();
   return x64::PhysicalAllocator::GetGlobal().Used();
 }
 

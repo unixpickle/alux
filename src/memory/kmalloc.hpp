@@ -13,7 +13,15 @@
 namespace OS {
 
 void InitializeMalloc();
+
+/**
+ * @noncritical
+ */
 void * Malloc(size_t size);
+
+/**
+ * @noncritical
+ */
 void Free(void * ptr);
 
 class MallocRegion : public ANAlloc::Malloc<ANAlloc::BBTree> {

@@ -1,13 +1,12 @@
 #include "lock.hpp"
-#include <scheduler/scheduler-init.hpp>
-#include <platform/interrupts.hpp>
+#include "critical.hpp"
 
 namespace OS {
 
 ScopeLock::ScopeLock(anlock_t lock) {
   theLock = lock;
   assert(!((uint64_t)lock & 7));
-  assert(!HasInitializedScheduler() || GetInterruptsEnabled());
+  AssertNoncritical();
   anlock_lock(theLock);
 }
 

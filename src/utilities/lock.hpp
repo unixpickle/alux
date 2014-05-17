@@ -15,7 +15,14 @@ class ScopeLock {
 private:
   anlock_t theLock;
 public:
+  /**
+   * @noncritical
+   */
   ScopeLock(anlock_t lock);
+  
+  /**
+   * @ambicritical
+   */
   ~ScopeLock();
 };
 

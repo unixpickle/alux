@@ -38,21 +38,24 @@ public:
   static const int SettingTMR_BASEDIV = (1 << 20);
 
   virtual ~LAPIC();
-  virtual void SetDefaults();
-  virtual void Enable() = 0;
-  virtual uint32_t GetId() = 0;
-  virtual void ClearErrors();
+  virtual void SetDefaults(); // @critical
+  virtual void Enable() = 0; // @critical
+  virtual uint32_t GetId() = 0; // @critical
+  virtual void ClearErrors(); // @critical
 
-  virtual void SendEOI();
-  virtual bool IsRequested(uint8_t vector);
-  virtual bool IsInService(uint8_t vector);
+  virtual void SendEOI(); // @critical
+  virtual bool IsRequested(uint8_t vector); // @critical
+  virtual bool IsInService(uint8_t vector); // @critical
 
+  /**
+   * @critical
+   */
   virtual void SendIPI(uint32_t cpu, uint8_t vector,
                        uint8_t mode, uint8_t level,
                        uint8_t trigger) = 0;
 
-  virtual uint64_t ReadRegister(uint16_t reg) = 0;
-  virtual void WriteRegister(uint16_t reg, uint64_t value) = 0;
+  virtual uint64_t ReadRegister(uint16_t reg) = 0; // @critical
+  virtual void WriteRegister(uint16_t reg, uint64_t value) = 0; // @critical
 };
 
 class XAPIC : public LAPIC {
@@ -84,6 +87,10 @@ public:
 };
 
 void InitializeLocalAPIC();
+
+/**
+ * @critical
+ */
 LAPIC & GetLocalAPIC();
 
 }

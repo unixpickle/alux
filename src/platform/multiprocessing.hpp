@@ -1,3 +1,6 @@
+#ifndef __PLATFORM_MULTIPROCESSING_HPP__
+#define __PLATFORM_MULTIPROCESSING_HPP__
+
 #include <scheduler/cpu.hpp>
 #include <cstdint>
 
@@ -11,11 +14,13 @@ public:
   
   /**
    * Returns the current processor structure.
+   * @critical
    */
   static Processor * CurrentProcessor();
   
   /**
    * Returns a unique identifier for this CPU.
+   * @ambicritical
    */
   virtual ProcessorID GetID() = 0;
   
@@ -23,6 +28,7 @@ public:
    * Returns the "priority" of the CPU. The lower the priority, the more likely
    * the scheduler is to use this CPU for running tasks. This can be used to
    * eliminate the usage of hypercores unless it becomes necessary.
+   * @ambicritical
    */
   virtual int GetPriority() = 0;
   
@@ -30,13 +36,9 @@ public:
    * Sends an IPI to this CPU and receives a response. Make sure that you are
    * not holding any locks when you call this, since it will lock the CPU until
    * a response is received.
+   * @ambicritical
    */
-  virtual void * SendSyncIPI(void * object);
-  
-  /**
-   * Sends an IPI to this CPU and does not wait for a response.
-   */
-  virtual void SendAsyncIPI(void * object);
+  virtual void * SendIPI(void * object);
   
 };
 
@@ -57,3 +59,5 @@ int ProcessorCount();
 Processor & GetProcessor(int index);
 
 }
+
+#endif

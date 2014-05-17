@@ -5,6 +5,7 @@ namespace OS {
 namespace KernMap {
 
 bool Map(PhysAddr phys, size_t bytes, VirtAddr & addr) {
+  AssertNoncritical();
   bool largePages = false;
   if (!(phys & 0x1fffff) && !(bytes & 0x1fffff)) {
     largePages = true;
@@ -16,14 +17,17 @@ bool Map(PhysAddr phys, size_t bytes, VirtAddr & addr) {
 }
 
 void MarkBlank(VirtAddr addr, size_t bytes) {
+  AssertNoncritical();
   x64::KernelMap::GetGlobal().ClearMap(addr, bytes);
 }
 
 void Unmap(VirtAddr addr, size_t bytes) {
+  AssertNoncritical();
   x64::KernelMap::GetGlobal().Unmap(addr, bytes);
 }
 
 void InvalidateCache(VirtAddr addr, size_t bytes, size_t pageSize) {
+  AssertCritical();
   (void)pageSize;
   size_t count = bytes / 0x1000;
   if (count > 0x100) { // TODO: find a better number than 0x100

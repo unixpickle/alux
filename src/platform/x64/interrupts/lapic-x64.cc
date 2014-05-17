@@ -11,6 +11,7 @@ LAPIC::~LAPIC() {
 }
 
 void LAPIC::SetDefaults() {
+  AssertCritical();
   WriteRegister(RegTASKPRIOR, 0x20);
   WriteRegister(RegLVT_TMR, 0x10000);
   WriteRegister(RegLVT_PERF, 0x10000);
@@ -27,26 +28,31 @@ void LAPIC::SetDefaults() {
 }
 
 void LAPIC::ClearErrors() {
+  AssertCritical();
   WriteRegister(RegESR, 0);
 }
 
 void LAPIC::SendEOI() {
+  AssertCritical();
   WriteRegister(RegEOI, 0);
 }
 
 bool LAPIC::IsRequested(uint8_t vector) {
+  AssertCritical();
   uint64_t regIndex = 0x20 + (vector >> 5);
   uint32_t mask = (1 << (vector & 0x1f));
   return 0 != (ReadRegister(regIndex) & mask);
 }
 
 bool LAPIC::IsInService(uint8_t vector) {
+  AssertCritical();
   uint64_t regIndex = 0x10 + (vector >> 5);
   uint32_t mask = (1 << (vector & 0x1f));
   return 0 != (ReadRegister(regIndex) & mask);
 }
 
 XAPIC::XAPIC(uint64_t _base) : base(_base) {
+  AssertCritical();
   VirtAddr addr;
   bool res = KernMap::Map(base, 0x1000, addr);
   assert(res);
@@ -59,6 +65,7 @@ XAPIC::~XAPIC() {
 }
 
 uint64_t XAPIC::ReadRegister(uint16_t reg) {
+  AssertCritical();
   if (reg != 0x30) {
     return (uint64_t)regs[reg * 4];
   } else {
@@ -69,6 +76,7 @@ uint64_t XAPIC::ReadRegister(uint16_t reg) {
 }
 
 void XAPIC::WriteRegister(uint16_t reg, uint64_t value) {
+  AssertCritical();
   if (reg != 0x30) {
     assert(!(value & 0xFFFFFFFF00000000L));
     regs[reg * 4] = value;
@@ -79,18 +87,21 @@ void XAPIC::WriteRegister(uint16_t reg, uint64_t value) {
 }
 
 void XAPIC::Enable() {
+  AssertCritical();
   uint64_t flags = ReadMSR(0x1b) & 0xf00;
   flags |= 1 << 11;
   WriteMSR(0x1b, base | flags);
 }
 
 uint32_t XAPIC::GetId() {
+  AssertCritical();
   return ReadRegister(RegAPICID) >> 0x18;
 }
 
 void XAPIC::SendIPI(uint32_t cpu, uint8_t vector,
                     uint8_t mode, uint8_t level,
                     uint8_t trigger) {
+  AssertCritical();
   uint64_t value = 0;
   value = (uint64_t)vector | ((uint64_t)mode << 8);
   value |= ((uint64_t)level << 0xe) | ((uint64_t)trigger << 0xf);
@@ -99,26 +110,31 @@ void XAPIC::SendIPI(uint32_t cpu, uint8_t vector,
 }
 
 uint64_t X2APIC::ReadRegister(uint16_t reg) {
+  AssertCritical();
   return ReadMSR((uint32_t)reg + 0x800);
 }
 
 void X2APIC::WriteRegister(uint16_t reg, uint64_t value) {
+  AssertCritical();
   WriteMSR((uint32_t)reg + 0x800, value);
 }
 
 void X2APIC::Enable() {
+  AssertCritical();
   uint64_t flags = ReadMSR(0x1b) & 0xf00;
   flags |= 3 << 10;
   WriteMSR(0x1b, flags);
 }
 
 uint32_t X2APIC::GetId() {
+  AssertCritical();
   return ReadRegister(RegAPICID);
 }
 
 void X2APIC::SendIPI(uint32_t cpu, uint8_t vector,
                      uint8_t mode, uint8_t level,
                      uint8_t trigger) {
+  AssertCritical();
   uint64_t value = 0;
   value = (uint64_t)vector | ((uint64_t)mode << 8);
   value |= ((uint64_t)level << 0xe) | ((uint64_t)trigger << 0xf);
@@ -140,6 +156,7 @@ void InitializeLocalAPIC() {
 }
 
 LAPIC & GetLocalAPIC() {
+  AssertCritical();
   return *lapic;
 }
 
