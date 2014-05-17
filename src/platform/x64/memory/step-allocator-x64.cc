@@ -65,7 +65,7 @@ PhysAddr StepAllocator::AllocSize(size_t pageSize) {
   return res;
 }
 
-void StepAllocator<PageSize, T>::FreePage(PhysAddr addr) {
+void StepAllocator::FreePage(PhysAddr addr) {
   (void)addr;
   Panic("StepAllocator::FreePage() - nothing to do");
 }
@@ -73,5 +73,3 @@ void StepAllocator<PageSize, T>::FreePage(PhysAddr addr) {
 }
 
 }
-
-#endif

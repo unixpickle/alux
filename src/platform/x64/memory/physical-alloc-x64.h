@@ -70,7 +70,7 @@ private:
   uint64_t lock OS_ALIGNED(8);
   size_t totalSpace = 0;
   
-  VirtAddr AllocateBitmaps(StepAllocator<0x1000> & alloc,
+  VirtAddr AllocateBitmaps(StepAllocator & alloc,
                            PhysAddr & firstFree);
   void GrabSpace(bool large,
                  StepAllocator & alloc,

@@ -66,9 +66,7 @@ namespace x64 {
     VirtAddr bitmapPtr = AllocateBitmaps(stepper, firstFree);
     
     allocators.GenerateAllocators((uint8_t *)bitmapPtr);
-    
-    MemoryRegion reg(0, firstFree);
-    allocators.Reserve(reg);
+    allocators.Reserve(firstFree);
     
     kernMap.allocator = this;
     
@@ -97,7 +95,7 @@ namespace x64 {
   
   size_t PhysicalAllocator::Available() {
     ScopeLock scope(&lock);
-    return allocators.AvailableSpace();
+    return allocators.GetAvailableSpace();
   }
   
   size_t PhysicalAllocator::Used() {
@@ -143,7 +141,7 @@ namespace x64 {
     }
   }
   
-  VirtAddr PhysicalAllocator::AllocateBitmaps(StepAllocator<0x1000> & alloc,
+  VirtAddr PhysicalAllocator::AllocateBitmaps(StepAllocator & alloc,
                                               PhysAddr & firstFree) {
     ssize_t remaining = (ssize_t)allocators.BitmapByteCount();
     
