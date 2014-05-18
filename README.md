@@ -9,23 +9,20 @@ General architectual ideas that I am playing around with:
  * Cross-platform abstractions
  * Memory allocation and VMM completely in user-space
 
-## TODO
+## To-do
 
-Currently, I'm working on getting SMP to work:
+I have SMP working, so now I'm going to focus on finishing up the boot process and tightening up the standards for post-boot execution. Here's some things I need to do:
 
- * Implement the Local APIC as an abstract base class
- * Use NASM to generate a processor initialization routine
- * Make inter-processor communication system
-  * Send message, poll for response or get callback if desired
+ * Add custom interrupt handler for Panic IPI; simply `cli` & `hlt`
+ * Create object-send IPI mechanism
+ * Custom one-time interrupt handler for CPU APIC timer calibration
+ * Calibrate CPU real time clock if it is available; otherwise, keep the PIT enabled for time-keeping purposes.
 
 Also, there's some miscellaneous stuff I want to do:
 
  * Implement ACPI shutdown
- * Create IPI for Panic()
-
-## General TODO
-
  * Look into Translation Cache Extension to increase invlpg speed
+ * Tighten up header docs about what is critical and noncritical and what is synchronous and what is not.
 
 ## License
 
