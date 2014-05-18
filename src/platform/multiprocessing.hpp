@@ -38,7 +38,7 @@ public:
    * a response is received.
    * @ambicritical
    */
-  virtual void * SendIPI(void * object);
+  virtual void * SendIPI(void * object) = 0;
   
 };
 
