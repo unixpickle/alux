@@ -1,11 +1,17 @@
-#include <platform/multiprocessing.hpp>
-#include <platform/interrupts.hpp>
 #include "../interrupts/int-handlers-x64.hpp"
 #include "../interrupts/pic-x64.hpp"
 #include "../interrupts/ioapic-x64.hpp"
 #include "../interrupts/lapic-x64.hpp"
+#include "../interrupts/int-vectors-x64.hpp"
+#include "cpu-x64.hpp"
+#include "pit-x64.hpp"
 
 namespace OS {
+
+static void SetupCPUList();
+static void StartCPUs();
+static void StartCPU(uint32_t lapicId);
+static void CalibrateCPUs();
 
 void InitializeProcessors() {
   x64::InitializeIDT();
@@ -25,9 +31,7 @@ void InitializeProcessors() {
   for (uint32_t i = 0; i < apic.GetPinCount(); i++) {
     apic.MaskPin(i);
   }
-  apic.MapIRQ(0, 0x20);
-  apic.MapIRQ(1, 0x21);
-  apic.MapIRQ(6, 0x26);
+  apic.MapIRQ(0, x64::IntVectors::PIT);
   x64::IOAPIC::StartUsing();
 
   x64::InitializeLocalAPIC();
@@ -37,7 +41,50 @@ void InitializeProcessors() {
   lapic.SetDefaults();
   lapic.Enable();
   
-  Panic("TODO: send CPU IPIs here");
+  SetupCPUList();
+  StartCPUs();
+  CalibrateCPUs();
+  
+  // TODO: see if we need the PIT to keep time
+  apic.MaskIRQ(x64::IntVectors::PIT);
+}
+
+static void SetupCPUList() {
+  int usable = x64::ACPI::GetMADT()->CountLocalAPICEntries(true);
+  x64::CPUList::Initialize(usable);
+}
+
+static void StartCPUs() {
+  x64::PitSetDivisor(11932);
+  x64::SetIntRoutine(x64::IntVectors::PIT, x64::PitInterruptHandler);
+  
+  x64::LAPIC & lapic = x64::GetLocalAPIC();
+  x64::ACPI::MADT * madt = x64::ACPI::GetMADT();
+  
+  for (int i = 0; i < madt->GetTableCount(); i++) {
+    uint8_t * table = madt->GetTable(i);
+    if (table[0] == x64::ACPI::MADT::TypeLAPIC) {
+      x64::ACPI::MADT::LocalAPIC * lapic = (x64::ACPI::MADT::LocalAPIC *)table;
+      if (!(lapic->flags & 1)) continue;
+      
+      StartCPU((uint32_t)lapic->apicId);
+    } else if (table[0] == x64::ACPI::MADT::Typex2APIC) {
+      x64::ACPI::MADT::LocalAPIC2 * lapic
+        = (x64::ACPI::MADT::LocalAPIC2 *)table;
+      if (!(lapic->flags & 1)) continue;
+      
+      StartCPU(lapic->x2apicId);
+    }
+  }
+}
+
+static void StartCPU(uint32_t lapicId) {
+  (void)lapicId;
+  Panic("TODO: implement StartCPU()");
+}
+
+static void CalibrateCPUs() {
+  Panic("TODO: implement CalibrateCPUs()");
 }
 
 }

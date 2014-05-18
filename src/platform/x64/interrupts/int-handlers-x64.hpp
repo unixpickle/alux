@@ -23,10 +23,16 @@ namespace OS {
 
 namespace x64 {
 
+typedef void (* IntRoutine)();
+
 void InitializeIDT();
 InterruptTable & GetGlobalIDT();
 void ConfigureDummyIDT();
 void ConfigureRealIDT();
+
+void SetIntRoutine(uint8_t vec, IntRoutine handler);
+IntRoutine GetIntRoutine(uint8_t vec);
+void UnsetIntRoutine(uint8_t vec);
 
 }
 

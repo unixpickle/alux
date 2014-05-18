@@ -55,6 +55,7 @@ public:
   
   void SetTable(uint8_t idx, const TableEntry & entry);
   void MapIRQ(uint8_t irq, uint8_t vector);
+  void MaskIRQ(uint8_t irq);
   void MaskPin(uint8_t irq);
 };
 

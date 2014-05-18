@@ -95,7 +95,7 @@ public:
   bool SystemHas8259();
   int CountType(uint8_t type);
   int CountIOAPICEntries();
-  int CountLocalAPICEntries();
+  int CountLocalAPICEntries(bool checkUsable = false);
   
   ISO * LookupISO(uint8_t physicalIRQ);
   IOAPIC * GetIOAPICWithBase(uint32_t base);

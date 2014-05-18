@@ -73,6 +73,15 @@ void IOAPIC::MapIRQ(uint8_t irq, uint8_t vector) {
   }
 }
 
+void IOAPIC::MaskIRQ(uint8_t irq) {
+  ACPI::MADT::ISO * iso = ACPI::GetMADT()->LookupISO(irq);
+  if (iso) {
+    MaskPin(iso->interrupt);
+  } else {
+    MaskPin(irq);
+  }
+}
+
 void IOAPIC::MaskPin(uint8_t irq) {
   WriteReg(0x10 + (irq * 2), 0x10000);
 }

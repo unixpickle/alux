@@ -3,12 +3,22 @@
 extern "C" {
 
 void InterruptCoded(void * caller, uint64_t vector, uint64_t code) {
+  OS::x64::IntRoutine h = OS::x64::GetIntRoutine((uint8_t)vector);
+  if (h) return h();
+  
+  if (vector >= 0xf0) return;
+  
   OS::cout << "OS::x64::InterruptCoded() - caller=" << (uintptr_t)caller
     << " vector=" << vector << " code=" << code << OS::endl;
   OS::Panic("nothing to do in interrupt handler");
 }
 
 void InterruptRegular(void * caller, uint64_t vector) {
+  OS::x64::IntRoutine h = OS::x64::GetIntRoutine((uint8_t)vector);
+  if (h) return h();
+  
+  if (vector >= 0xf0) return;
+  
   OS::cout << "OS::x64::InterruptRegular() - caller=" << (uintptr_t)caller
     << " vector=" << vector << OS::endl;
   OS::Panic("nothing to do in interrupt handler");
@@ -42,9 +52,12 @@ namespace OS {
 namespace x64 {
 
 static InterruptTable globalIdt;
+static IntRoutine * handlers;
 
 void InitializeIDT() {
   new(&globalIdt) InterruptTable();
+  handlers = new IntRoutine[0x100];
+  bzero(handlers, 0x800);
 }
 
 InterruptTable & GetGlobalIDT() {
@@ -66,6 +79,18 @@ void ConfigureRealIDT() {
       globalIdt.SetHandler(i, (void *)RawNonCodedHandler, 0x8e);
     }
   }
+}
+
+void SetIntRoutine(uint8_t vec, IntRoutine handler) {
+  handlers[vec] = handler;
+}
+
+IntRoutine GetIntRoutine(uint8_t vec) {
+  return handlers[vec];
+}
+
+void UnsetIntRoutine(uint8_t vec) {
+  handlers[vec] = NULL;
 }
 
 }

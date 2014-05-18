@@ -77,8 +77,24 @@ int MADT::CountIOAPICEntries() {
   return CountType(TypeIOAPIC);
 }
 
-int MADT::CountLocalAPICEntries() {
-  return CountType(TypeLAPIC) + CountType(Typex2APIC);
+int MADT::CountLocalAPICEntries(bool checkUsable) {
+  if (!checkUsable) {
+    return CountType(TypeLAPIC) + CountType(Typex2APIC);
+  } else {
+    int count = 0;
+    size_t offset = 0;
+    for (int i = 0; i < tableCount; i++) {
+      if (data[offset] == TypeLAPIC) {
+        LocalAPIC * apic = (LocalAPIC *)&data[offset];
+        if (apic->flags & 1) count++;
+      } else if (data[offset] == Typex2APIC) {
+        LocalAPIC2 * apic = (LocalAPIC2 *)&data[offset];
+        if (apic->flags & 1) count++;
+      }
+      offset += data[1 + offset];
+    }
+    return count;
+  }
 }
 
 MADT::ISO * MADT::LookupISO(uint8_t physicalIRQ) {
