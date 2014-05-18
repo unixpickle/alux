@@ -1,11 +1,11 @@
-
-/*
-
 #include "gdt-x64.hpp"
 
 namespace OS {
 
 namespace x64 {
+
+static GDT globalGDT;
+static bool initialized = false;
 
 GDT::DescTSS::DescTSS(TSS * tss)
   : limit_0(0x67), type(9), res0(0), dpl(0), present(1), limit_16(0),
@@ -18,26 +18,59 @@ GDT::DescTSS::DescTSS(TSS * tss)
   base_32 = ptrVal >> 0x20;
 }
 
-GDTPointer & GDT::GetCurrentPtr() {
-  // TODO: nyi
+TSS * GDT::DescTSS::GetPointer() {
+  uint64_t ptrVal = 0;
+  ptrVal |= base_0;
+  ptrVal |= base_16 << 16;
+  ptrVal |= base_24 << 24;
+  ptrVal |= (uint64_t)base_32 << 0x20;
+  return (TSS *)ptrVal;
+}
+
+GDT::GDTPointer GDT::GetCurrentPtr() {
+  GDTPointer result;
+  __asm__("sgdt (%0)" : : "r" (&result));
+  return result;
 }
 
 GDT & GDT::GetGlobal() {
-  // TODO: nyi
+  if (!initialized) {
+    new(&globalGDT) GDT(GetCurrentPtr());
+    initialized = true;
+  }
+  return globalGDT;
 }
 
-GDT::GDT(const GDTPointer & currentPtr) {
-  // TODO: nyi
+GDT::~GDT() {
+  delete buffer;
+}
+
+GDT::GDT(GDT::GDTPointer currentPtr)
+  : offset(currentPtr.limit + 1), initOffset(offset) {
+  buffer = new uint8_t[0x10000];
+  memcpy(buffer, (void *)currentPtr.start, offset);
+  bzero(buffer + offset, 0x10000 - offset);
 }
 
 uint16_t GDT::AddTSS(TSS * aTSS) {
-  // TODO: nyi
+  assert(offset <= 0xfff0);
+  
+  DescTSS desc(aTSS);
+  memcpy(buffer + offset, &desc, 0x10);
+  
+  uint16_t result = (uint16_t)offset;
+  offset += 0x10;
+  return result;
 }
 
-};
+TSS * GDT::GetTSS(uint16_t sel) {
+  return (TSS *)(buffer + sel);
+}
 
+size_t GDT::GetInitialOffset() {
+  return initOffset;
 }
 
 }
 
-*/
+}
