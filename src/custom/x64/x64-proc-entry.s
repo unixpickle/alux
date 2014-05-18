@@ -47,8 +47,6 @@ proc_entry_64:
   ; if I don't set SS=0, iret causes a #GP
   xor ax, ax
   mov ss, ax
-  
-  hlt
 
   pop rax
   mov cr3, rax

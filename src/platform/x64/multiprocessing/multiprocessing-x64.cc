@@ -13,6 +13,7 @@ namespace OS {
 namespace x64 {
 
 static const uint16_t codeAddress = 0x5000;
+static uint64_t curCpuLock OS_ALIGNED(8) = 0;
 
 static void SetupCPUList();
 static void AddThisCPU();
@@ -161,18 +162,23 @@ static void StartCPU(uint32_t lapicId) {
   int cpuCount = CPUList::Count();
   
   uint8_t vector = (uint8_t)(codeAddress >> 12);
-  lapic.ClearErrors();
-  lapic.SendIPI(lapicId, vector, 6, 1, 0);
-  PitSleep(20);
-  if (cpuCount == CPUList::Count()) {
+  for (int j = 0; j < 2; j++) {
+    lapic.ClearErrors();
     lapic.SendIPI(lapicId, vector, 6, 1, 0);
-    PitSleep(20);
-    if (cpuCount == CPUList::Count()) {
-      cerr << "[FAIL]" << endl;
-      return;
+  
+    // wait a maximum of 200ms before sending another IPI or failing
+    for (int i = 0; i < 20; i++) {
+      PitSleep(1);
+      anlock_lock(&curCpuLock);
+      int newCount = CPUList::Count();
+      anlock_unlock(&curCpuLock);
+      if (newCount != cpuCount) {
+        cout << "[OK]" << endl;
+        return;
+      }
     }
   }
-  cout << "[OK]" << endl;
+  cerr << "[FAIL]" << endl;
 }
 
 static void CalibrateCPUs() {
@@ -180,8 +186,8 @@ static void CalibrateCPUs() {
 }
 
 static void Entrance() {
-  cout << "entrance" << endl;
-  __asm__("cli\nhlt");
+  anlock_lock(&curCpuLock);
+  
   GDT & gdt = GDT::GetGlobal();
   int idx = CPUList::ConstructEntry(GetLocalAPIC().GetId());
   TSS * tss = new TSS();
@@ -205,10 +211,12 @@ static void CpuMain() {
   lapic.SetDefaults();
   lapic.Enable();
   
+  anlock_unlock(&curCpuLock);
   __asm__("sti");
-  cout << "OS::x64::CpuMain()" << endl;
   
-  while (1) {}
+  while (1) {
+    __asm__("hlt");
+  }
 }
   
 }
