@@ -15,7 +15,9 @@ void PitSetDivisor(uint16_t div) {
 }
 
 void PitInterruptHandler() {
-  (*tickPtr)++;
+  assert(!GetInterruptsEnabled());
+  __asm__("lock incq (%0)" : : "r" (tickPtr));
+  GetLocalAPIC().SendEOI();
 }
 
 void PitSleep(uint64_t ticks) {

@@ -4,7 +4,8 @@ namespace OS {
 
 namespace x64 {
 
-static LAPIC * lapic = NULL;
+static XAPIC * xapic = NULL;
+static X2APIC * x2apic = NULL;
 static int LAPICDivide = 0x3;
 
 LAPIC::~LAPIC() {
@@ -142,22 +143,25 @@ void X2APIC::SendIPI(uint32_t cpu, uint8_t vector,
   WriteRegister(0x30, value);
 }
 
-void InitializeLocalAPIC() {
+LAPIC & GetLocalAPIC() {
+  AssertCritical();
+  
   uint32_t ecx;
   CPUID(1, NULL, &ecx, NULL);
   if (ecx & (1 << 21)) {
     // setup x2APIC
-    lapic = new X2APIC();
-  } else {
-    // setup xAPIC
-    ACPI::MADT * madt = ACPI::GetMADT();
-    lapic = new XAPIC((uint64_t)madt->GetHeader().lapicAddr);
+    if (!x2apic) {
+      x2apic = new X2APIC();
+    }
+    return *x2apic;
   }
-}
-
-LAPIC & GetLocalAPIC() {
-  AssertCritical();
-  return *lapic;
+  
+  // setup xAPIC
+  if (!xapic) {
+    ACPI::MADT * madt = ACPI::GetMADT();
+    xapic = new XAPIC((uint64_t)madt->GetHeader().lapicAddr);
+  }
+  return *xapic;
 }
 
 }

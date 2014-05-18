@@ -17,6 +17,8 @@ private:
   uint32_t apicId;
 
 public:
+  uint16_t tssDesc;
+  
   CPU(uint32_t apicId); // only call this from the current CPU
 
   int GetIndexInCore();

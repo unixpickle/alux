@@ -10,6 +10,7 @@ namespace OS {
 namespace x64 {
 
 class TSS {
+public:
   uint32_t res0;
   uint64_t rsp[3];
   uint64_t res1;
@@ -70,6 +71,7 @@ public:
   TSS * GetTSS(uint16_t sel);
   
   size_t GetInitialOffset();
+  void Set();
 
 };
 

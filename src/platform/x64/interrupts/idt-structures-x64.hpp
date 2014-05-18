@@ -10,7 +10,7 @@ namespace OS {
 namespace x64 {
 
 // NOTICE: the C++11 standard is needed for this file because it uses packed
-// structures with initializers.
+// structures with initializers (which need to be POD types).
 
 /**
  * Represents this x86-64 machine code:

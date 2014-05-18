@@ -1,8 +1,7 @@
 #ifndef __PLATFORM_X64_PIT_X64_HPP__
 #define __PLATFORM_X64_PIT_X64_HPP__
 
-#include <cstdint>
-#include "../common-x64.hpp"
+#include "../interrupts/lapic-x64.hpp"
 
 namespace OS {
 

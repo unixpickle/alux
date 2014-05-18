@@ -86,8 +86,6 @@ public:
                        uint8_t trigger);
 };
 
-void InitializeLocalAPIC();
-
 /**
  * @critical
  */
