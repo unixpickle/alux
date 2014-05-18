@@ -73,7 +73,8 @@ size_t GDT::GetInitialOffset() {
 
 void GDT::Set() {
   GDTPointer ptr = {0xffff, (uint64_t)buffer};
-  assert(!((uint64_t)&ptr & 7));
+  // I don't think this needs to be aligned, and it won't be if we use GCC :(
+  // assert(!((uint64_t)&ptr & 7));
   __asm__("lgdt (%0)" : : "r" (&ptr));
 }
 

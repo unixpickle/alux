@@ -23,6 +23,10 @@ Also, there's some miscellaneous stuff I want to do:
  * Implement ACPI shutdown
  * Create IPI for Panic()
 
+## General TODO
+
+ * Look into Translation Cache Extension to increase invlpg speed
+
 ## License
 
 Alux is licensed under the BSD 2-clause license. See [LICENSE](https://github.com/unixpickle/alux/blob/master/LICENSE).

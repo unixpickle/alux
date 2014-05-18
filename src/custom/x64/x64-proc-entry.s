@@ -6,6 +6,8 @@ align 16
 db '_X64_PROC_ENTRY_'
 dq (proc_entry_end - proc_entry)
 proc_entry:
+  jmp 0:(.start - proc_entry + PROC_ADDR_BASE)
+.start:
   cli
   mov sp, PROC_ADDR_BASE - 0x10
 
@@ -14,10 +16,10 @@ proc_entry:
   mov edx, initial_pml4
   mov cr3, edx
   
-  ; set the LME and SCE bits of the EFER msr
+  ; set the LME, SCE and NXE bits of the EFER msr
   mov ecx, 0xC0000080
   rdmsr
-  or eax, 0x101
+  or eax, 0x901
   wrmsr
 
   ; enable paging and protection simultaneously
@@ -25,9 +27,14 @@ proc_entry:
   or ebx, 0x80000001
   mov cr0, ebx
   
-  mov ebx, gdt_pointer
+  mov ebx, local_gdt_ptr - proc_entry + PROC_ADDR_BASE
   lgdt [ebx]
   jmp gdt.code:((proc_entry_64 - proc_entry) + PROC_ADDR_BASE)
+
+align 8
+local_gdt_ptr:
+  dw gdt_pointer - gdt - 1
+  dq gdt
 
 bits 64
 proc_entry_64:

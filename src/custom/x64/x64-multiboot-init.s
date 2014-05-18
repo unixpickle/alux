@@ -15,7 +15,7 @@ MAGIC equ 0x1BADB002
 CHECKSUM equ -(MAGIC + FLAGS)
 
 CPUID_1_FEATURES equ (1 << 3) | (1 << 6) | (1 << 24) | (1 << 26)
-CPUID_80000001_FEATURES equ (1 << 11) | (1 << 29) | (1 << 20)
+CPUID_80000001_FEATURES equ (1 << 29) | (1 << 20)
 
 multiboot_header:
   dd MAGIC
@@ -59,10 +59,10 @@ start:
   or eax, 0xa0
   mov cr4, eax
 
-  ; set Long Mode bit
+  ; set Long Mode bit, System Call Extensions bit, and NX enable bit
   mov ecx, 0xc0000080
   rdmsr
-  or eax, 0x101
+  or eax, 0x901
   wrmsr
 
   ; configure paging
