@@ -42,6 +42,10 @@ void KernelMap::Setup() {
   manager = man;
 }
 
+PhysAddr KernelMap::GetPML4() {
+  return manager.GetPML4();
+}
+
 void KernelMap::Set() {
   manager.Set();
 }

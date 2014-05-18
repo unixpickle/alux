@@ -21,6 +21,11 @@ public:
   TableMgr & operator=(const TableMgr & mgr);
   
   /**
+   * Return the PML4
+   */
+  PhysAddr GetPML4();
+  
+  /**
    * mov cr3, MY_PML4
    */
   void Set();

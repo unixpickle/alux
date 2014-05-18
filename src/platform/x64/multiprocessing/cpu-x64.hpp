@@ -18,6 +18,7 @@ private:
 
 public:
   uint16_t tssDesc;
+  void * stack;
   
   CPU(uint32_t apicId); // only call this from the current CPU
 

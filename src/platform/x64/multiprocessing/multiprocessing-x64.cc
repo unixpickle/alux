@@ -3,6 +3,7 @@
 #include "../interrupts/ioapic-x64.hpp"
 #include "../interrupts/lapic-x64.hpp"
 #include "../interrupts/int-vectors-x64.hpp"
+#include "../memory/kernel-map-x64.hpp"
 #include "../gdt-x64.hpp"
 #include "cpu-x64.hpp"
 #include "pit-x64.hpp"
@@ -11,6 +12,8 @@ namespace OS {
 
 namespace x64 {
 
+static const uint16_t codeAddress = 0x5000;
+
 static void SetupCPUList();
 static void AddThisCPU();
 static void StartCPUs();
@@ -18,6 +21,9 @@ static void * CopyCPUCode(size_t & size);
 static void UncopyCPUCode(void * backup, size_t size);
 static void StartCPU(uint32_t lapicId);
 static void CalibrateCPUs();
+
+static void Entrance();
+static void CpuMain();
 
 void InitializeProcessors() {
   InitializeIDT();
@@ -68,22 +74,28 @@ static void AddThisCPU() {
   int idx = CPUList::ConstructEntry(GetLocalAPIC().GetId());
   TSS * tss = new TSS();
   tss->ioplBase = 0xffff;
+  
   uint16_t sel = gdt.AddTSS(tss);
-  CPUList::GetEntry(idx).tssDesc = sel;
   gdt.Set();
   __asm__("ltr %%ax" : : "a" (sel));
+  
+  CPU & cpu = CPUList::GetEntry(idx);
+  cpu.tssDesc = sel;
+  cpu.stack = new uint8_t[0x4000];
 }
 
 static void StartCPUs() {
   cout << "OS::x64::StartCPUs()" << endl;
   PitSetDivisor(11932);
   SetIntRoutine(IntVectors::PIT, PitInterruptHandler);
+  SetInterruptsEnabled(true);
 
   LAPIC & lapic = GetLocalAPIC();
   ACPI::MADT * madt = ACPI::GetMADT();
   
   size_t codeSize;
   void * theCopy = CopyCPUCode(codeSize);
+  cout << "OS::x64::StartCPUs() - startup code size = " << codeSize << endl;
 
   for (int i = 0; i < madt->GetTableCount(); i++) {
     uint8_t * table = madt->GetTable(i);
@@ -111,31 +123,92 @@ static void * CopyCPUCode(size_t & sizeOut) {
   for (int i = 0; i < 0x1000; i++) {
     if (!memcmp(buffer + i, "_X64_PROC_ENTRY_", 0x10)) {
       codeStart = buffer + i + 0x18;
-      memcpy(&codeLength, codeStart + i + 0x10, 8);
+      memcpy(&codeLength, buffer + i + 0x10, 8);
     }
   }
   
   void * backup = new uint8_t[codeLength + 0x1000];
-  memcpy(backup, (void *)0x4000, codeLength + 0x1000);
+  memcpy(backup, (void *)(codeAddress - 0x1000), codeLength + 0x1000);
   
-  memcpy((void *)0x5000, codeStart, codeLength);
+  memcpy((void *)codeAddress, codeStart, codeLength);
   sizeOut = (size_t)codeLength;
   return backup;
 }
 
 static void UncopyCPUCode(void * backup, size_t size) {
-  memcpy((void *)0x4000, backup, size + 0x1000);
+  memcpy((void *)(codeAddress - 0x1000), backup, size + 0x1000);
   delete (uint8_t *)backup;
 }
 
 static void StartCPU(uint32_t lapicId) {
   if (lapicId == GetLocalAPIC().GetId()) return;
   cout << "Starting CPU " << lapicId << " ... ";
-  Panic("TODO: implement StartCPU()");
+  
+  // copy the two buffers
+  uint64_t * buffer = (uint64_t *)(codeAddress - 0x10);
+  buffer[0] = (uint64_t)KernelMap::GetGlobal().GetPML4();
+  buffer[1] = (uint64_t)Entrance;
+  
+  // send the INIT IPI
+  LAPIC & lapic = GetLocalAPIC();
+  lapic.ClearErrors();
+  lapic.SendIPI(lapicId, 0, 5, 1, 1);
+  PitSleep(1);
+  lapic.SendIPI(lapicId, 0, 5, 0, 1);
+  PitSleep(1);
+  
+  // start the CPU
+  int cpuCount = CPUList::Count();
+  
+  uint8_t vector = (uint8_t)(codeAddress >> 12);
+  lapic.ClearErrors();
+  lapic.SendIPI(lapicId, vector, 6, 1, 0);
+  PitSleep(20);
+  if (cpuCount == CPUList::Count()) {
+    lapic.SendIPI(lapicId, vector, 6, 1, 0);
+    PitSleep(20);
+    if (cpuCount == CPUList::Count()) {
+      cerr << "[FAIL]" << endl;
+      return;
+    }
+  }
+  cout << "[OK]" << endl;
 }
 
 static void CalibrateCPUs() {
   Panic("TODO: implement CalibrateCPUs()");
+}
+
+static void Entrance() {
+  cout << "entrance" << endl;
+  __asm__("cli\nhlt");
+  GDT & gdt = GDT::GetGlobal();
+  int idx = CPUList::ConstructEntry(GetLocalAPIC().GetId());
+  TSS * tss = new TSS();
+  tss->ioplBase = 0xffff;
+  uint16_t sel = gdt.AddTSS(tss);
+  gdt.Set();
+  __asm__("ltr %%ax" : : "a" (sel));
+  
+  CPU & cpu = CPUList::GetEntry(idx);
+  cpu.tssDesc = sel;
+  cpu.stack = new uint8_t[0x4000];
+  
+  __asm__("mov %0, %%rsp\n"
+          "call *%1"
+          : : "r" (cpu.stack), "r" (CpuMain));
+}
+
+static void CpuMain() {
+  GetGlobalIDT().Load();
+  LAPIC & lapic = GetLocalAPIC();
+  lapic.SetDefaults();
+  lapic.Enable();
+  
+  __asm__("sti");
+  cout << "OS::x64::CpuMain()" << endl;
+  
+  while (1) {}
 }
   
 }

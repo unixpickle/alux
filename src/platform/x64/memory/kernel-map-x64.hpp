@@ -37,6 +37,11 @@ public:
   void Setup();
   
   /**
+   * Return the kernel pml4.
+   */
+  PhysAddr GetPML4();
+  
+  /**
    * Sets CR3 to this map's PML4.
    */
   void Set();

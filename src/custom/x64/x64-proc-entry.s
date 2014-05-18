@@ -2,6 +2,7 @@ bits 16
 
 PROC_ADDR_BASE equ 0x5000
 
+align 16
 db '_X64_PROC_ENTRY_'
 dq (proc_entry_end - proc_entry)
 proc_entry:
@@ -23,13 +24,25 @@ proc_entry:
   mov ebx, cr0
   or ebx, 0x80000001
   mov cr0, ebx
-
+  
   mov ebx, gdt_pointer
   lgdt [ebx]
   jmp gdt.code:((proc_entry_64 - proc_entry) + PROC_ADDR_BASE)
 
 bits 64
 proc_entry_64:
+  mov ax, gdt.data
+  mov ds, ax
+  mov es, ax
+  mov fs, ax
+  mov gs, ax
+
+  ; if I don't set SS=0, iret causes a #GP
+  xor ax, ax
+  mov ss, ax
+  
+  hlt
+
   pop rax
   mov cr3, rax
   ret

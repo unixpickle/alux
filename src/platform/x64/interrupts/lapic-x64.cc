@@ -82,8 +82,8 @@ void XAPIC::WriteRegister(uint16_t reg, uint64_t value) {
     assert(!(value & 0xFFFFFFFF00000000L));
     regs[reg * 4] = value;
   } else {
-    regs[reg * 4] = value & 0xFFFFFFFF;
     regs[(reg + 1) * 4] = value >> 0x20;
+    regs[reg * 4] = value & 0xFFFFFFFF;
   }
 }
 

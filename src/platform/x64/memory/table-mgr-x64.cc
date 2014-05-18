@@ -18,6 +18,10 @@ TableMgr & TableMgr::operator=(const TableMgr & mgr) {
   return *this;
 }
 
+PhysAddr TableMgr::GetPML4() {
+  return pml4;
+}
+
 void TableMgr::Set() {
   __asm__("mov %0, %%cr3" : : "r" (pml4));
 }
