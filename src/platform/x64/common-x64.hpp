@@ -6,7 +6,14 @@ namespace OS {
 
 namespace x64 {
 
+/**
+ * @ambicritical
+ */
 void OutB(uint16_t port, uint8_t byte);
+
+/**
+ * @critical
+ */
 void CPUID(uint32_t eax, uint32_t * ebx, uint32_t * edx, uint32_t * ecx);
 
 /**

@@ -134,6 +134,9 @@ public:
   static size_t GetPageSize(int idx);
   static size_t GetPageAlignment(int idx);
   
+  /**
+   * @noncritical
+   */
   static UserMap * CreateUserMap();
   
   /**

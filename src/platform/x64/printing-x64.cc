@@ -62,6 +62,7 @@ void PrintString(const char * string) {
 }
 
 void SetColor(int _color) {
+  ScopeLock scope(&mainLock);
   color = _color;
 }
 

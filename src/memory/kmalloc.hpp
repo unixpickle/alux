@@ -6,6 +6,7 @@
 #include <utilities/common.hpp>
 #include <utilities/logs.hpp>
 #include <utilities/lock.hpp>
+#include <utilities/critical.hpp>
 #include <analloc2>
 #include <stdlib/runtime.hpp>
 #include <iostream>

@@ -22,6 +22,7 @@ void InitializeMalloc() {
 
 void * Malloc(size_t size) {
   ScopeLock scope(&mallocLock);
+  AssertNoncritical();
   assert(size <= 0x100000);
   
   MallocRegion * reg = firstRegion;
@@ -37,6 +38,7 @@ void * Malloc(size_t size) {
 
 void Free(void * ptr) {
   ScopeLock scope(&mallocLock);
+  AssertNoncritical();
   MallocRegion * reg = firstRegion;
   while (reg) {
     if (reg->OwnsPointer(ptr)) {

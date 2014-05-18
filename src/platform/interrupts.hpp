@@ -3,7 +3,14 @@
 
 namespace OS {
 
+/**
+ * @ambicritical
+ */
 bool GetInterruptsEnabled();
+
+/**
+ * @ambicritical
+ */
 void SetInterruptsEnabled(bool flag);
 
 }

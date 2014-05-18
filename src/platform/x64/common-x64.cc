@@ -9,6 +9,7 @@ void OutB(uint16_t port, uint8_t byte) {
 }
 
 void CPUID(uint32_t eax, uint32_t * ebx, uint32_t * edx, uint32_t * ecx) {
+  AssertCritical();
   uint32_t ebxIn = ebx ? *ebx : 0;
   uint32_t ecxIn = ecx ? *ecx : 0;
   uint32_t edxIn = edx ? *edx : 0;

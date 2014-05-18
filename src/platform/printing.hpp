@@ -17,7 +17,14 @@ typedef enum {
   PrintColorBrightMask = 8
 } PrintColor;
 
+/**
+ * @noncritical
+ */
 void PrintString(const char * string);
+
+/**
+ * @noncritical
+ */
 void SetColor(int color);
 
 }
