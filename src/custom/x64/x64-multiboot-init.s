@@ -133,7 +133,7 @@ entry64:
 
 
 ; 16-bit processor entrypoint
-%include "./proc-entry.s"
+%include "./x64-proc-entry.s"
 
 ; static data area
 

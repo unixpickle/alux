@@ -14,6 +14,8 @@ namespace x64 {
 static void SetupCPUList();
 static void AddThisCPU();
 static void StartCPUs();
+static void * CopyCPUCode(size_t & size);
+static void UncopyCPUCode(void * backup, size_t size);
 static void StartCPU(uint32_t lapicId);
 static void CalibrateCPUs();
 
@@ -77,17 +79,11 @@ static void StartCPUs() {
   PitSetDivisor(11932);
   SetIntRoutine(IntVectors::PIT, PitInterruptHandler);
 
-  // mess with them
-  SetInterruptsEnabled(true);
-  while (1) {
-    cout << "tick" << endl;
-    PitSleep(100);
-    cout << "tock" << endl;
-    PitSleep(100);
-  }
-
   LAPIC & lapic = GetLocalAPIC();
   ACPI::MADT * madt = ACPI::GetMADT();
+  
+  size_t codeSize;
+  void * theCopy = CopyCPUCode(codeSize);
 
   for (int i = 0; i < madt->GetTableCount(); i++) {
     uint8_t * table = madt->GetTable(i);
@@ -104,10 +100,37 @@ static void StartCPUs() {
       StartCPU(lapic->x2apicId);
     }
   }
+  
+  UncopyCPUCode(theCopy, codeSize);
+}
+
+static void * CopyCPUCode(size_t & sizeOut) {
+  const char * buffer = (const char *)0x100000;
+  const char * codeStart = NULL;
+  uint64_t codeLength;
+  for (int i = 0; i < 0x1000; i++) {
+    if (!memcmp(buffer + i, "_X64_PROC_ENTRY_", 0x10)) {
+      codeStart = buffer + i + 0x18;
+      memcpy(&codeLength, codeStart + i + 0x10, 8);
+    }
+  }
+  
+  void * backup = new uint8_t[codeLength + 0x1000];
+  memcpy(backup, (void *)0x4000, codeLength + 0x1000);
+  
+  memcpy((void *)0x5000, codeStart, codeLength);
+  sizeOut = (size_t)codeLength;
+  return backup;
+}
+
+static void UncopyCPUCode(void * backup, size_t size) {
+  memcpy((void *)0x4000, backup, size + 0x1000);
+  delete (uint8_t *)backup;
 }
 
 static void StartCPU(uint32_t lapicId) {
-  (void)lapicId;
+  if (lapicId == GetLocalAPIC().GetId()) return;
+  cout << "Starting CPU " << lapicId << " ... ";
   Panic("TODO: implement StartCPU()");
 }
 
