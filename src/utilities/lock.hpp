@@ -26,6 +26,22 @@ public:
   ~ScopeLock();
 };
 
+class ScopeCriticalLock {
+private:
+  anlock_t theLock;
+
+public:
+  /**
+   * @critical
+   */
+  ScopeCriticalLock(anlock_t lock);
+  
+  /**
+   * @ambicritical
+   */
+  ~ScopeCriticalLock();
+};
+
 }
 
 #endif

@@ -49,22 +49,26 @@ public:
   /**
    * Attempts to map a physical address to a virtual address. If the map fails,
    * (VirtualAddr)0 is returned.
+   * @noncritical
    */
   VirtAddr Map(PhysAddr start, size_t size, bool largePages);
 
   /**
    * Map a physical address to a specified virtual address. If something was
    * already mapped there, this will Panic().
+   * @noncritical
    */
   void MapAt(VirtAddr virt, PhysAddr start, size_t size, bool largePages);
   
   /**
    * Set some mapping to unpresent but keep it non-zero
+   * @noncritical
    */
   void ClearMap(VirtAddr virt, size_t size);
   
   /**
    * Unmap a virtual region of memory.
+   * @noncritical
    */
   void Unmap(VirtAddr virt, size_t size);
 
@@ -72,16 +76,19 @@ public:
    * Temporarily map a 4K physical page into a virtual address. You should lock
    * yourself to this CPU since the caches on other CPUs may have stale entires
    * for this address.
+   * @critical
    */
   VirtAddr AllocScratch(PhysAddr start);
   
   /**
    * Reuse the same scratch for a different address.
+   * @critical
    */
   void ReassignScratch(VirtAddr addr, PhysAddr newAddr);
   
   /**
    * Release a virtual address returned by AllocScratch to be used elsewhere.
+   * @critical
    */
   void FreeScratch(VirtAddr ptr);
 

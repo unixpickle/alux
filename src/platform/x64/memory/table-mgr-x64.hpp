@@ -8,7 +8,9 @@ namespace OS {
 namespace x64 {
 
 /**
- * This class handles everything that is 4-level page tables.
+ * This class handles everything that is 4-level page tables. However, it does
+ * not provide any locking mechanisms whatsoever. It is simply a wrapper around
+ * the x86-64 4-level page table structure.
  */
 class TableMgr {
 protected:

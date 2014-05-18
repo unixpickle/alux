@@ -51,6 +51,7 @@ void KernelMap::Set() {
 }
 
 VirtAddr KernelMap::Map(PhysAddr start, size_t size, bool largePages) {
+  AssertNoncritical();
   assert(!(size & (largePages ? 0x1fffff : 0xfff)));
   assert(!(start & (largePages ? 0x1fffff : 0xfff)));
   
@@ -82,6 +83,7 @@ VirtAddr KernelMap::Map(PhysAddr start, size_t size, bool largePages) {
 
 void KernelMap::MapAt(VirtAddr virt, PhysAddr start,
                       size_t size, bool largePages) {
+  AssertNoncritical();
   ScopeLock scope(&mapLock);
   uint64_t flags = 0x103 | (largePages ? 0x80 : 0);
   manager.Map(virt, start, size, largePages, flags, 3);
@@ -99,11 +101,13 @@ void KernelMap::MapAt(VirtAddr virt, PhysAddr start,
 }
 
 void KernelMap::ClearMap(VirtAddr virt, size_t size) {
+  AssertNoncritical();
   ScopeLock scope(&mapLock);
   manager.ClearMap(virt, size);
 }
 
 void KernelMap::Unmap(VirtAddr virt, size_t size) {
+  AssertNoncritical();
   ScopeLock scope(&mapLock);
   manager.Unmap(virt, size);
   
@@ -120,7 +124,8 @@ void KernelMap::Unmap(VirtAddr virt, size_t size) {
 }
 
 VirtAddr KernelMap::AllocScratch(PhysAddr start) {
-  ScopeLock scope(&scratchLock);
+  AssertCritical();
+  ScopeCriticalLock scope(&scratchLock);
   
   assert(!(start & 0xfff));
   
@@ -150,6 +155,7 @@ VirtAddr KernelMap::AllocScratch(PhysAddr start) {
 }
 
 void KernelMap::ReassignScratch(VirtAddr addr, PhysAddr newAddr) {
+  AssertCritical();
   int bitIndex = (int)((addr - ScratchStartAddr) >> 12);
   int scratchTableIdx = bitIndex >> 9;
   uint64_t * table = (uint64_t *)((uint64_t)ScratchPTStart()
@@ -159,7 +165,8 @@ void KernelMap::ReassignScratch(VirtAddr addr, PhysAddr newAddr) {
 }
 
 void KernelMap::FreeScratch(VirtAddr ptr) {
-  ScopeLock scope(&scratchLock);
+  AssertCritical();
+  ScopeCriticalLock scope(&scratchLock);
   
   int bitIndex = (int)((ptr - ScratchStartAddr) >> 12);
   int fieldIndex = bitIndex / 0x40;
