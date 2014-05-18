@@ -12,7 +12,7 @@ LAPIC::~LAPIC() {
 
 void LAPIC::SetDefaults() {
   AssertCritical();
-  WriteRegister(RegTASKPRIOR, 0x20);
+  WriteRegister(RegTASKPRIOR, 0x0);
   WriteRegister(RegLVT_TMR, 0x10000);
   WriteRegister(RegLVT_PERF, 0x10000);
   WriteRegister(RegLVT_LINT0, 0x8700);

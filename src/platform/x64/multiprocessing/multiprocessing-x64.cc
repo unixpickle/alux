@@ -58,6 +58,15 @@ static void StartCPUs() {
   x64::PitSetDivisor(11932);
   x64::SetIntRoutine(x64::IntVectors::PIT, x64::PitInterruptHandler);
   
+  // mess with them
+  SetInterruptsEnabled(true);
+  while (1) {
+    cout << "tick" << endl;
+    x64::PitSleep(100);
+    cout << "tock" << endl;
+    x64::PitSleep(100);
+  }
+  
   x64::LAPIC & lapic = x64::GetLocalAPIC();
   x64::ACPI::MADT * madt = x64::ACPI::GetMADT();
   

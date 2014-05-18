@@ -65,10 +65,13 @@ void IOAPIC::MapIRQ(uint8_t irq, uint8_t vector) {
   
   ACPI::MADT::ISO * iso = ACPI::GetMADT()->LookupISO(irq);
   if (iso) {
+    cout << "mapping IRQ, setting entry for " << iso->interrupt << endl;
+    // TODO: idk why i do & 0x3, i should check this out
     if (iso->flags & 0x3) entry.intpol = 1;
     if ((iso->flags >> 2) & 0x3) entry.triggermode = 1;
     SetTable(iso->interrupt, entry);
   } else {
+    cout << "mapping IRQ regular " << irq << endl;
     SetTable(irq, entry);
   }
 }
