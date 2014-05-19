@@ -71,6 +71,13 @@ size_t GDT::GetInitialOffset() {
   return initOffset;
 }
 
+int GDT::GetTSSIndex() {
+  uint64_t reg;
+  __asm__("xor %%rax, %%rax\n"
+          "str %%ax" : "=a" (reg));
+  return (int)((reg - initOffset) / 0x10);
+}
+
 void GDT::Set() {
   GDTPointer ptr = {0xffff, (uint64_t)buffer};
   // I don't think this needs to be aligned, and it won't be if we use GCC :(

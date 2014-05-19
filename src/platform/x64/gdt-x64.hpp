@@ -71,6 +71,7 @@ public:
   TSS * GetTSS(uint16_t sel);
   
   size_t GetInitialOffset();
+  int GetTSSIndex();
   void Set();
 
 };

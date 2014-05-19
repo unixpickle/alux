@@ -22,7 +22,7 @@ public:
    * Returns a unique identifier for this CPU.
    * @ambicritical
    */
-  virtual ProcessorID GetID() = 0;
+  virtual ProcessorID GetId() = 0;
   
   /**
    * Returns the "priority" of the CPU. The lower the priority, the more likely

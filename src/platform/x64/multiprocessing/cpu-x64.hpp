@@ -14,18 +14,21 @@ class CPU : public Processor {
 private:
   int logicalCPUBits;
   int coreCPUBits;
-  uint32_t apicId;
 
 public:
+  uint32_t apicId;
   uint16_t tssDesc;
   void * stack;
+  
+  uint64_t apicClockSpeed;
+  bool hasCalibrated;
   
   CPU(uint32_t apicId); // only call this from the current CPU
 
   int GetIndexInCore();
   int GetIndexInCPU();
   
-  virtual ProcessorID GetID();
+  virtual ProcessorID GetId();
   virtual int GetPriority();
   virtual void * SendIPI(void * object);
 };
@@ -33,7 +36,7 @@ public:
 namespace CPUList {
   
   void Initialize(int maxCount);
-  int Count();
+  int GetCount();
   int ConstructEntry(uint32_t apicId);
   CPU & GetEntry(int index);
   

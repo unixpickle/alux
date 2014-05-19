@@ -18,7 +18,7 @@ int CPU::GetIndexInCPU() {
   return 0;
 }
 
-ProcessorID CPU::GetID() {
+ProcessorID CPU::GetId() {
   return (ProcessorID)apicId;
 }
 
@@ -45,7 +45,7 @@ namespace CPUList {
     listBuffer = new uint8_t[maxCount * sizeof(CPU)];
   }
   
-  int Count() {
+  int GetCount() {
     return fillCount;
   }
   
