@@ -186,6 +186,8 @@ void CpuCalibrate() {
   int idx = GDT::GetGlobal().GetTSSIndex();
   CPU & cpu = CPUList::GetEntry(idx);
   cpu.hasCalibrated = true;
+  // TODO: here, use the PIT to calibrate our Local APIC timer; I am not sure
+  // if all timers are guaranteed to be the same, so for now, nahhhh.
   // LAPIC & lapic = GetLocalAPIC();
 }
 
