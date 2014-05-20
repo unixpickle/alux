@@ -3,27 +3,19 @@
 namespace OS {
 namespace x64 {
 
+static int32_t calibrateRemaining OS_ALIGNED(8);
+
 void InitializeTime() {
   CalibrateLapicTimers();
 
   Panic("TODO: here, setup a better time keeping mechanism.");
   if (SupportsInvariantTSC()) {
-    // configure the TSC
+    CalibrateTSC();
   } else if (SupportsHPET()) {
-    // look for HPET
+    // calibrate the HPET here
   } else {
     // resort to using the PIT
   }
-}
-
-bool SupportsInvariantTSC() {
-  uint32_t edx;
-  CPUID(0x80000007, NULL, &edx, NULL);
-  return (edx & (1 << 8)) != 0;
-}
-
-bool SupportsHPET() {
-  return false;
 }
 
 void CalibrateLapicTimers() {
@@ -31,26 +23,15 @@ void CalibrateLapicTimers() {
   SetIntRoutine(IntVectors::Calibrate, CpuCalibrateLapic);
 
   LAPIC & lapic = GetLocalAPIC();
+  calibrateRemaining = CPUList::GetCount();
   for (int i = 0; i < CPUList::GetCount(); i++) {
     CPU & cpu = CPUList::GetEntry(i);
-    if (cpu.apicId != lapic.GetId()) {
-      lapic.SendIPI(cpu.apicId, IntVectors::Calibrate, 0, 1, 0);
-    } else {
-      CpuCalibrateLapic();
-    }
+    if (cpu.apicId == lapic.GetId()) continue;
+    lapic.SendIPI(cpu.apicId, IntVectors::Calibrate, 0, 1, 0);
   }
+  CpuCalibrateLapic();
   
-  bool allDone;
-  do {
-    allDone = true;
-    for (int i = 0; i < CPUList::GetCount(); i++) {
-      CPU & cpu = CPUList::GetEntry(i);
-      if (!cpu.timeInfo.lapicCalibrated) {
-        allDone = false;
-        break;
-      }
-    }
-  } while (!allDone);
+  while (calibrateRemaining);
   
   UnsetIntRoutine(IntVectors::Calibrate);
 }
@@ -65,9 +46,10 @@ void CpuCalibrateLapic() {
   uint64_t value = lapic.ReadRegister(LAPIC::RegTMRCURRCNT);
   lapic.WriteRegister(LAPIC::RegLVT_TMR, 0x10000);
 
-  CPU & cpu = CPUList::GetCurrentCPU();
+  CPU & cpu = CPUList::GetCurrent();
   cpu.timeInfo.lapicClock = (uint64_t)(0xffffffff - value) * 2;
-  cpu.timeInfo.lapicCalibrated = true;
+  
+  __asm__("lock decl (%0)" : : "r" (&calibrateRemaining));
 }
 
 }

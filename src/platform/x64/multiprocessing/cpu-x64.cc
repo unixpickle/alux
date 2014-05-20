@@ -63,7 +63,7 @@ namespace CPUList {
     return ptr[index];
   }
 
-  CPU & GetCurrentCPU() {
+  CPU & GetCurrent() {
     int index = GDT::GetGlobal().GetTSSIndex();
     return GetEntry(index);
   }

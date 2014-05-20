@@ -39,7 +39,7 @@ namespace CPUList {
   int GetCount();
   int ConstructEntry(uint32_t apicId);
   CPU & GetEntry(int index);
-  CPU & GetCurrentCPU();
+  CPU & GetCurrent();
   
 }
 
