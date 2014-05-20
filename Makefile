@@ -21,6 +21,7 @@ export CC
 export LD
 export NASM
 export CXXFLAGS
+export CFLAGS
 
 $(BUILD_DIR)/$(BINFILE): $(BUILD_DIR)
 	$(MAKE) -C $(BUILD_DIR)/obj
