@@ -25,13 +25,11 @@ void PitInterruptHandler() {
 }
 
 void PitSleep(uint64_t ticks) {
-  assert(GetInterruptsEnabled());
   uint64_t until = *tickPtr + ticks;
   while (*tickPtr < until);
 }
 
 void PitWait(uint64_t deadline) {
-  assert(GetInterruptsEnabled());
   while (*tickPtr < deadline);
 }
 
