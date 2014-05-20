@@ -1,0 +1,5 @@
+namespace OS {
+
+void InitializePlatform();
+
+}

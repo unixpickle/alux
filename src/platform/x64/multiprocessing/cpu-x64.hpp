@@ -5,6 +5,7 @@
 #include <platform/failure.hpp>
 #include <cassert>
 #include <new>
+#include "../time/time-structures-x64.hpp"
 
 namespace OS {
 
@@ -19,9 +20,8 @@ public:
   uint32_t apicId;
   uint16_t tssDesc;
   void * stack;
-  
-  uint64_t apicClockSpeed;
-  bool hasCalibrated;
+
+  TimeCalibration timeInfo;
   
   CPU(uint32_t apicId); // only call this from the current CPU
 
@@ -39,6 +39,7 @@ namespace CPUList {
   int GetCount();
   int ConstructEntry(uint32_t apicId);
   CPU & GetEntry(int index);
+  CPU & GetCurrentCPU();
   
 }
 

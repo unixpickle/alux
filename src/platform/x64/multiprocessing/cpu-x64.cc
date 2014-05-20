@@ -1,4 +1,5 @@
 #include "cpu-x64.hpp"
+#include "../gdt-x64.hpp"
 
 namespace OS {
 
@@ -60,6 +61,11 @@ namespace CPUList {
     assert(index >= 0 && index < fillCount);
     CPU * ptr = (CPU *)listBuffer;
     return ptr[index];
+  }
+
+  CPU & GetCurrentCPU() {
+    int index = GDT::GetGlobal().GetTSSIndex();
+    return GetEntry(index);
   }
   
 }

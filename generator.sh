@@ -20,6 +20,7 @@ if [ $1 == 'x64' ]; then
   CXXSOURCES=${CXXSOURCES}\ `echo $PWD/src/platform/x64/interrupts/*.cc`
   CXXSOURCES=${CXXSOURCES}\ `echo $PWD/src/platform/x64/acpi/*.cc`
   CXXSOURCES=${CXXSOURCES}\ `echo $PWD/src/platform/x64/multiprocessing/*.cc`
+  CXXSOURCES=${CXXSOURCES}\ `echo $PWD/src/platform/x64/time/*.cc`
 else
   echo Unknown TARGET $1
   exit

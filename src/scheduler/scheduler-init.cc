@@ -9,7 +9,6 @@ bool HasInitializedScheduler() {
 }
 
 void InitializeScheduler() {
-  InitializeProcessors();
   inited = true;
 }
 

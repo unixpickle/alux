@@ -12,6 +12,7 @@ void EntryPoint() {
   InitializeMalloc();
   cout << " [OK]" << endl;
 
+  InitializePlatform();
   InitializeScheduler();
   
   Panic("nothing to do now");

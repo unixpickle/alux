@@ -43,12 +43,6 @@ public:
 };
 
 /**
- * Initialize the entire multiprocessing system. This will be called by the
- * kernel entry point after the system memory allocator has been configured.
- */
-void InitializeProcessors();
-
-/**
  * Returns the number of processors on the system.
  */
 int ProcessorCount();

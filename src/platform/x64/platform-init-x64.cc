@@ -1,8 +1,8 @@
-#include "smp-init-x64.hpp"
+#include "platform-init-x64.hpp"
 
 namespace OS {
 
-void InitializeProcessors() {
+void InitializePlatform() {
   x64::InitializeInterrupts();
   x64::ConfigureIOAPIC();
   x64::InitializeLAPIC();
@@ -12,11 +12,8 @@ void InitializeProcessors() {
   x64::GetBaseIOAPIC().MapIRQ(0, x64::IntVectors::PIT);
   SetInterruptsEnabled(true);
   
-  x64::SetupCpuList();
-  x64::StartCpus();
-  x64::CalibrateCpus();
-  
-  Panic("InitializeProcessors() - am I done, yet?");
+  x64::InitializeSMP();
+  x64::InitializeTime();
 }
 
 }

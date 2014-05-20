@@ -6,6 +6,11 @@ namespace x64 {
 static const uint16_t codeAddress = 0x5000;
 static uint64_t curCpuLock OS_ALIGNED(8) = 0;
 
+void InitializeSMP() {
+  SetupCpuList();
+  StartCpus();
+}
+
 void SetupCpuList() {
   int usable = ACPI::GetMADT()->CountLocalAPICEntries(true);
   CPUList::Initialize(usable);
@@ -29,31 +34,6 @@ void StartCpus() {
   void * theCopy = CopyCpuCode(codeSize);
   IterateApicIds(StartCpu);
   UncopyCpuCode(theCopy, codeSize);
-}
-
-void CalibrateCpus() {
-  SetIntRoutine(IntVectors::Calibrate, CpuCalibrate);
-  
-  for (int i = 0; i < CPUList::GetCount(); i++) {
-    CPU & cpu = CPUList::GetEntry(i);
-    CalibrateCpu(cpu.apicId);
-  }
-  
-  bool allDone;
-  do {
-    allDone = true;
-    for (int i = 0; i < CPUList::GetCount(); i++) {
-      CPU & cpu = CPUList::GetEntry(i);
-      if (!cpu.hasCalibrated) {
-        allDone = false;
-        break;
-      }
-    }
-  } while (!allDone);
-  
-  UnsetIntRoutine(IntVectors::Calibrate);
-  
-  cout << "OS::x64::CalibrateCpus() - all CPUs calibrated" << endl;
 }
 
 void IterateApicIds(void (* func)(uint32_t)) {
@@ -112,15 +92,6 @@ void StartCpu(uint32_t lapicId) {
     }
   }
   cerr << "OS::x64::StartCpu() - could not start APIC " << lapicId << endl;
-}
-
-void CalibrateCpu(uint32_t lapicId) {
-  LAPIC & lapic = GetLocalAPIC();
-  if (lapicId == lapic.GetId()) {
-    CpuCalibrate();
-  } else {
-    lapic.SendIPI(lapicId, IntVectors::Calibrate, 0, 1, 0);
-  }
 }
 
 void * CopyCpuCode(size_t & sizeOut) {
@@ -182,14 +153,6 @@ void CpuMain() {
   }
 }
 
-void CpuCalibrate() {
-  int idx = GDT::GetGlobal().GetTSSIndex();
-  CPU & cpu = CPUList::GetEntry(idx);
-  cpu.hasCalibrated = true;
-  // TODO: here, use the PIT to calibrate our Local APIC timer; I am not sure
-  // if all timers are guaranteed to be the same, so for now, nahhhh.
-  // LAPIC & lapic = GetLocalAPIC();
+}
 }
 
-}
-}
