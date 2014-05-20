@@ -7,11 +7,13 @@ static const uint16_t codeAddress = 0x5000;
 static uint64_t curCpuLock OS_ALIGNED(8) = 0;
 
 void InitializeSMP() {
+  cout << "OS::x64::InitializeSMP()" << endl;
   SetupCpuList();
   StartCpus();
 }
 
 void SetupCpuList() {
+  cout << "OS::x64::SetupCpuList()" << endl;
   int usable = ACPI::GetMADT()->CountLocalAPICEntries(true);
   CPUList::Initialize(usable);
   
@@ -64,7 +66,7 @@ void StartCpu(uint32_t lapicId) {
   uint64_t * buffer = (uint64_t *)(codeAddress - 0x10);
   buffer[0] = (uint64_t)KernelMap::GetGlobal().GetPML4();
   buffer[1] = (uint64_t)CpuEntrance;
-  
+
   // send the INIT IPI
   LAPIC & lapic = GetLocalAPIC();
   lapic.ClearErrors();
