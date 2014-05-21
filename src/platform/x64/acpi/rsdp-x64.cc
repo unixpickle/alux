@@ -1,5 +1,4 @@
 #include "rsdp-x64.hpp"
-#include <iostream> // todo: comment this out
 
 namespace OS {
 
@@ -16,12 +15,6 @@ RSDP & GetRSDP() {
   if (!rsdp) {
     if (!FindRSDP()) {
       Panic("OS::x64::ACPI::GetRSDP() - not found");
-    }
-    for (int i = 0; i < rsdp->TableCount(); i++) {
-      auto buf = rsdp->GetTable(i);
-      char dest[5] = {0};
-      MemcpyToVirt((VirtAddr)dest, buf, 4);
-      cout << "name is " << dest << " at " << i << endl;
     }
   }
   return *rsdp;
