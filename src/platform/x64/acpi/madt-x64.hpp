@@ -2,26 +2,16 @@
 #define __PLATFORM_X64_MADT_X64_H__
 
 #include "rsdp-x64.hpp"
+#include "acpi-structures-x64.hpp"
 #include <cstring>
 #include <new>
 
 namespace OS {
-
 namespace x64 {
-
 namespace ACPI {
 
-class MADTHeader {
+class MADTHeader : public Table {
 public:
-  uint32_t signature;
-  uint32_t length;
-  uint8_t revision;
-  uint8_t checksum;
-  char oemid[6];
-  uint64_t oemTableId;
-  uint32_t oemRevision;
-  uint32_t creatorId;
-  uint32_t creatorRev;
   uint32_t lapicAddr;
   uint32_t flags;
 } OS_PACKED;
@@ -107,9 +97,7 @@ public:
 MADT * GetMADT();
 
 }
-
 }
-
 }
 
 #endif

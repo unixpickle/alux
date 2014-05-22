@@ -1,9 +1,7 @@
 #include "madt-x64.hpp"
 
 namespace OS {
-
 namespace x64 {
-
 namespace ACPI {
 
 static MADT globalMadt;
@@ -148,7 +146,6 @@ MADT * GetMADT() {
 }
 
 }
-
+}
 }
 
-}
