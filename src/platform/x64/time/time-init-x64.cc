@@ -8,14 +8,18 @@ static int32_t calibrateRemaining OS_ALIGNED(8);
 void InitializeTime() {
   CalibrateLapicTimers();
 
-  Panic("TODO: here, setup a better time keeping mechanism.");
   if (TSC::IsSupported()) {
     TSC::Initialize();
+    *SystemClockPointer() = &TSC::GetGlobal();
   } else if (HPET::IsSupported()) {
     HPET::Initialize();
+    *SystemClockPointer() = &HPET::GetGlobal();
   } else {
-    // resort to using the PIT
+    *SystemClockPointer() = &PIT::GetGlobal();
   }
+  
+  cout << "There are " << GetSystemClock().GetTicksPerMin() << " ticks/min"
+    << endl;
 }
 
 void CalibrateLapicTimers() {
@@ -27,7 +31,7 @@ void CalibrateLapicTimers() {
   for (int i = 0; i < CPUList::GetGlobal().GetCount(); i++) {
     CPU & cpu = CPUList::GetGlobal()[i];
     if (cpu.apicId == lapic.GetId()) continue;
-    lapic.SendIPI(cpu.apicId, IntVectors::Calibrate, 0, 1, 0);
+    lapic.SendIPI(cpu.apicId, IntVectors::Calibrate);
   }
   CpuCalibrateLapic();
   

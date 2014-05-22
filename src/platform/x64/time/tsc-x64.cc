@@ -32,7 +32,7 @@ void TSC::Initialize() {
   for (int i = 0; i < cpuList.GetCount(); i++) {
     CPU & cpu = cpuList[i];
     if (cpu.apicId == lapic.GetId()) continue;
-    lapic.SendIPI(cpu.apicId, IntVectors::Calibrate, 0, 1, 0);
+    lapic.SendIPI(cpu.apicId, IntVectors::Calibrate);
   }
   
   while (calibrateRemaining);

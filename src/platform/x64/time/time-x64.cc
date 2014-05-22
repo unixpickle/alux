@@ -1,7 +1,19 @@
-#include <platform/time.hpp>
+#include "time-x64.hpp"
 
 namespace OS {
 
-  // TODO: this
+  static Clock * mainClock;
+
+  namespace x64 {
+
+    Clock ** SystemClockPointer() {
+      return &mainClock;
+    }
+
+  }
+
+  Clock & GetSystemClock() {
+    return *mainClock;
+  }
 
 }

@@ -52,7 +52,7 @@ void IRT::Unset(int idx) {
 extern "C" {
 
 void InterruptCoded(void * caller, uint64_t vector, uint64_t code) {
-  auto table = OS::x64::IRT::GetGlobal();
+  OS::x64::IRT & table = OS::x64::IRT::GetGlobal();
   if (table[vector]) return table[vector]();
 
   if (vector >= 0xf0) return;
@@ -63,7 +63,7 @@ void InterruptCoded(void * caller, uint64_t vector, uint64_t code) {
 }
 
 void InterruptRegular(void * caller, uint64_t vector) {
-  auto table = OS::x64::IRT::GetGlobal();
+  OS::x64::IRT & table = OS::x64::IRT::GetGlobal();
   if (table[vector]) return table[vector]();
   
   if (vector >= 0xf0) return;

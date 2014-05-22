@@ -49,9 +49,7 @@ GDT::GDT(GDT::GDTPointer currentPtr)
   : offset(currentPtr.limit + 1), initOffset(offset) {
   buffer = new uint8_t[0x10000];
   memcpy(buffer, (void *)currentPtr.start, offset);
-  cout << "the value i'm using for bzero is " << 0x10000 - offset << endl;
   bzero(buffer + offset, 0x10000 - offset);
-  cout << "done bzero" << endl;
 }
 
 uint16_t GDT::AddTSS(TSS * aTSS) {

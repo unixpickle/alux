@@ -9,24 +9,22 @@ General architectual ideas that I am playing around with:
  * Cross-platform abstractions
  * Memory allocation and VMM completely in user-space
 
-## To-do
+## TODO
 
-I have SMP working, so now I'm going to focus on finishing up the boot process and tightening up the standards for post-boot execution. Here's some things I need to do:
+Right now, I have my mindset on revising much of this code, since I have developed as a C++ programmer since I started working on this project. I am going to roughly do the following:
 
- * Make IDT::GetGlobal() and IDT::Initialize()
- * Make class IntHandlerTable
-   * create `IntHandlerTable.Register` and `.Unregister`
- * Create an HPET implementation
- * Add custom interrupt handler for Panic IPI; simply `cli` & `hlt`
- * Create object-send IPI mechanism
- * Custom one-time interrupt handler for CPU APIC timer calibration
- * Calibrate CPU real time clock if it is available; otherwise, keep the PIT enabled for time-keeping purposes.
+ * Favor singletons over global static objects
+ * Define the criticality for every single method and lock
+ * Define which methods will and will-not require some external lock
+ * Change appropriate class names to acronyms for brevity
+ * Make sure I actually *capitalize* acronyms
+ * Remove blank lines between `namespace XYZ {` lines.
 
 Also, there's some miscellaneous stuff I want to do:
 
+ * Create object-send IPI mechanism
  * Implement ACPI shutdown
  * Look into Translation Cache Extension to increase invlpg speed
- * Tighten up header docs about what is critical and noncritical and what is synchronous and what is not.
 
 ## License
 

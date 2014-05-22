@@ -57,8 +57,8 @@ public:
    * @critical
    */
   virtual void SendIPI(uint32_t cpu, uint8_t vector,
-                       uint8_t mode, uint8_t level,
-                       uint8_t trigger) = 0;
+                       uint8_t mode = 0, uint8_t level = 1,
+                       uint8_t trigger = 0) = 0;
 
   virtual uint64_t ReadRegister(uint16_t reg) = 0; // @critical
   virtual void WriteRegister(uint16_t reg, uint64_t value) = 0; // @critical

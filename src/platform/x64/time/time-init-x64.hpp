@@ -3,6 +3,7 @@
 
 #include "tsc-x64.hpp"
 #include "hpet-x64.hpp"
+#include "time-x64.hpp"
 
 namespace OS {
 namespace x64 {

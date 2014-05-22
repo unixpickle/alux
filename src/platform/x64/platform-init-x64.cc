@@ -13,6 +13,7 @@ void InitializePlatform() {
   SetInterruptsEnabled(true);
   
   x64::InitializeSMP();
+  x64::InitializeFailure();
   x64::InitializeTime();
 }
 
