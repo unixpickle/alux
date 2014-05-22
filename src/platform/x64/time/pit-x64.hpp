@@ -4,7 +4,7 @@
 #include "../interrupts/lapic-x64.hpp"
 #include "../interrupts/ioapic-x64.hpp"
 #include "../interrupts/int-vectors-x64.hpp"
-#include "../interrupts/int-handlers-x64.hpp"
+#include "../interrupts/irt-x64.hpp"
 #include <platform/time.hpp>
 
 namespace OS {

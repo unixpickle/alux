@@ -19,10 +19,8 @@ bool TSC::IsSupported() {
 
 void TSC::Initialize() {
   cout << "OS::x64::TSC::Initialize()" << endl;
-  new(&globalTSC) TSC();
-  
   // calibrate CPUs
-  SetIntRoutine(IntVectors::Calibrate, CpuCalibrateTSC);
+  IRT::GetGlobal()[IntVectors::Calibrate] = CpuCalibrateTSC;
 
   calibrateWaitUntil = PIT::GetGlobal().GetTime() + 50;
 
@@ -38,7 +36,7 @@ void TSC::Initialize() {
   }
   
   while (calibrateRemaining);
-  UnsetIntRoutine(IntVectors::Calibrate);
+  IRT::GetGlobal().Unset(IntVectors::Calibrate);
   
   // find the lowest offset value
   uint64_t lowestOff = ~(uint64_t)1;
@@ -58,22 +56,22 @@ void TSC::Initialize() {
     cpuList[i].timeInfo.tscOffset -= lowestOff;
   }
   
-  cout << "OS::x64::CalibrateTSC() - biggest diff = "
+  cout << "OS::x64::TSC::Initialize() - biggest diff = "
     << highestOff - lowestOff << endl;
+  
+  PIT::GetGlobal().Sleep(1);
+  uint64_t start = RDTSC();
+  PIT::GetGlobal().Sleep(50);
+  uint64_t end = RDTSC();
+  uint64_t ticksPerMin = (end - start) * 120;
+  new(&globalTSC) TSC(ticksPerMin);
 }
 
 TSC & TSC::GetGlobal() {
   return globalTSC;
 }
 
-TSC::TSC() {
-  // calculate rate
-  PIT::GetGlobal().Sleep(1);
-  uint64_t start = RDTSC();
-  PIT::GetGlobal().Sleep(50);
-  uint64_t end = RDTSC();
-  ticksPerMin = (end - start) * 120;
-}
+TSC::TSC(uint64_t tpm) : ticksPerMin(tpm) { }
 
 uint64_t TSC::GetTime() {
   ScopeCritical critical;

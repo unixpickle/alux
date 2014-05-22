@@ -17,7 +17,11 @@ public:
   static void Initialize();
   static TSC & GetGlobal();
   
-  TSC();
+  TSC() {
+    Panic("for the OS only");
+  }
+  
+  TSC(uint64_t tpm);
   
   virtual uint64_t GetTime();
   virtual uint64_t GetTicksPerMin();

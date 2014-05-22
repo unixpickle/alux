@@ -146,7 +146,7 @@ void CpuEntrance() {
 }
 
 void CpuMain() {
-  GetGlobalIDT().Load();
+  IDT::GetGlobal().Load();
   InitializeLAPIC();
   anlock_unlock(&curCpuLock);
   

@@ -5,16 +5,17 @@ namespace x64 {
 
 void InitializeInterrupts() {
   cout << "OS::x64::InitializeInterrupts()" << endl;
-  InitializeIDT();
-  ConfigureDummyIDT();
-  GetGlobalIDT().Load();
+  IDT::Initialize();
+  IRT::Initialize();
+  IRT::GetGlobal().ConfigureDummy();
+  IDT::GetGlobal().Load();
   RemapPIC(0xf0, 0xf8, 0xff, 0xff);
   SetInterruptsEnabled(true);
   // if there are a few interrupts masked, we can trigger our handlers for all
   // of them and send appropriate EOIs to the PIC.
   __asm__("nop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\nnop");
   SetInterruptsEnabled(false);
-  ConfigureRealIDT();
+  IRT::GetGlobal().Configure();
 }
 
 void ConfigureIOAPIC() {

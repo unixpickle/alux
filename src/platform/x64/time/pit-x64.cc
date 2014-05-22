@@ -12,7 +12,7 @@ void PIT::IntHandler() {
 
 void PIT::Initialize() {
   new(&mainPit) PIT();
-  SetIntRoutine(IntVectors::PIT, PitInterruptHandler);
+  IRT::GetGlobal()[IntVectors::PIT] = PitInterruptHandler;
 }
 
 PIT & PIT::GetGlobal() {

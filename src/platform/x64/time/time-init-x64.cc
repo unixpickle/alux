@@ -20,7 +20,7 @@ void InitializeTime() {
 
 void CalibrateLapicTimers() {
   cout << "OS::x64::CalibrateLapicTimers()" << endl;
-  SetIntRoutine(IntVectors::Calibrate, CpuCalibrateLapic);
+  IRT::GetGlobal()[IntVectors::Calibrate] = CpuCalibrateLapic;
 
   LAPIC & lapic = LAPIC::GetCurrent();
   calibrateRemaining = CPUList::GetGlobal().GetCount();
@@ -33,7 +33,7 @@ void CalibrateLapicTimers() {
   
   while (calibrateRemaining);
   
-  UnsetIntRoutine(IntVectors::Calibrate);
+  IRT::GetGlobal().Unset(IntVectors::Calibrate);
 }
 
 void CpuCalibrateLapic() {
