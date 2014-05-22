@@ -13,6 +13,9 @@ General architectual ideas that I am playing around with:
 
 I have SMP working, so now I'm going to focus on finishing up the boot process and tightening up the standards for post-boot execution. Here's some things I need to do:
 
+ * Make IDT::GetGlobal() and IDT::Initialize()
+ * Make class IntHandlerTable
+   * create `IntHandlerTable.Register` and `.Unregister`
  * Create an HPET implementation
  * Add custom interrupt handler for Panic IPI; simply `cli` & `hlt`
  * Create object-send IPI mechanism
