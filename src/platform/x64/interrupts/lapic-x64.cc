@@ -59,6 +59,11 @@ void LAPIC::SendEOI() {
   WriteRegister(RegEOI, 0);
 }
 
+void LAPIC::SetPriority(uint8_t vector) {
+  AssertCritical();
+  WriteRegister(RegTASKPRIOR, vector);
+}
+
 bool LAPIC::IsRequested(uint8_t vector) {
   AssertCritical();
   uint64_t regIndex = 0x20 + (vector >> 5);

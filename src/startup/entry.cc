@@ -14,7 +14,6 @@ void EntryPoint() {
 
   InitializePlatform();
   InitializeScheduler();
-  
   Panic("nothing to do now");
 }
 

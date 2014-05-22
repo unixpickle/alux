@@ -50,6 +50,7 @@ public:
   virtual void ClearErrors(); // @critical
 
   virtual void SendEOI(); // @critical
+  virtual void SetPriority(uint8_t vector);
   virtual bool IsRequested(uint8_t vector); // @critical
   virtual bool IsInService(uint8_t vector); // @critical
 

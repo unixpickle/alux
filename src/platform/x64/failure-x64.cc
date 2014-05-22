@@ -23,11 +23,22 @@ namespace OS {
       __asm__("cli\nhlt");
     }
     
-    // TODO: replace this cerr<< with a custom call that overwrites the main
-    // screen buffer
-    cerr << message << endl;
-    
     __asm__("cli");
+    
+    // write the error to the screen
+    uint16_t * buf = (uint16_t *)0xb8000;
+    int i = 0;
+    const char * prefix = "PANIC: ";
+    while (*prefix) {
+      buf[i++] = *prefix | 0xf200;
+      prefix++;
+    }
+    while (*message) {
+      buf[i++] = *message | 0xf900;
+      message++;
+    }
+    buf[i] = 0xf920;
+    
     if (failureInitialized) {
       x64::CPUList & list = x64::CPUList::GetGlobal();
       x64::LAPIC & lapic = x64::LAPIC::GetCurrent();

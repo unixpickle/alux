@@ -4,10 +4,9 @@
 
 extern "C" {
 
-void __assert(const char * msg, const char * file, int line) {
-  OS::cerr << "Assertion failure: " << msg << " at " << file
-    << ":" << line << OS::endl;
-  OS::Panic("assertion failure in kernel.");
+int __assert(const char * msg) {
+  OS::Panic(msg);
+  return 0;
 }
 
 }
