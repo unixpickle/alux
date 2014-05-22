@@ -19,6 +19,8 @@ HPET & HPET::GetGlobal() {
 }
 
 HPET::HPET() {
+  ACPI::HPETDesc desc = ACPI::GetHPET(0);
+  cout << "HPET::HPET() address = " << desc.address.address << endl;
 }
 
 uint64_t HPET::GetTime() {
