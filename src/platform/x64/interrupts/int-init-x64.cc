@@ -19,8 +19,8 @@ void InitializeInterrupts() {
 
 void ConfigureIOAPIC() {
   cout << "OS::x64::ConfigureIOAPIC()" << endl;
-  InitializeIOAPIC();
-  IOAPIC & apic = GetBaseIOAPIC();
+  IOAPIC::Initialize();
+  IOAPIC & apic = IOAPIC::GetBase();
   for (uint32_t i = 0; i < apic.GetPinCount(); i++) {
     apic.MaskPin(i);
   }
@@ -28,7 +28,7 @@ void ConfigureIOAPIC() {
 }
 
 void InitializeLAPIC() {
-  LAPIC & lapic = GetLocalAPIC();
+  LAPIC & lapic = LAPIC::GetCurrent();
   lapic.SetDefaults();
   lapic.Enable();
   cout << "OS::x64::InitializeLAPIC() - enabled LAPIC (id=" << lapic.GetId()

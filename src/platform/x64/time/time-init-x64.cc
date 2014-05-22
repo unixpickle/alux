@@ -22,7 +22,7 @@ void CalibrateLapicTimers() {
   cout << "OS::x64::CalibrateLapicTimers()" << endl;
   SetIntRoutine(IntVectors::Calibrate, CpuCalibrateLapic);
 
-  LAPIC & lapic = GetLocalAPIC();
+  LAPIC & lapic = LAPIC::GetCurrent();
   calibrateRemaining = CPUList::GetGlobal().GetCount();
   for (int i = 0; i < CPUList::GetGlobal().GetCount(); i++) {
     CPU & cpu = CPUList::GetGlobal()[i];
@@ -37,7 +37,7 @@ void CalibrateLapicTimers() {
 }
 
 void CpuCalibrateLapic() {
-  LAPIC & lapic = GetLocalAPIC();
+  LAPIC & lapic = LAPIC::GetCurrent();
   PIT::GetGlobal().Sleep(1);
   lapic.WriteRegister(LAPIC::RegLVT_TMR, 0xff);
   lapic.WriteRegister(LAPIC::RegTMRINITCNT, 0xffffffff);

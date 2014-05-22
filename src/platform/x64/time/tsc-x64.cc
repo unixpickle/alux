@@ -29,7 +29,7 @@ void TSC::Initialize() {
   CPUList & cpuList = CPUList::GetGlobal();
 
   // tell each CPU to do calibrate
-  LAPIC & lapic = GetLocalAPIC();
+  LAPIC & lapic = LAPIC::GetCurrent();
   calibrateRemaining = cpuList.GetCount();
   for (int i = 0; i < cpuList.GetCount(); i++) {
     CPU & cpu = cpuList[i];

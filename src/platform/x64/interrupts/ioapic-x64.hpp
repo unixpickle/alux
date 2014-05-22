@@ -20,6 +20,9 @@ private:
 public:
   static const int RegVersion = 0x1;
   
+  static void Initialize();
+  static IOAPIC & GetBase();
+  
   static void StartUsing();
   
   class TableEntry {
@@ -58,9 +61,6 @@ public:
   void MaskIRQ(uint8_t irq);
   void MaskPin(uint8_t irq);
 };
-
-void InitializeIOAPIC();
-IOAPIC & GetBaseIOAPIC();
 
 }
 

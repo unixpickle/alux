@@ -7,7 +7,7 @@ static PIT mainPit;
 
 void PIT::IntHandler() {
   __asm__("lock incq (%0)" : : "r" (&ticks));
-  GetLocalAPIC().SendEOI();
+  LAPIC::GetCurrent().SendEOI();
 }
 
 void PIT::Initialize() {
@@ -20,11 +20,11 @@ PIT & PIT::GetGlobal() {
 }
 
 void PIT::Register() {
-  GetBaseIOAPIC().MapIRQ(0, IntVectors::PIT);
+  IOAPIC::GetBase().MapIRQ(0, IntVectors::PIT);
 }
 
 void PIT::Deregister() {
-  GetBaseIOAPIC().MaskIRQ(IntVectors::PIT);
+  IOAPIC::GetBase().MaskIRQ(IntVectors::PIT);
 }
 
 PIT::PIT() : divide(0), ticks(0) { }

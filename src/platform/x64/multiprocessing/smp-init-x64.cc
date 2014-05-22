@@ -18,7 +18,7 @@ void SetupCpuList() {
   CPUList::Initialize(usable);
   
   GDT & gdt = GDT::GetGlobal();
-  int idx = CPUList::GetGlobal().ConstructEntry(GetLocalAPIC().GetId());
+  int idx = CPUList::GetGlobal().ConstructEntry(LAPIC::GetCurrent().GetId());
   assert(!idx);
   TSS * tss = new TSS();
   tss->ioplBase = 0xffff;
@@ -40,7 +40,7 @@ void StartCpus() {
 }
 
 void IterateApicIds(void (* func)(uint32_t)) {
-  LAPIC & lapic = GetLocalAPIC();
+  LAPIC & lapic = LAPIC::GetCurrent();
   ACPI::MADT * madt = ACPI::GetMADT();
   
   for (int i = 0; i < madt->GetTableCount(); i++) {
@@ -61,7 +61,7 @@ void IterateApicIds(void (* func)(uint32_t)) {
 }
 
 void StartCpu(uint32_t lapicId) {
-  if (lapicId == GetLocalAPIC().GetId()) return;
+  if (lapicId == LAPIC::GetCurrent().GetId()) return;
   
   // copy the two pointers to the startup stack
   uint64_t * buffer = (uint64_t *)(codeAddress - 0x10);
@@ -69,7 +69,7 @@ void StartCpu(uint32_t lapicId) {
   buffer[1] = (uint64_t)CpuEntrance;
 
   // send the INIT IPI
-  LAPIC & lapic = GetLocalAPIC();
+  LAPIC & lapic = LAPIC::GetCurrent();
   lapic.ClearErrors();
   lapic.SendIPI(lapicId, 0, 5, 1, 1);
   PIT::GetGlobal().Sleep(1);
@@ -127,7 +127,7 @@ void CpuEntrance() {
   anlock_lock(&curCpuLock);
   
   GDT & gdt = GDT::GetGlobal();
-  int idx = CPUList::GetGlobal().ConstructEntry(GetLocalAPIC().GetId());
+  int idx = CPUList::GetGlobal().ConstructEntry(LAPIC::GetCurrent().GetId());
   TSS * tss = new TSS();
   tss->ioplBase = 0xffff;
   uint16_t sel = gdt.AddTSS(tss);

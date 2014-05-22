@@ -6,6 +6,22 @@ namespace x64 {
 
 static IOAPIC baseAPIC;
 
+void IOAPIC::Initialize() {
+  ACPI::MADT * madt = ACPI::GetMADT();
+  if (!madt) Panic("I/O APIC support requires MADT");
+  cout << "MADT info: IOAPICs=" << madt->CountIOAPICEntries() << " LAPICS="
+    << madt->CountLocalAPICEntries() << endl;
+  
+  ACPI::MADT::IOAPIC * info = madt->GetIOAPICWithBase(0);
+  if (!info) Panic("No base I/O APIC found :(");
+  
+  new(&baseAPIC) IOAPIC(info);
+}
+
+IOAPIC & IOAPIC::GetBase() {
+  return baseAPIC;
+}
+
 void IOAPIC::StartUsing() {
   OutB(0x22, 0x70);
   OutB(0x23, 0x01);
@@ -85,22 +101,6 @@ void IOAPIC::MaskIRQ(uint8_t irq) {
 
 void IOAPIC::MaskPin(uint8_t irq) {
   WriteReg(0x10 + (irq * 2), 0x10000);
-}
-
-void InitializeIOAPIC() {
-  ACPI::MADT * madt = ACPI::GetMADT();
-  if (!madt) Panic("I/O APIC support requires MADT");
-  cout << "MADT info: IOAPICs=" << madt->CountIOAPICEntries() << " LAPICS="
-    << madt->CountLocalAPICEntries() << endl;
-  
-  ACPI::MADT::IOAPIC * info = madt->GetIOAPICWithBase(0);
-  if (!info) Panic("No base I/O APIC found :(");
-  
-  new(&baseAPIC) IOAPIC(info);
-}
-
-IOAPIC & GetBaseIOAPIC() {
-  return baseAPIC;
 }
 
 }

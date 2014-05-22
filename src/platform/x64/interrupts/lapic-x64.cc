@@ -8,6 +8,27 @@ static XAPIC * xapic = NULL;
 static X2APIC * x2apic = NULL;
 static int LAPICDivide = 0x3;
 
+LAPIC & LAPIC::GetCurrent() {
+  AssertCritical();
+  
+  uint32_t ecx;
+  CPUID(1, NULL, &ecx, NULL);
+  if (ecx & (1 << 21)) {
+    // setup x2APIC
+    if (!x2apic) {
+      x2apic = new X2APIC();
+    }
+    return *x2apic;
+  }
+  
+  // setup xAPIC
+  if (!xapic) {
+    ACPI::MADT * madt = ACPI::GetMADT();
+    xapic = new XAPIC((uint64_t)madt->GetHeader().lapicAddr);
+  }
+  return *xapic;
+}
+
 LAPIC::~LAPIC() {
 }
 
@@ -141,27 +162,6 @@ void X2APIC::SendIPI(uint32_t cpu, uint8_t vector,
   value |= ((uint64_t)level << 0xe) | ((uint64_t)trigger << 0xf);
   value |= ((uint64_t)cpu << 0x20);
   WriteRegister(0x30, value);
-}
-
-LAPIC & GetLocalAPIC() {
-  AssertCritical();
-  
-  uint32_t ecx;
-  CPUID(1, NULL, &ecx, NULL);
-  if (ecx & (1 << 21)) {
-    // setup x2APIC
-    if (!x2apic) {
-      x2apic = new X2APIC();
-    }
-    return *x2apic;
-  }
-  
-  // setup xAPIC
-  if (!xapic) {
-    ACPI::MADT * madt = ACPI::GetMADT();
-    xapic = new XAPIC((uint64_t)madt->GetHeader().lapicAddr);
-  }
-  return *xapic;
 }
 
 }

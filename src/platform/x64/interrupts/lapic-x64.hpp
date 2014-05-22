@@ -36,6 +36,12 @@ public:
   static const int SettingNMI = (1 << 10);
   static const int SettingTMR_PERIODIC = 0x20000;
   static const int SettingTMR_BASEDIV = (1 << 20);
+  
+  /**
+   * During the boot process, this must only be called on one CPU at a time.
+   * @critical
+   */
+  static LAPIC & GetCurrent();
 
   virtual ~LAPIC();
   virtual void SetDefaults(); // @critical
@@ -85,11 +91,6 @@ public:
                        uint8_t mode, uint8_t level,
                        uint8_t trigger);
 };
-
-/**
- * @critical
- */
-LAPIC & GetLocalAPIC();
 
 }
 
