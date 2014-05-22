@@ -11,8 +11,8 @@ void InitializeTime() {
   Panic("TODO: here, setup a better time keeping mechanism.");
   if (TSC::IsSupported()) {
     TSC::Initialize();
-  } else if (SupportsHPET()) {
-    InitializeHPET();
+  } else if (HPET::IsSupported()) {
+    HPET::Initialize();
   } else {
     // resort to using the PIT
   }

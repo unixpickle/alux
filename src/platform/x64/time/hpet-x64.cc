@@ -3,15 +3,34 @@
 namespace OS {
 namespace x64 {
 
-bool SupportsHPET() {
+static HPET globalHpet;
+
+bool HPET::IsSupported() {
   return ACPI::GetHPETCount() != 0;
 }
 
-void InitializeHPET() {
+void HPET::Initialize() {
   assert(ACPI::GetHPETCount());
-  
-  Panic("NYI");
+  new(&globalHpet) HPET();
+}
+
+HPET & HPET::GetGlobal() {
+  return globalHpet;
+}
+
+HPET::HPET() {
+}
+
+uint64_t HPET::GetTime() {
+  Panic("HPET::GetTime() NYI");
+  return 0;
+}
+
+uint64_t HPET::GetTicksPerMin() {
+  Panic("HPET::GetTicksPerMin() NYI");
+  return 0;
 }
 
 }
 }
+
