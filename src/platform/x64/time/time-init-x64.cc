@@ -9,10 +9,10 @@ void InitializeTime() {
   CalibrateLapicTimers();
 
   Panic("TODO: here, setup a better time keeping mechanism.");
-  if (SupportsInvariantTSC()) {
-    CalibrateTSC();
+  if (TSC::IsSupported()) {
+    TSC::Initialize();
   } else if (SupportsHPET()) {
-    // calibrate the HPET here
+    InitializeHPET();
   } else {
     // resort to using the PIT
   }
@@ -23,9 +23,9 @@ void CalibrateLapicTimers() {
   SetIntRoutine(IntVectors::Calibrate, CpuCalibrateLapic);
 
   LAPIC & lapic = GetLocalAPIC();
-  calibrateRemaining = CPUList::GetCount();
-  for (int i = 0; i < CPUList::GetCount(); i++) {
-    CPU & cpu = CPUList::GetEntry(i);
+  calibrateRemaining = CPUList::GetGlobal().GetCount();
+  for (int i = 0; i < CPUList::GetGlobal().GetCount(); i++) {
+    CPU & cpu = CPUList::GetGlobal()[i];
     if (cpu.apicId == lapic.GetId()) continue;
     lapic.SendIPI(cpu.apicId, IntVectors::Calibrate, 0, 1, 0);
   }
@@ -38,15 +38,15 @@ void CalibrateLapicTimers() {
 
 void CpuCalibrateLapic() {
   LAPIC & lapic = GetLocalAPIC();
-  PitSleep(1);
+  PIT::GetGlobal().Sleep(1);
   lapic.WriteRegister(LAPIC::RegLVT_TMR, 0xff);
   lapic.WriteRegister(LAPIC::RegTMRINITCNT, 0xffffffff);
-  PitSleep(50);
+  PIT::GetGlobal().Sleep(50);
 
   uint64_t value = lapic.ReadRegister(LAPIC::RegTMRCURRCNT);
   lapic.WriteRegister(LAPIC::RegLVT_TMR, 0x10000);
 
-  CPU & cpu = CPUList::GetCurrent();
+  CPU & cpu = CPUList::GetGlobal().GetCurrent();
   cpu.timeInfo.lapicClock = (uint64_t)(0xffffffff - value) * 2;
   
   __asm__("lock decl (%0)" : : "r" (&calibrateRemaining));

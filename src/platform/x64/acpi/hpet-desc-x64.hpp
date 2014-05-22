@@ -10,7 +10,7 @@ namespace x64 {
 
 namespace ACPI {
 
-class HPET {
+class HPETDesc {
 public:
   uint32_t signature;
   uint32_t length;
@@ -29,7 +29,7 @@ public:
 } OS_PACKED;
 
 int GetHPETCount();
-HPET GetHPET(int i);
+HPETDesc GetHPET(int i);
 
 }
 

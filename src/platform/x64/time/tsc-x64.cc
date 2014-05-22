@@ -5,26 +5,34 @@ namespace x64 {
 
 static uint64_t calibrateWaitUntil;
 static int32_t calibrateRemaining;
-static uint64_t rate;
+static TSC globalTSC;
 
-bool SupportsInvariantTSC() {
+static void CpuCalibrateTSC();
+static uint64_t RDTSC();
+
+bool TSC::IsSupported() {
+  // TODO: check specific CPU families
   uint32_t edx;
   CPUID(0x80000007, NULL, &edx, NULL);
   return (edx & (1 << 8)) != 0;
 }
 
-void CalibrateTSC() {
+void TSC::Initialize() {
+  cout << "OS::x64::TSC::Initialize()" << endl;
+  new(&globalTSC) TSC();
+  
   // calibrate CPUs
-  cout << "OS::x64::CalibrateTSC()" << endl;
   SetIntRoutine(IntVectors::Calibrate, CpuCalibrateTSC);
 
-  calibrateWaitUntil = PitGetTicks() + 50;
+  calibrateWaitUntil = PIT::GetGlobal().GetTime() + 50;
+
+  CPUList & cpuList = CPUList::GetGlobal();
 
   // tell each CPU to do calibrate
   LAPIC & lapic = GetLocalAPIC();
-  calibrateRemaining = CPUList::GetCount();
-  for (int i = 0; i < CPUList::GetCount(); i++) {
-    CPU & cpu = CPUList::GetEntry(i);
+  calibrateRemaining = cpuList.GetCount();
+  for (int i = 0; i < cpuList.GetCount(); i++) {
+    CPU & cpu = cpuList[i];
     if (cpu.apicId == lapic.GetId()) continue;
     lapic.SendIPI(cpu.apicId, IntVectors::Calibrate, 0, 1, 0);
   }
@@ -35,8 +43,8 @@ void CalibrateTSC() {
   // find the lowest offset value
   uint64_t lowestOff = ~(uint64_t)1;
   uint64_t highestOff = 0;
-  for (int i = 0; i < CPUList::GetCount(); i++) {
-    CPU & cpu = CPUList::GetEntry(i);
+  for (int i = 0; i < cpuList.GetCount(); i++) {
+    CPU & cpu = cpuList[i];
     if (cpu.timeInfo.tscOffset < lowestOff) {
       lowestOff = cpu.timeInfo.tscOffset;
     }
@@ -46,36 +54,49 @@ void CalibrateTSC() {
   }
   
   // remove the lowest offset from all of them
-  for (int i = 0; i < CPUList::GetCount(); i++) {
-    CPUList::GetEntry(i).timeInfo.tscOffset -= lowestOff;
+  for (int i = 0; i < cpuList.GetCount(); i++) {
+    cpuList[i].timeInfo.tscOffset -= lowestOff;
   }
-  
-  // calculate rate
-  PitSleep(1);
-  uint64_t start = GetTSCValue();
-  PitSleep(50);
-  uint64_t end = GetTSCValue();
-  rate = (end - start) * 2;
   
   cout << "OS::x64::CalibrateTSC() - biggest diff = "
     << highestOff - lowestOff << endl;
 }
 
-void CpuCalibrateTSC() {
-  CPU & cpu = CPUList::GetCurrent();
-  PitWait(calibrateWaitUntil);
+TSC & TSC::GetGlobal() {
+  return globalTSC;
+}
+
+TSC::TSC() {
+  // calculate rate
+  PIT::GetGlobal().Sleep(1);
+  uint64_t start = RDTSC();
+  PIT::GetGlobal().Sleep(50);
+  uint64_t end = RDTSC();
+  ticksPerMin = (end - start) * 120;
+}
+
+uint64_t TSC::GetTime() {
+  ScopeCritical critical;
   
-  cpu.timeInfo.tscOffset = GetTSCValue();
+  CPU & cpu = CPUList::GetGlobal().GetCurrent();
+  return RDTSC() - cpu.timeInfo.tscOffset;
+}
+
+uint64_t TSC::GetTicksPerMin() {
+  return ticksPerMin;
+}
+
+static void CpuCalibrateTSC() {
+  CPU & cpu = CPUList::GetGlobal().GetCurrent();
+  PIT::GetGlobal().WaitUntil(calibrateWaitUntil);
+  
+  cpu.timeInfo.tscOffset = RDTSC();
   __asm__("lock decl (%0)" : : "r" (&calibrateRemaining));
 }
 
-uint64_t GetTSCRate() {
-  return rate;
-}
-
-uint64_t GetTSCValue() {
+static uint64_t RDTSC() {
   uint32_t eax, edx;
-  // TODO: here, use mfence or lfence depending on the CPU
+  // TODO: here, use mfence or lfence depending on the CPU (AMD => mfence)
   __asm__("mfence\n"
           "rdtsc" : "=a" (eax), "=d" (edx));
   return (uint64_t)edx << 32 | (uint64_t)eax;

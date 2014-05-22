@@ -1,9 +1,10 @@
+#include "../acpi/hpet-desc-x64.hpp"
+
 namespace OS {
 namespace x64 {
 
-inline bool SupportsHPET() {
-  return false;
-}
+bool SupportsHPET();
+void InitializeHPET();
 
 }
 }

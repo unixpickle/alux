@@ -3,12 +3,9 @@
 
 #include <platform/multiprocessing.hpp>
 #include <platform/failure.hpp>
-#include <cassert>
-#include <new>
 #include "../time/time-structures-x64.hpp"
 
 namespace OS {
-
 namespace x64 {
 
 class CPU : public Processor {
@@ -33,18 +30,7 @@ public:
   virtual void * SendIPI(void * object);
 };
 
-namespace CPUList {
-  
-  void Initialize(int maxCount);
-  int GetCount();
-  int ConstructEntry(uint32_t apicId);
-  CPU & GetEntry(int index);
-  CPU & GetCurrent();
-  
 }
-
-}
-
 }
 
 #endif

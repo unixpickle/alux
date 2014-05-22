@@ -2,36 +2,40 @@
 #define __PLATFORM_X64_PIT_X64_HPP__
 
 #include "../interrupts/lapic-x64.hpp"
-#include "time-structures-x64.hpp"
+#include "../interrupts/ioapic-x64.hpp"
+#include "../interrupts/int-vectors-x64.hpp"
+#include "../interrupts/int-handlers-x64.hpp"
+#include <platform/time.hpp>
 
 namespace OS {
 
 namespace x64 {
 
-/**
- * Suggest value 11932 for ~100 Hz
- */
-void PitSetDivisor(uint16_t div);
+class PIT : public Clock {
+private:
+  uint64_t ticks;
+  uint8_t divide;
+  void IntHandler();
+  
+public:
+  static void Initialize();
+  static PIT & GetGlobal();
+  static void Register();
+  static void Deregister();
+  
+  PIT();
+  
+  void SetDivisor(uint16_t div); // 11932 for ~100Hz
+  void Sleep(uint64_t time);
+  void WaitUntil(uint64_t deadline);
+  
+  virtual uint64_t GetTime();
+  virtual uint64_t GetTicksPerMin();
+  
+  friend void PitInterruptHandler();
+};
 
-/**
- * Returns the number of ticks since the last call to PitSetDivisor()
- */
-uint64_t PitGetTicks();
-
-/**
- * Call to increment the PIT counter.
- */
 void PitInterruptHandler();
-
-/**
- * Sleep on the PIT for a given number of ticks.
- */
-void PitSleep(uint64_t ticks);
-
-/**
- * Wait until the PIT tick count reaches a value.
- */
-void PitWait(uint64_t date);
 
 }
 

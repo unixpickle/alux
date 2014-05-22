@@ -2,7 +2,6 @@
 #include "../gdt-x64.hpp"
 
 namespace OS {
-
 namespace x64 {
 
 CPU::CPU(uint32_t _apicId) : apicId(_apicId) {
@@ -35,41 +34,5 @@ void * CPU::SendIPI(void * object) {
   return NULL;
 }
 
-namespace CPUList {
-  
-  static uint8_t * listBuffer;
-  static int fillCount = 0;
-  static int maxCount;
-  
-  void Initialize(int _maxCount) {
-    maxCount = _maxCount;
-    listBuffer = new uint8_t[maxCount * sizeof(CPU)];
-  }
-  
-  int GetCount() {
-    return fillCount;
-  }
-  
-  int ConstructEntry(uint32_t apicId) {
-    assert(maxCount > fillCount);
-    void * destPtr = (void *)(listBuffer + sizeof(CPU) * fillCount);
-    new(destPtr) CPU(apicId);
-    return fillCount++;
-  }
-  
-  CPU & GetEntry(int index) {
-    assert(index >= 0 && index < fillCount);
-    CPU * ptr = (CPU *)listBuffer;
-    return ptr[index];
-  }
-
-  CPU & GetCurrent() {
-    int index = GDT::GetGlobal().GetTSSIndex();
-    return GetEntry(index);
-  }
-  
 }
-
-}
-
 }

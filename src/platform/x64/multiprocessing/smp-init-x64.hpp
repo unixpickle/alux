@@ -6,7 +6,7 @@
 #include "../memory/kernel-map-x64.hpp"
 #include "../time/pit-x64.hpp"
 #include "../gdt-x64.hpp"
-#include "cpu-x64.hpp"
+#include "cpu-list-x64.hpp"
 
 namespace OS {
 namespace x64 {

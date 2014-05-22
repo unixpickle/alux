@@ -18,7 +18,8 @@ void SetupCpuList() {
   CPUList::Initialize(usable);
   
   GDT & gdt = GDT::GetGlobal();
-  int idx = CPUList::ConstructEntry(GetLocalAPIC().GetId());
+  int idx = CPUList::GetGlobal().ConstructEntry(GetLocalAPIC().GetId());
+  assert(!idx);
   TSS * tss = new TSS();
   tss->ioplBase = 0xffff;
 
@@ -26,7 +27,7 @@ void SetupCpuList() {
   gdt.Set();
   __asm__("ltr %%ax" : : "a" (sel));
 
-  CPU & cpu = CPUList::GetEntry(idx);
+  CPU & cpu = CPUList::GetGlobal()[idx];
   cpu.tssDesc = sel;
   cpu.stack = new uint8_t[0x4000];
 }
@@ -71,12 +72,12 @@ void StartCpu(uint32_t lapicId) {
   LAPIC & lapic = GetLocalAPIC();
   lapic.ClearErrors();
   lapic.SendIPI(lapicId, 0, 5, 1, 1);
-  PitSleep(1);
+  PIT::GetGlobal().Sleep(1);
   lapic.SendIPI(lapicId, 0, 5, 0, 1);
-  PitSleep(1);
+  PIT::GetGlobal().Sleep(1);
   
   // start the CPU
-  int cpuCount = CPUList::GetCount();
+  int cpuCount = CPUList::GetGlobal().GetCount();
   
   // send STARTUP IPI (and resend if needed, as it is on some AMD systems)
   uint8_t vector = (uint8_t)(codeAddress >> 12);
@@ -86,9 +87,9 @@ void StartCpu(uint32_t lapicId) {
   
     // wait a maximum of 200ms before sending another IPI or failing
     for (int i = 0; i < 20; i++) {
-      PitSleep(1);
+      PIT::GetGlobal().Sleep(1);
       anlock_lock(&curCpuLock);
-      int newCount = CPUList::GetCount();
+      int newCount = CPUList::GetGlobal().GetCount();
       anlock_unlock(&curCpuLock);
       if (newCount != cpuCount) return;
     }
@@ -126,14 +127,14 @@ void CpuEntrance() {
   anlock_lock(&curCpuLock);
   
   GDT & gdt = GDT::GetGlobal();
-  int idx = CPUList::ConstructEntry(GetLocalAPIC().GetId());
+  int idx = CPUList::GetGlobal().ConstructEntry(GetLocalAPIC().GetId());
   TSS * tss = new TSS();
   tss->ioplBase = 0xffff;
   uint16_t sel = gdt.AddTSS(tss);
   gdt.Set();
   __asm__("ltr %%ax" : : "a" (sel));
   
-  CPU & cpu = CPUList::GetEntry(idx);
+  CPU & cpu = CPUList::GetGlobal()[idx];
   cpu.tssDesc = sel;
   cpu.stack = new uint8_t[0x4000];
   
