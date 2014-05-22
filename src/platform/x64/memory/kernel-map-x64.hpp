@@ -7,13 +7,14 @@
 #include <platform/failure.hpp>
 #include <cassert>
 #include <utilities/lock.hpp>
+#include <utilities/singleton.hpp>
 #include <stdlib/runtime.hpp>
 
 namespace OS {
 
 namespace x64 {
 
-class KernelMap {
+class KernelMap : public Singleton {
 private:
   uint64_t * virtScratchPTs[ScratchPTCount];
   uint64_t scratchBitmaps[ScratchPTCount * 8];
@@ -94,7 +95,7 @@ public:
 
 protected:
   friend class TableMgr;
-  friend class PhysicalAllocator;
+  friend class PMM;
   
   PageAllocator * allocator;
   

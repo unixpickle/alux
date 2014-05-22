@@ -2,6 +2,7 @@
 #define __PLATFORM_X64_PHYSICAL_ALLOC_X64_H__
 
 #include <platform/memory.hpp>
+#include <utilities/singleton.hpp>
 #include <analloc2>
 #include "kernel-map-x64.hpp"
 #include "step-allocator-x64.hpp"
@@ -13,20 +14,24 @@ namespace x64 {
 void InitializeKernAllocator(void * mbootPtr);
 KernelMap * GetGlobalKernelMap();
 
-class PhysicalAllocator : public PageAllocator {
+/**
+ * The PMM is the Physical Memory Manager. It is responsible for allocating
+ * physical memory.
+ */
+class PMM : public PageAllocator, public Singleton {
 public:
   static const int MaximumAllocators = 0x10;
   typedef ANAlloc::BBTree TreeType;
   typedef ANAlloc::AllocatorList<MaximumAllocators, TreeType> AllocatorList;
   
   static void Initialize(void * mbootPtr);
-  static PhysicalAllocator & GetGlobal();
+  static PMM & GetGlobal();
   
-  PhysicalAllocator() {
+  PMM() {
     Panic("This is just for the nice compiler.");
   }
   
-  PhysicalAllocator(void * mbootPtr);
+  PMM(void * mbootPtr);
   void Setup();
   
   bool Alloc(size_t size, PhysAddr & addr, size_t * realSize);

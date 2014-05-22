@@ -17,8 +17,8 @@ private:
   bool wereEnabled;
   
 public:
-  ScopeCritical();
-  ~ScopeCritical();
+  ScopeCritical(); // @ambicritical
+  ~ScopeCritical(); // @critical
 };
 
 }

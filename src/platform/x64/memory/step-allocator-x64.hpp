@@ -22,7 +22,7 @@ public:
   virtual PhysAddr AllocSize(size_t size);
   virtual void FreePage(PhysAddr addr);
 
-  friend class PhysicalAllocator;
+  friend class PMM;
 };
 
 }
