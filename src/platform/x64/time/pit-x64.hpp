@@ -26,8 +26,6 @@ public:
   PIT();
   
   void SetDivisor(uint16_t div); // 11932 for ~100Hz
-  void Sleep(uint64_t time);
-  void WaitUntil(uint64_t deadline);
   
   virtual uint64_t GetTime();
   virtual uint64_t GetTicksPerMin();

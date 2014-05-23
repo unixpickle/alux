@@ -42,15 +42,6 @@ uint64_t PIT::GetTicksPerMin() {
   return 71590920L / divide;
 }
 
-void PIT::Sleep(uint64_t time) {
-  uint64_t until = GetTime() + time;
-  while (GetTime() < until);
-}
-
-void PIT::WaitUntil(uint64_t deadline) {
-  while (GetTime() < deadline);
-}
-
 void PitInterruptHandler() {
   PIT::GetGlobal().IntHandler();
 }

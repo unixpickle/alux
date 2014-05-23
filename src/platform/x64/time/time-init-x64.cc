@@ -6,8 +6,6 @@ namespace x64 {
 static int32_t calibrateRemaining OS_ALIGNED(8);
 
 void InitializeTime() {
-  CalibrateLapicTimers();
-
   if (TSC::IsSupported()) {
     TSC::Initialize();
     *SystemClockPointer() = &TSC::GetGlobal();
@@ -17,6 +15,8 @@ void InitializeTime() {
   } else {
     *SystemClockPointer() = &PIT::GetGlobal();
   }
+
+  CalibrateLapicTimers();
   
   cout << "There are " << GetSystemClock().GetTicksPerMin() << " ticks/min"
     << endl;
@@ -42,10 +42,10 @@ void CalibrateLapicTimers() {
 
 void CpuCalibrateLapic() {
   LAPIC & lapic = LAPIC::GetCurrent();
-  PIT::GetGlobal().Sleep(1);
+  GetSystemClock().MicroSleep(10000);
   lapic.WriteRegister(LAPIC::RegLVT_TMR, 0xff);
   lapic.WriteRegister(LAPIC::RegTMRINITCNT, 0xffffffff);
-  PIT::GetGlobal().Sleep(50);
+  PIT::GetGlobal().MicroSleep(500000);
 
   uint64_t value = lapic.ReadRegister(LAPIC::RegTMRCURRCNT);
   lapic.WriteRegister(LAPIC::RegLVT_TMR, 0x10000);
