@@ -32,7 +32,7 @@ HPET::HPET() {
   clockSpeed = 60000000000000000L / (caps >> 0x20);
   
   // enable the main counter
-  hpetVirtual[2] |= 1; // ENABLE_CNF
+  Enable();
 }
 
 uint64_t HPET::GetTime() {
@@ -41,6 +41,14 @@ uint64_t HPET::GetTime() {
 
 uint64_t HPET::GetTicksPerMin() {
   return clockSpeed;
+}
+
+void HPET::Disable() {
+  hpetVirtual[2] &= ~(uint64_t)1; // ENABLE_CNF
+}
+
+void HPET::Enable() {
+  hpetVirtual[2] |= 1;
 }
 
 }

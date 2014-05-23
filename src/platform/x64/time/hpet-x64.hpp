@@ -23,6 +23,9 @@ public:
 
   virtual uint64_t GetTime();
   virtual uint64_t GetTicksPerMin();
+
+  void Disable();
+  void Enable();
 };
 
 }

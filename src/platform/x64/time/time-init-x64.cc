@@ -6,14 +6,16 @@ namespace x64 {
 static int32_t calibrateRemaining OS_ALIGNED(8);
 
 void InitializeTime() {
+  *SystemClockPointer() = &PIT::GetGlobal();
+  if (HPET::IsSupported()) {
+    HPET::Initialize();
+    *SystemClockPointer() = &HPET::GetGlobal();
+    PIT::GetGlobal().Deregister();
+  }
   if (TSC::IsSupported()) {
     TSC::Initialize();
     *SystemClockPointer() = &TSC::GetGlobal();
-  } else if (HPET::IsSupported()) {
-    HPET::Initialize();
-    *SystemClockPointer() = &HPET::GetGlobal();
-  } else {
-    *SystemClockPointer() = &PIT::GetGlobal();
+    HPET::GetGlobal().Disable();
   }
 
   CalibrateLapicTimers();
@@ -42,10 +44,10 @@ void CalibrateLapicTimers() {
 
 void CpuCalibrateLapic() {
   LAPIC & lapic = LAPIC::GetCurrent();
-  GetSystemClock().MicroSleep(10000);
+  GetSystemClock().MicroSleep(1);
   lapic.WriteRegister(LAPIC::RegLVT_TMR, 0xff);
   lapic.WriteRegister(LAPIC::RegTMRINITCNT, 0xffffffff);
-  PIT::GetGlobal().MicroSleep(500000);
+  GetSystemClock().MicroSleep(500000);
 
   uint64_t value = lapic.ReadRegister(LAPIC::RegTMRCURRCNT);
   lapic.WriteRegister(LAPIC::RegLVT_TMR, 0x10000);

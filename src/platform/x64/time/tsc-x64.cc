@@ -22,7 +22,8 @@ void TSC::Initialize() {
   // calibrate CPUs
   IRT::GetGlobal()[IntVectors::Calibrate] = CpuCalibrateTSC;
 
-  calibrateWaitUntil = PIT::GetGlobal().GetTime() + 50;
+  calibrateWaitUntil = GetSystemClock().GetTime()
+    + GetSystemClock().GetTicksPerMin() / 120;
 
   CPUList & cpuList = CPUList::GetGlobal();
 
@@ -59,9 +60,9 @@ void TSC::Initialize() {
   cout << "OS::x64::TSC::Initialize() - biggest diff = "
     << highestOff - lowestOff << endl;
   
-  PIT::GetGlobal().Sleep(1);
+  GetSystemClock().MicroSleep(1);
   uint64_t start = RDTSC();
-  PIT::GetGlobal().Sleep(50);
+  GetSystemClock().MicroSleep(500000);
   uint64_t end = RDTSC();
   uint64_t ticksPerMin = (end - start) * 120;
   new(&globalTSC) TSC(ticksPerMin);
@@ -86,7 +87,7 @@ uint64_t TSC::GetTicksPerMin() {
 
 static void CpuCalibrateTSC() {
   CPU & cpu = CPUList::GetGlobal().GetCurrent();
-  PIT::GetGlobal().WaitUntil(calibrateWaitUntil);
+  GetSystemClock().WaitUntil(calibrateWaitUntil);
   
   cpu.timeInfo.tscOffset = RDTSC();
   __asm__("lock decl (%0)" : : "r" (&calibrateRemaining));

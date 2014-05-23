@@ -20,7 +20,13 @@ public:
   }
 
   virtual uint64_t MicroSleep(uint64_t micros) {
-    Sleep((micros * GetTicksPerMin()) / 60000000L);
+    uint64_t divide = 60000000L;
+    uint64_t tpm = GetTicksPerMin();
+    while (Log2Ceil(micros) + Log2Ceil(tpm) > 63) {
+      divide <<= 1;
+      tpm >>= 1;
+    }
+    Sleep((micros * tpm) / divide);
   }
 };
 
