@@ -11,20 +11,7 @@ General architectual ideas that I am playing around with:
 
 ## TODO
 
-Right now, I have my mindset on revising much of this code, since I have developed as a C++ programmer since I started working on this project. I am going to roughly do the following:
-
- * Favor singletons over global static objects
- * Define the criticality for every single method and lock
- * Define which methods will and will-not require some external lock
- * Change appropriate class names to acronyms for brevity
- * Make sure I actually *capitalize* acronyms
- * Remove blank lines between `namespace XYZ {` lines.
-
-Also, there's some miscellaneous stuff I want to do:
-
- * Create object-send IPI mechanism
- * Implement ACPI shutdown
- * Look into Translation Cache Extension to increase invlpg speed
+Rewrite the entire thing so that I don't think it's dirty anymore.
 
 ## License
 
