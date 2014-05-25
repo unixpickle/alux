@@ -69,7 +69,7 @@ class Makefile
     @_generateWithTemplate files, command
   
   _simplifyName: (name) ->
-    return name[4..].replace /\//g, '_'
+    return name.replace /\//g, '_'
   
   _getIncludes: ->
     val = process.env['INCLUDES'] ? ''
@@ -85,15 +85,20 @@ main = ->
     process.exit 1
   
   mainSources = ['stdlib']
+  deps = ['analloc2/src', 'anlock/src']
   finder = new SourceFinder()
   for source in mainSources
     finder.search 'src/' + source
+  for dep in deps
+    finder.search 'dependencies/' + dep
   finder.search 'src/arch/' + arch
   
   includes = [
     'src/stdlib/cheaders'
     'src/stdlib/cppheaders'
     'src'
+    'dependencies/analloc2/include'
+    'dependencies/anlock/src'
   ]
   objdir = process.env['OBJDIR']
   file = new Makefile finder, includes, objdir

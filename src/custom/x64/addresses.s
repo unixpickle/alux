@@ -1,0 +1,1 @@
+LOADBASE equ 0x100000
