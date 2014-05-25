@@ -1,4 +1,4 @@
-OUTPUT_FILE = alux.bin
+OUTPUT_FILE = $(BUILDDIR)/alux.bin
 OUTPUT_FORMAT ?= binary
 CUSTOM_OUTDIR = $(BUILDDIR)/custom
 

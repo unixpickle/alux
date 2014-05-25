@@ -23,6 +23,7 @@ class SourceFinder
     assoc =
       '.c': @cSources
       '.cc': @cppSources
+      '.cpp': @cppSources
       '.s': @nasmSources
     assoc[ext]?.push? fullPath
 
