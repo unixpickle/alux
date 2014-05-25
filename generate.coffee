@@ -85,7 +85,7 @@ main = ->
     console.error 'Unknown architecture: ' + arch
     process.exit 1
   
-  mainSources = ['stdlib']
+  mainSources = ['stdlib', 'utilities']
   deps = ['analloc2/src', 'anlock/src']
   finder = new SourceFinder()
   for source in mainSources
@@ -100,6 +100,7 @@ main = ->
     'src'
     'dependencies/analloc2/include'
     'dependencies/anlock/src'
+    'src/arch/' + arch + '/include'
   ]
   objdir = process.env['OBJDIR']
   file = new Makefile finder, includes, objdir

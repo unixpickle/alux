@@ -1,9 +1,9 @@
-#include <cassert>
+#include <arch/general/failure.hpp>
 
 extern "C" {
 
 int __assert(const char * msg) {
-  // TODO: this is just a stub
+  OS::Panic(msg);
   return 0;
 }
 

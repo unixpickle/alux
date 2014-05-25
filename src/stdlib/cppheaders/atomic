@@ -1,0 +1,77 @@
+#ifndef __ATOMIC_HPP__
+#define __ATOMIC_HPP__
+
+#include <common>
+
+namespace OS {
+
+template <class T>
+class Atomic<T> {
+protected:
+  T value OS_ALIGNED(8);
+  
+public:
+  Atomic(const Atomic<T> & a) {
+    value = a.value;
+  }
+  
+  Atomic(T v) {
+    value = v;
+  }
+  
+  Atomic<T> & operator=(const Atomic<T> & a) {
+    value = a.value;
+    return *this;
+  }
+  
+  Atomic<T> & operator=(T v) {
+    value = v;
+    return *this;
+  }
+
+  Atomic<T> & operator+=(const Atomic<T> & a) {
+    __sync_add_and_fetch(&value, a.value);
+    return *this;
+  }
+  
+  Atomic<T> & operator+=(T v) {
+    __sync_add_and_fetch(&value, v);
+    return *this;
+  }
+  
+  Atomic<T> & operator-=(const Atomic<T> & a) {
+    __sync_sub_and_fetch(&value, a.value);
+    return *this;
+  }
+  
+  Atomic<T> & operator-=(T v) {
+    __sync_sub_and_fetch(&value, v);
+    return *this;
+  }
+  
+  Atomic<T> & operator--() {
+    __sync_sub_and_fetch(&value, 1);
+    return *this;
+  }
+  
+  Atomic<T> & operator++() {
+    __sync_add_and_fetch(&value, 1);
+    return *this;
+  }
+  
+  Atomic<T> operator--(int) { // dummy arg for postfix
+    return Atomic<T>(__sync_fetch_and_sub(&value, 1));
+  }
+  
+  Atomic<T> operator++(int) { // dummy arg for postfix
+    return Atomic<T>(__sync_fetch_and_add(&value, 1));
+  }
+  
+  T GetValue() const {
+    return value;
+  }
+};
+
+}
+
+#endif
