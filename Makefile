@@ -3,11 +3,13 @@ TARGET_ARCH ?= x64
 BINFILE ?= alux.bin
 BUILD_DIR ?= $(PROJECT_ROOT)/build
 CUSTOM_OUTDIR ?= $(BUILD_DIR)/custom-out
+OBJDIR = $(BUILD_DIR)/obj
 
 override CXXFLAGS += -nostdlib -nostdinc -ffreestanding -mno-red-zone -fno-exceptions -fno-rtti -Wno-long-long -Wextra -std=c++11 -mno-sse -mno-mmx
 override CFLAGS += -nostdlib -nostdinc -ffreestanding -mno-red-zone -Wno-long-long -Wextra -mno-sse -mno-mmx
+override NASMFLAGS += -f elf64
 
-CXX ?= "g++"
+CXX ?= g++
 CC ?= gcc
 LD ?= ld
 NASM ?= nasm
@@ -16,12 +18,14 @@ export CUSTOM_OUTDIR
 export PROJECT_ROOT
 export BINFILE
 export TARGET_ARCH
+export OBJDIR
 export CXX
 export CC
 export LD
 export NASM
 export CXXFLAGS
 export CFLAGS
+export NASMFLAGS
 
 $(BUILD_DIR)/$(BINFILE): $(BUILD_DIR)
 	$(MAKE) -C $(BUILD_DIR)/obj
@@ -30,7 +34,8 @@ $(BUILD_DIR)/$(BINFILE): $(BUILD_DIR)
 
 $(BUILD_DIR): dependencies
 	mkdir $(BUILD_DIR)
-	bash generator.sh $(TARGET_ARCH) $(BUILD_DIR)/obj
+	mkdir $(OBJDIR)
+	coffee generate.coffee
 
 dependencies:
 	mkdir dependencies
