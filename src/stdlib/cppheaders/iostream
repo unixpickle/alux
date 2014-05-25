@@ -1,0 +1,88 @@
+#ifndef __IOSTREAM_HPP__
+#define __IOSTREAM_HPP__
+
+namespace OS {
+
+class OutStream {
+public:
+  virtual OutStream & operator<<(const char * str);
+  virtual OutStream & operator<<(int number);
+  virtual OutStream & operator<<(long number);
+  virtual OutStream & operator<<(long long number);
+  virtual OutStream & operator<<(unsigned int number);
+  virtual OutStream & operator<<(unsigned long number);
+  virtual OutStream & operator<<(unsigned long long number);
+};
+
+class OutStreamErr : public OutStream {
+public:
+  typedef OutStream super;
+
+  virtual OutStream & operator<<(const char * str);
+
+  virtual OutStream & operator<<(int number) {
+    return super::operator<<(number);
+  }
+
+  virtual OutStream & operator<<(unsigned int number) {
+    return super::operator<<(number);
+  }
+
+  virtual OutStream & operator<<(long number) {
+    return super::operator<<(number);
+  }
+
+  virtual OutStream & operator<<(unsigned long number) {
+    return super::operator<<(number);
+  }
+
+  virtual OutStream & operator<<(long long number) {
+    return super::operator<<(number);
+  }
+
+  virtual OutStream & operator<<(unsigned long long number) {
+    return super::operator<<(number);
+  }
+};
+
+class OutStreamOut : public OutStream {
+public:
+  typedef OutStream super;
+
+  virtual OutStream & operator<<(const char * str);
+
+  virtual OutStream & operator<<(int number) {
+    return super::operator<<(number);
+  }
+
+  virtual OutStream & operator<<(unsigned int number) {
+    return super::operator<<(number);
+  }
+
+  virtual OutStream & operator<<(long number) {
+    return super::operator<<(number);
+  }
+
+  virtual OutStream & operator<<(unsigned long number) {
+    return super::operator<<(number);
+  }
+
+  virtual OutStream & operator<<(long long number) {
+    return super::operator<<(number);
+  }
+
+  virtual OutStream & operator<<(unsigned long long number) {
+    return super::operator<<(number);
+  }
+};
+
+extern OutStreamOut cout;
+extern OutStreamErr cerr;
+extern const char * endl;
+
+bool HasInitializedOutStream();
+void InitializeOutStream();
+
+}
+
+#endif
