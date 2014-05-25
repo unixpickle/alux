@@ -1,5 +1,6 @@
-#include <cstdint>
+#include <arch/x64/pmm/region-list.hpp>
 #include <arch/general/failure.hpp>
+#include <cstdint>
 #include <iostream>
 
 extern "C" {
@@ -7,7 +8,7 @@ extern "C" {
 void MbootEntry(void * mbootPtr) {
   OS::InitializeOutStream();
   OS::cout << "MbootEntry(" << (uintptr_t)mbootPtr << ")" << OS::endl;
-  
+  OS::x64::RegionList::Initialize(mbootPtr);
   // TODO: initialize memory management
 }
 
