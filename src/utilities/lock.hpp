@@ -14,6 +14,15 @@ public:
   ~ScopeLock(); // @ambicritical
 };
 
+class ScopeCriticalLock {
+private:
+  uint64_t * lock;
+
+public:
+  ScopeCriticalLock(uint64_t * lock); // @noncritical
+  ~ScopeCriticalLock(); // @ambicritical
+};
+
 }
 
 #endif

@@ -1,4 +1,8 @@
 #include <arch/x64/pmm/region-list.hpp>
+#include <arch/x64/pmm/allocator.hpp>
+#include <arch/x64/vmm/global-map.hpp>
+#include <arch/x64/vmm/scratch.hpp>
+#include <arch/x64/vmm/kernel-layout.hpp>
 #include <arch/general/failure.hpp>
 #include <cstdint>
 #include <iostream>
@@ -9,7 +13,17 @@ void MbootEntry(void * mbootPtr) {
   OS::InitializeOutStream();
   OS::cout << "MbootEntry(" << (uintptr_t)mbootPtr << ")" << OS::endl;
   OS::x64::RegionList::Initialize(mbootPtr);
-  // TODO: initialize memory management
+  
+  OS::x64::StepAllocator alloc(OS::x64::KernelSize());
+  
+  OS::x64::GlobalMap::Initialize(&alloc);
+  OS::x64::GlobalMap & map = OS::x64::GlobalMap::GetGlobal();
+  OS::x64::Scratch::Initialize(map.GetPDPT(), alloc);
+  
+  // TODO: map.Set()
+  
+  OS::x64::Allocator::Initialize(alloc);
+  map.allocator = &OS::x64::Allocator::GetGlobal();
 }
 
 /**

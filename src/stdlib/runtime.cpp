@@ -1,4 +1,5 @@
-#include "runtime.hpp"
+#include <stdlib/runtime.hpp>
+#include <arch/general/failure.hpp>
 
 extern "C" {
 
@@ -16,7 +17,7 @@ void __cxa_finalize(void * f) {
 }
 
 void __cxa_pure_virtual() {
-  // TODO: panic here
+  OS::Panic("__cxa_pure_virtual() - method unimplemented");
 }
 
 }
