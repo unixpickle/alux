@@ -21,6 +21,7 @@ public:
   PhysAddr GetPDPT();
   
   friend void ::MbootEntry(void *);
+  friend class PageTable;
   
 protected:
   PageAllocator * allocator;
