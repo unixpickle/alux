@@ -3,13 +3,44 @@
 
 #include <cstddef>
 
+/**
+ * @ambicritical
+ */
 void * operator new(size_t, void * p);
+
+/**
+ * @ambicritical
+ */
 void * operator new[](size_t, void * p);
+
+/**
+ * @noncritical
+ */
 void * operator new(size_t);
+
+/**
+ * @noncritical
+ */
 void * operator new[](size_t);
+
+/**
+ * @noncritical
+ */
 void operator delete(void * ptr);
+
+/**
+ * @noncritical
+ */
 void operator delete[](void * ptr);
+
+/**
+ * @ambicritical
+ */
 void operator delete(void * ptr , void * place);
+
+/**
+ * @ambicritical
+ */
 void operator delete[](void * ptr, void * place);
 
 #endif

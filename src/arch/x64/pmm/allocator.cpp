@@ -7,6 +7,10 @@
 
 namespace OS {
 
+PhysicalAllocator & PhysicalAllocator::GetGlobal() {
+  return x64::Allocator::GetGlobal();
+}
+
 namespace x64 {
 
 static Allocator allocator;
