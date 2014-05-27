@@ -1,7 +1,6 @@
 #include <arch/x64/pmm/region-list.hpp>
 #include <arch/x64/pmm/step-allocator.hpp>
 #include <arch/general/failure.hpp>
-#include <iostream> // TODO: delete this
 
 namespace OS {
 
@@ -15,8 +14,6 @@ PhysAddr StepAllocator::AllocPage() {
 }
 
 PhysAddr StepAllocator::AllocSize(size_t pageSize) {
-  cout << "StepAllocator::AllocSize() - this = "
-    << (uintptr_t)this << endl;
   RegionList & regions = RegionList::GetGlobal();
   MemoryRegion * reg = regions.FindRegion(lastAddr);
   if (!reg) {
@@ -40,7 +37,6 @@ PhysAddr StepAllocator::AllocSize(size_t pageSize) {
   
   PhysAddr res = lastAddr;
   lastAddr += pageSize;
-  cout << "StepAllocator::AllocSize() - done" << endl;
   return res;
 }
 

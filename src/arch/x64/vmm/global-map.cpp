@@ -7,7 +7,6 @@
 #include <cstddef>
 #include <cassert>
 #include <new>
-#include <iostream> // TODO: delete this
 
 namespace OS {
 
@@ -119,9 +118,7 @@ VirtAddr GlobalMap::Reserve(size_t pageSize, size_t pageCount) {
   for (size_t i = 0; i < pageCount; i++) {
     ScopeLock scope(&tableLock);
     // make each entry contain the value `pageSize` with no other flags set
-    cout << "setting " << addr << " to " << pageSize << endl;
     bool result = table.Set(addr, pageSize, 3, PageSizeDepth(pageSize));
-    cout << "done." << endl;
     if (!result) {
       Panic("GlobalMap::Reserve() - table.Set() failed");
     }

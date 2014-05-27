@@ -3,8 +3,6 @@
 #include <arch/x64/vmm/global-map.hpp>
 #include <arch/general/failure.hpp>
 
-#include <iostream> // TODO: delete this
-
 namespace OS {
 
 namespace x64 {
@@ -60,20 +58,14 @@ bool PageTable::Set(VirtAddr addr,
   
   TypedScratch<uint64_t> scratch(pml4);
   for (int depth = 0; depth < theDepth; depth++) {
-    cout << "loop iter " << depth << endl;
     uint64_t nextPage = scratch[indexes[depth]];
     if (!(nextPage & 1)) {
       // we have to temporarily leave the critical section, meaning afterwards
       // we will have to clear the scratch's CPU cache
-      cout << "allocating a page..." << endl;
       SetCritical(false);
-      cout << "allocator is " << (uintptr_t)GlobalMap::GetGlobal().allocator
-        << endl;
       nextPage = GlobalMap::GetGlobal().allocator->AllocPage();
       SetCritical(true);
       scratch.InvalidateCache();
-      
-      cout << "reassigning" << endl;
       
       scratch[indexes[depth]] = nextPage | parentMask;
       scratch.Reassign(nextPage & 0x7ffffffffffff000);

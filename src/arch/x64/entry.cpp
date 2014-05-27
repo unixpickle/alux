@@ -16,6 +16,8 @@ void MbootEntry(void * mbootPtr) {
   
   OS::x64::StepAllocator alloc(OS::x64::KernelSize());
   
+  OS::cout << "Initializing memory subsystem..." << OS::endl;
+  
   OS::x64::GlobalMap::Initialize(&alloc);
   OS::x64::GlobalMap & map = OS::x64::GlobalMap::GetGlobal();
   OS::x64::Scratch::Initialize(map.GetPDPT(), alloc);
@@ -23,6 +25,8 @@ void MbootEntry(void * mbootPtr) {
   
   OS::x64::Allocator::Initialize(alloc);
   map.allocator = &OS::x64::Allocator::GetGlobal();
+  
+  OS::Panic("TODO: initialize interrupts after memory");
 }
 
 /**

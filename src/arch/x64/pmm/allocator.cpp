@@ -5,16 +5,14 @@
 #include <utilities/lock.hpp>
 #include <new>
 
-#include <iostream> // TODO: delete this
-
 namespace OS {
 
 namespace x64 {
 
 static Allocator allocator;
 
-void Allocator::Initialize(StepAllocator & allocator) {
-  new(&allocator) Allocator(allocator);
+void Allocator::Initialize(StepAllocator & alloc) {
+  new(&allocator) Allocator(alloc);
 }
 
 Allocator & Allocator::GetGlobal() { 
@@ -89,16 +87,12 @@ VirtAddr Allocator::AllocateRaw(StepAllocator & alloc, size_t size) {
   
   size_t pageSize = size >= 0x200000 ? 0x200000 : 0x1000;
   size_t pageCount = size / pageSize + (size % pageSize ? 1 : 0);
-  cout << "reserving something..." << endl;
   VirtAddr reserved = map.Reserve(pageSize, pageCount);
-  cout << "got memory at " << reserved << endl;
   VirtAddr dest = reserved;
   
   while (pageCount--) {
     PhysAddr page = alloc.AllocSize(pageSize);
-    cout << "page is " << page << endl;
     map.MapAt(dest, page, pageSize, 1, false);
-    cout << "done mapping" << endl;
     dest += pageSize;
   }
   
