@@ -73,40 +73,17 @@ VirtAddr GlobalMap::Map(PhysAddr phys, size_t pageSize, size_t pageCount,
   ScopeLock mainScope(&allocationLock);
   
   VirtAddr region = AllocateRegion(pageSize, pageCount);
-  assert(region < Scratch::StartAddr);
+  uint64_t source = phys | TableEntryMask(pageSize, executable);
   
-  uint64_t curSource = phys | TableEntryMask(pageSize, executable);
-  VirtAddr curDest = region;
-  int depth = PageSizeDepth(pageSize);
-  
-  for (size_t i = 0; i < pageCount; i++) {
-    ScopeLock scope(&tableLock);
-    bool result = table.Set(curDest, curSource, 3, depth);
-    if (!result) {
-      Panic("GlobalMap::Map() - table.Set() failed");
-    }
-    curSource += pageSize;
-    curDest += pageSize;
-  }
-  
+  SetEntries(region, source, pageSize, pageSize, pageCount);
   return region;
 }
 
 void GlobalMap::MapAt(VirtAddr virt, PhysAddr phys, size_t pageSize,
                       size_t pageCount, bool executable) {
-  uint64_t curSource = phys | TableEntryMask(pageSize, executable);
-  VirtAddr curDest = virt;
-  int depth = PageSizeDepth(pageSize);
-
-  for (size_t i = 0; i < pageCount; i++) {
-    ScopeLock scope(&tableLock);
-    bool result = table.Set(curDest, curSource, 3, depth);
-    if (!result) {
-      Panic("GlobalMap::MapAt() - table.Set() failed");
-    }
-    curSource += pageSize;
-    curDest += pageSize;
-  }
+  uint64_t source = phys | TableEntryMask(pageSize, executable);
+  SetEntries(virt, source, pageSize, pageSize, pageCount);
+  
   // we may have overwritten something
   DistributeKernelInvlpg(virt, pageCount * pageSize);
 }
@@ -114,17 +91,8 @@ void GlobalMap::MapAt(VirtAddr virt, PhysAddr phys, size_t pageSize,
 VirtAddr GlobalMap::Reserve(size_t pageSize, size_t pageCount) {
   ScopeLock mainScope(&allocationLock);
   VirtAddr region = AllocateRegion(pageSize, pageCount);
-  VirtAddr addr = region;
   uint64_t entry = pageSize | (pageSize == 0x1000 ? 0 : 0x80);
-  for (size_t i = 0; i < pageCount; i++) {
-    ScopeLock scope(&tableLock);
-    // make each entry contain the value `pageSize` with no other flags set
-    bool result = table.Set(addr, entry, 3, PageSizeDepth(pageSize));
-    if (!result) {
-      Panic("GlobalMap::Reserve() - table.Set() failed");
-    }
-    addr += pageSize;
-  }
+  SetEntries(region, entry, pageSize, 0, pageCount);
   return region;
 }
 
@@ -154,6 +122,23 @@ void GlobalMap::Setup() {
   
   table.SetPML4(setup.GetPML4());
   pdpt = setup.GetPDPT();
+}
+
+void GlobalMap::SetEntries(VirtAddr virt, PhysAddr phys, size_t virtAdd,
+                           size_t physAdd, size_t count) {
+  int depth = PageSizeDepth(virtAdd);
+  VirtAddr curVirt = virt;
+  PhysAddr curPhys = phys;
+
+  for (size_t i = 0; i < count; i++) {
+    ScopeLock scope(&tableLock);
+    bool result = table.Set(curVirt, curPhys, 3, depth);
+    if (!result) {
+      Panic("GlobalMap::SetEntries() - table.Set() failed");
+    }
+    curPhys += physAdd;
+    curVirt += virtAdd;
+  }
 }
 
 VirtAddr GlobalMap::AllocateRegion(size_t pageSize, size_t pageCount) {

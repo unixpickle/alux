@@ -54,6 +54,9 @@ protected:
   
   void Setup();
   
+  void SetEntries(VirtAddr virt, PhysAddr phys, size_t virtAdd,
+                  size_t physAdd, size_t count);
+  
   VirtAddr AllocateRegion(size_t pageSize, size_t pageCount);
   void FreeRegion(VirtAddr, size_t pageSize, size_t pageCount);
   
