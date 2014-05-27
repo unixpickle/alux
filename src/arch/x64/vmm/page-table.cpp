@@ -60,15 +60,22 @@ bool PageTable::Set(VirtAddr addr,
   for (int depth = 0; depth < theDepth; depth++) {
     uint64_t nextPage = scratch[indexes[depth]];
     if (!(nextPage & 1)) {
+      // we have to temporarily leave the critical section, meaning afterwards
+      // we will have to clear the scratch's CPU cache
+      SetCritical(false);
       nextPage = GlobalMap::GetGlobal().allocator->AllocPage();
-      
-      // we need to zero out the newly allocated table for security etc.
-      TypedScratch<uint64_t> temp(nextPage);
-      for (int i = 0; i < 0x200; i++) {
-        temp[i] = 0;
-      }
+      SetCritical(true);
+      scratch.InvalidateCache();
       
       scratch[indexes[depth]] = nextPage | parentMask;
+      scratch.Reassign(nextPage & 0x7ffffffffffff000);
+      
+      // zero out the new page
+      for (int i = 0; i < 0x200; i++) {
+        scratch[i] = 0;
+      }
+      
+      continue;
     } else if (nextPage & 0x80) {
       return false;
     } else {
@@ -124,7 +131,11 @@ bool PageTable::Unset(VirtAddr addr) {
     }
     if (!allGone) break;
     
+    SetCritical(false);
     GlobalMap::GetGlobal().allocator->FreePage(tableAddresses[i]);
+    SetCritical(true);
+    scratch.InvalidateCache();
+    
     scratch.Reassign(tableAddresses[i - 1]);
     scratch[indexes[i - 1]] = 0;
   }

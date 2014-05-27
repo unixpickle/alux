@@ -19,8 +19,7 @@ void MbootEntry(void * mbootPtr) {
   OS::x64::GlobalMap::Initialize(&alloc);
   OS::x64::GlobalMap & map = OS::x64::GlobalMap::GetGlobal();
   OS::x64::Scratch::Initialize(map.GetPDPT(), alloc);
-  
-  // TODO: map.Set()
+  map.Set();
   
   OS::x64::Allocator::Initialize(alloc);
   map.allocator = &OS::x64::Allocator::GetGlobal();

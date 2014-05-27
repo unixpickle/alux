@@ -44,6 +44,10 @@ void StepAllocator::FreePage(PhysAddr) {
   Panic("StepAllocator::FreePage() - nothing to do");
 }
 
+PhysAddr StepAllocator::GetLastAddress() {
+  return lastAddr;
+}
+
 }
 
 }

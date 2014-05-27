@@ -5,6 +5,7 @@
 #include <arch/x64/vmm/page-table.hpp>
 #include <arch/x64/entry.hpp> // so I can make ::MbootEntry() a friend
 #include <arch/general/address-space.hpp>
+#include <common>
 
 namespace OS {
 
@@ -32,13 +33,18 @@ public:
   
   friend void ::MbootEntry(void *);
   friend class PageTable;
+  friend class Allocator;
   
 protected:
   PageAllocator * allocator;
   PageTable table;
   PhysAddr pdpt;
-  uint64_t allocationLock; // held whenever an allocation is underway
-  uint64_t tableLock; // held whenever the table is being modified directly
+  
+   // held whenever an allocation is underway
+  uint64_t allocationLock OS_ALIGNED(8);
+  
+  // held whenever the table is being modified directly (inner lock)
+  uint64_t tableLock;
   
   VirtAddr freeStart;
   size_t freeSize;

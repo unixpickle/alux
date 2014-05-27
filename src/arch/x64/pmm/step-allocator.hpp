@@ -18,6 +18,7 @@ public:
   virtual PhysAddr AllocPage();
   virtual PhysAddr AllocSize(size_t size);
   virtual void FreePage(PhysAddr p);
+  PhysAddr GetLastAddress();
 };
 
 }

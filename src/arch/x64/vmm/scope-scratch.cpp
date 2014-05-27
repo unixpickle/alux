@@ -27,6 +27,10 @@ void ScopeScratch::Reassign(PhysAddr newAddr) {
   Scratch::GetGlobal().Reassign(ptr, newAddr);
 }
 
+void ScopeScratch::InvalidateCache() {
+  __asm__("invlpg (%0)" : : "r" (ptr));
+}
+
 }
 
 }

@@ -37,6 +37,13 @@ public:
    * @critical
    */
   void Reassign(PhysAddr newAddr);
+  
+  /**
+   * Call this after you leave a critical section--even for an instant--while 
+   * this instance is alive.
+   * @critical
+   */
+  void InvalidateCache();
 };
 
 template <class T>
