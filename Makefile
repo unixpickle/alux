@@ -20,9 +20,11 @@ export NASM
 
 override CXXFLAGS += -nostdlib -nostdinc -ffreestanding -mno-red-zone -fno-exceptions -fno-rtti -Wno-long-long -Wextra -std=c++11 -mno-sse -mno-mmx
 override CFLAGS += -nostdlib -nostdinc -ffreestanding -mno-red-zone -Wno-long-long -Wextra -mno-sse -mno-mmx
+override NASMFLAGS += -f elf64
 
 export CXXFLAGS
 export CFLAGS
+export NASMFLAGS
 
 $(BUILDDIR)/$(OUTFILE): $(BUILDDIR)
 	$(MAKE) -C $(OBJDIR)

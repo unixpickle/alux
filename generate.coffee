@@ -66,7 +66,7 @@ class Makefile
       includes = @_getIncludes()
       command = "#{compiler} -c #{flags} #{includes} %IN -o %OUT"
     else
-      command = "#{compiler} #{flags} %IN -o %OUT"
+      command = "#{compiler} #{flags ? ''} %IN -o %OUT"
     @_generateWithTemplate files, command
   
   _simplifyName: (name) ->

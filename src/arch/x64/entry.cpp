@@ -3,6 +3,8 @@
 #include <arch/x64/vmm/global-map.hpp>
 #include <arch/x64/vmm/scratch.hpp>
 #include <arch/x64/vmm/kernel-layout.hpp>
+#include <arch/x64/interrupts/irt.hpp>
+#include <arch/x64/interrupts/idt.hpp>
 #include <arch/general/failure.hpp>
 #include <cstdint>
 #include <iostream>
@@ -27,7 +29,10 @@ void MbootEntry(void * mbootPtr) {
   OS::x64::Allocator::Initialize(alloc);
   map.allocator = &OS::x64::Allocator::GetGlobal();
   
-  OS::Panic("TODO: initialize interrupts after memory");
+  OS::x64::IDT::Initialize();
+  OS::x64::IRT::Initialize();
+  
+  OS::Panic("TODO: initialize LAPIC and IOAPIC using ACPI here");
 }
 
 /**

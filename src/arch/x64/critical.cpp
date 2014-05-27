@@ -30,4 +30,3 @@ void SetCritical(bool flag) {
 }
 
 }
-
