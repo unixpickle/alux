@@ -5,7 +5,9 @@
 #include <arch/x64/vmm/kernel-layout.hpp>
 #include <arch/x64/interrupts/irt.hpp>
 #include <arch/x64/interrupts/idt.hpp>
+#include <arch/x64/critical.hpp>
 #include <arch/general/failure.hpp>
+#include <arch/general/critical.hpp>
 #include <cstdint>
 #include <iostream>
 #include <new>
@@ -29,8 +31,12 @@ void MbootEntry(void * mbootPtr) {
   OS::x64::Allocator::Initialize(alloc);
   map.allocator = &OS::x64::Allocator::GetGlobal();
   
+  OS::cout << "Initializing interrupt subsystem..." << OS::endl;
+  
   OS::x64::IDT::Initialize();
   OS::x64::IRT::Initialize();
+  OS::SetIgnoreCriticality(false);
+  OS::SetCritical(false);
   
   OS::Panic("TODO: initialize LAPIC and IOAPIC using ACPI here");
 }
