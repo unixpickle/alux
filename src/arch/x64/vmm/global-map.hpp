@@ -36,7 +36,8 @@ protected:
   PageAllocator * allocator;
   PageTable table;
   PhysAddr pdpt;
-  uint64_t allocationLock, tableLock;
+  uint64_t allocationLock; // held whenever an allocation is underway
+  uint64_t tableLock; // held whenever the table is being modified directly
   
   VirtAddr freeStart;
   size_t freeSize;

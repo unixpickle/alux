@@ -45,16 +45,19 @@ size_t GlobalMap::GetPageSize(int index) {
 }
 
 void GlobalMap::Unmap(VirtAddr virt, size_t pageSize, size_t pageCount) {
-  ScopeLock scope(&allocationLock);
-  for (size_t i = 0; i < pageCount; i++) {
-    ScopeLock scope(&tableLock);
-    VirtAddr theAddr = virt + (pageSize * i);
-    if (!table.Unset(theAddr)) {
-      Panic("GlobalMap::Unmap() - table.Unset() failed");
+  {
+    ScopeLock mainScope(&allocationLock);
+    for (size_t i = 0; i < pageCount; i++) {
+      ScopeLock scope(&tableLock);
+      VirtAddr theAddr = virt + (pageSize * i);
+      if (!table.Unset(theAddr)) {
+        Panic("GlobalMap::Unmap() - table.Unset() failed");
+      }
     }
+    FreeRegion(virt, pageSize, pageCount);
   }
+  // invalidate the memory
   DistributeKernelInvlpg(virt, pageSize * pageCount);
-  FreeRegion(virt, pageSize, pageCount);
 }
 
 VirtAddr GlobalMap::Map(PhysAddr phys, size_t pageSize, size_t pageCount,
@@ -96,7 +99,7 @@ void GlobalMap::MapAt(VirtAddr virt, PhysAddr phys, size_t pageSize,
     curSource += pageSize;
     curDest += pageSize;
   }
-  // invalidate the pages
+  // we may have overwritten something
   DistributeKernelInvlpg(virt, pageCount * pageSize);
 }
 
