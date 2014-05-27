@@ -11,6 +11,8 @@ bool IgnoreCriticality() {
 }
 
 bool GetCritical() {
+  if (IgnoreCriticality()) return true;
+
   unsigned long value;
   __asm__("pushfq\n"
           "pop %0" : "=r" (value));
@@ -18,6 +20,8 @@ bool GetCritical() {
 }
 
 void SetCritical(bool flag) {
+  if (IgnoreCriticality()) return;
+
   if (flag) {
     __asm__("cli");
   } else {
@@ -26,3 +30,4 @@ void SetCritical(bool flag) {
 }
 
 }
+

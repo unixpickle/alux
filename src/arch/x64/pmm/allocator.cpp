@@ -5,6 +5,8 @@
 #include <utilities/lock.hpp>
 #include <new>
 
+#include <iostream> // TODO: delete this
+
 namespace OS {
 
 namespace x64 {
@@ -12,8 +14,6 @@ namespace x64 {
 static Allocator allocator;
 
 void Allocator::Initialize(StepAllocator & allocator) {
-  Panic("OS::x64::Allocator::Initialize() - NYI");
-  
   new(&allocator) Allocator(allocator);
 }
 
@@ -32,7 +32,7 @@ Allocator::Allocator(StepAllocator & alloc) {
                                regions.GetRegionCount());
   allocators.SetInfo(info);
   allocators.GenerateDescriptions(true); // `true` is needed to sort it
-  
+
   VirtAddr newAddress = AllocateRaw(alloc, allocators.BitmapByteCount());
   allocators.GenerateAllocators((uint8_t *)newAddress);
   allocators.Reserve(alloc.GetLastAddress());
@@ -89,12 +89,16 @@ VirtAddr Allocator::AllocateRaw(StepAllocator & alloc, size_t size) {
   
   size_t pageSize = size >= 0x200000 ? 0x200000 : 0x1000;
   size_t pageCount = size / pageSize + (size % pageSize ? 1 : 0);
+  cout << "reserving something..." << endl;
   VirtAddr reserved = map.Reserve(pageSize, pageCount);
+  cout << "got memory at " << reserved << endl;
   VirtAddr dest = reserved;
   
   while (pageCount--) {
     PhysAddr page = alloc.AllocSize(pageSize);
+    cout << "page is " << page << endl;
     map.MapAt(dest, page, pageSize, 1, false);
+    cout << "done mapping" << endl;
     dest += pageSize;
   }
   
