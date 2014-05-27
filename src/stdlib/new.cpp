@@ -17,6 +17,7 @@ void * operator new[](size_t, void * p) {
 
 void * operator new(size_t s) {
   OS::ScopeLock scope(&lock);
+  
   if (!initialized) {
     OS::Malloc::Initialize();
     initialized = true;
@@ -27,7 +28,7 @@ void * operator new(size_t s) {
 }
 
 void * operator new[](size_t s) {
-  return (void *)(new uint8_t[s]);
+  return operator new(s);
 }
 
 void operator delete(void * p) {
@@ -37,7 +38,7 @@ void operator delete(void * p) {
 }
 
 void operator delete[](void * p) {
-  delete (uint8_t *)p;
+  operator delete(p);
 }
 
 void operator delete(void *, void *) {

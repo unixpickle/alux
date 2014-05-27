@@ -6,6 +6,7 @@
 #include <arch/general/failure.hpp>
 #include <cstdint>
 #include <iostream>
+#include <new>
 
 extern "C" {
 
@@ -25,6 +26,13 @@ void MbootEntry(void * mbootPtr) {
   
   OS::x64::Allocator::Initialize(alloc);
   map.allocator = &OS::x64::Allocator::GetGlobal();
+  
+  uint8_t * ptr = new uint8_t[0x20];
+  OS::cout << "ptr 1 " << (uintptr_t)ptr << OS::endl;
+  uint8_t * buffer = new uint8_t[0x2000];
+  OS::cout << "ptr 2 " << (uintptr_t)buffer << OS::endl;
+  delete ptr;
+  delete buffer;
   
   OS::Panic("TODO: initialize interrupts after memory");
 }

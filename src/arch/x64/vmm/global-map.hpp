@@ -50,6 +50,7 @@ protected:
   size_t freeSize;
   
   static int PageSizeDepth(size_t size);
+  static uint64_t TableEntryMask(size_t pageSize, bool exec);
   
   void Setup();
   

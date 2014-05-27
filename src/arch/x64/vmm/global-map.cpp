@@ -75,7 +75,7 @@ VirtAddr GlobalMap::Map(PhysAddr phys, size_t pageSize, size_t pageCount,
   VirtAddr region = AllocateRegion(pageSize, pageCount);
   assert(region < Scratch::StartAddr);
   
-  uint64_t curSource = phys | 3 | (executable ? 0 : (uint64_t)1 << 63);
+  uint64_t curSource = phys | TableEntryMask(pageSize, executable);
   VirtAddr curDest = region;
   int depth = PageSizeDepth(pageSize);
   
@@ -94,7 +94,7 @@ VirtAddr GlobalMap::Map(PhysAddr phys, size_t pageSize, size_t pageCount,
 
 void GlobalMap::MapAt(VirtAddr virt, PhysAddr phys, size_t pageSize,
                       size_t pageCount, bool executable) {
-  uint64_t curSource = phys | 3 | (executable ? 0 : (uint64_t)1 << 63);
+  uint64_t curSource = phys | TableEntryMask(pageSize, executable);
   VirtAddr curDest = virt;
   int depth = PageSizeDepth(pageSize);
 
@@ -115,10 +115,11 @@ VirtAddr GlobalMap::Reserve(size_t pageSize, size_t pageCount) {
   ScopeLock mainScope(&allocationLock);
   VirtAddr region = AllocateRegion(pageSize, pageCount);
   VirtAddr addr = region;
+  uint64_t entry = pageSize | (pageSize == 0x1000 ? 0 : 0x80);
   for (size_t i = 0; i < pageCount; i++) {
     ScopeLock scope(&tableLock);
     // make each entry contain the value `pageSize` with no other flags set
-    bool result = table.Set(addr, pageSize, 3, PageSizeDepth(pageSize));
+    bool result = table.Set(addr, entry, 3, PageSizeDepth(pageSize));
     if (!result) {
       Panic("GlobalMap::Reserve() - table.Set() failed");
     }
@@ -140,6 +141,11 @@ int GlobalMap::PageSizeDepth(size_t size) {
   }
   Panic("unknown page size");
   return -1;
+}
+
+uint64_t GlobalMap::TableEntryMask(size_t pageSize, bool exec) {
+  return 0x103 | (pageSize == 0x1000 ? 0 : 0x80)
+    | (exec ? 0 : (uint64_t)1 << 63);
 }
 
 void GlobalMap::Setup() {
