@@ -33,6 +33,11 @@ public:
   virtual size_t GetPageSize(int index) = 0;
   
   /**
+   * Returns the physical alignment required for pages of a certain size.
+   */
+  virtual size_t GetPageAlignment(int index) = 0;
+  
+  /**
    * Unmap a chunk of memory from this address space.
    * @noncritical
    */

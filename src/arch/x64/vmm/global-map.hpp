@@ -22,6 +22,7 @@ public:
   virtual void Set();
   virtual int GetPageSizeCount();
   virtual size_t GetPageSize(int index);
+  virtual size_t GetPageAlignment(int index);
   virtual void Unmap(VirtAddr virt, size_t pageSize, size_t pageCount);
   virtual VirtAddr Map(PhysAddr phys, size_t pageSize, size_t pageCount,
                        bool executable = true);

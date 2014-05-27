@@ -10,6 +10,10 @@
 
 namespace OS {
 
+AddressSpace & AddressSpace::GetGlobal() {
+  return x64::GlobalMap::GetGlobal();
+}
+
 namespace x64 {
 
 static GlobalMap instance;
@@ -42,6 +46,10 @@ int GlobalMap::GetPageSizeCount() {
 size_t GlobalMap::GetPageSize(int index) {
   if (index) return 0x200000;
   return 0x1000;
+}
+
+size_t GlobalMap::GetPageAlignment(int index) {
+  return GetPageSize(index);
 }
 
 void GlobalMap::Unmap(VirtAddr virt, size_t pageSize, size_t pageCount) {
