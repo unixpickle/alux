@@ -9,7 +9,7 @@ class AddressSpace {
 public:
   static AddressSpace & GetGlobal();
   
-  virtual ~AddressSpace() = 0;
+  virtual ~AddressSpace() {}
   
   /**
    * Bind this address space to the current CPU.
@@ -28,14 +28,15 @@ public:
    * Returns the page size at a given index (0 through GetPageSizeCount() - 1
    * inclusive). The page sizes returned from this must be sorted in ascending
    * order, meaning that GetPageSize(0) < GetPageSize(1) ... < GetPageSize(n).
+   * @ambicritical
    */
   virtual size_t GetPageSize(int index) = 0;
   
   /**
-   * Unmap a page of memory from this address space.
+   * Unmap a chunk of memory from this address space.
    * @noncritical
    */
-  virtual void Unmap(VirtAddr virt) = 0;
+  virtual void Unmap(VirtAddr virt, size_t pageSize, size_t pageCount) = 0;
   
   /**
    * Map a physical address somewhere into virtual memory and return its
@@ -49,7 +50,7 @@ public:
    * Map a physical address to a virtual address.
    * @noncritical
    */
-  virtual bool MapAt(VirtAddr virt, PhysAddr phys, size_t pageSize,
+  virtual void MapAt(VirtAddr virt, PhysAddr phys, size_t pageSize,
                      size_t pageCount, bool executable = true) = 0;
   
   /**
@@ -58,8 +59,9 @@ public:
    * between unmapped and reserved memory is that reserved memory will never
    * be returned by a different call to Reserve() or Map() until the reserved
    * memory is unmapped.
+   * @noncritical
    */
-  virtual VirtAddr Reserve(size_t pageSize, size_t size) = 0;
+  virtual VirtAddr Reserve(size_t pageSize, size_t pageCount) = 0;
   
 };
 

@@ -3,6 +3,7 @@
 
 #include <specific/types.hpp>
 #include <cstdint>
+#include <cstddef>
 
 namespace OS {
 
@@ -24,7 +25,7 @@ public:
    * This may return depth 3 with entry=0.
    * @ambicritical -> @critical -> @ambicritical
    */
-  int Walk(VirtAddr addr, uint64_t & entry);
+  int Walk(VirtAddr addr, uint64_t & entry, size_t * size);
   
   /**
    * Set a raw entry in the page table.

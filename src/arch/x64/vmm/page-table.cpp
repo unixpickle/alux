@@ -18,7 +18,7 @@ void PageTable::SetPML4(PhysAddr val) {
   pml4 = val;
 }
 
-int PageTable::Walk(VirtAddr addr, uint64_t & entry) {
+int PageTable::Walk(VirtAddr addr, uint64_t & entry, size_t * size) {
   int indexes[4] = {
     (int)((addr >> 39) & 0x1ff),
     (int)((addr >> 30) & 0x1ff),
@@ -36,8 +36,10 @@ int PageTable::Walk(VirtAddr addr, uint64_t & entry) {
   }
   if (scratch[indexes[depth]] & 0x80 || depth == 3) {
     entry = scratch[indexes[depth]];
+    if (size) *size = 0x1000L << (27 - 9 * depth);
     return depth;
   }
+  if (size) *size = 0x1000L << (27 - 9 * depth);
   return -1;
 }
 
@@ -46,7 +48,7 @@ bool PageTable::Set(VirtAddr addr,
                     uint64_t parentMask,
                     int theDepth) {
   assert(theDepth >= 0 && theDepth < 4);
-  assert(!(addr & (1L << (39 - 9 * theDepth)) - 1));
+  assert(!(addr & (0x1000L << (27 - 9 * theDepth)) - 1));
   int indexes[4] = {
     (int)((addr >> 39) & 0x1ff),
     (int)((addr >> 30) & 0x1ff),
@@ -104,7 +106,7 @@ bool PageTable::Unset(VirtAddr addr) {
     scratch.Reassign(tableAddresses[depth + 1]);
   }
   
-  if (addr & (1L << (39 - 9 * maxDepth)) - 1) {
+  if (addr & (0x1000L << (27 - 9 * maxDepth)) - 1) {
     // the address is not properly aligned to the page we found
     return false;
   }
