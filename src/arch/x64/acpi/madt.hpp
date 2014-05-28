@@ -82,11 +82,11 @@ public:
   
   bool SystemHas8259();
   int CountType(uint8_t type);
-  int CountIOAPICEntries();
-  int CountLAPICEntries(bool checkUsable);
+  int CountIOAPICs();
+  int CountLAPICs(bool checkUsable);
   
   ISO * LookupISO(uint8_t physIRQ);
-  IOAPIC * GetIOAPICWithBase(uint32_t base);
+  IOAPIC * LookupIOAPIC(uint32_t base);
 
 protected:
   EasyMap * map;

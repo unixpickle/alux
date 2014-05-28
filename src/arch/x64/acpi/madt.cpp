@@ -72,11 +72,11 @@ int MADT::CountType(uint8_t type) {
   return count;
 }
 
-int MADT::CountIOAPICEntries() {
+int MADT::CountIOAPICs() {
   return CountType(TypeIOAPIC);
 }
 
-int MADT::CountLAPICEntries(bool checkUsable) {
+int MADT::CountLAPICs(bool checkUsable) {
   if (!checkUsable) {
     return CountType(TypeLAPIC) + CountType(TypeX2APIC);
   } else {
@@ -110,7 +110,7 @@ MADT::ISO * MADT::LookupISO(uint8_t physIRQ) {
   return NULL;
 }
 
-MADT::IOAPIC * MADT::GetIOAPICWithBase(uint32_t base) {
+MADT::IOAPIC * MADT::LookupIOAPIC(uint32_t base) {
   size_t offset = 0;
   for (int i = 0; i < tableCount; i++) {
     if (GetData()[offset] == TypeIOAPIC) {
