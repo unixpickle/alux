@@ -1,7 +1,10 @@
 #include <arch/x64/acpi/sdt.hpp>
-#include <arch/x64/vmm/scope-scratch.hpp>
+#include <arch/x64/vmm/scope-scratch.hpp> // TODO: delete this
+#include <arch/general/failure.hpp>
 #include <memory/physcopy.hpp>
 #include <cstring>
+
+#include <iostream> // TODO: delete me
 
 namespace OS {
 
@@ -14,11 +17,13 @@ static uint8_t MemChecksum(uint8_t * ptr, int len);
 
 void SDT::Initialize() {
   RSDP * ptr = FindRSDP();
+  if (!ptr) {
+    Panic("OS::x64::SDT::Initialize() - failed to find RSDP");
+  }
   if (ptr->revision == 0) {
-    // create an RSDT
     globalSDT = new RSDT((PhysAddr)ptr->ptrRSDT);
   } else {
-    globalSDT = new XSDT((PhysAddr)ptr->ptrXSDT);
+    globalSDT = new XSDT(ptr->ptrXSDT);
   }
 }
 
@@ -26,7 +31,7 @@ SDT & SDT::GetGlobal() {
   return *globalSDT;
 }
 
-SDT::SDT(PhysAddr phys) {
+SDT::SDT(PhysAddr phys) {  
   // read the size field and then map that bugger
   uint32_t size;
   PhysCopy(&size, phys + 4, 4);
@@ -42,8 +47,9 @@ int SDT::FindTable(const char * name) {
   uint32_t num = *((uint32_t *)name);
   for (int i = 0; i < GetCount(); i++) {
     PhysAddr tableAddr = GetTable(i);
-    TypedScratch<uint32_t> scratch(tableAddr);
-    if (scratch[0] == num) {
+    uint32_t typeNum;
+    PhysCopy(&typeNum, tableAddr, 4);
+    if (typeNum == num) {
       return i;
     }
   }

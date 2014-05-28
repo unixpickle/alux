@@ -3,7 +3,7 @@
 
 #include <arch/x64/pmm/page-allocator.hpp>
 #include <arch/x64/vmm/page-table.hpp>
-#include <arch/x64/entry.hpp> // so I can make ::MbootEntry() a friend
+#include <arch/x64/init.hpp> // so I can make InitializeMemory() a friend
 #include <arch/general/address-space.hpp>
 #include <common>
 
@@ -31,7 +31,7 @@ public:
                      size_t pageCount, bool executable = true);
   virtual VirtAddr Reserve(size_t pageSize, size_t pageCount);
   
-  friend void ::MbootEntry(void *);
+  friend void InitializeMemory(void *);
   friend class PageTable;
   friend class Allocator;
   

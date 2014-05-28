@@ -1,7 +1,7 @@
 #ifndef __X64_MADT_HPP__
 #define __X64_MADT_HPP__
 
-#include <cstdint>
+#include <memory/easy-map.hpp>
 #include <common>
 
 namespace OS {
@@ -69,6 +69,9 @@ public:
   static const uint8_t TypeISO = 2;
   static const uint8_t TypeX2APIC = 9;
   
+  static void Initialize();
+  static MADT * GetGlobal();
+  
   MADT(PhysAddr phyPtr);
   ~MADT();
   
@@ -80,13 +83,17 @@ public:
   bool SystemHas8259();
   int CountType(uint8_t type);
   int CountIOAPICEntries();
+  int CountLAPICEntries(bool checkUsable);
   
   ISO * LookupISO(uint8_t physIRQ);
   IOAPIC * GetIOAPICWithBase(uint32_t base);
 
 protected:
-  MADTHeader header;
-  uint8_t * data;
+  EasyMap * map;
+  int tableCount;
+  
+  uint8_t * GetData();
+  size_t GetDataSize();
 };
 
 }

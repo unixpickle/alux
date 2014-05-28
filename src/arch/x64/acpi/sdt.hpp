@@ -33,9 +33,16 @@ public:
 
   SDT(PhysAddr phys);
   ~SDT();
-  virtual int GetCount() = 0;
-  virtual PhysAddr GetTable(int i) = 0;
-  int FindTable(const char * name); // -1 on not found
+  virtual int GetCount() = 0; // @noncritical
+  virtual PhysAddr GetTable(int i) = 0; // @noncritical
+  
+  /**
+   * Find a table with a given 4 letter name.
+   * @param A pointer to some 4-character name
+   * @return -1 on not found, otherwise an index.
+   * @noncritical
+   */
+  int FindTable(const char * name);
 };
 
 class RSDT : public SDT {
