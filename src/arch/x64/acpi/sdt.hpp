@@ -3,6 +3,7 @@
 
 #include <common>
 #include <cstdint>
+#include <memory/easy-map.hpp>
 
 namespace OS {
 
@@ -22,30 +23,31 @@ public:
 } OS_PACKED;
 
 class SDT {
+protected:
+  EasyMap * map;
+  size_t tableSize;
+  
 public:
   static void Initialize();
   static SDT & GetGlobal();
 
+  SDT(PhysAddr phys);
+  ~SDT();
   virtual int GetCount() = 0;
   virtual PhysAddr GetTable(int i) = 0;
+  int FindTable(const char * name); // -1 on not found
 };
 
 class RSDT : public SDT {
-private:
-  void * mappedAddr;
-
 public:
-  RSDT(PhysAddr phys);
+  RSDT(PhysAddr phys) : SDT(phys) {}
   virtual int GetCount();
   virtual PhysAddr GetTable(int i);
 };
 
 class XSDT : public SDT {
-private:
-  void * mappedAddr;
-
 public:
-  XSDT(PhysAddr phys);
+  XSDT(PhysAddr phys) : SDT(phys) {}
   virtual int GetCount();
   virtual PhysAddr GetTable(int i);
 };
@@ -55,4 +57,3 @@ public:
 }
 
 #endif
-
