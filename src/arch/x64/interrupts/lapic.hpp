@@ -10,22 +10,6 @@ namespace x64 {
 
 class LAPIC {
 public:
-  static const int RegApicId = 0x2;
-  static const int RegApicVer = 0x3;
-  static const int RegTaskPriority = 0x8;
-  static const int RegEOI = 0xb;
-  static const int RegSpurious = 0xf;
-  static const int RegESR = 0x28;
-  static const int RegICR = 0x30;
-  static const int RegLVTTimer = 0x32;
-  static const int RegLVTPerf = 0x34;
-  static const int RegLVTLint0 = 0x35;
-  static const int RegLVTLint1 = 0x36;
-  static const int RegLVTError = 0x37;
-  static const int RegTimerInitCount = 0x38;
-  static const int RegTimerCurrCount = 0x39;
-  static const int RegTimerDiv = 0x3e;
-  
   /**
    * During the boot process, this must only be called on one CPU at a time.
    * @critical
@@ -52,6 +36,24 @@ public:
 
   virtual uint64_t ReadReg(uint16_t reg) = 0; // @critical
   virtual void WriteReg(uint16_t reg, uint64_t value) = 0; // @critical
+  
+  enum Regs {
+    RegApicId = 0x2,
+    RegApicVer = 0x3,
+    RegTaskPriority = 0x8,
+    RegEOI = 0xb,
+    RegSpurious = 0xf,
+    RegESR = 0x28,
+    RegICR = 0x30,
+    RegLVTTimer = 0x32,
+    RegLVTPerf = 0x34,
+    RegLVTLint0 = 0x35,
+    RegLVTLint1 = 0x36,
+    RegLVTError = 0x37,
+    RegTimerInitCount = 0x38,
+    RegTimerCurrCount = 0x39,
+    RegTimerDiv = 0x3e
+  };
 };
 
 class XAPIC : public LAPIC {
