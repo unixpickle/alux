@@ -72,7 +72,7 @@ uint32_t IOAPIC::GetInterruptBase() {
   return madtInfo.interruptBase;
 }
 
-void IOAPIC::SetTable(uint8_t idx, const TableEntry & entry) {
+void IOAPIC::SetEntry(uint8_t idx, const Entry & entry) {
   const uint32_t * valPtr = (const uint32_t *)&entry;
   WriteReg(0x10 + (idx * 2), 0x10000); // mask the entry
   WriteReg(0x11 + (idx * 2), valPtr[1]);
@@ -80,7 +80,7 @@ void IOAPIC::SetTable(uint8_t idx, const TableEntry & entry) {
 }
 
 void IOAPIC::MapIRQ(uint8_t irq, uint8_t vector) {
-  TableEntry entry = {0};
+  Entry entry = {};
   entry.vector = vector;
 
   MADT::ISO * iso = MADT::GetGlobal()->LookupISO(irq);
@@ -88,9 +88,9 @@ void IOAPIC::MapIRQ(uint8_t irq, uint8_t vector) {
     // TODO: idk why i do & 0x3, i should check this out
     if (iso->flags & 0x3) entry.intpol = 1;
     if ((iso->flags >> 2) & 0x3) entry.triggermode = 1;
-    SetTable(iso->interrupt, entry);
+    SetEntry(iso->interrupt, entry);
   } else {
-    SetTable(irq, entry);
+    SetEntry(irq, entry);
   }
 }
 
