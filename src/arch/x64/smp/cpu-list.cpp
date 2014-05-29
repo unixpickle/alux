@@ -1,5 +1,6 @@
 #include <arch/x64/smp/cpu-list.hpp>
-#include <arch/x64/smp/cpu.hpp>
+#include <arch/general/failure.hpp>
+#include <cassert>
 #include <new>
 
 namespace OS {

@@ -1,7 +1,7 @@
 #ifndef __X64_CPU_LIST_HPP__
 #define __X64_CPU_LIST_HPP__
 
-#include <cstdint>
+#include <arch/x64/smp/cpu.hpp>
 
 namespace OS {
 

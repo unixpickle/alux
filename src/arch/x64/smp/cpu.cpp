@@ -1,4 +1,4 @@
-#include <arch/x64/cpu.hpp>
+#include <arch/x64/smp/cpu.hpp>
 
 namespace OS {
 
