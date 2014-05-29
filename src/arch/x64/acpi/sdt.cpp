@@ -36,7 +36,7 @@ SDT::SDT(PhysAddr phys) {
   uint32_t size;
   PhysCopy(&size, phys + 4, 4);
   tableSize = size;
-  map = new EasyMap(phys, size, false);
+  map = new EasyMap(phys, size);
 }
 
 SDT::~SDT() {

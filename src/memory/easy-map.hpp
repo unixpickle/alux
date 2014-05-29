@@ -24,7 +24,7 @@ public:
   /**
    * @noncritical
    */
-  EasyMap(PhysAddr start, size_t size, bool exec = true);
+  EasyMap(PhysAddr start, size_t size, bool exec = false);
   
   /**
    * @noncritical

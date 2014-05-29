@@ -5,7 +5,7 @@
 namespace OS {
 
 void PhysCopy(void * dest, PhysAddr source, size_t size) {
-  EasyMap map(source, size, false);
+  EasyMap map(source, size);
   memcpy(dest, (uint8_t *)map.GetStart(), size);
 }
 

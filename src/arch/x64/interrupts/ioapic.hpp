@@ -16,7 +16,6 @@ public:
   
   static void Initialize();
   static IOAPIC & GetBase();
-  
   static void StartUsing();
   
   IOAPIC(); // do not create an IOAPIC this way

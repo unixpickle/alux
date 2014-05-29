@@ -23,7 +23,7 @@ MADT * MADT::GetGlobal() {
 MADT::MADT(PhysAddr phyPtr) : tableCount(0) {
   uint32_t size;
   PhysCopy(&size, phyPtr + 4, 4);
-  map = new EasyMap(phyPtr, size, false);
+  map = new EasyMap(phyPtr, size);
   
   size_t offset = 1;
   while (offset < GetDataSize()) {
