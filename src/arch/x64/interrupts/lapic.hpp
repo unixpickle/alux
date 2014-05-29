@@ -14,8 +14,6 @@ public:
   static const int RegApicVer = 0x3;
   static const int RegTaskPriority = 0x8;
   static const int RegEOI = 0xb;
-  static const int RegLDR = 0xd;
-  static const int RegDDR = 0xe;
   static const int RegSpurious = 0xf;
   static const int RegESR = 0x28;
   static const int RegICR = 0x30;
@@ -27,14 +25,6 @@ public:
   static const int RegTimerInitCount = 0x38;
   static const int RegTimerCurrCount = 0x39;
   static const int RegTimerDiv = 0x3e;
-
-  static const int SettingLast = 0x38f;
-  static const int SettingSWEnable = 0x100;
-  static const int SettingCpuFocus = 0x200;
-  static const int SettingDisable = 0x1000;
-  static const int SettingNmi = (1 << 10);
-  static const int SettingTimerPeriodic = 0x20000;
-  static const int SettingTimerBaseDiv = (1 << 20);
   
   /**
    * During the boot process, this must only be called on one CPU at a time.
