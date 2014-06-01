@@ -1,4 +1,5 @@
 #include <arch/x64/smp/cpu-list.hpp>
+#include <arch/x64/segments/gdt.hpp>
 #include <arch/general/failure.hpp>
 #include <utilities/critical.hpp>
 #include <cassert>
@@ -41,10 +42,11 @@ CPU & CPUList::operator[](int idx) {
   return *((CPU *)buffer + idx);
 }
 
-CPU * CPUList::GetCurrent() {
+CPU & CPUList::GetCurrent() {
   AssertCritical();
-  // TODO: here, use the GDT to get the current TSS index
-  return NULL;
+  int index = GDT::GetGlobal().GetTSSIndex();
+  assert(index >= 0 && index < count);
+  return (*this)[index];
 }
 
 }

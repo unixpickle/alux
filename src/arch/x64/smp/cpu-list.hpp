@@ -24,7 +24,7 @@ public:
   CPU & AddEntry(uint32_t apicId); // @ambicritical, unsynchronized
 
   CPU & operator[](int idx); // @ambicritical, unsynchronized
-  CPU * GetCurrent(); // @critical
+  CPU & GetCurrent(); // @critical
 };
 
 }

@@ -11,6 +11,7 @@ void InitializeACPI();
 void InitializeAPIC();
 void InitializeTime();
 void InitializeSMP();
+void InitializeTimers();
 
 }
 

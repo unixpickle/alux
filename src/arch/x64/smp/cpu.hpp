@@ -13,6 +13,9 @@ public:
   uint16_t tssSelector;
   TSS * tss;
   void * dedicatedStack; // top of the stack, not bottom of it
+  struct {
+    uint64_t lapic;
+  } frequencies;
   
   CPU(uint32_t apicId);
     

@@ -15,6 +15,7 @@
 #include <arch/x64/time/clock.hpp>
 #include <arch/x64/time/pit.hpp>
 #include <arch/x64/time/hpet.hpp>
+#include <arch/x64/time/lapic.hpp>
 #include <arch/x64/general/critical.hpp>
 #include <arch/general/critical.hpp>
 #include <iostream>
@@ -130,6 +131,14 @@ void InitializeSMP() {
   __asm__ volatile("ltr %%ax" : : "a" (sel));
   
   StartProcessors();
+}
+
+void InitializeTimers() {
+  cout << "Initializing CPU timers..." << endl;
+  
+  InitializeLapicTimers();
+  
+  // TODO: here is where I might setup invariant TSC for a faster clock
 }
 
 }

@@ -132,9 +132,12 @@ static void CPUEntrance() {
   cpu.tssSelector = sel;
   cpu.tss = firstTSS;
   
-  __asm__ volatile("mov %0, %%rsp\n"
-                   "call *%1"
-                   : : "r" (cpuStack), "r" (CPUMain));
+  gdt.Set();
+  
+  __asm__ volatile("ltr %%ax\n"
+                   "mov %%rbx, %%rsp\n"
+                   "call *%%rcx"
+                   : : "a" (sel), "b" (cpuStack), "c" (CPUMain));
 }
 
 static void CPUMain() {
