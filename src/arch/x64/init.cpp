@@ -14,7 +14,7 @@
 #include <arch/x64/segments/gdt.hpp>
 #include <arch/x64/time/clock.hpp>
 #include <arch/x64/time/pit.hpp>
-#include <arch/x64/critical.hpp>
+#include <arch/x64/general/critical.hpp>
 #include <arch/general/critical.hpp>
 #include <iostream>
 #include <cassert>
