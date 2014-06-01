@@ -3,6 +3,7 @@
 #include <arch/x64/interrupts/lapic.hpp>
 #include <arch/x64/interrupts/irt.hpp>
 #include <arch/x64/interrupts/vectors.hpp>
+#include <arch/x64/common.hpp>
 #include <new>
 
 namespace OS {
@@ -38,6 +39,10 @@ PIT::PIT() : divide(0), counter(0) { }
 void PIT::SetDivisor(uint16_t aDiv) {
   divide = aDiv;
   counter = 0;
+  
+  OutB(0x43, 0x34); // channel 0, lobyte/hibyte, rate generator
+  OutB(0x40, (uint8_t)(aDiv & 0xff));
+  OutB(0x40, (uint8_t)((aDiv >> 8) & 0xff));
 }
 
 uint64_t PIT::GetTime() {

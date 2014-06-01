@@ -115,6 +115,7 @@ void InitializeSMP() {
   
   // setup PIT and then fire up CPUs
   PIT::Initialize();
+  PIT::GetGlobal().SetDivisor(1193);
   SetCurrentClock(&PIT::GetGlobal());
   PIT::Start();
   StartProcessors();

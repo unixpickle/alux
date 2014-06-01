@@ -1,7 +1,8 @@
-#include <cstdint>
-#include <utilities/lock.hpp>
 #include <arch/x64/common.hpp>
+#include <utilities/lock.hpp>
+#include <utilities/critical.hpp>
 #include <common>
+#include <cstdint>
 
 namespace OS {
 
@@ -20,6 +21,7 @@ void InitializeConsole() {
 }
 
 void PrintString(const char * string) {
+  AssertNoncritical();
   ScopeLock scope(&mainLock);
   while (*string) {
     unsigned char theChar = *(string++);
@@ -63,6 +65,7 @@ void PrintString(const char * string) {
 }
 
 void SetColor(int _color) {
+  AssertNoncritical();
   ScopeLock scope(&mainLock);
   color = _color;
 }

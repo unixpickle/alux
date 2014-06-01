@@ -1,6 +1,7 @@
 #include <arch/x64/interrupts/irt-handlers.hpp>
 #include <arch/x64/interrupts/irt.hpp>
 #include <arch/x64/common.hpp>
+#include <arch/x64/critical.hpp>
 #include <arch/general/failure.hpp>
 #include <iostream>
 
@@ -12,6 +13,7 @@ void InterruptCoded(void * caller, uint64_t vector, uint64_t code) {
 
   if (vector >= 0xf0) return;
   
+  OS::SetIgnoreCriticality(true);
   OS::cout << "OS::x64::InterruptCoded() - caller=" << (uintptr_t)caller
     << " vector=" << vector << " code=" << code << OS::endl;
   OS::Panic("nothing to do in interrupt handler");
@@ -23,6 +25,7 @@ void InterruptRegular(void * caller, uint64_t vector) {
   
   if (vector >= 0xf0) return;
   
+  OS::SetIgnoreCriticality(true);
   OS::cout << "OS::x64::InterruptRegular() - caller=" << (uintptr_t)caller
     << " vector=" << vector << OS::endl;
   OS::Panic("nothing to do in interrupt handler");

@@ -2,7 +2,9 @@
 #include <arch/x64/smp/startup-code.hpp>
 #include <arch/x64/interrupts/ioapic.hpp>
 #include <arch/x64/interrupts/lapic.hpp>
+#include <arch/x64/interrupts/idt.hpp>
 #include <arch/x64/vmm/global-map.hpp>
+#include <arch/x64/segments/gdt.hpp>
 #include <arch/general/clock.hpp>
 #include <arch/general/failure.hpp>
 #include <utilities/critical.hpp>
@@ -22,6 +24,7 @@ static uint64_t curCpuLock OS_ALIGNED(8) = 0;
 static void IterateApicIds(void (* func)(uint32_t));
 static void StartCPU(uint32_t apicId);
 static void CPUEntrance();
+static void CPUMain();
 
 void StartProcessors() {
   cout << "Starting processors..." << endl;
@@ -55,9 +58,12 @@ static void IterateApicIds(void (* func)(uint32_t)) {
 }
 
 static void StartCPU(uint32_t apicId) {
-  SetCritical(true);
-  if (apicId == LAPIC::GetCurrent().GetId()) return;
-  SetCritical(false);
+  {
+    ScopeCritical scope;
+    if (apicId == LAPIC::GetCurrent().GetId()) return;
+  }
+  
+  cout << "Starting CPU " << apicId << " ... ";
   
   // copy the two pointers to the startup stack
   code->UpdateStack(GlobalMap::GetGlobal().GetPML4(),
@@ -101,7 +107,41 @@ static void StartCPU(uint32_t apicId) {
 }
 
 static void CPUEntrance() {
+  IDT::GetGlobal().Load();
+  SetCritical(false);
+  anlock_lock(&curCpuLock);
+  
+  // configure LAPIC and get ID
+  SetCritical(true);
+  LAPIC & lapic = LAPIC::GetCurrent();
+  lapic.SetDefaults();
+  lapic.Enable();
+  uint32_t lapicId = lapic.GetId();
+  SetCritical(false);
+  
+  // setup the new GDT entry
+  GDT & gdt = GDT::GetGlobal();
+  TSS * firstTSS = new TSS();
+  uint16_t sel = gdt.AddTSS(firstTSS);
+  
+  // initialize this CPU entry
+  void * cpuStack = (void *)(new uint8_t[0x4000]);
+  firstTSS->rsp[0] = (uint64_t)cpuStack;
+  CPU & cpu = CPUList::GetGlobal().AddEntry(lapicId);
+  cpu.dedicatedStack = cpuStack;
+  cpu.tssSelector = sel;
+  cpu.tss = firstTSS;
+  
+  __asm__ volatile("mov %0, %%rsp\n"
+                   "call *%1"
+                   : : "r" (cpuStack), "r" (CPUMain));
+}
+
+static void CPUMain() {
   cout << "[OK]" << endl;
+  
+  anlock_unlock(&curCpuLock);
+  
   while (1) {
     __asm__("hlt");
   }

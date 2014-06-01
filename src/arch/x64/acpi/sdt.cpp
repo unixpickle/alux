@@ -1,10 +1,7 @@
 #include <arch/x64/acpi/sdt.hpp>
-#include <arch/x64/vmm/scope-scratch.hpp> // TODO: delete this
 #include <arch/general/failure.hpp>
 #include <memory/physcopy.hpp>
 #include <cstring>
-
-#include <iostream> // TODO: delete me
 
 namespace OS {
 
