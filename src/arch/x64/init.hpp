@@ -9,6 +9,7 @@ void InitializeMemory(void * mbootPtr);
 void InitializeInterrupts();
 void InitializeACPI();
 void InitializeAPIC();
+void InitializeTime();
 void InitializeSMP();
 
 }

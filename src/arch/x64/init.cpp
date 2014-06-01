@@ -14,6 +14,7 @@
 #include <arch/x64/segments/gdt.hpp>
 #include <arch/x64/time/clock.hpp>
 #include <arch/x64/time/pit.hpp>
+#include <arch/x64/time/hpet.hpp>
 #include <arch/x64/general/critical.hpp>
 #include <arch/general/critical.hpp>
 #include <iostream>
@@ -83,6 +84,21 @@ void InitializeAPIC() {
   SetCritical(false);
 }
 
+void InitializeTime() {
+  cout << "Initializing the time subsystem..." << endl;
+  
+  if (HPET::IsSupported()) {
+    HPET::Initialize();
+    SetCurrentClock(&HPET::GetGlobal());
+    HPET::GetGlobal().Start();
+  } else {
+    PIT::Initialize();
+    PIT::GetGlobal().SetDivisor(1193);
+    SetCurrentClock(&PIT::GetGlobal());
+    PIT::Start();
+  }
+}
+
 void InitializeSMP() {
   cout << "Initializing SMP subsystem..." << endl;
   
@@ -113,11 +129,6 @@ void InitializeSMP() {
   gdt.Set();
   __asm__ volatile("ltr %%ax" : : "a" (sel));
   
-  // setup PIT and then fire up CPUs
-  PIT::Initialize();
-  PIT::GetGlobal().SetDivisor(1193);
-  SetCurrentClock(&PIT::GetGlobal());
-  PIT::Start();
   StartProcessors();
 }
 
