@@ -114,8 +114,8 @@ static void CPUEntrance() {
   // configure LAPIC and get ID
   SetCritical(true);
   LAPIC & lapic = LAPIC::GetCurrent();
-  lapic.SetDefaults();
   lapic.Enable();
+  lapic.SetDefaults();
   uint32_t lapicId = lapic.GetId();
   SetCritical(false);
   

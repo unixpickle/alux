@@ -79,8 +79,8 @@ void InitializeAPIC() {
   IOAPIC::StartUsing();
   
   LAPIC & lapic = LAPIC::GetCurrent();
-  lapic.SetDefaults();
   lapic.Enable();
+  lapic.SetDefaults();
   
   SetCritical(false);
 }
