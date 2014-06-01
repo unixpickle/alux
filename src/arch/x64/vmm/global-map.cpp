@@ -35,6 +35,10 @@ PhysAddr GlobalMap::GetPDPT() {
   return pdpt;
 }
 
+PhysAddr GlobalMap::GetPML4() {
+  return table.GetPML4();
+}
+
 void GlobalMap::Set() {
   __asm__("mov %0, %%cr3" : : "r" (table.GetPML4()) : "memory");
 }

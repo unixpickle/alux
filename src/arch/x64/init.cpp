@@ -5,11 +5,17 @@
 #include <arch/x64/vmm/kernel-layout.hpp>
 #include <arch/x64/interrupts/irt.hpp>
 #include <arch/x64/interrupts/idt.hpp>
+#include <arch/x64/interrupts/lapic.hpp>
+#include <arch/x64/interrupts/ioapic.hpp>
 #include <arch/x64/acpi/sdt.hpp>
 #include <arch/x64/acpi/madt.hpp>
+#include <arch/x64/smp/init.hpp>
+#include <arch/x64/smp/cpu-list.hpp>
+#include <arch/x64/segments/gdt.hpp>
 #include <arch/x64/critical.hpp>
 #include <arch/general/critical.hpp>
 #include <iostream>
+#include <cassert>
 
 namespace OS {
 
@@ -55,11 +61,52 @@ void InitializeACPI() {
 }
 
 void InitializeAPIC() {
+  cout << "Initialize I/O APIC and Local APIC..." << endl;
   
+  IOAPIC::Initialize();
+  LAPIC::Initialize();
+  
+  SetCritical(true);
+  
+  IOAPIC & base = IOAPIC::GetBase();
+  for (uint32_t i = 0; i < base.GetPinCount(); i++) {
+    base.MaskPin((int)i);
+  }
+  IOAPIC::StartUsing();
+  
+  LAPIC & lapic = LAPIC::GetCurrent();
+  lapic.SetDefaults();
+  lapic.Enable();
+  
+  SetCritical(false);
 }
 
 void InitializeSMP() {
+  cout << "Initializing SMP subsystem..." << endl;
   
+  MADT * madt = MADT::GetGlobal();
+  assert(madt != NULL);
+  CPUList::Initialize(madt->CountLAPICs(true));
+  
+  // initialize GDT and TSS
+  GDT::Initialize();
+  GDT & gdt = GDT::GetGlobal();
+  TSS * firstTSS = new TSS();
+  uint16_t sel = gdt.AddTSS(firstTSS);
+  
+  // initialize this CPU entry
+  void * cpuStack = (void *)(new uint8_t[0x4000]);
+  firstTSS->rsp[0] = (uint64_t)cpuStack;
+  CPU & cpu = CPUList::GetGlobal().AddEntry(LAPIC::GetCurrent().GetId());
+  cpu.dedicatedStack = cpuStack;
+  cpu.tssSelector = sel;
+  cpu.tss = firstTSS;
+  
+  // set the current GDT and Task Register
+  gdt.Set();
+  __asm__ volatile("ltr %%ax" : : "a" (sel));
+  
+  StartProcessors();
 }
 
 }

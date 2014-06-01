@@ -14,25 +14,25 @@ public:
   
   static const int RegVersion = 0x1;
   
-  static void Initialize();
-  static IOAPIC & GetBase();
-  static void StartUsing();
+  static void Initialize(); // @noncritical
+  static IOAPIC & GetBase(); // @ambicritical
+  static void StartUsing(); // @critical
   
   IOAPIC(); // do not create an IOAPIC this way
-  IOAPIC(MADT::IOAPIC * info);
-  ~IOAPIC();
+  IOAPIC(MADT::IOAPIC * info); // @noncritical
+  ~IOAPIC(); // @noncritical
   
-  void WriteReg(uint8_t reg, uint32_t val);
-  uint32_t ReadReg(uint8_t reg);
+  void WriteReg(uint8_t reg, uint32_t val); // @critical
+  uint32_t ReadReg(uint8_t reg); // @critical
 
-  uint32_t GetVersion();
-  uint32_t GetPinCount();
-  uint32_t GetInterruptBase();
+  uint32_t GetVersion(); // @critical
+  uint32_t GetPinCount(); // @critical
+  uint32_t GetInterruptBase(); // @critical
 
-  void SetEntry(uint8_t idx, const Entry & entry);
-  void MapIRQ(uint8_t irq, uint8_t vector);
-  void MaskIRQ(uint8_t irq);
-  void MaskPin(uint8_t irq);
+  void SetEntry(uint8_t idx, const Entry & entry); // @critical
+  void MapIRQ(uint8_t irq, uint8_t vector); // @critical
+  void MaskIRQ(uint8_t irq); // @critical
+  void MaskPin(uint8_t irq); // @critical
   
   class Entry {
   public:

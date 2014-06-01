@@ -2,6 +2,7 @@
 #define __X64_CPU_HPP__
 
 #include <cstdint>
+#include <arch/x64/segments/tss.hpp>
 
 namespace OS {
 
@@ -9,7 +10,8 @@ namespace x64 {
 
 class CPU {
 public:
-  uint16_t tss;
+  uint16_t tssSelector;
+  TSS * tss;
   void * dedicatedStack; // top of the stack, not bottom of it
   
   CPU(uint32_t apicId);

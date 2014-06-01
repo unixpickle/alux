@@ -19,6 +19,7 @@ public:
   GlobalMap();
   
   PhysAddr GetPDPT();
+  PhysAddr GetPML4();
   
   virtual void Set();
   virtual int GetPageSizeCount();
