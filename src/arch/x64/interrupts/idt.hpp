@@ -18,6 +18,7 @@ public:
   static IDT & GetGlobal();
   
   void SetEntry(int idx, void * fn, uint8_t flags);
+  void SetIST(int idx, uint8_t ist);
   void Load();
 };
 

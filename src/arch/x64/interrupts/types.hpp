@@ -37,16 +37,14 @@ class IdtEntry {
 public:
   uint16_t lowOffset;
   uint16_t codeSegment;
-  uint8_t reserved1;
+  uint8_t ist : 3;
+  uint8_t reserved1 : 5;
   uint8_t flags;
   uint16_t midOffset;
   uint32_t highOffset;
   uint32_t reserved2;
   
-  IdtEntry() {
-    codeSegment = 8;
-    reserved1 = 0;
-    reserved2 = 0;
+  IdtEntry() : codeSegment(8), ist(0), reserved1(0), reserved2(0) {
   }
   
   void SetOffset(uint64_t exc) {

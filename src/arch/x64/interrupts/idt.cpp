@@ -23,6 +23,10 @@ void IDT::SetEntry(int idx, void * fn, uint8_t flags) {
   entries[idx].flags = flags;
 }
 
+void IDT::SetIST(int idx, uint8_t ist) {
+  entries[idx].ist = ist;
+}
+
 void IDT::Load() {
   idtPtr.limit = 0xfff; // TODO: see if this should be 0x1000
   idtPtr.virtualAddress = (uint64_t)entries;
