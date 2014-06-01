@@ -7,10 +7,6 @@ namespace OS {
 
 namespace x64 {
 
-X2APIC::X2APIC() {
-  Panic("X2APIC::X2APIC() - for the compiler only");
-}
-
 uint64_t X2APIC::ReadReg(uint16_t reg) {
   AssertCritical();
   return ReadMSR((uint32_t)reg + 0x800);

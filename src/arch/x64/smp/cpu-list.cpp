@@ -1,5 +1,6 @@
 #include <arch/x64/smp/cpu-list.hpp>
 #include <arch/general/failure.hpp>
+#include <utilities/critical.hpp>
 #include <cassert>
 #include <new>
 
@@ -41,6 +42,7 @@ CPU & CPUList::operator[](int idx) {
 }
 
 CPU * CPUList::GetCurrent() {
+  AssertCritical();
   // TODO: here, use the GDT to get the current TSS index
   return NULL;
 }

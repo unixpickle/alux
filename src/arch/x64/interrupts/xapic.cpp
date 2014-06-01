@@ -12,7 +12,6 @@ XAPIC::XAPIC() {
 }
 
 XAPIC::XAPIC(uint64_t _base) : base(_base) {
-  AssertCritical();
   map = new EasyMap(base, 0x1000);
 }
 

@@ -4,6 +4,7 @@
 #include <arch/x64/interrupts/lapic.hpp>
 #include <arch/x64/vmm/global-map.hpp>
 #include <arch/general/failure.hpp>
+#include <utilities/critical.hpp>
 #include <iostream>
 
 namespace OS {
@@ -17,6 +18,8 @@ static void StartCPU(uint32_t apicId);
 static void CPUEntrance();
 
 void StartProcessors() {
+  cout << "Starting processors..." << endl;
+  
   size_t codeSize;
   StartupCode _code;
   code = &_code;
@@ -27,7 +30,6 @@ void StartProcessors() {
 }
 
 static void IterateApicIds(void (* func)(uint32_t)) {
-  LAPIC & lapic = LAPIC::GetCurrent();
   MADT * madt = MADT::GetGlobal();
   
   for (int i = 0; i < madt->GetTableCount(); i++) {
@@ -47,7 +49,10 @@ static void IterateApicIds(void (* func)(uint32_t)) {
 }
 
 static void StartCPU(uint32_t apicId) {
-  if (apicId == LAPIC::GetCurrent().GetId()) return;
+  {
+    ScopeCritical critical;
+    if (apicId == LAPIC::GetCurrent().GetId()) return;
+  }
   
   // copy the two pointers to the startup stack
   code->UpdateStack(GlobalMap::GetGlobal().GetPML4(),

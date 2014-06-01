@@ -14,17 +14,17 @@ private:
   uint8_t * buffer;
 
 public:
-  static void Initialize(int capacity);
-  static CPUList & GetGlobal();
+  static void Initialize(int capacity); // @noncritical
+  static CPUList & GetGlobal(); // @noncritical
 
   CPUList(); // do not initialize CPUList yourself
   CPUList(int capacity); // do not initialize CPUList yourself
 
-  int GetCount();
-  CPU & AddEntry(uint32_t apicId);
+  int GetCount(); // @ambicritical, unsynchronized
+  CPU & AddEntry(uint32_t apicId); // @ambicritical, unsynchronized
 
-  CPU & operator[](int idx);
-  CPU * GetCurrent();
+  CPU & operator[](int idx); // @ambicritical, unsynchronized
+  CPU * GetCurrent(); // @critical
 };
 
 }

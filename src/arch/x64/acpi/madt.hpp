@@ -20,24 +20,24 @@ public:
   static const uint8_t TypeISO = 2;
   static const uint8_t TypeX2APIC = 9;
   
-  static void Initialize();
-  static MADT * GetGlobal();
+  static void Initialize(); // @noncritical
+  static MADT * GetGlobal(); // @ambicritical
   
-  MADT(PhysAddr phyPtr);
-  ~MADT();
+  MADT(PhysAddr phyPtr); // @noncritical
+  ~MADT(); // @noncritical
   
-  const Header & GetHeader();
+  const Header & GetHeader(); // @ambicritical
   
-  int GetTableCount();
-  uint8_t * GetTable(int i);
+  int GetTableCount(); // @ambicritical
+  uint8_t * GetTable(int i); // @ambicritical
   
-  bool SystemHas8259();
-  int CountType(uint8_t type);
-  int CountIOAPICs();
-  int CountLAPICs(bool checkUsable);
+  bool SystemHas8259(); // @ambicritical
+  int CountType(uint8_t type); // @ambicritical
+  int CountIOAPICs(); // @ambicritical
+  int CountLAPICs(bool checkUsable); // @ambicritical
   
-  ISO * LookupISO(uint8_t physIRQ);
-  IOAPIC * LookupIOAPIC(uint32_t base);
+  ISO * LookupISO(uint8_t physIRQ); // @ambicritical
+  IOAPIC * LookupIOAPIC(uint32_t base); // @ambicritical
 
   class Header {
   public:

@@ -28,19 +28,19 @@ protected:
   size_t tableSize;
   
 public:
-  static void Initialize();
-  static SDT & GetGlobal();
+  static void Initialize(); // @noncritical
+  static SDT & GetGlobal(); // @ambicritical
 
   SDT(PhysAddr phys);
   ~SDT();
-  virtual int GetCount() = 0; // @noncritical
-  virtual PhysAddr GetTable(int i) = 0; // @noncritical
+  virtual int GetCount() = 0; // @ambicritical
+  virtual PhysAddr GetTable(int i) = 0; // @ambicritical
   
   /**
    * Find a table with a given 4 letter name.
    * @param A pointer to some 4-character name
    * @return -1 on not found, otherwise an index.
-   * @noncritical
+   * @ambicritical
    */
   int FindTable(const char * name);
 };

@@ -97,7 +97,12 @@ void InitializeSMP() {
   // initialize this CPU entry
   void * cpuStack = (void *)(new uint8_t[0x4000]);
   firstTSS->rsp[0] = (uint64_t)cpuStack;
-  CPU & cpu = CPUList::GetGlobal().AddEntry(LAPIC::GetCurrent().GetId());
+  
+  SetCritical(true);
+  uint32_t lapicId = LAPIC::GetCurrent().GetId();
+  SetCritical(false);
+  
+  CPU & cpu = CPUList::GetGlobal().AddEntry(lapicId);
   cpu.dedicatedStack = cpuStack;
   cpu.tssSelector = sel;
   cpu.tss = firstTSS;

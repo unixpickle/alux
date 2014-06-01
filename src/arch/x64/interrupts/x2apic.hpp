@@ -9,7 +9,6 @@ namespace x64 {
 
 class X2APIC : public LAPIC {
 public:
-  X2APIC(); // do not call this
   virtual uint64_t ReadReg(uint16_t reg);
   virtual void WriteReg(uint16_t reg, uint64_t value);
   virtual void Enable();
