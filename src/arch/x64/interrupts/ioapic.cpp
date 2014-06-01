@@ -80,7 +80,8 @@ void IOAPIC::SetEntry(uint8_t idx, const Entry & entry) {
 }
 
 void IOAPIC::MapIRQ(uint8_t irq, uint8_t vector) {
-  Entry entry = {};
+  Entry entry;
+  bzero(&entry, sizeof(entry));
   entry.vector = vector;
 
   MADT::ISO * iso = MADT::GetGlobal()->LookupISO(irq);
