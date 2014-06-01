@@ -12,6 +12,8 @@
 #include <arch/x64/smp/init.hpp>
 #include <arch/x64/smp/cpu-list.hpp>
 #include <arch/x64/segments/gdt.hpp>
+#include <arch/x64/time/clock.hpp>
+#include <arch/x64/time/pit.hpp>
 #include <arch/x64/critical.hpp>
 #include <arch/general/critical.hpp>
 #include <iostream>
@@ -111,6 +113,10 @@ void InitializeSMP() {
   gdt.Set();
   __asm__ volatile("ltr %%ax" : : "a" (sel));
   
+  // setup PIT and then fire up CPUs
+  PIT::Initialize();
+  SetCurrentClock(&PIT::GetGlobal());
+  PIT::Start();
   StartProcessors();
 }
 

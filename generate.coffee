@@ -85,7 +85,7 @@ main = ->
     console.error 'Unknown architecture: ' + arch
     process.exit 1
   
-  mainSources = ['stdlib', 'utilities', 'memory']
+  mainSources = ['stdlib', 'utilities', 'memory', 'arch/general']
   deps = ['analloc2/src', 'anlock/src']
   finder = new SourceFinder()
   for source in mainSources

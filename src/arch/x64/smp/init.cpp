@@ -3,15 +3,21 @@
 #include <arch/x64/interrupts/ioapic.hpp>
 #include <arch/x64/interrupts/lapic.hpp>
 #include <arch/x64/vmm/global-map.hpp>
+#include <arch/general/clock.hpp>
 #include <arch/general/failure.hpp>
 #include <utilities/critical.hpp>
 #include <iostream>
+
+extern "C" {
+#include <anlock.h>
+}
 
 namespace OS {
 
 namespace x64 {
 
 static StartupCode * code;
+static uint64_t curCpuLock OS_ALIGNED(8) = 0;
   
 static void IterateApicIds(void (* func)(uint32_t));
 static void StartCPU(uint32_t apicId);
@@ -49,21 +55,56 @@ static void IterateApicIds(void (* func)(uint32_t)) {
 }
 
 static void StartCPU(uint32_t apicId) {
-  {
-    ScopeCritical critical;
-    if (apicId == LAPIC::GetCurrent().GetId()) return;
-  }
+  SetCritical(true);
+  if (apicId == LAPIC::GetCurrent().GetId()) return;
+  SetCritical(false);
   
   // copy the two pointers to the startup stack
   code->UpdateStack(GlobalMap::GetGlobal().GetPML4(),
                     (uint64_t)CPUEntrance);
 
-  cout << "StartCPU(" << apicId << ")" << endl;
-  Panic("StartCPU - NYI");
+  // use the initial CPU count to tell if it's started later on
+  int cpuCount = CPUList::GetGlobal().GetCount();
+
+  // send the INIT IPI
+  SetCritical(true);
+  LAPIC & lapic = LAPIC::GetCurrent();
+  lapic.ClearErrors();
+  lapic.SendIPI(apicId, 0, 5, 1, 1);
+  SetCritical(false);
+  
+  Clock::GetGlobal().Sleep(1);
+  
+  SetCritical(true);
+  lapic.SendIPI(apicId, 0, 5, 0, 1);
+  SetCritical(false);
+  
+  Clock::GetGlobal().Sleep(1);
+
+  // send STARTUP IPI (and resend if needed, as it is on some AMD systems)
+  for (int j = 0; j < 2; j++) {
+    SetCritical(true);
+    lapic.ClearErrors();
+    lapic.SendIPI(apicId, code->GetStartupVector(), 6, 1, 0);
+    SetCritical(false);
+
+    // wait a maximum of 200ms before sending another IPI or failing
+    for (int i = 0; i < 20; i++) {
+      Clock::GetGlobal().MicroSleep(10000);
+      anlock_lock(&curCpuLock);
+      int newCount = CPUList::GetGlobal().GetCount();
+      anlock_unlock(&curCpuLock);
+      if (newCount != cpuCount) return;
+    }
+  }
+  cerr << "[FAIL]" << endl;
 }
 
 static void CPUEntrance() {
-  
+  cout << "[OK]" << endl;
+  while (1) {
+    __asm__("hlt");
+  }
 }
 
 }

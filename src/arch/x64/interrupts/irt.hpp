@@ -14,13 +14,13 @@ class IRT {
 public:
   typedef void (* Routine)();
   
-  static void Initialize();
-  static IRT & GetGlobal();
+  static void Initialize(); // @noncritical
+  static IRT & GetGlobal(); // @ambicritical
   
   IRT();
   
-  Routine & operator[](uint8_t idx);
-  void Unset(uint8_t idx);
+  Routine & operator[](uint8_t idx); // @ambicritical, unsyrchronized
+  void Unset(uint8_t idx); // @ambicritical, unsyrchronized
 
 protected:
   Routine * routines;

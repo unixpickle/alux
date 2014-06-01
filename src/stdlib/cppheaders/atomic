@@ -6,7 +6,7 @@
 namespace OS {
 
 template <class T>
-class Atomic<T> {
+class Atomic {
 protected:
   T value OS_ALIGNED(8);
   
@@ -20,12 +20,12 @@ public:
   }
   
   Atomic<T> & operator=(const Atomic<T> & a) {
-    value = a.value;
+    __atomic_store(&value, &a.value, __ATOMIC_SEQ_CST);
     return *this;
   }
   
   Atomic<T> & operator=(T v) {
-    value = v;
+    __atomic_store_n(&value, v, __ATOMIC_SEQ_CST);
     return *this;
   }
 
@@ -67,8 +67,10 @@ public:
     return Atomic<T>(__sync_fetch_and_add(&value, 1));
   }
   
-  T GetValue() const {
-    return value;
+  T GetValue() {
+    T res;
+    __atomic_store(&res, &value, __ATOMIC_SEQ_CST);
+    return res;
   }
 };
 
