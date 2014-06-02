@@ -2,12 +2,14 @@
 #define __UTILITIES_INDEX_SET_HPP__
 
 #include <cstdint>
+#include <common>
 
 namespace OS {
 
 class IndexSet {
 public:
   class Node {
+  public:
     static const int Max = 0xfe;
     
     Node * next;

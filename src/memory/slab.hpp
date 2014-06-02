@@ -2,6 +2,7 @@
 #define __MEMORY_SLAB_HPP__
 
 #include <cstddef>
+#include <new>
 
 namespace OS {
 

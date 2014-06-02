@@ -1,7 +1,10 @@
 #include <utilities/index-set.hpp>
 #include <utilities/lock.hpp>
 #include <memory/slab.hpp>
-#include <common>
+
+extern "C" {
+#include <anlock.h>
+}
 
 namespace OS {
 
@@ -9,7 +12,7 @@ static uint64_t slabInitLock OS_ALIGNED(8);
 static TypedSlab<IndexSet::Node> slab;
 static bool initialized;
 
-IndexSet::IndexSet() : max(Node::Max) {
+IndexSet::IndexSet() : numUsed(0) {
   anlock_lock(&slabInitLock);
   if (!initialized) {
     new(&slab) TypedSlab<IndexSet::Node>();
@@ -31,7 +34,7 @@ IndexSet::~IndexSet() {
 }
 
 uint64_t IndexSet::Pop() {
-  ScopeLock(&lock);
+  ScopeLock scope(&lock);
   if (firstNode->count) {
     return firstNode->indexes[--firstNode->count];
   }
@@ -45,8 +48,8 @@ uint64_t IndexSet::Pop() {
 }
 
 void IndexSet::Push(uint64_t idx) {
-  ScopeLock(&lock);
-  if (firstNode.count < Node::Max) {
+  ScopeLock scope(&lock);
+  if (firstNode->count < Node::Max) {
     firstNode->indexes[firstNode->count++] = idx;
     return;
   }
