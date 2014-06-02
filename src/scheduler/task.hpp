@@ -1,6 +1,7 @@
 #ifndef __SCHEDULER_TASK_HPP__
 #define __SCHEDULER_TASK_HPP__
 
+#include <utilities/index-set.hpp>
 #include <cstdint>
 #include <common>
 
@@ -17,6 +18,14 @@ enum KillReason {
 class Task {
 public:
   Task * next, * last;
+  
+  /**
+   * This must be implemented by the specific platform to return either a Task
+   * or some subclass of Task with specific information.
+   *
+   * @noncritical
+   */
+  static Task * CreateTask();
   
   Task();
   virtual ~Task();
@@ -52,7 +61,16 @@ public:
   virtual void Release();
   
 protected:
-  // TODO: an ivar should go here for a task address space
+  /**
+   * Called from a kernel thread when the task should be cleaned up.
+   * @noncritical
+   */
+  virtual void Destroy();
+  
+  IndexSet descriptorIds;
+  IndexSet threadIds;
+  
+  // TODO: address space variable here
   
   // thread list
   uint64_t threadsLock OS_ALIGNED(8);

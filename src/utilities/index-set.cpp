@@ -1,0 +1,60 @@
+#include <utilities/index-set.hpp>
+#include <utilities/lock.hpp>
+#include <memory/slab.hpp>
+#include <common>
+
+namespace OS {
+
+static uint64_t slabInitLock OS_ALIGNED(8);
+static TypedSlab<IndexSet::Node> slab;
+static bool initialized;
+
+IndexSet::IndexSet() : max(Node::Max) {
+  anlock_lock(&slabInitLock);
+  if (!initialized) {
+    new(&slab) TypedSlab<IndexSet::Node>();
+  }
+  anlock_unlock(&slabInitLock);
+  
+  firstNode = slab.New();
+  firstNode->next = NULL; // this is redundant, but it's for show
+  firstNode->count = 0;
+}
+
+IndexSet::~IndexSet() {
+  Node * node = firstNode;
+  while (node) {
+    Node * next = node->next;
+    slab.Delete(node);
+    node = next;
+  }
+}
+
+uint64_t IndexSet::Pop() {
+  ScopeLock(&lock);
+  if (firstNode->count) {
+    return firstNode->indexes[--firstNode->count];
+  }
+  if (firstNode->next) {
+    Node * rem = firstNode;
+    firstNode = firstNode->next;
+    slab.Delete(rem);
+    return Pop();
+  }
+  return numUsed++;
+}
+
+void IndexSet::Push(uint64_t idx) {
+  ScopeLock(&lock);
+  if (firstNode.count < Node::Max) {
+    firstNode->indexes[firstNode->count++] = idx;
+    return;
+  }
+  Node * node = slab.New();
+  node->next = firstNode;
+  node->count = 1;
+  node->indexes[0] = idx;
+  firstNode = node;
+}
+
+}
