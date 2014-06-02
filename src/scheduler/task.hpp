@@ -28,6 +28,10 @@ public:
   static Task * CreateTask();
   
   Task();
+  
+  /**
+   * @noncritical
+   */
   virtual ~Task();
   
   /**
@@ -51,14 +55,21 @@ public:
   /**
    * Unholds the task and then releases it.
    *
-   * @critical
+   * @noncritical
    */
   virtual void Unhold();
   
   /**
-   * @critical
+   * @noncritical
    */
   virtual void Release();
+  
+  /**
+   * Request that the task be killed. If you call this and the task is held or
+   * retained, your kill request will not take place immediately.
+   * @noncritical
+   */
+  virtual void Kill(uint64_t reason);
   
 protected:
   /**
