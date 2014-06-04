@@ -9,13 +9,13 @@ extern "C" {
 namespace OS {
 
 static uint64_t slabInitLock OS_ALIGNED(8);
-static TypedSlab<IndexSet::Node> slab;
+static Slab<IndexSet::Node, 0x10> slab;
 static bool initialized;
 
 IndexSet::IndexSet() : numUsed(0) {
   anlock_lock(&slabInitLock);
   if (!initialized) {
-    new(&slab) TypedSlab<IndexSet::Node>();
+    new(&slab) Slab<IndexSet::Node, 0x10>();
   }
   anlock_unlock(&slabInitLock);
   

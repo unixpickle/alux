@@ -98,6 +98,7 @@ main = ->
     'src/stdlib/cheaders'
     'src/stdlib/cppheaders'
     'src'
+    'dependencies/anslabs/include'
     'dependencies/analloc2/include'
     'dependencies/anlock/src'
     'src/arch/' + arch + '/include'

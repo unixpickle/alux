@@ -40,6 +40,7 @@ dependencies:
 	mkdir dependencies
 	git clone https://github.com/unixpickle/anlock.git dependencies/anlock
 	git clone https://github.com/unixpickle/analloc2.git dependencies/analloc2
+	git clone https://github.com/unixpickle/anslabs.git dependencies/anslabs
 
 image: $(BUILDDIR)/grub_root
 	grub-mkrescue -o $(BUILDDIR)/`basename $(OUTFILE) .bin`.iso $(BUILDDIR)/grub_root/
