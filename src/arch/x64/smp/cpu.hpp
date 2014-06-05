@@ -3,6 +3,7 @@
 
 #include <cstdint>
 #include <arch/x64/segments/tss.hpp>
+#include <arch/x64/smp/invlpg.hpp>
 
 namespace OS {
 
@@ -16,6 +17,9 @@ public:
   struct {
     uint64_t lapic;
   } frequencies;
+  
+  uint64_t invlpgLock OS_ALIGNED(8); // @critical
+  InvlpgInfo * invlpgInfo;
   
   CPU(uint32_t apicId);
     

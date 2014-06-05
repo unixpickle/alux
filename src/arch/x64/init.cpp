@@ -11,6 +11,7 @@
 #include <arch/x64/acpi/madt.hpp>
 #include <arch/x64/smp/init.hpp>
 #include <arch/x64/smp/cpu-list.hpp>
+#include <arch/x64/smp/invlpg.hpp>
 #include <arch/x64/segments/gdt.hpp>
 #include <arch/x64/time/clock.hpp>
 #include <arch/x64/time/pit.hpp>
@@ -131,6 +132,7 @@ void InitializeSMP() {
   __asm__ volatile("ltr %%ax" : : "a" (sel));
   
   StartProcessors();
+  InitializeInvlpg();
 }
 
 void InitializeTimers() {
