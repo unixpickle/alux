@@ -6,43 +6,46 @@
 
 namespace OS {
 
-class Loop;
-class Task;
-class Thread;
+class Job;
+class Scheduler;
 
 class Context {
 public:
   /**
+   * Sleep the current context until a WakeUp() on it is called.
    * @critical
    */
-  static Context * GetCurrent();
+  static void Sleep();
+  
+  /**
+   * Return the current context. Needless to say, this is architecture
+   * independent.
+   * @critical
+   */
+  static Context * GetContext();
   
   /**
    * @critical
    */
-  Task * GetTask();
+  virtual Job * GetJob();
   
   /**
    * @critical
    */
-  Thread * GetThread();
+  virtual void SetJob(Job * job);
   
   /**
-   * @param task The reference to this will be consumed.
-   * @param thread A thread.
    * @critical
    */
-  void SetTaskAndThread(Task * task, Thread * thread);
+  virtual void WakeUp();
   
-  /**
-   * @ambicritical
-   */
-  virtual Loop & GetLoop();
+protected:
+  uint64_t jobLock OS_ALIGNED(8); // @critical
+  Job * currentJob;
   
-private:
-  uint64_t currentLock OS_ALIGNED(8); // @critical
-  Task * currentTask; // retained
-  Thread * currentThread;
+  void * userInfo; // for the Scheduler
+  
+  friend class Scheduler;
 };
 
 }
