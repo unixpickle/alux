@@ -3,8 +3,6 @@
 #include <cstdint>
 #include <iostream>
 
-#include <memory/easy-map.hpp> // TODO: delete me
-
 extern "C" {
 
 void MbootEntry(void * mbootPtr) {

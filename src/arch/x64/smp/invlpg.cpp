@@ -6,8 +6,6 @@
 #include <utilities/critical.hpp>
 #include <utilities/lock.hpp>
 
-#include <arch/general/failure.hpp> // TODO: delete this
-
 namespace OS {
 
 namespace x64 {
