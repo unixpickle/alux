@@ -17,78 +17,49 @@ enum KillReason {
 
 class Task {
 public:
-  Task * next, * last;
-  
-  /**
-   * This must be implemented by the specific platform to return either a Task
-   * or some subclass of Task with specific information.
-   *
-   * @noncritical
-   */
-  static Task * CreateTask();
-  
-  Task();
-  
   /**
    * @noncritical
    */
   virtual ~Task();
   
   /**
-   * If the task is not being killed, or if it is held, this will increment the
-   * task's reference count and return true. Otherwise, the reference count
-   * will not be changed and false will be returned.
-   *
+   * Returns true unless the task has been killed and is not being held.
    * @critical
    */
   virtual bool Retain();
   
   /**
-   * If the task is being killed, this returns false. Otherwise, it increments
-   * the reference count of the task and "holds" the task. Now, the task cannot
-   * be killed until the task is unheld.
-   *
+   * Returns true unless the task has been killed.
    * @critical
    */
   virtual bool Hold();
   
   /**
-   * Unholds the task and then releases it.
-   *
-   * @noncritical
+   * @critical
    */
   virtual void Unhold();
   
   /**
-   * @noncritical
+   * @critical
    */
   virtual void Release();
   
   /**
-   * Request that the task be killed. If you call this and the task is held or
-   * retained, your kill request will not take place immediately.
-   * @noncritical
+   * Request that the task be killed. If the task has already been killed, that
+   * kill reason will not be changed.
+   * @critical
    */
   virtual void Kill(uint64_t reason);
   
 protected:
   /**
-   * Called from a kernel thread when the task should be cleaned up.
+   * Perform last-minute cleanup for the task.
    * @noncritical
    */
   virtual void Destroy();
   
-  IndexSet descriptorIds;
-  IndexSet threadIds;
-  
-  // TODO: address space variable here
-  
-  // thread list
-  uint64_t threadsLock OS_ALIGNED(8);
-  Thread * firstThread;
-  
-  // state information
-  uint64_t stateLock OS_ALIGNED(8);
+  // state information (from hell)
+  uint64_t stateLock OS_ALIGNED(8); // @critical
   uint64_t refCount;
   bool isKilled;
   bool isHeld;

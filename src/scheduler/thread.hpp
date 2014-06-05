@@ -7,6 +7,7 @@
 namespace OS {
 
 class Task;
+class Loop;
 
 class Thread {
 public:
@@ -20,22 +21,7 @@ public:
   /**
    * @noncritical
    */
-  ~Thread();
-  
-  class FxState {
-    // TODO: information from SSE2 regs
-  } OS_PACKED;
-  
-  class State {
-    FxState * fxState; // NULL = floating-point uninitialized
-    uint64_t rsp;
-    uint64_t rbp;
-    uint64_t rip;
-    uint64_t eflags;
-  } OS_PACKED;
-  
-  Thread * next, * last;
-  Thread * queueNext, * queueLast;
+  virtual ~Thread();
   
   /**
    * Returns a retained reference to the parent task or NULL if the task has
@@ -44,21 +30,14 @@ public:
    */
   virtual Task * GetTask();
   
-  /**
-   * Returns a read-write reference to the state
-   * @ambicritical
-   */
-  virtual State & GetState();
-  
 protected:
   Task * task;
   
-  uint64_t stateLock OS_ALIGNED(8);
-  State state;
+  uint64_t loopLock OS_ALIGNED(8); // @critical
+  Loop * loop;
+  Thread * loopNext, * loopLast;
   
-  uint64_t pollLock OS_ALIGNED(8);
-  bool isPolling;
-  uint64_t pollDescriptor;
+  friend class Loop;
 };
 
 }
