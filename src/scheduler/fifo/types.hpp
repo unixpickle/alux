@@ -36,11 +36,12 @@ class JobInfo : public UserInfo {
 public:
   JobInfo(Job * job);
   JobList::Node node;
+  Context * affinity;
 };
 
 class ContextInfo : public UserInfo {
 public:
-  // TODO: stuff here for isActive etc.
+  bool isActive;
 };
 
 class Scheduler : public OS::Scheduler::Scheduler {
@@ -62,6 +63,8 @@ protected:
   uint64_t lock OS_ALIGNED(8); // @critical
   JobList * jobLists;
 
+  Context * LeastUtilizedContext(); // @ambicritical, locked already
+  static bool & IsContextActive(Context * context);
 };
 
 }

@@ -40,6 +40,11 @@ public:
   virtual void SetJob(Job * job); // @critical
   virtual void Start(); // @critical
   
+  virtual size_t GetIndex(); // @ambicritical
+  
+  virtual void ResetTimeInfo(); // @critical
+  virtual void GetTimeInfo(uint64_t & active, uint64_t & total); // @critical
+  
 protected:
   uint64_t jobLock OS_ALIGNED(8); // @critical
   Job * job;
