@@ -7,6 +7,7 @@
 #include <arch/x64/interrupts/idt.hpp>
 #include <arch/x64/interrupts/lapic.hpp>
 #include <arch/x64/interrupts/ioapic.hpp>
+#include <arch/x64/interrupts/vectors.hpp>
 #include <arch/x64/acpi/sdt.hpp>
 #include <arch/x64/acpi/madt.hpp>
 #include <arch/x64/smp/init.hpp>
@@ -17,6 +18,7 @@
 #include <arch/x64/time/pit.hpp>
 #include <arch/x64/time/hpet.hpp>
 #include <arch/x64/time/lapic.hpp>
+#include <arch/x64/multitasking/interrupt.hpp>
 #include <arch/x64/general/critical.hpp>
 #include <arch/x64/general/failure.hpp>
 #include <arch/general/critical.hpp>
@@ -143,6 +145,12 @@ void InitializeTimers() {
   InitializeLapicTimers();
   
   // TODO: here is where I might setup invariant TSC for a faster clock
+}
+
+void InitializeMultitasking() {
+  IRT::GetGlobal()[IntVectors::LapicTimer] = MultitaskingInterrupt;
+  // TODO: here, there will be some sort of kernel task/thread that needs to be
+  // initialized; do that.
 }
 
 }
