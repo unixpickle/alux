@@ -1,5 +1,6 @@
 #include <arch/general/clock.hpp>
 #include <utilities/critical.hpp>
+#include <utilities/frac.hpp>
 #include <math>
 
 namespace OS {
@@ -16,13 +17,8 @@ void Clock::Sleep(uint64_t ticks) {
 
 void Clock::MicroSleep(uint64_t micros) {
   AssertNoncritical();
-  uint64_t divide = 60000000L;
-  uint64_t tpm = GetTicksPerMin();
-  while (Log2Ceil(micros) + Log2Ceil(tpm) > 63) {
-    divide <<= 1;
-    tpm >>= 1;
-  }
-  Sleep((micros * tpm) / divide);
+  Frac64 ratio(GetTicksPerMin(), 60000000L);
+  Sleep(ratio.Multiply(micros));
 }
 
 }
