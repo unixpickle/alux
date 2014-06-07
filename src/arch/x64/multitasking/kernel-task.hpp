@@ -17,6 +17,7 @@ public:
 
 protected:
   bool hasRun;
+  uint64_t argument;
   void * stack;
 };
 
