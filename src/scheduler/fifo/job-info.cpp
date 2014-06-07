@@ -1,4 +1,4 @@
-#include <scheduler/fifo/types.hpp>
+#include <scheduler/fifo/job-info.hpp>
 
 namespace OS {
 

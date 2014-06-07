@@ -1,7 +1,8 @@
 #ifndef __GENERAL_CPU_HPP__
 #define __GENERAL_CPU_HPP__
 
-#include <multitasking/types.hpp>
+#include <multitasking/task.hpp>
+#include <scheduler/user-info.hpp>
 
 namespace OS {
 

@@ -2,6 +2,7 @@
 #define __GENERAL_ADDRESS_SPACE__
 
 #include <specific/types.hpp>
+#include <cstddef>
 
 namespace OS {
 

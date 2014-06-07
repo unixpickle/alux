@@ -1,4 +1,5 @@
-#include <scheduler/fifo/types.hpp>
+#include <scheduler/fifo/scheduler.hpp>
+#include <scheduler/fifo/job-info.hpp>
 #include <arch/general/clock.hpp>
 #include <arch/general/cpu.hpp>
 #include <utilities/lock.hpp>
@@ -34,6 +35,16 @@ void Scheduler::SetTimer(uint64_t fireTime, bool) {
   JobInfo::ForJob(job)->timerDeadline = fireTime;
 }
 
+void Scheduler::SetInfiniteTimer() {
+  AssertCritical();
+  ScopeCriticalLock scope(&lock);
+  
+  CPU & cpu = CPU::GetCurrent();
+  Job * job = cpu.GetTask();
+  assert(job != NULL);
+  JobInfo::ForJob(job)->timerDeadline = UINT64_MAX;
+}
+
 bool Scheduler::UnsetTimer(Job * job) {
   AssertCritical();
   ScopeCriticalLock scope(&lock);
@@ -54,7 +65,7 @@ void Scheduler::Tick() {
     job = jobList.NextJob();
     while (job) {
       JobInfo * info = JobInfo::ForJob(job);
-      if (info->timerDeadline > now) {
+      if (info->timerDeadline > now || info->timerDeadline == UINT64_MAX) {
         if (info->timerDeadline < nextTick) {
           nextTick = info->timerDeadline;
         }

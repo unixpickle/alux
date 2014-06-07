@@ -1,35 +1,12 @@
-#ifndef __SCHEDULER_TYPES_HPP__
-#define __SCHEDULER_TYPES_HPP__
+#ifndef __SCHEDULER_SCHEDULER_HPP__
+#define __SCHEDULER_SCHEDULER_HPP__
 
-#include <cstddef>
+#include <scheduler/job.hpp>
 #include <cstdint>
-#include <common>
 
 namespace OS {
 
-class CPU;
-
 namespace Scheduler {
-
-class Scheduler;
-
-class UserInfo {
-public:
-  virtual ~UserInfo() {}
-};
-
-class JobGroup {
-public:
-  UserInfo * userInfo;
-};
-
-class Job {
-public:
-  UserInfo * userInfo;
-  
-  virtual void Run() = 0; // @critical (no return)
-  virtual JobGroup * GetJobGroup() = 0; // @ambicritical
-};
 
 class Scheduler {
 public:
@@ -66,6 +43,13 @@ public:
    * @critical
    */
   virtual void SetTimer(uint64_t fireTime, bool prec) = 0;
+  
+  /**
+   * Set a timer that will never go off. This timer can be cancelled with a
+   * call to UnsetTimer().
+   * @critical
+   */
+  virtual void SetInfiniteTimer() = 0;
   
   /**
    * Unset a timer for some job. If a timer was set for the job, this will
