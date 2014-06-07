@@ -7,8 +7,15 @@ namespace x64 {
 Task::Task(OS::TaskGroup * g) : super(g) {}
 
 void Task::Run() {
-  // TODO: do a context switch into the given task using an iret and a bunch of
-  // inline assembly
+  __asm__ __volatile__(
+    "mov %%rax, %%cr3\n"
+    "sub $0x28, %%rsp\n"
+    "mov $5, %%rcx\n"
+    "mov %%rsp, %%rdx\n"
+    "rep movsq\n"
+    "iretq"
+    : : "a" (regs.cr3), "S" (&regs)
+  );
 }
 
 }

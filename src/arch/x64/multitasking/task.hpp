@@ -14,12 +14,14 @@ public:
   typedef OS::Task super;
   
   class Registers {
-    uint64_t rsp;
-    uint64_t rbp;
+  public:
+    // these are ordered this way for iretq
     uint64_t rip;
-    uint64_t rflags;
     uint64_t cs;
+    uint64_t rflags;
+    uint64_t rsp;
     uint64_t ss;
+    
     uint64_t cr3;
   } OS_PACKED;
   
