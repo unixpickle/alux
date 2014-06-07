@@ -8,7 +8,6 @@ namespace OS {
 namespace x64 {
 
 class KernelTaskGroup : public OS::TaskGroup {
-public:
 };
 
 }

@@ -11,6 +11,7 @@ class Job {
 public:
   UserInfo * userInfo;
   
+  virtual ~Job() {}
   virtual void Run() = 0; // @critical (no return)
   virtual JobGroup * GetJobGroup() = 0; // @ambicritical
 };

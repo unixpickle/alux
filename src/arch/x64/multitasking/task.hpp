@@ -28,7 +28,12 @@ public:
   Registers regs;
   
   Task(OS::TaskGroup * g);
+  virtual ~Task();
   virtual void Run();
+  
+protected:
+  void * kernStack;
+  void SetStackInCPU();
 };
 
 }

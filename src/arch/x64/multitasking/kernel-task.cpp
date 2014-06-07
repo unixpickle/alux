@@ -28,6 +28,8 @@ KernelTask::~KernelTask() {
 void KernelTask::Run() {
   if (hasRun) return super::Run();
   hasRun = true;
+  
+  SetStackInCPU();
   __asm__(
     "mov %%rax, %%cr3\n"
     "sub $0x28, %%rsp\n"
