@@ -45,7 +45,7 @@ class Scheduler : public OS::Scheduler::Scheduler {
 public:
   static const int Jiffy = 6000; // 6000 times a minute (100 Hz)
   
-  Scheduler(Context ** contexts, size_t count);
+  Scheduler();
 
   virtual UserInfo * InfoForJob(Job * aJob);
   virtual UserInfo * InfoForJobGroup(JobGroup * aJobGroup);
@@ -56,9 +56,6 @@ public:
   virtual void DeleteJob(Job * job);
 
 protected:
-  Context ** contexts;
-  size_t count;
-
   uint64_t lock OS_ALIGNED(8); // @critical
   JobList jobList;
 };

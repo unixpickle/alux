@@ -1,5 +1,6 @@
 #include <scheduler/fifo/types.hpp>
 #include <arch/general/clock.hpp>
+#include <arch/general/cpu.hpp>
 #include <utilities/lock.hpp>
 #include <utilities/critical.hpp>
 
@@ -9,8 +10,7 @@ namespace Scheduler {
 
 namespace FIFO {
 
-Scheduler::Scheduler(Context ** _contexts, size_t _count)
-  : contexts(_contexts), count(_count) {
+Scheduler::Scheduler() {
   AssertNoncritical();
 }
 
@@ -28,8 +28,8 @@ void Scheduler::SetTimer(uint64_t fireTime, bool) {
   AssertCritical();
   ScopeCriticalLock scope(&lock);
   
-  Context & context = Context::GetCurrent();
-  Job * job = context.GetJob();
+  CPU & cpu = CPU::GetCurrent();
+  Job * job = cpu.GetJob();
   assert(job != NULL);
   JobInfo::ForJob(job)->timerDeadline = fireTime;
 }
@@ -49,7 +49,6 @@ void Scheduler::Tick() {
   Clock & clock = Clock::GetGlobal();
   uint64_t now = clock.GetTime();
   uint64_t nextTick = now + clock.GetTicksPerMin() / Jiffy;
-  
   {
     ScopeCriticalLock scope(&lock);
     job = jobList.NextJob();
@@ -68,11 +67,11 @@ void Scheduler::Tick() {
     }
   }
   
-  Context::SetTimeout(nextTick - now);
+  CPU::SetTimeout(nextTick - now);
   if (job) {
     job->Run();
   } else {
-    Context::WaitTimeout();
+    CPU::WaitUntilTick();
   }
 }
 

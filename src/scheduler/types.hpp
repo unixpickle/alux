@@ -7,6 +7,8 @@
 
 namespace OS {
 
+class CPU;
+
 namespace Scheduler {
 
 class Scheduler;
@@ -29,25 +31,6 @@ public:
   virtual JobGroup * GetJobGroup() = 0; // @ambicritical
 };
 
-class Context {
-public:
-  UserInfo * userInfo;
-  
-  static void Halt(); // @critical
-  static void WaitTimeout(); // @critical
-  static void SetTimeout(uint64_t timeout); // @critical
-  static Context & GetCurrent(); // @critical
-  
-  virtual Job * GetJob(); // @critical
-  virtual void SetJob(Job * job); // @critical
-  virtual void Unhalt(); // @critical
-  virtual size_t GetIndex(); // @ambicritical
-  
-protected:
-  uint64_t jobLock OS_ALIGNED(8); // @critical
-  Job * job;
-};
-
 class Scheduler {
 public:
   /**
@@ -55,7 +38,7 @@ public:
    * this build.
    * @noncritical
    */
-  static void InitializeScheduler(Context ** contexts, size_t count);
+  static void InitializeScheduler();
   
   /**
    * Returns the global initialized scheduler.
