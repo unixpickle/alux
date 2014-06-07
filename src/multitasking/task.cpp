@@ -1,5 +1,6 @@
 #include <multitasking/task.hpp>
 #include <multitasking/task-group.hpp>
+#include <arch/general/cpu.hpp>
 
 namespace OS {
 
@@ -12,6 +13,10 @@ TaskGroup * Task::GetTaskGroup() {
 
 Scheduler::JobGroup * Task::GetJobGroup() {
   return static_cast<Scheduler::JobGroup *>(group);
+}
+
+void Task::Run() {
+  CPU::GetCurrent().SetTask(this);
 }
 
 void Task::Cleanup() {

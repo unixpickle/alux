@@ -3,6 +3,9 @@
 
 #include <multitasking/task.hpp>
 #include <scheduler/user-info.hpp>
+#include <cstddef>
+#include <cstdint>
+#include <common>
 
 namespace OS {
 
@@ -18,10 +21,14 @@ public:
   
   virtual size_t GetIndex() = 0; // @ambicritical
   virtual void Wakeup() = 0; // @critical
-  virtual Task * GetTask() = 0; // @critical; doesn't retain/release group
-  virtual void SetTask(Task *) = 0; // @critical; doesn't retain/release group
+  virtual Task * GetTask(); // @critical; doesn't retain/release group
+  virtual void SetTask(Task *); // @critical; consumes ownership
   
   Scheduler::UserInfo * userInfo;
+  
+protected:
+  uint64_t taskLock OS_ALIGNED(8); // @critical
+  Task * task;
 };
 
 }

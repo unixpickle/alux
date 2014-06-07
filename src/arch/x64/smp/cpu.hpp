@@ -28,12 +28,8 @@ public:
   virtual size_t GetIndex();
   virtual void Wakeup();
 
-  Task * GetTask();
-  void SetTask(Task * task);
-
 private:
   uint32_t apicId;
-  Task * task OS_ALIGNED(8);
   
 };
 

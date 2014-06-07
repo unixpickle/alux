@@ -18,6 +18,7 @@ Task::~Task() {
 
 void Task::Run() {
   AssertCritical();
+  super::Run();
   SetStackInCPU();
   __asm__ __volatile__(
     "mov %%rax, %%cr3\n"

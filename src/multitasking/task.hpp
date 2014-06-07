@@ -13,10 +13,12 @@ class TaskGroup;
 class Task : public Scheduler::Job {
 public:
   Task(TaskGroup * group);
-  // some state will go here, etc.
-
+  
   TaskGroup * GetTaskGroup();
-  virtual Scheduler::JobGroup * GetJobGroup();
+  Scheduler::JobGroup * GetJobGroup();
+  
+  virtual void Run(); // doesn't do much
+  
 protected:
   virtual void Cleanup(); // @noncritical
   

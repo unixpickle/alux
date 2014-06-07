@@ -26,16 +26,6 @@ void CPU::Wakeup() {
   lapic.SendIPI(GetAPICID(), IntVectors::LapicTimer);
 }
 
-Task * CPU::GetTask() {
-  AssertCritical();
-  return task;
-}
-
-void CPU::SetTask(Task * _task) {
-  AssertCritical();
-  task = _task;
-}
-
 }
 
 }

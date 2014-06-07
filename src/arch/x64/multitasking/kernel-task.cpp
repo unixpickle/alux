@@ -27,8 +27,9 @@ KernelTask::~KernelTask() {
 
 void KernelTask::Run() {
   if (hasRun) return super::Run();
-  hasRun = true;
   
+  hasRun = true;
+  OS::Task::Run();
   SetStackInCPU();
   __asm__(
     "mov %%rax, %%cr3\n"
