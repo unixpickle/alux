@@ -29,7 +29,7 @@ void Scheduler::SetTimer(uint64_t fireTime, bool) {
   ScopeCriticalLock scope(&lock);
   
   CPU & cpu = CPU::GetCurrent();
-  Job * job = cpu.GetJob();
+  Job * job = cpu.GetTask();
   assert(job != NULL);
   JobInfo::ForJob(job)->timerDeadline = fireTime;
 }

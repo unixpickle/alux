@@ -3,6 +3,7 @@
 #include <arch/x64/interrupts/lapic.hpp>
 #include <arch/x64/interrupts/vectors.hpp>
 #include <utilities/critical.hpp>
+#include <utilities/lock.hpp>
 
 namespace OS {
 
@@ -25,12 +26,14 @@ void CPU::Wakeup() {
   lapic.SendIPI(GetAPICID(), IntVectors::LapicTimer);
 }
 
-Scheduler::Job * CPU::GetJob() {
-  return job;
+Task * CPU::GetTask() {
+  AssertCritical();
+  return task;
 }
 
-void CPU::SetJob(Scheduler::Job * _job) {
-  job = _job;
+void CPU::SetTask(Task * _task) {
+  AssertCritical();
+  task = _task;
 }
 
 }

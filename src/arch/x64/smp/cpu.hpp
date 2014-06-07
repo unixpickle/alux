@@ -4,7 +4,6 @@
 #include <arch/x64/segments/tss.hpp>
 #include <arch/x64/smp/invlpg.hpp>
 #include <arch/general/cpu.hpp>
-#include <cstdint>
 
 namespace OS {
 
@@ -28,13 +27,14 @@ public:
   
   virtual size_t GetIndex();
   virtual void Wakeup();
-  virtual Scheduler::Job * GetJob();
 
-  void SetJob(Scheduler::Job * job);
+  Task * GetTask();
+  void SetTask(Task * task);
 
 private:
   uint32_t apicId;
-  Scheduler::Job * job;
+  Task * task OS_ALIGNED(8);
+  
 };
 
 }

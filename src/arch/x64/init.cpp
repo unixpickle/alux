@@ -18,6 +18,7 @@
 #include <arch/x64/time/hpet.hpp>
 #include <arch/x64/time/lapic.hpp>
 #include <arch/x64/general/critical.hpp>
+#include <arch/x64/general/failure.hpp>
 #include <arch/general/critical.hpp>
 #include <iostream>
 #include <cassert>
@@ -133,6 +134,7 @@ void InitializeSMP() {
   
   StartProcessors();
   InitializeInvlpg();
+  InitializePanic();
 }
 
 void InitializeTimers() {

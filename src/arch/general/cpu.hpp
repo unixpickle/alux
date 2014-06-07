@@ -1,7 +1,7 @@
 #ifndef __GENERAL_CPU_HPP__
 #define __GENERAL_CPU_HPP__
 
-#include <scheduler/types.hpp>
+#include <multitasking/types.hpp>
 
 namespace OS {
 
@@ -17,7 +17,8 @@ public:
   
   virtual size_t GetIndex() = 0; // @ambicritical
   virtual void Wakeup() = 0; // @critical
-  virtual Scheduler::Job * GetJob() = 0; // @critical
+  virtual Task * GetTask() = 0; // @critical; doesn't retain/release group
+  virtual void SetTask(Task *) = 0; // @critical; doesn't retain/release group
   
   Scheduler::UserInfo * userInfo;
 };
