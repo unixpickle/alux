@@ -25,6 +25,7 @@ public:
 
   CPU & operator[](int idx); // @ambicritical, unsynchronized
   CPU & GetCurrent(); // @critical
+  int GetIndex(CPU & entry);
 };
 
 }

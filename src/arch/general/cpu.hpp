@@ -15,9 +15,9 @@ public:
   static size_t GetCount();
   static CPU & GetAt(size_t idx);
   
-  virtual size_t GetIndex() = 0;
-  virtual void Wakeup() = 0;
-  virtual Scheduler::Job * GetJob() = 0;
+  virtual size_t GetIndex() = 0; // @ambicritical
+  virtual void Wakeup() = 0; // @critical
+  virtual Scheduler::Job * GetJob() = 0; // @critical
   
   Scheduler::UserInfo * userInfo;
 };

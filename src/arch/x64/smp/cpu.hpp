@@ -1,15 +1,16 @@
 #ifndef __X64_CPU_HPP__
 #define __X64_CPU_HPP__
 
-#include <cstdint>
 #include <arch/x64/segments/tss.hpp>
 #include <arch/x64/smp/invlpg.hpp>
+#include <arch/general/cpu.hpp>
+#include <cstdint>
 
 namespace OS {
 
 namespace x64 {
 
-class CPU {
+class CPU : public OS::CPU {
 public:
   uint16_t tssSelector;
   TSS * tss;
@@ -24,9 +25,16 @@ public:
   CPU(uint32_t apicId);
     
   uint32_t GetAPICID();
+  
+  virtual size_t GetIndex();
+  virtual void Wakeup();
+  virtual Scheduler::Job * GetJob();
+
+  void SetJob(Scheduler::Job * job);
 
 private:
   uint32_t apicId;
+  Scheduler::Job * job;
 };
 
 }

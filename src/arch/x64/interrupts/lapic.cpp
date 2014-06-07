@@ -82,6 +82,16 @@ bool LAPIC::IsInService(uint8_t vector) {
   return 0 != (ReadReg(regIndex) & mask);
 }
 
+void LAPIC::SetTimeout(uint8_t vector, uint32_t ticks) {
+  uint32_t timerField = vector;// | (2 << 17); // mode is bit 17
+  WriteReg(RegLVTTimer, timerField);
+  WriteReg(RegTimerInitCount, ticks);
+}
+
+void LAPIC::ClearTimeout() {
+  WriteReg(RegLVTTimer, 0x10000);
+}
+
 }
 
 }

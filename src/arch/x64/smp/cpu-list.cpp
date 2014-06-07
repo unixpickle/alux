@@ -42,6 +42,12 @@ CPU & CPUList::operator[](int idx) {
   return *((CPU *)buffer + idx);
 }
 
+int CPUList::GetIndex(CPU & entry) {
+  uintptr_t ptr = (uintptr_t)&entry;
+  uintptr_t diff = ptr - (uintptr_t)buffer;
+  return (int)(diff / sizeof(CPU));
+}
+
 CPU & CPUList::GetCurrent() {
   AssertCritical();
   int index = GDT::GetGlobal().GetTSSIndex();

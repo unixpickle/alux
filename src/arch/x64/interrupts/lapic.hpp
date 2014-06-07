@@ -28,6 +28,9 @@ public:
   virtual bool IsRequested(uint8_t vector); // @critical
   virtual bool IsInService(uint8_t vector); // @critical
 
+  virtual void SetTimeout(uint8_t vector, uint32_t ticks); // @critical
+  virtual void ClearTimeout();
+
   /**
    * @critical
    */
