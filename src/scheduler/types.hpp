@@ -25,25 +25,23 @@ class Job {
 public:
   UserInfo * userInfo;
   
-  virtual void Run(uint64_t timeout) = 0;
-  virtual JobGroup * GetJobGroup();
+  virtual void Run() = 0; // @critical (no return)
+  virtual JobGroup * GetJobGroup() = 0; // @ambicritical
 };
 
 class Context {
 public:
   UserInfo * userInfo;
   
-  static void Stop(); // @critical
+  static void Halt(); // @critical
+  static void WaitTimeout(); // @critical
+  static void SetTimeout(uint64_t timeout); // @critical
   static Context & GetCurrent(); // @critical
   
   virtual Job * GetJob(); // @critical
   virtual void SetJob(Job * job); // @critical
-  virtual void Start(); // @critical
-  
+  virtual void Unhalt(); // @critical
   virtual size_t GetIndex(); // @ambicritical
-  
-  virtual void ResetTimeInfo(); // @critical
-  virtual void GetTimeInfo(uint64_t & active, uint64_t & total); // @critical
   
 protected:
   uint64_t jobLock OS_ALIGNED(8); // @critical
@@ -80,32 +78,30 @@ public:
   virtual UserInfo * InfoForJobGroup(JobGroup * aJobGroup) = 0;
   
   /**
-   * Create a new timer. If you call this, you do not need to call PushJob(job)
-   * and you should *not* call that; the job will automatically be run after
-   * the expired time (or a little after if the precision is low).
-   * @noncritical
-   */
-  virtual void SetTimer(uint64_t fireTime, Job * job, bool prec) = 0;
-  
-  /**
-   * Call this periodically from a kernel thread to do the scheduler's
-   * deallocating. The reason this is needed is that deallocation may be
-   * inappropriate for certain (critical) subroutines.
-   * @noncritical
-   */
-  virtual void CollectGarbage() = 0;
-  
-  /**
-   * Pushes a job to the scheduler so it may be executed
+   * Set a timer for the current job. After you call this, you should call
+   * Tick() from the same critical section.
    * @critical
    */
-  virtual void PushJob(Job * job) = 0;
+  virtual void SetTimer(uint64_t fireTime, bool prec) = 0;
   
   /**
-   * Returns the next job to attempt to execute
+   * Unset a timer for some job. If a timer was set for the job, this will
+   * rescheduler the job regularly.
+   * @return true if a timer was removed; false otherwise
    * @critical
    */
-  virtual Job * PopJob() = 0;
+  virtual bool UnsetTimer(Job * job) = 0;
+  
+  /**
+   * Called when the current timeout fires.
+   * @critical
+   */
+  virtual void Tick() = 0;
+  
+  /**
+   * @critical
+   */
+  virtual void AddJob(Job * job) = 0;
   
   /**
    * @critical

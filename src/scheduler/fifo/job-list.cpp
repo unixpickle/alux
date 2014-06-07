@@ -10,9 +10,7 @@ JobList::JobList() : firstNode(NULL), lastNode(NULL) {
 }
 
 void JobList::PushJob(Job * job) {
-  // TODO: figure out which type of cast to use
-  Node * node = &(static_cast<JobInfo *>(job->userInfo))->node;
-  node->jobList = this;
+  Node * node = &JobInfo::ForJob(job)->node;
   node->last = NULL;
   node->next = firstNode;
   if (firstNode) {
@@ -34,8 +32,10 @@ Job * JobList::NextJob() {
 }
 
 bool JobList::RemoveJob(Job * job) {
-  Node * node = &(static_cast<JobInfo *>(job->userInfo))->node;
-  if (node->jobList != this) return false;
+  Node * node = &JobInfo::ForJob(job)->node;  
+  if (!node->next && !node->last) {
+    if (node != firstNode) return false;
+  }
   
   if (node->last) {
     node->last->next = node->next;
@@ -47,7 +47,6 @@ bool JobList::RemoveJob(Job * job) {
   } else {
     lastNode = node->last;
   }
-  node->jobList = NULL;
   node->next = node->last = NULL;
   return true;
 }

@@ -22,9 +22,8 @@ public:
     Node * next;
     Node * last;
     Job * job;
-    JobList * jobList;
     
-    Node(Job * aJob) : next(NULL), last(NULL), job(aJob), jobList(NULL) {}
+    Node(Job * aJob) : next(NULL), last(NULL), job(aJob) {}
   };
   
 protected:
@@ -34,26 +33,26 @@ protected:
 
 class JobInfo : public UserInfo {
 public:
+  static JobInfo * ForJob(Job * j);
+  
   JobInfo(Job * job);
   JobList::Node node;
-  Context * affinity;
-};
-
-class ContextInfo : public UserInfo {
-public:
-  bool isActive;
+  
+  uint64_t timerDeadline;
 };
 
 class Scheduler : public OS::Scheduler::Scheduler {
 public:
+  static const int Jiffy = 6000; // 6000 times a minute (100 Hz)
+  
   Scheduler(Context ** contexts, size_t count);
 
   virtual UserInfo * InfoForJob(Job * aJob);
   virtual UserInfo * InfoForJobGroup(JobGroup * aJobGroup);
-  virtual void SetTimer(uint64_t fireTime, Job * job, bool prec);
-  virtual void CollectGarbage();
-  virtual void PushJob(Job * job);
-  virtual Job * PopJob();
+  virtual void SetTimer(uint64_t fireTime, bool prec);
+  virtual bool UnsetTimer(Job * job);
+  virtual void Tick();
+  virtual void AddJob(Job * job);
   virtual void DeleteJob(Job * job);
 
 protected:
@@ -61,10 +60,7 @@ protected:
   size_t count;
 
   uint64_t lock OS_ALIGNED(8); // @critical
-  JobList * jobLists;
-
-  Context * LeastUtilizedContext(); // @ambicritical, locked already
-  static bool & IsContextActive(Context * context);
+  JobList jobList;
 };
 
 }

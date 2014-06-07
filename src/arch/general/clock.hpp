@@ -7,15 +7,15 @@ namespace OS {
 
 class Clock {
 public:
-  static Clock & GetGlobal();
+  static Clock & GetGlobal(); // @ambicritical
   
   /**
-   * @noncritical
+   * @ambicritical
    */
   virtual uint64_t GetTime() = 0;
   
   /**
-   * @noncritical
+   * @ambicritical
    */
   virtual uint64_t GetTicksPerMin() = 0;
 
