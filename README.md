@@ -11,7 +11,23 @@ General architectual ideas that I am playing around with:
 
 ## TODO
 
-Rewrite the entire thing so that I don't think it's dirty anymore.
+I am currently working on the scheduler.
+
+ * Create Scheduler::GetGlobal() etc.
+ * (x64) Implement timer interrupt routine
+ * Setup kernel task for garbage collection
+ * Implement fast index set based on slab
+   * Grab index at constructor, release at destructor
+ * Test by creating *"Hello, world!"* kernel task.
+ * Implement application address-space
+ * (x64) Setup NMI handler for syscall
+ * Create syscall handler for user-space task
+ * Create a sort of TaskCode object
+ * Implement a page-fault handler for loading code.
+ * Setup simple user-space task and test it
+ * Create ELF loader
+
+Then, I will direct my attention to the Inter-Process Communication and Kernel-Process Communication systems.
 
 ## License
 
