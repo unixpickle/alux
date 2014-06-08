@@ -15,6 +15,7 @@ public:
   static CPU & GetCurrent();
   static void WaitUntilTick(); // @critical -> @noncritical (no-return)
   static void SetTimeout(uint64_t clockTicks);
+  static void ClearTimeout();
   
   static size_t GetCount();
   static CPU & GetAt(size_t idx);

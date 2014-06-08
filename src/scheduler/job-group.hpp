@@ -7,10 +7,14 @@ namespace OS {
 
 namespace Scheduler {
 
-class JobGroup {
+class JobGroup : public Destructable {
 public:
   UserInfo * userInfo;
-  virtual ~JobGroup() {}
+  
+  virtual ~JobGroup() {
+    if (userInfo) delete userInfo;
+  }
+  
 };
 
 }

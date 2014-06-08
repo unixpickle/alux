@@ -22,6 +22,8 @@
 #include <arch/x64/general/critical.hpp>
 #include <arch/x64/general/failure.hpp>
 #include <arch/general/critical.hpp>
+#include <scheduler/scheduler.hpp>
+#include <multitasking/kernel-task.hpp>
 #include <iostream>
 #include <cassert>
 
@@ -149,8 +151,8 @@ void InitializeTimers() {
 
 void InitializeMultitasking() {
   IRT::GetGlobal()[IntVectors::LapicTimer] = MultitaskingInterrupt;
-  // TODO: here, there will be some sort of kernel task/thread that needs to be
-  // initialized; do that.
+  Scheduler::Scheduler::Initialize();
+  OS::KernelTask::Initialize();
 }
 
 }

@@ -37,6 +37,11 @@ void CPU::SetTimeout(uint64_t clockTicks) {
   x64::LAPIC::GetCurrent().SetTimeout(x64::IntVectors::LapicTimer, lapicTicks);
 }
 
+void CPU::ClearTimeout() {
+  AssertCritical();
+  x64::LAPIC::GetCurrent().ClearTimeout();
+}
+
 size_t CPU::GetCount() {
   return x64::CPUList::GetGlobal().GetCount();
 }

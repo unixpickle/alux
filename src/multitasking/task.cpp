@@ -6,6 +6,11 @@
 
 namespace OS {
 
+Task::~Task() {
+  // TODO: here, remove the task from the PID map, free the task's PID, close
+  // the task's sockets, delete the task's threads, etc.
+}
+
 void Task::AddThread(Thread * thread) {
   AssertCritical();
   ScopeLock scope(&threadsLock);

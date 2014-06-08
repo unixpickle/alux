@@ -16,7 +16,7 @@ class Task : public Scheduler::JobGroup {
 public:
   virtual void AddThread(Thread * th); // @critical
   virtual void RemoveThread(Thread * th); // @critical
-  virtual ~Task() {} // @noncritical
+  virtual ~Task(); // @noncritical
   
   bool Retain(); // @critical
   void Release(); // @critical
@@ -27,6 +27,9 @@ public:
 protected:
   uint64_t threadsLock OS_ALIGNED(8); // @critical
   Thread * firstThread;
+  
+  Task * garbageNext;
+  Task * garbageLast;
   
   uint64_t lifeLock OS_ALIGNED(8);
   uint64_t retainCount;
