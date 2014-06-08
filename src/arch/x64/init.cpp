@@ -18,12 +18,9 @@
 #include <arch/x64/time/pit.hpp>
 #include <arch/x64/time/hpet.hpp>
 #include <arch/x64/time/lapic.hpp>
-#include <arch/x64/multitasking/interrupt.hpp>
 #include <arch/x64/general/critical.hpp>
 #include <arch/x64/general/failure.hpp>
 #include <arch/general/critical.hpp>
-#include <scheduler/scheduler.hpp>
-#include <multitasking/kernel-task.hpp>
 #include <iostream>
 #include <cassert>
 
@@ -147,12 +144,6 @@ void InitializeTimers() {
   InitializeLapicTimers();
   
   // TODO: here is where I might setup invariant TSC for a faster clock
-}
-
-void InitializeMultitasking() {
-  IRT::GetGlobal()[IntVectors::LapicTimer] = MultitaskingInterrupt;
-  Scheduler::Scheduler::Initialize();
-  OS::KernelTask::Initialize();
 }
 
 }

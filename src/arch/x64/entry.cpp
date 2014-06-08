@@ -16,7 +16,6 @@ void MbootEntry(void * mbootPtr) {
   OS::x64::InitializeTime();
   OS::x64::InitializeSMP();
   OS::x64::InitializeTimers();
-  OS::x64::InitializeMultitasking();
   
   OS::Panic("TODO: platform initialization complete; what do????");
 }

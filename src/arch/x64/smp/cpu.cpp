@@ -16,16 +16,6 @@ uint32_t CPU::GetAPICID() {
   return apicId;
 }
 
-size_t CPU::GetIndex() {
-  return CPUList::GetGlobal().GetIndex(*this);
-}
-
-void CPU::Wakeup() {
-  AssertCritical();
-  LAPIC & lapic = LAPIC::GetCurrent();
-  lapic.SendIPI(GetAPICID(), IntVectors::LapicTimer);
-}
-
 }
 
 }
