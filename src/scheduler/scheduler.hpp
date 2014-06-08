@@ -15,7 +15,7 @@ public:
    * this build.
    * @noncritical
    */
-  static void InitializeScheduler();
+  static void Initialize();
   
   /**
    * Returns the global initialized scheduler.
