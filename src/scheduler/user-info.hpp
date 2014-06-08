@@ -1,0 +1,7 @@
+namespace OS {
+
+class UserInfo {
+  
+};
+
+}
