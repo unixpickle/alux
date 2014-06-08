@@ -1,5 +1,6 @@
 PROJECT_ROOT = $(shell pwd)
 TARGET_ARCH ?= x64
+TARGET_SCHEDULER ?= fifo
 OUTFILE ?= alux.bin
 BUILDDIR ?= $(PROJECT_ROOT)/build
 OBJDIR ?= $(BUILDDIR)/objects
@@ -10,6 +11,7 @@ NASM ?= nasm
 
 export PROJECT_ROOT
 export TARGET_ARCH
+export TARGET_SCHEDULER
 export OUTFILE
 export BUILDDIR
 export OBJDIR

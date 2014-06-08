@@ -3,12 +3,8 @@
 
 namespace OS {
 
-namespace FIFOScheduler {
-
 class ThreadInfo {
 };
-
-}
 
 }
 

@@ -84,12 +84,16 @@ main = ->
   if not arch in ['x64']
     console.error 'Unknown architecture: ' + arch
     process.exit 1
+  scheduler = process.env['TARGET_SCHEDULER']
+  if not scheduler in ['fifo']
+    console.error 'Unknown scheduler: ' + scheduler
+    process.exit 1
   
   mainSources = [
     'stdlib'
     'utilities'
     'memory'
-    'scheduler'
+    'scheduler/base'
     'multitasking'
     'arch/general'
   ]
@@ -100,6 +104,7 @@ main = ->
   for dep in deps
     finder.search 'dependencies/' + dep
   finder.search 'src/arch/' + arch
+  finder.search 'src/scheduler/' + scheduler
   
   includes = [
     'src/stdlib/cheaders'
@@ -109,6 +114,7 @@ main = ->
     'dependencies/analloc2/include'
     'dependencies/anlock/src'
     'src/arch/' + arch + '/include'
+    'src/scheduler/' + scheduler + '/include'
   ]
   objdir = process.env['OBJDIR']
   file = new Makefile finder, includes, objdir

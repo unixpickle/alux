@@ -1,4 +1,4 @@
-#include <scheduler/thread.hpp>
+#include <scheduler/base/thread.hpp>
 
 namespace OS {
 

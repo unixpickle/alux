@@ -1,7 +1,7 @@
 #ifndef __SCHEDULER_THREAD_HPP__
 #define __SCHEDULER_THREAD_HPP__
 
-#include <scheduler/default.hpp>
+#include <scheduler_specific/thread-info.hpp>
 #include <utilities/linked-list.hpp>
 
 namespace OS {

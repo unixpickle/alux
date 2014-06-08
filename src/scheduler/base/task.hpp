@@ -1,7 +1,8 @@
 #ifndef __SCHEDULER_TASK_HPP__
 #define __SCHEDULER_TASK_HPP__
 
-#include <scheduler/thread.hpp>
+#include <scheduler/base/thread.hpp>
+#include <scheduler_specific/task-info.hpp>
 #include <cstdint>
 #include <common>
 
