@@ -1,7 +1,7 @@
 #ifndef __GENERAL_CPU_HPP__
 #define __GENERAL_CPU_HPP__
 
-#include <multitasking/task.hpp>
+#include <multitasking/thread.hpp>
 #include <scheduler/user-info.hpp>
 #include <cstddef>
 #include <cstdint>
@@ -21,14 +21,14 @@ public:
   
   virtual size_t GetIndex() = 0; // @ambicritical
   virtual void Wakeup() = 0; // @critical
-  virtual Task * GetTask(); // @critical; doesn't retain/release group
-  virtual void SetTask(Task *); // @critical; consumes ownership
+  virtual Thread * GetThread(); // @critical; doesn't retain/release group
+  virtual void SetThread(Thread *); // @critical; consumes ownership
   
   Scheduler::UserInfo * userInfo;
   
 protected:
-  uint64_t taskLock OS_ALIGNED(8); // @critical
-  Task * task;
+  uint64_t threadLock OS_ALIGNED(8); // @critical
+  Thread * thread;
 };
 
 }

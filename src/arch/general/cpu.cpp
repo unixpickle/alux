@@ -1,21 +1,21 @@
 #include <arch/general/cpu.hpp>
-#include <multitasking/task-group.hpp>
+#include <multitasking/task.hpp>
 #include <utilities/lock.hpp>
 #include <utilities/critical.hpp>
 
 namespace OS {
 
-Task * CPU::GetTask() {
+Thread * CPU::GetThread() {
   AssertCritical();
-  ScopeCriticalLock scope(&taskLock);
-  return task;
+  ScopeCriticalLock scope(&threadLock);
+  return thread;
 }
 
-void CPU::SetTask(Task * t) {
+void CPU::SetThread(Thread * t) {
   AssertCritical();
-  ScopeCriticalLock scope(&taskLock);
-  task->GetTaskGroup()->Release();
-  task = t;
+  ScopeCriticalLock scope(&threadLock);
+  thread->GetTask()->Release();
+  thread = t;
 }
 
 }

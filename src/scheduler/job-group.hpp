@@ -10,6 +10,7 @@ namespace Scheduler {
 class JobGroup {
 public:
   UserInfo * userInfo;
+  virtual ~JobGroup() {}
 };
 
 }

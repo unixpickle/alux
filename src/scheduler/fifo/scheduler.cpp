@@ -30,7 +30,7 @@ void Scheduler::SetTimer(uint64_t fireTime, bool) {
   ScopeCriticalLock scope(&lock);
   
   CPU & cpu = CPU::GetCurrent();
-  Job * job = cpu.GetTask();
+  Job * job = cpu.GetThread();
   assert(job != NULL);
   JobInfo::ForJob(job)->timerDeadline = fireTime;
 }
@@ -40,7 +40,7 @@ void Scheduler::SetInfiniteTimer() {
   ScopeCriticalLock scope(&lock);
   
   CPU & cpu = CPU::GetCurrent();
-  Job * job = cpu.GetTask();
+  Job * job = cpu.GetThread();
   assert(job != NULL);
   JobInfo::ForJob(job)->timerDeadline = UINT64_MAX;
 }

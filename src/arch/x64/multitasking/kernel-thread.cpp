@@ -1,12 +1,12 @@
-#include <arch/x64/multitasking/kernel-task.hpp>
+#include <arch/x64/multitasking/kernel-thread.hpp>
 #include <arch/x64/vmm/global-map.hpp>
 
 namespace OS {
 
 namespace x64 {
 
-KernelTask::KernelTask(OS::TaskGroup * g, uint64_t method, uint64_t _argument)
-  : super(g), argument(_argument) {
+KernelThread::KernelThread(OS::Task * t, uint64_t method, uint64_t _argument)
+  : super(t), argument(_argument) {
   stack = (void *)(new uint8_t[0x4000]);
   
   regs.rip = method;
@@ -21,15 +21,15 @@ KernelTask::KernelTask(OS::TaskGroup * g, uint64_t method, uint64_t _argument)
           : "=a" (regs.rflags));
 }
 
-KernelTask::~KernelTask() {
+KernelThread::~KernelThread() {
   delete (uint8_t *)stack;
 }
 
-void KernelTask::Run() {
+void KernelThread::Run() {
   if (hasRun) return super::Run();
   
   hasRun = true;
-  OS::Task::Run();
+  OS::Thread::Run();
   SetStackInCPU();
   __asm__(
     "mov %%rax, %%cr3\n"

@@ -2,8 +2,7 @@
 #define __X64_TASK_HPP__
 
 #include <multitasking/task.hpp>
-#include <cstdint>
-#include <common>
+#include <arch/general/address-space.hpp>
 
 namespace OS {
 
@@ -11,29 +10,13 @@ namespace x64 {
 
 class Task : public OS::Task {
 public:
-  typedef OS::Task super;
-  
-  class Registers {
-  public:
-    // these are ordered this way for iretq
-    uint64_t rip;
-    uint64_t cs;
-    uint64_t rflags;
-    uint64_t rsp;
-    uint64_t ss;
-    
-    uint64_t cr3;
-  } OS_PACKED;
-  
-  Registers regs;
-  
-  Task(OS::TaskGroup * g);
+  Task();
   virtual ~Task();
-  virtual void Run();
   
+  AddressSpace * GetAddressSpace();
+
 protected:
-  void * kernStack;
-  void SetStackInCPU();
+  AddressSpace * addressSpace;
 };
 
 }

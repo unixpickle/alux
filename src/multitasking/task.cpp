@@ -1,25 +1,62 @@
 #include <multitasking/task.hpp>
-#include <multitasking/task-group.hpp>
-#include <arch/general/cpu.hpp>
+#include <multitasking/thread.hpp>
+#include <utilities/critical.hpp>
+#include <utilities/lock.hpp>
+#include <cstddef>
 
 namespace OS {
 
-Task::Task(TaskGroup * _group) : group(_group) {
+void Task::AddThread(Thread * thread) {
+  AssertCritical();
+  ScopeLock scope(&threadsLock);
+  thread->taskNext = firstThread;
+  thread->taskLast = NULL;
+  firstThread = thread;
 }
 
-TaskGroup * Task::GetTaskGroup() {
-  return group;
+void Task::RemoveThread(Thread * th) {
+  AssertCritical();
+  ScopeLock scope(&threadsLock);
+  if (firstThread == th) {
+    firstThread = th->taskNext;
+    if (firstThread) {
+      firstThread->taskLast = NULL;
+    }
+  }
+  th->taskNext = NULL;
+  th->taskLast = NULL;
 }
 
-Scheduler::JobGroup * Task::GetJobGroup() {
-  return static_cast<Scheduler::JobGroup *>(group);
+bool Task::Retain() {
+  AssertCritical();
+  ScopeCriticalLock scope(&lifeLock);
+  if (!holdCount && isKilled) return false;
+  retainCount++;
+  return true;
 }
 
-void Task::Run() {
-  CPU::GetCurrent().SetTask(this);
+void Task::Release() {
+  AssertCritical();
+  ScopeCriticalLock scope(&lifeLock);
+  // TODO: release and then (if killed) push a kill thread
 }
 
-void Task::Cleanup() {
+bool Task::Hold() {
+  AssertCritical();
+  ScopeCriticalLock scope(&lifeLock);
+  if (!holdCount && isKilled) return false;
+  holdCount++;
+  return true;
+}
+
+void Task::Unhold() {
+  AssertCritical();
+  ScopeCriticalLock scope(&lifeLock);
+  // TODO: unhold and then (if killed) push a kill thread
+}
+
+void Task::Kill() {
+  AssertCritical();
 }
 
 }

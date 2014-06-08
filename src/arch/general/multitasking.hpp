@@ -1,28 +1,28 @@
 #ifndef __GENERAL_MULTITASKING_HPP__
 #define __GENERAL_MULTITASKING_HPP__
 
-#include <multitasking/task-group.hpp>
 #include <multitasking/task.hpp>
+#include <multitasking/thread.hpp>
 
 namespace OS {
 
 /**
- * Create a task group that may hold kernel tasks.
+ * Create a task that may hold kernel threads.
  * @noncritical
  */
-TaskGroup * CreateKernelTaskGroup();
+OS::Task * CreateKernelTask();
 
 /**
- * Create a kernel task for the created task group.
+ * Create a kernel thread.
  * @noncritical
  */
-Task * CreateKernelTask(TaskGroup * group, void * function);
+OS::Thread * CreateKernelThread(OS::Task *, void * function);
 
 /**
- * Create a kernel task for the created task group and pass an argument to it.
+ * Create a kernel thread and pass it an argument.
  * @noncritical
  */
-Task * CreateKernelTask(TaskGroup * group, void * function, void * argument);
+OS::Thread * CreateKernelThread(OS::Task *, void * function, void * argument);
 
 }
 

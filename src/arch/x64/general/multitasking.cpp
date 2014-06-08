@@ -1,20 +1,21 @@
 #include <arch/general/multitasking.hpp>
-#include <arch/x64/multitasking/kernel-task-group.hpp>
 #include <arch/x64/multitasking/kernel-task.hpp>
+#include <arch/x64/multitasking/kernel-thread.hpp>
 #include <cstddef>
 
 namespace OS {
 
-TaskGroup * CreateKernelTaskGroup() {
-  return new x64::KernelTaskGroup();
+OS::Task * CreateKernelTask() {
+  return new x64::KernelTask();
 }
 
-Task * CreateKernelTask(TaskGroup * g, void * function) {
-  return CreateKernelTask(g, function, NULL);
+OS::Thread * CreateKernelThread(OS::Task * t, void * function) {
+  return CreateKernelThread(t, function, NULL);
 }
 
-Task * CreateKernelTask(TaskGroup * g, void * function, void * argument) {
-  return new x64::KernelTask(g, (uint64_t)function, (uint64_t)argument);
+OS::Thread * CreateKernelThread(OS::Task * t, void * function,
+                                void * argument) {
+  return new x64::KernelThread(t, (uint64_t)function, (uint64_t)argument);
 }
 
 }

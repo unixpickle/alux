@@ -1,33 +1,37 @@
 #ifndef __MULTITASKING_TASK_HPP__
 #define __MULTITASKING_TASK_HPP__
 
-#include <scheduler/job.hpp>
+#include <scheduler/job-group.hpp>
+#include <cstdint>
+#include <common>
 
 namespace OS {
 
-class TaskGroup;
+class Thread;
 
 /**
- * Equivalent of a Mach thread.
+ * Equivalent of a Mach task.
  */
-class Task : public Scheduler::Job {
+class Task : public Scheduler::JobGroup {
 public:
-  Task(TaskGroup * group);
+  virtual void AddThread(Thread * th); // @critical
+  virtual void RemoveThread(Thread * th); // @critical
+  virtual ~Task() {} // @noncritical
   
-  TaskGroup * GetTaskGroup();
-  Scheduler::JobGroup * GetJobGroup();
-  
-  virtual void Run(); // doesn't do much
-  
+  bool Retain(); // @critical
+  void Release(); // @critical
+  bool Hold(); // @critical
+  void Unhold(); // @critical
+  void Kill(); // @critical
+
 protected:
-  virtual void Cleanup(); // @noncritical
+  uint64_t threadsLock OS_ALIGNED(8); // @critical
+  Thread * firstThread;
   
-  TaskGroup * group;
-  
-  Task * groupNext;
-  Task * groupLast;
-  
-  friend class TaskGroup;
+  uint64_t lifeLock OS_ALIGNED(8);
+  uint64_t retainCount;
+  uint64_t holdCount;
+  bool isKilled;
 };
 
 }
