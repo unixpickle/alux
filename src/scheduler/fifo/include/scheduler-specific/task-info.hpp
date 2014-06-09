@@ -3,7 +3,11 @@
 
 namespace OS {
 
+class Task;
+
 class TaskInfo {
+public:
+  TaskInfo(Task *) {}
 };
 
 }

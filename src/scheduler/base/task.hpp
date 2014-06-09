@@ -2,7 +2,7 @@
 #define __SCHEDULER_TASK_HPP__
 
 #include <scheduler/base/thread.hpp>
-#include <scheduler_specific/task-info.hpp>
+#include <scheduler-specific/task-info.hpp>
 #include <cstdint>
 #include <common>
 
@@ -14,6 +14,7 @@ class Task {
 public:
   TaskInfo userInfo;
   
+  Task(); // @noncritical
   virtual ~Task(); // @noncritical
   virtual void Delete() = 0; // @noncritical
   
@@ -28,7 +29,7 @@ public:
 
 private:
   uint64_t threadsLock OS_ALIGNED(8); // @critical
-  LinkedList<Thread, &Thread::taskLink> threads;
+  Thread * firstThread;
   
   uint64_t stateLock OS_ALIGNED(8); // @critical
   uint64_t retainCount;

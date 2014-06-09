@@ -2,7 +2,7 @@
 
 namespace OS {
 
-Thread::Thread(Task * owner) : task(owner) {
+Thread::Thread(Task * owner) : task(owner), userInfo(this) {
 }
 
 Thread::~Thread() {

@@ -4,7 +4,13 @@
 
 namespace OS {
 
+Task::Task() : userInfo(this) {
+  AssertNoncritical();
+  // TODO: here, allocate a PID
+}
+
 Task::~Task() {
+  AssertNoncritical();
   // TODO: here, destroy all the threads, deregister the PID, close sockets,
   // etc.
 }
@@ -12,13 +18,26 @@ Task::~Task() {
 void Task::AddThread(Thread * th) {
   AssertCritical();
   ScopeCriticalLock lock(&threadsLock);
-  threads.PushBack(th);
+  th->taskNext = firstThread;
+  th->taskLast = NULL;
+  if (firstThread) {
+    firstThread->taskLast = th;
+  }
+  firstThread = th;
 }
 
 void Task::RemoveThread(Thread * th) {
   AssertCritical();
   ScopeCriticalLock lock(&threadsLock);
-  threads.Remove(th);
+  if (th == firstThread) {
+    firstThread = th->taskNext;
+    if (firstThread) firstThread->taskLast = NULL;
+  } else {
+    th->taskLast->taskNext = th->taskNext;
+    if (th->taskNext) {
+      th->taskNext = th->taskLast;
+    }
+  }
 }
 
 bool Task::Retain() {
