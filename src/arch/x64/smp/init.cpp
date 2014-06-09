@@ -125,7 +125,7 @@ static void CPUEntrance() {
   uint16_t sel = gdt.AddTSS(firstTSS);
   
   // initialize this CPU entry
-  void * cpuStack = (void *)(new uint8_t[0x4000]);
+  void * cpuStack = (void *)((new uint8_t[0x4000]) + 0x4000);
   firstTSS->rsp[0] = (uint64_t)cpuStack;
   CPU & cpu = CPUList::GetGlobal().AddEntry(lapicId);
   cpu.dedicatedStack = cpuStack;

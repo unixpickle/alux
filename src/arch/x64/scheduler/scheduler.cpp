@@ -6,10 +6,13 @@
 #include <arch/x64/interrupts/vectors.hpp>
 #include <arch/general/failure.hpp>
 #include <arch/general/clock.hpp>
+#include <scheduler-specific/scheduler.hpp>
 #include <utilities/frac.hpp>
 #include <utilities/critical.hpp>
 
 namespace OS {
+
+static void CallTick();
 
 Task * CreateKernelTask() {
   return x64::Task::New(true);
@@ -28,9 +31,31 @@ Thread * CreateKernelThread(OS::Task * kernTask, void * func, void * arg) {
 
 void SaveAndTick() {
   AssertCritical();
-  // TODO: save the registers by pushing them to the stack, then switch stack
-  // and call the destination method
-  Panic("SaveAndTick - NYI");
+  x64::CPU & cpu = x64::CPUList::GetGlobal().GetCurrent();
+  x64::Thread * th = static_cast<x64::Thread *>(cpu.GetThread());
+  if (!th) {
+    __asm__("mov %%rax, %%rsp\n"
+            "call *%%rbx"
+            : : "a" (cpu.dedicatedStack), "b" (CallTick));
+  } else {
+    __asm__(
+      "movq $save_and_tick_return, (%%rdi)\n" // save RIP
+      "xor %%rax, %%rax\n"
+      "mov %%cs, %%ax\n" // save CS
+      "mov %%rax, 8(%%rdi)\n"
+      "mov %%ss, %%ax\n" // save SS
+      "mov %%rax, 0x20(%%rdi)\n"
+      "pushfq\n" // save RFLAGS
+      "pop %%rax\n"
+      "mov %%rax, 0x10(%%rdi)\n"
+      "mov %%rsp, 0x18(%%rdi)\n" // save RSP
+      "mov %%rcx, %%rsp\n" // load new RSP
+      "call *%%rbx\n" // CallTick()
+      "save_and_tick_return:"
+      : : "c" (cpu.dedicatedStack), "b" (CallTick), "D" (&th->state)
+      : "rax", "rdx", "rsi", "r8", "r9", "r10", "r11", "r12", "r13", "r14",
+        "r15", "memory");
+  }
 }
 
 void SetTimeout(uint64_t deadline, bool) {
@@ -55,6 +80,20 @@ void WaitTimeout() {
   while (1) {
     __asm__ __volatile__("hlt");
   }
+}
+
+static void CallTick() {
+  Scheduler::GetGlobal().Tick();
+}
+
+namespace x64 {
+
+void LapicTickMethod() {
+  AssertCritical();
+  LAPIC::GetCurrent().SendEOI();
+  SaveAndTick();
+}
+
 }
 
 }

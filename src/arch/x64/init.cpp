@@ -18,9 +18,11 @@
 #include <arch/x64/time/pit.hpp>
 #include <arch/x64/time/hpet.hpp>
 #include <arch/x64/time/lapic.hpp>
+#include <arch/x64/scheduler/scheduler.hpp>
 #include <arch/x64/general/critical.hpp>
 #include <arch/x64/general/failure.hpp>
 #include <arch/general/critical.hpp>
+#include <scheduler-specific/scheduler.hpp>
 #include <iostream>
 #include <cassert>
 
@@ -117,7 +119,7 @@ void InitializeSMP() {
   uint16_t sel = gdt.AddTSS(firstTSS);
   
   // initialize this CPU entry
-  void * cpuStack = (void *)(new uint8_t[0x4000]);
+  void * cpuStack = (void *)((new uint8_t[0x4000]) + 0x4000);
   firstTSS->rsp[0] = (uint64_t)cpuStack;
   
   SetCritical(true);
@@ -143,7 +145,12 @@ void InitializeTimers() {
   
   InitializeLapicTimers();
   
-  // TODO: here is where I might setup invariant TSC for a faster clock
+  // TODO: here is where I might setup invariant TSC for a better clock
+}
+
+void InitializeMultitasking() {
+  Scheduler::Initialize();
+  IRT::GetGlobal()[IntVectors::LapicTimer] = LapicTickMethod;
 }
 
 }

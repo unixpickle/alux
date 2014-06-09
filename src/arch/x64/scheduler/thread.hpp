@@ -19,7 +19,7 @@ public:
   
   uint64_t rdi;
   uint64_t cr3;
-};
+} OS_PACKED;
 
 class Thread : public OS::Thread {
 public:
