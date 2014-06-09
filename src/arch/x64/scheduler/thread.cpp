@@ -3,6 +3,8 @@
 #include <arch/x64/vmm/global-map.hpp>
 #include <utilities/critical.hpp>
 
+#include <iostream> // TODO: delete this
+
 namespace OS {
 
 namespace x64 {
@@ -47,14 +49,16 @@ void Thread::Run() {
   AssertCritical();
   CPU & cpu = CPUList::GetGlobal().GetCurrent();
   cpu.tss->rsp[0] = (uint64_t)kernStack + 0x4000; // for interrupts
+  uint64_t * nums = (uint64_t *)&state;
   __asm__ __volatile__(
     "mov %%rax, %%cr3\n"
     "sub $0x28, %%rsp\n"
     "mov $5, %%rcx\n"
-    "mov %%rsp, %%rdx\n"
+    "mov %%rsp, %%rdi\n"
     "rep movsq\n"
+    "mov %%rdx, %%rdi\n"
     "iretq"
-    : : "a" (state.cr3), "S" (&state), "D" (state.rdi)
+    : : "a" (state.cr3), "S" (&state), "d" (state.rdi)
   );
 }
 

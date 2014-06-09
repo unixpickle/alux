@@ -7,10 +7,14 @@
 #include <new>
 
 #include <iostream> // TODO: delete this
+#include <arch/x64/general/critical.hpp> // TODO: delete this
+#include <arch/general/failure.hpp> // TODO: delete this
 
 namespace OS {
 
 static Scheduler globalObj;
+
+static void LoopString(const char * string);
 
 void Scheduler::Initialize() {
   new(&globalObj) Scheduler();
@@ -23,7 +27,13 @@ Scheduler & Scheduler::GetGlobal() {
 void Scheduler::Start() {
   AssertNoncritical();
   
+  Task * t = CreateKernelTask();
+  Thread * th1 = CreateKernelThread(t, (void *)&LoopString, (void *)"tick");
+  Thread * th2 = CreateKernelThread(t, (void *)&LoopString, (void *)"tock");
+  
   SetCritical(true);
+  AddThread(th1);
+  AddThread(th2);
   CPUList & list = CPUList::GetGlobal();
   CPU & thisCPU = CPU::GetCurrent();
   for (int i = 0; i < list.GetCount(); i++) {
@@ -47,21 +57,25 @@ void Scheduler::RemoveThread(Thread * t) {
 
 void Scheduler::SetTimeout(uint64_t deadline, bool) {
   AssertCritical();
-  ScopeCriticalLock scope(&lock);
-  
-  Thread * th = CPU::GetCurrent().GetThread();
-  assert(th != NULL);
-  th->userInfo.nextTick = deadline;
+  {
+    ScopeCriticalLock scope(&lock);
+
+    Thread * th = CPU::GetCurrent().GetThread();
+    assert(th != NULL);
+    th->userInfo.nextTick = deadline;
+  }
   SaveAndTick();
 }
 
 void Scheduler::SetInfiniteTimeout() {
   AssertCritical();
-  ScopeCriticalLock scope(&lock);
+  {
+    ScopeCriticalLock scope(&lock);
   
-  Thread * th = CPU::GetCurrent().GetThread();
-  assert(th != NULL);
-  th->userInfo.nextTick = UINT64_MAX;
+    Thread * th = CPU::GetCurrent().GetThread();
+    assert(th != NULL);
+    th->userInfo.nextTick = UINT64_MAX;
+  }
   SaveAndTick();
 }
 
@@ -78,7 +92,6 @@ bool Scheduler::ClearTimeout(Thread *) {
 
 void Scheduler::Resign() {
   AssertCritical();
-  ScopeCriticalLock scope(&lock);
   SaveAndTick();
 }
 
@@ -90,9 +103,6 @@ void Scheduler::Tick() {
   if (!toRun) {
     WaitTimeout();
   } else {
-    CPU::SetThread(toRun);
-    toRun->userInfo.nextTick = 0;
-    toRun->userInfo.isRunning = true;
     toRun->Run();
   }
 }
@@ -117,13 +127,17 @@ Thread * Scheduler::GetNextThread() {
   
   while (1) {
     if (first) {
-      PushThread(current);
       current = PopThread();
-      if (current == first) break;
+      PushThread(current);
+      if (current == first) {
+        current = NULL;
+        break;
+      }
     } else {
       first = PopThread();
       if (!first) break;
       current = first;
+      PushThread(current);
     }
       
     if (current->userInfo.isRunning) continue;
@@ -134,6 +148,12 @@ Thread * Scheduler::GetNextThread() {
       continue;
     }
     break;
+  }
+  
+  if (current) {
+    current->userInfo.isRunning = true;
+    current->userInfo.nextTick = 0;
+    CPU::SetThread(current);
   }
   OS::SetTimeout(nextTick - now, true);
   return current;
@@ -183,6 +203,17 @@ void Scheduler::UnlinkThread(Thread * th) {
     firstThread = th->userInfo.next;
   }
   th->userInfo.next = th->userInfo.last = NULL;
+}
+
+static void LoopString(const char * string) {
+  while (1) {
+    uint64_t waitUntil = Clock::GetGlobal().GetTime()
+      + Clock::GetGlobal().GetTicksPerMin() / 120;
+    SetCritical(true);
+    Scheduler::GetGlobal().SetTimeout(waitUntil, true);
+    SetCritical(false);
+    cout << string << endl;
+  }
 }
 
 }
