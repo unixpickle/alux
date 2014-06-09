@@ -1,5 +1,6 @@
 #include <scheduler-specific/scheduler.hpp>
 #include <arch/general/cpu.hpp>
+#include <arch/general/scheduler.hpp>
 #include <arch/general/clock.hpp>
 #include <utilities/lock.hpp>
 #include <utilities/critical.hpp>
@@ -36,7 +37,7 @@ void Scheduler::SetTimeout(uint64_t deadline, bool) {
   Thread * th = CPU::GetCurrent().GetThread();
   assert(th != NULL);
   th->userInfo.nextTick = deadline;
-  CPU::SaveAndTick();
+  SaveAndTick();
 }
 
 void Scheduler::SetInfiniteTimeout() {
@@ -46,7 +47,7 @@ void Scheduler::SetInfiniteTimeout() {
   Thread * th = CPU::GetCurrent().GetThread();
   assert(th != NULL);
   th->userInfo.nextTick = UINT64_MAX;
-  CPU::SaveAndTick();
+  SaveAndTick();
 }
 
 bool Scheduler::ClearTimeout(Thread *) {
@@ -63,7 +64,7 @@ bool Scheduler::ClearTimeout(Thread *) {
 void Scheduler::Resign() {
   AssertCritical();
   ScopeCriticalLock scope(&lock);
-  CPU::SaveAndTick();
+  SaveAndTick();
 }
 
 void Scheduler::Tick() {
@@ -99,9 +100,9 @@ void Scheduler::Tick() {
     break;
   }
   
-  CPU::SetTimeout(nextTick - now, false);
-  if (current) {
-    CPU::Sleep();
+  SetTimeout(nextTick - now, false);
+  if (!current) {
+    WaitTimeout();
   } else {
     CPU::SetThread(current);
     current->userInfo.nextTick = 0;

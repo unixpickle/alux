@@ -1,3 +1,6 @@
+#include <arch/general/scheduler.hpp>
+#include <arch/x64/scheduler/task.hpp>
+#include <arch/x64/scheduler/thread.hpp>
 #include <arch/x64/smp/cpu-list.hpp>
 #include <arch/x64/interrupts/lapic.hpp>
 #include <arch/x64/interrupts/vectors.hpp>
@@ -8,26 +11,29 @@
 
 namespace OS {
 
-CPU & CPU::GetCurrent() {
+Task * CreateKernelTask() {
+  return x64::Task::New(true);
+}
+
+Thread * CreateKernelThread(OS::Task * kernTask, void * func) {
+  return CreateKernelThread(kernTask, func, NULL);
+}
+
+Thread * CreateKernelThread(OS::Task * kernTask, void * func, void * arg) {
+  x64::Task * theTask = static_cast<x64::Task *>(kernTask);
+  x64::Thread * th = x64::Thread::New(theTask, true);
+  th->SetEntry((uint64_t)func, (uint64_t)arg);
+  return th;
+}
+
+void SaveAndTick() {
   AssertCritical();
-  return x64::CPUList::GetGlobal().GetCurrent();
-}
-
-size_t CPU::GetCount() {
-  return (size_t)x64::CPUList::GetGlobal().GetCount();
-}
-
-CPU & CPU::GetAt(size_t idx) {
-  return static_cast<CPU &>(x64::CPUList::GetGlobal()[(int)idx]);
-}
-
-void CPU::SaveAndTick() {
   // TODO: save the registers by pushing them to the stack, then switch stack
   // and call the destination method
-  Panic("CPU::SaveAndTick - NYI");
+  Panic("SaveAndTick - NYI");
 }
 
-void CPU::SetTimeout(uint64_t deadline, bool) {
+void SetTimeout(uint64_t deadline, bool) {
   AssertCritical();
   x64::CPU & cpu = x64::CPUList::GetGlobal().GetCurrent();
 
@@ -38,12 +44,12 @@ void CPU::SetTimeout(uint64_t deadline, bool) {
   x64::LAPIC::GetCurrent().SetTimeout(x64::IntVectors::LapicTimer, lapicTicks);
 }
 
-void CPU::ClearTimeout() {
+void ClearTimeout() {
   AssertCritical();
   x64::LAPIC::GetCurrent().ClearTimeout();
 }
 
-void CPU::Sleep() {
+void WaitTimeout() {
   AssertCritical();
   __asm__("sti");
   while (1) {

@@ -7,6 +7,10 @@
 
 namespace OS {
 
+CPUList & CPUList::GetGlobal() {
+  return x64::CPUList::GetGlobal();
+}
+
 namespace x64 {
 
 static CPUList globalList;

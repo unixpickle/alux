@@ -9,16 +9,10 @@ namespace OS {
 
 class CPU {
 public:
-  static CPU & GetCurrent(); // @critical
-  static size_t GetCount(); // @ambicritical
-  static CPU & GetAt(size_t index); // @ambicritical
-  static void SaveAndTick(); // @critical
-  static void SetTimeout(uint64_t delay, bool precision); // @critical
-  static void ClearTimeout(); // @critical
-  static void Sleep(); // @critical -> @noncritical (no return)
   static void SetThread(Thread * th); // @critical
+  static CPU & GetCurrent();
   
-  virtual size_t GetIndex() = 0; // @ambicritical
+  virtual int GetIndex() = 0; // @ambicritical
   virtual void Wake() = 0; // @critical
   virtual Thread * GetThread(); // @critical
   

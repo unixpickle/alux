@@ -6,6 +6,10 @@
 
 namespace OS {
 
+CPU & CPU::GetCurrent() {
+  return x64::CPUList::GetGlobal().GetCurrent();
+}
+
 namespace x64 {
 
 CPU::CPU(uint32_t _apicId) : apicId(_apicId) {
@@ -15,7 +19,7 @@ uint32_t CPU::GetAPICID() {
   return apicId;
 }
 
-size_t CPU::GetIndex() {
+int CPU::GetIndex() {
   return (size_t)GetAPICID();
 }
 

@@ -24,7 +24,7 @@ public:
   CPU(uint32_t apicId);
     
   uint32_t GetAPICID();
-  virtual size_t GetIndex();
+  virtual int GetIndex();
   virtual void Wake();
 
 private:
