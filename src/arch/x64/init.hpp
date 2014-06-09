@@ -12,7 +12,7 @@ void InitializeAPIC();
 void InitializeTime();
 void InitializeSMP();
 void InitializeTimers();
-void InitializeMultitasking();
+void InitializeScheduler();
 
 }
 

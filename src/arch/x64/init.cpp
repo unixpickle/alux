@@ -148,9 +148,11 @@ void InitializeTimers() {
   // TODO: here is where I might setup invariant TSC for a better clock
 }
 
-void InitializeMultitasking() {
-  Scheduler::Initialize();
+void InitializeScheduler() {
+  cout << "Initializing scheduler..." << endl;
   IRT::GetGlobal()[IntVectors::LapicTimer] = LapicTickMethod;
+  Scheduler::Initialize();
+  Scheduler::GetGlobal().Start();
 }
 
 }

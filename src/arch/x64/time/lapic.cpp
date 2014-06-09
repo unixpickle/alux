@@ -40,6 +40,9 @@ static void CalibrateLAPIC() {
   AssertCritical();
   
   LAPIC & lapic = LAPIC::GetCurrent();
+  if (lapic.IsInService(IntVectors::Calibrate)) {
+    lapic.SendEOI();
+  }
   lapic.WriteReg(LAPIC::RegLVTTimer, 0xff);
   lapic.WriteReg(LAPIC::RegTimerInitCount, 0xffffffff);
   SetCritical(false);

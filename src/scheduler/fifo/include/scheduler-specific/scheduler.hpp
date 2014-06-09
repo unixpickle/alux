@@ -9,10 +9,12 @@ namespace OS {
 
 class Scheduler {
 public:
-  static const uint64_t Jiffy = 60000; // 100Hz
+  static const uint64_t Jiffy = 6000; // 100Hz
   
   static void Initialize();
   static Scheduler & GetGlobal();
+  
+  void Start(); // @noncritical
   
   // operations acting on the scheduler as a whole
   
@@ -38,6 +40,7 @@ protected:
   Thread * firstThread = NULL;
   Thread * lastThread = NULL;
   
+  Thread * GetNextThread(); // @critical
   Thread * PopThread(); // @critical, nosync
   void PushThread(Thread *); // @critical, nosync
   void UnlinkThread(Thread *);

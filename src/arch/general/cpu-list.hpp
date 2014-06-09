@@ -6,6 +6,7 @@
 namespace OS {
 
 class CPUList {
+public:
   static CPUList & GetGlobal();
   
   virtual int GetCount() = 0;

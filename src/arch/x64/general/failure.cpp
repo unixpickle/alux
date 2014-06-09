@@ -51,6 +51,7 @@ void Panic(const char * message) {
 }
 
 static void PanicIPI() {
+  // don't even bother sending an EOI
   __asm__("cli\nhlt");
 }
 

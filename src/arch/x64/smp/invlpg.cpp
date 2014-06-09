@@ -46,6 +46,12 @@ void InitializeInvlpg() {
 }
 
 static void HandleInvlpg() {
+  AssertCritical();
+  LAPIC & lapic = LAPIC::GetCurrent();
+  if (lapic.IsInService(IntVectors::Invlpg)) {
+    lapic.SendEOI();
+  }
+  
   CPU & cpu = CPUList::GetGlobal().GetCurrent();
   ScopeCriticalLock lock(&cpu.invlpgLock);
   while (cpu.invlpgInfo) {

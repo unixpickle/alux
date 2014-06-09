@@ -1,10 +1,12 @@
 #include <scheduler-specific/scheduler.hpp>
-#include <arch/general/cpu.hpp>
+#include <arch/general/cpu-list.hpp>
 #include <arch/general/scheduler.hpp>
 #include <arch/general/clock.hpp>
 #include <utilities/lock.hpp>
 #include <utilities/critical.hpp>
 #include <new>
+
+#include <iostream> // TODO: delete this
 
 namespace OS {
 
@@ -16,6 +18,19 @@ void Scheduler::Initialize() {
 
 Scheduler & Scheduler::GetGlobal() {
   return globalObj;
+}
+
+void Scheduler::Start() {
+  AssertNoncritical();
+  
+  SetCritical(true);
+  CPUList & list = CPUList::GetGlobal();
+  CPU & thisCPU = CPU::GetCurrent();
+  for (int i = 0; i < list.GetCount(); i++) {
+    if (&list[i] == &thisCPU) continue;
+    list[i].Wake();
+  }
+  Tick();
 }
 
 void Scheduler::AddThread(Thread * t) {
@@ -68,7 +83,23 @@ void Scheduler::Resign() {
 }
 
 void Scheduler::Tick() {
+  int index = CPU::GetCurrent().GetIndex();
   AssertCritical();
+  
+  Thread * toRun = GetNextThread();
+  if (!toRun) {
+    WaitTimeout();
+  } else {
+    CPU::SetThread(toRun);
+    toRun->userInfo.nextTick = 0;
+    toRun->userInfo.isRunning = true;
+    toRun->Run();
+  }
+}
+
+// PRIVATE //
+
+Thread * Scheduler::GetNextThread() {
   ScopeCriticalLock scope(&lock);
   
   Thread * running = CPU::GetCurrent().GetThread();
@@ -81,15 +112,20 @@ void Scheduler::Tick() {
   uint64_t now = clock.GetTime();
   uint64_t nextTick = now + clock.GetTicksPerMin() / Jiffy;
   
-  Thread * first = PopThread();
-  Thread * current = first;
+  Thread * first = NULL;
+  Thread * current = NULL;
   
-  while (current) {
-    if (current != first) {
+  while (1) {
+    if (first) {
       PushThread(current);
       current = PopThread();
       if (current == first) break;
+    } else {
+      first = PopThread();
+      if (!first) break;
+      current = first;
     }
+      
     if (current->userInfo.isRunning) continue;
     if (current->userInfo.nextTick > now) {
       if (current->userInfo.nextTick < nextTick) {
@@ -99,19 +135,9 @@ void Scheduler::Tick() {
     }
     break;
   }
-  
-  SetTimeout(nextTick - now, false);
-  if (!current) {
-    WaitTimeout();
-  } else {
-    CPU::SetThread(current);
-    current->userInfo.nextTick = 0;
-    current->userInfo.isRunning = true;
-    current->Run();
-  }
+  OS::SetTimeout(nextTick - now, true);
+  return current;
 }
-
-// PRIVATE //
 
 Thread * Scheduler::PopThread() {
   Thread * result = firstThread;
