@@ -8,15 +8,15 @@
 
 namespace OS {
 
-class Scheduler;
 class Thread;
+class GarbageThread;
 
 class Task : public ArchTask, public SchedTask {
 public:
   static Task * New(bool forKernel); // @noncritical
   
   ~Task(); // @noncritical
-  void Delete(); // @noncritical
+  virtual void Delete(); // @noncritical
   
   void AddThread(Thread * th); // @critical
   void RemoveThread(Thread * th); // @critical
@@ -26,6 +26,10 @@ public:
   bool Hold(); // @critical
   void Unhold(); // @critical
   void Kill(uint64_t status); // @critical
+
+protected:
+  Task * garbageNext;
+  friend class GarbageThread;
 
 private:
   Task(bool forKernel);

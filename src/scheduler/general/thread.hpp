@@ -12,15 +12,16 @@ class Thread : public ArchThread, public SchedThread {
 public:
   static Thread * New(Task * owner, bool kernel); // @noncritical
   
-  void Delete(); // @noncritical
+  virtual void Delete(); // @noncritical
   Task * GetTask(); // @ambicritical
   
 protected:
   Thread * taskNext, * taskLast;
   friend class Task;
   
-private:
   Thread(Task * owner, bool kernel); // @noncritical
+  
+private:
   Task * task;
 };
 
