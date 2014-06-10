@@ -1,7 +1,7 @@
 #ifndef __X64_PAGE_ALLOCATOR_HPP__
 #define __X64_PAGE_ALLOCATOR_HPP__
 
-#include <specific/types.hpp>
+#include <arch-specific/types.hpp>
 
 namespace OS {
 

@@ -1,7 +1,7 @@
 #ifndef __MEMORY_PHYSCOPY_HPP__
 #define __MEMORY_PHYSCOPY_HPP__
 
-#include <specific/types.hpp>
+#include <arch-specific/types.hpp>
 #include <cstddef>
 
 namespace OS {

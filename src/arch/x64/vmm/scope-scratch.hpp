@@ -2,7 +2,7 @@
 #define __X64_SCOPE_SCRATCH_HPP__
 
 #include <utilities/critical.hpp>
-#include <specific/types.hpp>
+#include <arch-specific/types.hpp>
 
 namespace OS {
 

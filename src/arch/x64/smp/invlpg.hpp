@@ -1,7 +1,7 @@
 #ifndef __X64_SMP_INVLPG_HPP__
 #define __X64_SMP_INVLPG_HPP__
 
-#include <specific/types.hpp>
+#include <arch-specific/types.hpp>
 #include <cstddef>
 
 namespace OS {

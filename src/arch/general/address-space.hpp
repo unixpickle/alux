@@ -1,7 +1,7 @@
 #ifndef __GENERAL_ADDRESS_SPACE__
 #define __GENERAL_ADDRESS_SPACE__
 
-#include <specific/types.hpp>
+#include <arch-specific/types.hpp>
 #include <cstddef>
 
 namespace OS {

@@ -1,7 +1,7 @@
 #ifndef __X64_MAP_SETUP_HPP__
 #define __X64_MAP_SETUP_HPP__
 
-#include <specific/types.hpp>
+#include <arch-specific/types.hpp>
 #include <arch/x64/pmm/page-allocator.hpp>
 
 namespace OS {

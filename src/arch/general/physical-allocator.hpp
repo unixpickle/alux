@@ -1,7 +1,7 @@
 #ifndef __GENERAL_PHYSICAL_ALLOCATOR__
 #define __GENERAL_PHYSICAL_ALLOCATOR__
 
-#include <specific/types.hpp>
+#include <arch-specific/types.hpp>
 
 namespace OS {
 
