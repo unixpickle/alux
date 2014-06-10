@@ -1,37 +1,32 @@
-#include <arch/x64/scheduler/task.hpp>
+#include <arch-specific/task.hpp>
 #include <arch/x64/vmm/global-map.hpp>
+#include <arch/general/failure.hpp>
+#include <utilities/critical.hpp>
 
 namespace OS {
 
 namespace x64 {
 
-Task * Task::New(bool kernel) {
-  // TODO: use some sort of slab here
-  return new Task(kernel);
-}
-
-Task::Task(bool kernel) {
+ArchTask::ArchTask(bool kernel) {
+  AssertNoncritical();
   if (!kernel) {
     // TODO: here, create the address space with something I haven't
     // implemented yet
+    Panic("ArchTask(false) - user tasks NYI");
     addressSpace = NULL;
   } else {
     addressSpace = &GlobalMap::GetGlobal();
   }
 }
 
-Task::~Task() {
+ArchTask::~ArchTask() {
+  AssertNoncritical();
   if (addressSpace != &GlobalMap::GetGlobal()) {
     if (addressSpace) delete addressSpace;
   }
 }
 
-void Task::Delete() {
-  // TODO: use some sort of slab here
-  delete this;
-}
-
-AddressSpace * Task::GetAddressSpace() {
+AddressSpace * ArchTask::GetAddressSpace() {
   return addressSpace;
 }
 

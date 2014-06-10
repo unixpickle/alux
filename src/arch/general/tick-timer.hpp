@@ -1,36 +1,14 @@
-#include <scheduler/base/task.hpp>
-#include <scheduler/base/thread.hpp>
+#ifndef __GENERAL_TICK_TIMER_HPP__
+#define __GENERAL_TICK_TIMER_HPP__
+
+#include <scheduler/general/task.hpp>
+#include <scheduler/general/thread.hpp>
 
 namespace OS {
 
-class SchedulerExpert {
+class TickTimer {
 public:
-  static SchedulerExpert & GetGlobal();
-  
-  /**
-   * Ask the architecture-specific code for a task that is appropriate for
-   * running kernel threads.
-   * @noncritical
-   */
-  virtual Task * CreateKernelTask() = 0;
- 
-  /**
-   * Ask the architecture-specific code for a thread to run under a kernel
-   * task.
-   * @param kernTask The owning task
-   * @param func The entry point of the thread. The behaviour is undefined if
-   * you return from this function.
-   * @noncritical
-   */
-  virtual Thread * CreateKernelThread(Task * kernTask, void * func) = 0;
- 
-  /**
-   * Create a kernel thread, calling `func` and passing one pointer argument,
-   * `argument`.
-   * @noncritical
-   */
-  virtual Thread * CreateKernelThread(Task * kernTask, void * func,
-                                      void * argument) = 0;
+  static TickTimer & GetCurrent(); // @critical
  
   /**
    * This is the fundamental method that a scheduler uses to save the
@@ -69,3 +47,5 @@ public:
 };
 
 }
+
+#endif

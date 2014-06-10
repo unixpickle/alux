@@ -1,7 +1,7 @@
 #ifndef __FIFO_SCHEDULER_HPP__
 #define __FIFO_SCHEDULER_HPP__
 
-#include <scheduler/base/thread.hpp>
+#include <scheduler/general/thread.hpp>
 #include <common>
 #include <cstdint>
 

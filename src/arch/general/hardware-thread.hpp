@@ -1,7 +1,7 @@
 #ifndef __GENERAL_HARDWARE_THREAD_HPP__
 #define __GENERAL_HARDWARE_THREAD_HPP__
 
-#include <scheduler/base/thread.hpp>
+#include <scheduler/general/thread.hpp>
 #include <cstdint>
 #include <common>
 

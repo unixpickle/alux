@@ -1,5 +1,5 @@
-#ifndef __FIFO_THREAD_INFO_HPP__
-#define __FIFO_THREAD_INFO_HPP__
+#ifndef __FIFO_THREAD_HPP__
+#define __FIFO_THREAD_HPP__
 
 #include <cstddef>
 #include <cstdint>
@@ -8,10 +8,8 @@ namespace OS {
 
 class Thread;
 
-class ThreadInfo {
+class SchedulerThread {
 public:
-  ThreadInfo(Thread *) {}
-  
   Thread * next = NULL;
   Thread * last = NULL;
   

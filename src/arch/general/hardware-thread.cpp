@@ -1,5 +1,5 @@
 #include <arch/general/hardware-thread.hpp>
-#include <scheduler/base/task.hpp>
+#include <scheduler/general/task.hpp>
 #include <utilities/critical.hpp>
 #include <utilities/lock.hpp>
 

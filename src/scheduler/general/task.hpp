@@ -1,22 +1,22 @@
 #ifndef __SCHEDULER_TASK_HPP__
 #define __SCHEDULER_TASK_HPP__
 
-#include <scheduler/base/thread.hpp>
-#include <scheduler-specific/task-info.hpp>
+#include <scheduler-specific/task.hpp>
+#include <arch-specific/task.hpp>
 #include <cstdint>
 #include <common>
 
 namespace OS {
 
 class Scheduler;
+class Thread;
 
-class Task {
+class Task : public ArchTask, public SchedulerTask {
 public:
-  TaskInfo userInfo;
+  static Task * New(bool forKernel); // @noncritical
   
-  Task(); // @noncritical
-  virtual ~Task(); // @noncritical
-  virtual void Delete() = 0; // @noncritical
+  ~Task(); // @noncritical
+  void Delete(); // @noncritical
   
   void AddThread(Thread * th); // @critical
   void RemoveThread(Thread * th); // @critical
@@ -28,6 +28,8 @@ public:
   void Kill(uint64_t status); // @critical
 
 private:
+  Task(bool forKernel);
+  
   uint64_t threadsLock OS_ALIGNED(8); // @critical
   Thread * firstThread;
   

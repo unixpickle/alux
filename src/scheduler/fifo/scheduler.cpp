@@ -1,20 +1,14 @@
 #include <scheduler-specific/scheduler.hpp>
 #include <arch/general/hardware-thread-list.hpp>
-#include <arch/general/scheduler-expert.hpp>
+#include <arch/general/tick-timer.hpp>
 #include <arch/general/clock.hpp>
 #include <utilities/lock.hpp>
 #include <utilities/critical.hpp>
 #include <new>
 
-#include <iostream> // TODO: delete this
-#include <arch/x64/general/critical.hpp> // TODO: delete this
-#include <arch/general/failure.hpp> // TODO: delete this
-
 namespace OS {
 
 static Scheduler globalObj;
-
-static void LoopString(const char * string);
 
 void Scheduler::Initialize() {
   new(&globalObj) Scheduler();
@@ -26,17 +20,7 @@ Scheduler & Scheduler::GetGlobal() {
 
 void Scheduler::Start() {
   AssertNoncritical();
-  
-  SchedulerExpert & expert = SchedulerExpert::GetGlobal();
-  Task * t = expert.CreateKernelTask();
-  Thread * th1 = expert.CreateKernelThread(t, (void *)&LoopString,
-                                           (void *)"tick");
-  Thread * th2 = expert.CreateKernelThread(t, (void *)&LoopString,
-                                           (void *)"tock");
-  
   SetCritical(true);
-  AddThread(th1);
-  AddThread(th2);
   HardwareThreadList & list = HardwareThreadList::GetGlobal();
   HardwareThread & thisCPU = HardwareThread::GetCurrent();
   for (int i = 0; i < list.GetCount(); i++) {
@@ -65,9 +49,9 @@ void Scheduler::SetTimeout(uint64_t deadline, bool) {
 
     Thread * th = HardwareThread::GetCurrent().GetThread();
     assert(th != NULL);
-    th->userInfo.nextTick = deadline;
+    th->SchedulerThread::nextTick = deadline;
   }
-  SchedulerExpert::GetGlobal().SaveAndTick();
+  TickTimer::GetCurrent().SaveAndTick();
 }
 
 void Scheduler::SetInfiniteTimeout() {
@@ -77,9 +61,9 @@ void Scheduler::SetInfiniteTimeout() {
   
     Thread * th = HardwareThread::GetCurrent().GetThread();
     assert(th != NULL);
-    th->userInfo.nextTick = UINT64_MAX;
+    th->SchedulerThread::nextTick = UINT64_MAX;
   }
-  SchedulerExpert::GetGlobal().SaveAndTick();
+  TickTimer::GetCurrent().SaveAndTick();
 }
 
 bool Scheduler::ClearTimeout(Thread *) {
@@ -88,14 +72,14 @@ bool Scheduler::ClearTimeout(Thread *) {
   
   Thread * th = HardwareThread::GetCurrent().GetThread();
   assert(th != NULL);
-  bool wasDelayed = th->userInfo.nextTick != 0;
-  th->userInfo.nextTick = 0;
+  bool wasDelayed = th->SchedulerThread::nextTick != 0;
+  th->SchedulerThread::nextTick = 0;
   return wasDelayed;
 }
 
 void Scheduler::Resign() {
   AssertCritical();
-  SchedulerExpert::GetGlobal().SaveAndTick();
+  TickTimer::GetCurrent().SaveAndTick();
 }
 
 void Scheduler::Tick() {
@@ -104,7 +88,7 @@ void Scheduler::Tick() {
   
   Thread * toRun = GetNextThread();
   if (!toRun) {
-    SchedulerExpert::GetGlobal().WaitTimeout();
+    TickTimer::GetCurrent().WaitTimeout();
   } else {
     toRun->Run();
   }
@@ -117,7 +101,7 @@ Thread * Scheduler::GetNextThread() {
   
   Thread * running = HardwareThread::GetCurrent().GetThread();
   if (running) {
-    running->userInfo.isRunning = false;
+    running->SchedulerThread::isRunning = false;
     HardwareThread::SetThread(NULL);
   }
   
@@ -143,10 +127,10 @@ Thread * Scheduler::GetNextThread() {
       PushThread(current);
     }
       
-    if (current->userInfo.isRunning) continue;
-    if (current->userInfo.nextTick > now) {
-      if (current->userInfo.nextTick < nextTick) {
-        nextTick = current->userInfo.nextTick;
+    if (current->SchedulerThread::isRunning) continue;
+    if (current->SchedulerThread::nextTick > now) {
+      if (current->SchedulerThread::nextTick < nextTick) {
+        nextTick = current->SchedulerThread::nextTick;
       }
       continue;
     }
@@ -156,69 +140,63 @@ Thread * Scheduler::GetNextThread() {
   }
   
   if (current) {
-    current->userInfo.isRunning = true;
-    current->userInfo.nextTick = 0;
+    current->SchedulerThread::isRunning = true;
+    current->SchedulerThread::nextTick = 0;
     HardwareThread::SetThread(current);
   }
-  SchedulerExpert::GetGlobal().SetTimeout(nextTick - now, true);
+  TickTimer::GetCurrent().SetTimeout(nextTick - now, true);
   return current;
 }
 
 Thread * Scheduler::PopThread() {
   Thread * result = firstThread;
   if (!result) return NULL;
-  if (result->userInfo.next) {
-    result->userInfo.next->userInfo.last = result->userInfo.last;
+  if (result->SchedulerThread::next) {
+    result->SchedulerThread::next->SchedulerThread::last
+      = result->SchedulerThread::last;
   } else {
-    lastThread = result->userInfo.last;
+    lastThread = result->SchedulerThread::last;
   }
-  if (result->userInfo.last) {
-    result->userInfo.last->userInfo.next = result->userInfo.next;
+  if (result->SchedulerThread::last) {
+    result->SchedulerThread::last->SchedulerThread::next
+      = result->SchedulerThread::next;
   } else {
-    firstThread = result->userInfo.next;
+    firstThread = result->SchedulerThread::next;
   }
-  result->userInfo.next = result->userInfo.last = NULL;
+  result->SchedulerThread::next = result->SchedulerThread::last = NULL;
   return result;
 }
 
 void Scheduler::PushThread(Thread * th) {
   if (lastThread) {
-    th->userInfo.last = lastThread;
-    th->userInfo.next = NULL;
-    lastThread->userInfo.next = th;
+    th->SchedulerThread::last = lastThread;
+    th->SchedulerThread::next = NULL;
+    lastThread->SchedulerThread::next = th;
     lastThread = th;
   } else {
     lastThread = firstThread = th;
-    th->userInfo.next = th->userInfo.last = NULL;
+    th->SchedulerThread::next = th->SchedulerThread::last = NULL;
   }
 }
 
 void Scheduler::UnlinkThread(Thread * th) {
-  if (!th->userInfo.next && !th->userInfo.last && th != firstThread) {
+  if (!th->SchedulerThread::next && !th->SchedulerThread::last
+      && th != firstThread) {
     return;
   }
-  if (th->userInfo.next) {
-    th->userInfo.next->userInfo.last = th->userInfo.last;
+  if (th->SchedulerThread::next) {
+    th->SchedulerThread::next->SchedulerThread::last
+      = th->SchedulerThread::last;
   } else {
-    lastThread = th->userInfo.last;
+    lastThread = th->SchedulerThread::last;
   }
-  if (th->userInfo.last) {
-    th->userInfo.last->userInfo.next = th->userInfo.next;
+  if (th->SchedulerThread::last) {
+    th->SchedulerThread::last->SchedulerThread::next
+      = th->SchedulerThread::next;
   } else {
-    firstThread = th->userInfo.next;
+    firstThread = th->SchedulerThread::next;
   }
-  th->userInfo.next = th->userInfo.last = NULL;
-}
-
-static void LoopString(const char * string) {
-  while (1) {
-    uint64_t waitUntil = Clock::GetGlobal().GetTime()
-      + Clock::GetGlobal().GetTicksPerMin() / 120;
-    SetCritical(true);
-    Scheduler::GetGlobal().SetTimeout(waitUntil, true);
-    SetCritical(false);
-    cout << string << endl;
-  }
+  th->SchedulerThread::next = th->SchedulerThread::last = NULL;
 }
 
 }

@@ -93,9 +93,9 @@ main = ->
     'stdlib'
     'utilities'
     'memory'
-    'scheduler/base'
     'multitasking'
     'arch/general'
+    'scheduler/general'
   ]
   deps = ['analloc2/src', 'anlock/src']
   finder = new SourceFinder()

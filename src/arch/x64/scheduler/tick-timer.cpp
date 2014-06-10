@@ -1,6 +1,4 @@
-#include <arch/x64/scheduler/expert.hpp>
-#include <arch/x64/scheduler/task.hpp>
-#include <arch/x64/scheduler/thread.hpp>
+#include <arch/x64/scheduler/tick-timer.hpp>
 #include <arch/x64/smp/cpu-list.hpp>
 #include <arch/x64/interrupts/lapic.hpp>
 #include <arch/x64/interrupts/vectors.hpp>
@@ -13,52 +11,36 @@
 
 namespace OS {
 
-SchedulerExpert & SchedulerExpert::GetGlobal() {
-  return x64::SchedulerExpert::GetGlobal();
+TickTimer & TickTimer::GetCurrent() {
+  return x64::TickTimer::GetGlobal();
 }
 
 namespace x64 {
 
-static SchedulerExpert globalExpert;
+static TickTimer globalTimer;
 
 static void CallTick() {
   Scheduler::GetGlobal().Tick();
 }
 
-void SchedulerExpert::Initialize() {
-  new(&globalExpert) SchedulerExpert();
+void TickTimer::Initialize() {
+  new(&globalTimer) TickTimer();
 }
 
-SchedulerExpert & SchedulerExpert::GetGlobal() {
-  return globalExpert;
+TickTimer & TickTimer::GetGlobal() {
+  return globalTimer;
 }
 
-OS::Task * SchedulerExpert::CreateKernelTask() {
-  return Task::New(true);
-}
-
-OS::Thread * SchedulerExpert::CreateKernelThread(OS::Task * kernTask,
-                                                 void * func) {
-  return CreateKernelThread(kernTask, func, NULL);
-}
-
-OS::Thread * SchedulerExpert::CreateKernelThread(OS::Task * kernTask,
-                                                 void * func, void * arg) {
-  Task * theTask = static_cast<Task *>(kernTask);
-  Thread * th = Thread::New(theTask, true);
-  th->SetEntry((uint64_t)func, (uint64_t)arg);
-  return th;
-}
-
-void SchedulerExpert::SaveAndTick() {
+void TickTimer::SaveAndTick() {
   AssertCritical();
   CPU & cpu = CPUList::GetGlobal().GetCurrent();
-  Thread * th = static_cast<Thread *>(cpu.GetThread());
+  Thread * th = cpu.GetThread();
   if (!th) {
     __asm__("mov %%rax, %%rsp\n"
             "call *%%rbx"
             : : "a" (cpu.dedicatedStack), "b" (CallTick));
   } else {
+    void * statePtr = (void *)&th->ArchThread::state;
     __asm__(
       "movq $save_and_tick_return, (%%rdi)\n" // save RIP
       "xor %%rax, %%rax\n"
@@ -73,13 +55,13 @@ void SchedulerExpert::SaveAndTick() {
       "mov %%rcx, %%rsp\n" // load new RSP
       "call *%%rbx\n" // CallTick()
       "save_and_tick_return:"
-      : : "c" (cpu.dedicatedStack), "b" (CallTick), "D" (&th->state)
+      : : "c" (cpu.dedicatedStack), "b" (CallTick), "D" (statePtr)
       : "rax", "rdx", "rsi", "r8", "r9", "r10", "r11", "r12", "r13", "r14",
         "r15", "memory");
   }
 }
 
-void SchedulerExpert::SetTimeout(uint64_t deadline, bool) {
+void TickTimer::SetTimeout(uint64_t deadline, bool) {
   AssertCritical();
   CPU & cpu = CPUList::GetGlobal().GetCurrent();
 
@@ -90,12 +72,12 @@ void SchedulerExpert::SetTimeout(uint64_t deadline, bool) {
   LAPIC::GetCurrent().SetTimeout(IntVectors::LapicTimer, lapicTicks);
 }
 
-void SchedulerExpert::ClearTimeout() {
+void TickTimer::ClearTimeout() {
   AssertCritical();
   LAPIC::GetCurrent().ClearTimeout();
 }
 
-void SchedulerExpert::WaitTimeout() {
+void TickTimer::WaitTimeout() {
   AssertCritical();
   __asm__("sti");
   while (1) {
@@ -106,7 +88,7 @@ void SchedulerExpert::WaitTimeout() {
 void LapicTickMethod() {
   AssertCritical();
   LAPIC::GetCurrent().SendEOI();
-  SchedulerExpert::GetGlobal().SaveAndTick();
+  TickTimer::GetGlobal().SaveAndTick();
 }
 
 }

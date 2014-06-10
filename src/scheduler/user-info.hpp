@@ -1,7 +1,0 @@
-namespace OS {
-
-class UserInfo {
-  
-};
-
-}
