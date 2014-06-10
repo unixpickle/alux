@@ -1,0 +1,24 @@
+#include <arch/general/hardware-thread.hpp>
+#include <scheduler/base/task.hpp>
+#include <utilities/critical.hpp>
+#include <utilities/lock.hpp>
+
+namespace OS {
+
+void HardwareThread::SetThread(Thread * th) {
+  AssertCritical();
+  HardwareThread & hwth = HardwareThread::GetCurrent();
+  ScopeCriticalLock scope(&hwth.threadLock);
+  if (hwth.thread) {
+    hwth.thread->GetTask()->Release();
+  }
+  hwth.thread = th;
+}
+
+Thread * HardwareThread::GetThread() {
+  AssertCritical();
+  ScopeCriticalLock scope(&threadLock);
+  return thread;
+}
+
+}

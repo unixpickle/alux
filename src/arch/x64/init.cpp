@@ -18,7 +18,7 @@
 #include <arch/x64/time/pit.hpp>
 #include <arch/x64/time/hpet.hpp>
 #include <arch/x64/time/lapic.hpp>
-#include <arch/x64/scheduler/scheduler.hpp>
+#include <arch/x64/scheduler/expert.hpp>
 #include <arch/x64/general/critical.hpp>
 #include <arch/x64/general/failure.hpp>
 #include <arch/general/critical.hpp>
@@ -151,6 +151,7 @@ void InitializeTimers() {
 void InitializeScheduler() {
   cout << "Initializing scheduler..." << endl;
   IRT::GetGlobal()[IntVectors::LapicTimer] = LapicTickMethod;
+  SchedulerExpert::Initialize();
   Scheduler::Initialize();
   Scheduler::GetGlobal().Start();
 }

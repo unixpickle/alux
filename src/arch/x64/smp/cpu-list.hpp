@@ -2,13 +2,13 @@
 #define __X64_CPU_LIST_HPP__
 
 #include <arch/x64/smp/cpu.hpp>
-#include <arch/general/cpu-list.hpp>
+#include <arch/general/hardware-thread-list.hpp>
 
 namespace OS {
 
 namespace x64 {
 
-class CPUList : public OS::CPUList {
+class CPUList : public HardwareThreadList {
 private:
   int capacity;
   int count;

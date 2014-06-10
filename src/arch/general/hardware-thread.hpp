@@ -1,5 +1,5 @@
-#ifndef __GENERAL_CPU_HPP__
-#define __GENERAL_CPU_HPP__
+#ifndef __GENERAL_HARDWARE_THREAD_HPP__
+#define __GENERAL_HARDWARE_THREAD_HPP__
 
 #include <scheduler/base/thread.hpp>
 #include <cstdint>
@@ -7,10 +7,10 @@
 
 namespace OS {
 
-class CPU {
+class HardwareThread {
 public:
   static void SetThread(Thread * th); // @critical
-  static CPU & GetCurrent();
+  static HardwareThread & GetCurrent();
   
   virtual int GetIndex() = 0; // @ambicritical
   virtual void Wake() = 0; // @critical

@@ -1,6 +1,6 @@
 #include <scheduler-specific/scheduler.hpp>
-#include <arch/general/cpu-list.hpp>
-#include <arch/general/scheduler.hpp>
+#include <arch/general/hardware-thread-list.hpp>
+#include <arch/general/scheduler-expert.hpp>
 #include <arch/general/clock.hpp>
 #include <utilities/lock.hpp>
 #include <utilities/critical.hpp>
@@ -27,15 +27,18 @@ Scheduler & Scheduler::GetGlobal() {
 void Scheduler::Start() {
   AssertNoncritical();
   
-  Task * t = CreateKernelTask();
-  Thread * th1 = CreateKernelThread(t, (void *)&LoopString, (void *)"tick");
-  Thread * th2 = CreateKernelThread(t, (void *)&LoopString, (void *)"tock");
+  SchedulerExpert & expert = SchedulerExpert::GetGlobal();
+  Task * t = expert.CreateKernelTask();
+  Thread * th1 = expert.CreateKernelThread(t, (void *)&LoopString,
+                                           (void *)"tick");
+  Thread * th2 = expert.CreateKernelThread(t, (void *)&LoopString,
+                                           (void *)"tock");
   
   SetCritical(true);
   AddThread(th1);
   AddThread(th2);
-  CPUList & list = CPUList::GetGlobal();
-  CPU & thisCPU = CPU::GetCurrent();
+  HardwareThreadList & list = HardwareThreadList::GetGlobal();
+  HardwareThread & thisCPU = HardwareThread::GetCurrent();
   for (int i = 0; i < list.GetCount(); i++) {
     if (&list[i] == &thisCPU) continue;
     list[i].Wake();
@@ -60,11 +63,11 @@ void Scheduler::SetTimeout(uint64_t deadline, bool) {
   {
     ScopeCriticalLock scope(&lock);
 
-    Thread * th = CPU::GetCurrent().GetThread();
+    Thread * th = HardwareThread::GetCurrent().GetThread();
     assert(th != NULL);
     th->userInfo.nextTick = deadline;
   }
-  SaveAndTick();
+  SchedulerExpert::GetGlobal().SaveAndTick();
 }
 
 void Scheduler::SetInfiniteTimeout() {
@@ -72,18 +75,18 @@ void Scheduler::SetInfiniteTimeout() {
   {
     ScopeCriticalLock scope(&lock);
   
-    Thread * th = CPU::GetCurrent().GetThread();
+    Thread * th = HardwareThread::GetCurrent().GetThread();
     assert(th != NULL);
     th->userInfo.nextTick = UINT64_MAX;
   }
-  SaveAndTick();
+  SchedulerExpert::GetGlobal().SaveAndTick();
 }
 
 bool Scheduler::ClearTimeout(Thread *) {
   AssertCritical();
   ScopeCriticalLock scope(&lock);
   
-  Thread * th = CPU::GetCurrent().GetThread();
+  Thread * th = HardwareThread::GetCurrent().GetThread();
   assert(th != NULL);
   bool wasDelayed = th->userInfo.nextTick != 0;
   th->userInfo.nextTick = 0;
@@ -92,16 +95,16 @@ bool Scheduler::ClearTimeout(Thread *) {
 
 void Scheduler::Resign() {
   AssertCritical();
-  SaveAndTick();
+  SchedulerExpert::GetGlobal().SaveAndTick();
 }
 
 void Scheduler::Tick() {
-  int index = CPU::GetCurrent().GetIndex();
+  int index = HardwareThread::GetCurrent().GetIndex();
   AssertCritical();
   
   Thread * toRun = GetNextThread();
   if (!toRun) {
-    WaitTimeout();
+    SchedulerExpert::GetGlobal().WaitTimeout();
   } else {
     toRun->Run();
   }
@@ -112,10 +115,10 @@ void Scheduler::Tick() {
 Thread * Scheduler::GetNextThread() {
   ScopeCriticalLock scope(&lock);
   
-  Thread * running = CPU::GetCurrent().GetThread();
+  Thread * running = HardwareThread::GetCurrent().GetThread();
   if (running) {
     running->userInfo.isRunning = false;
-    CPU::SetThread(NULL);
+    HardwareThread::SetThread(NULL);
   }
   
   Clock & clock = Clock::GetGlobal();
@@ -153,9 +156,9 @@ Thread * Scheduler::GetNextThread() {
   if (current) {
     current->userInfo.isRunning = true;
     current->userInfo.nextTick = 0;
-    CPU::SetThread(current);
+    HardwareThread::SetThread(current);
   }
-  OS::SetTimeout(nextTick - now, true);
+  SchedulerExpert::GetGlobal().SetTimeout(nextTick - now, true);
   return current;
 }
 

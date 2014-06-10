@@ -6,7 +6,7 @@
 
 namespace OS {
 
-CPU & CPU::GetCurrent() {
+HardwareThread & HardwareThread::GetCurrent() {
   return x64::CPUList::GetGlobal().GetCurrent();
 }
 

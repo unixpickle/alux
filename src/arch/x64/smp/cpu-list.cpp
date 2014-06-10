@@ -7,7 +7,7 @@
 
 namespace OS {
 
-CPUList & CPUList::GetGlobal() {
+HardwareThreadList & HardwareThreadList::GetGlobal() {
   return x64::CPUList::GetGlobal();
 }
 

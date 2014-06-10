@@ -3,13 +3,13 @@
 
 #include <arch/x64/segments/tss.hpp>
 #include <arch/x64/smp/invlpg.hpp>
-#include <arch/general/cpu.hpp>
+#include <arch/general/hardware-thread.hpp>
 
 namespace OS {
 
 namespace x64 {
 
-class CPU : public OS::CPU {
+class CPU : public HardwareThread {
 public:
   uint16_t tssSelector;
   TSS * tss;
