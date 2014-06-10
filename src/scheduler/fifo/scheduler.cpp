@@ -150,6 +150,8 @@ Thread * Scheduler::GetNextThread() {
       }
       continue;
     }
+    
+    if (!current->GetTask()->Retain()) continue;
     break;
   }
   
