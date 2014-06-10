@@ -1,5 +1,6 @@
 #include <scheduler/general/task.hpp>
-#include <scheduler/general/thread.hpp>
+#include <scheduler/general/garbage-thread.hpp>
+#include <scheduler-specific/scheduler.hpp>
 #include <utilities/lock.hpp>
 #include <utilities/critical.hpp>
 
@@ -17,8 +18,18 @@ Task::Task(bool forKernel) : ArchTask(forKernel) {
 
 Task::~Task() {
   AssertNoncritical();
-  // TODO: here, destroy all the threads, deregister the PID, close sockets,
-  // etc.
+  // no need to lock our threads list anymore since it can't change externally
+  // while nobody can retain us.
+  while (firstThread) {
+    SetCritical(true);
+    Scheduler::GetGlobal().RemoveThread(firstThread);
+    SetCritical(false);
+    Thread * th = firstThread;
+    firstThread = th->taskNext;
+    th->Delete();
+  }
+  
+  // TODO: get rid of the PID here, close sockets, etc.
 }
 
 void Task::Delete() {
@@ -95,7 +106,7 @@ void Task::Kill(uint64_t status) {
 // PRIVATE
 
 void Task::Terminate() {
-  // TODO: here, push the task to the garbage thread
+  GarbageThread::GetGlobal().PushTask(this);
 }
 
 }
