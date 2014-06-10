@@ -8,7 +8,7 @@ namespace OS {
 
 class Task;
 
-class Thread : public ArchThread, public SchedulerThread {
+class Thread : public ArchThread, public SchedThread {
 public:
   static Thread * New(Task * owner, bool kernel); // @noncritical
   

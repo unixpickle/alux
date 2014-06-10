@@ -8,7 +8,7 @@ namespace OS {
 
 class Thread;
 
-class SchedulerThread {
+class SchedThread {
 public:
   Thread * next = NULL;
   Thread * last = NULL;

@@ -11,7 +11,7 @@ namespace OS {
 class Scheduler;
 class Thread;
 
-class Task : public ArchTask, public SchedulerTask {
+class Task : public ArchTask, public SchedTask {
 public:
   static Task * New(bool forKernel); // @noncritical
   

@@ -3,7 +3,7 @@
 
 namespace OS {
 
-class SchedulerTask {
+class SchedTask {
 public:
 };
 

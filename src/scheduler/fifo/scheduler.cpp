@@ -49,7 +49,7 @@ void Scheduler::SetTimeout(uint64_t deadline, bool) {
 
     Thread * th = HardwareThread::GetCurrent().GetThread();
     assert(th != NULL);
-    th->SchedulerThread::nextTick = deadline;
+    th->SchedThread::nextTick = deadline;
   }
   TickTimer::GetCurrent().SaveAndTick();
 }
@@ -61,7 +61,7 @@ void Scheduler::SetInfiniteTimeout() {
   
     Thread * th = HardwareThread::GetCurrent().GetThread();
     assert(th != NULL);
-    th->SchedulerThread::nextTick = UINT64_MAX;
+    th->SchedThread::nextTick = UINT64_MAX;
   }
   TickTimer::GetCurrent().SaveAndTick();
 }
@@ -72,8 +72,8 @@ bool Scheduler::ClearTimeout(Thread *) {
   
   Thread * th = HardwareThread::GetCurrent().GetThread();
   assert(th != NULL);
-  bool wasDelayed = th->SchedulerThread::nextTick != 0;
-  th->SchedulerThread::nextTick = 0;
+  bool wasDelayed = th->SchedThread::nextTick != 0;
+  th->SchedThread::nextTick = 0;
   return wasDelayed;
 }
 
@@ -101,7 +101,7 @@ Thread * Scheduler::GetNextThread() {
   
   Thread * running = HardwareThread::GetCurrent().GetThread();
   if (running) {
-    running->SchedulerThread::isRunning = false;
+    running->SchedThread::isRunning = false;
     HardwareThread::SetThread(NULL);
   }
   
@@ -127,10 +127,10 @@ Thread * Scheduler::GetNextThread() {
       PushThread(current);
     }
       
-    if (current->SchedulerThread::isRunning) continue;
-    if (current->SchedulerThread::nextTick > now) {
-      if (current->SchedulerThread::nextTick < nextTick) {
-        nextTick = current->SchedulerThread::nextTick;
+    if (current->SchedThread::isRunning) continue;
+    if (current->SchedThread::nextTick > now) {
+      if (current->SchedThread::nextTick < nextTick) {
+        nextTick = current->SchedThread::nextTick;
       }
       continue;
     }
@@ -140,8 +140,8 @@ Thread * Scheduler::GetNextThread() {
   }
   
   if (current) {
-    current->SchedulerThread::isRunning = true;
-    current->SchedulerThread::nextTick = 0;
+    current->SchedThread::isRunning = true;
+    current->SchedThread::nextTick = 0;
     HardwareThread::SetThread(current);
   }
   TickTimer::GetCurrent().SetTimeout(nextTick - now, true);
@@ -151,52 +151,48 @@ Thread * Scheduler::GetNextThread() {
 Thread * Scheduler::PopThread() {
   Thread * result = firstThread;
   if (!result) return NULL;
-  if (result->SchedulerThread::next) {
-    result->SchedulerThread::next->SchedulerThread::last
-      = result->SchedulerThread::last;
+  if (result->SchedThread::next) {
+    result->SchedThread::next->SchedThread::last = result->SchedThread::last;
   } else {
-    lastThread = result->SchedulerThread::last;
+    lastThread = result->SchedThread::last;
   }
-  if (result->SchedulerThread::last) {
-    result->SchedulerThread::last->SchedulerThread::next
-      = result->SchedulerThread::next;
+  if (result->SchedThread::last) {
+    result->SchedThread::last->SchedThread::next = result->SchedThread::next;
   } else {
-    firstThread = result->SchedulerThread::next;
+    firstThread = result->SchedThread::next;
   }
-  result->SchedulerThread::next = result->SchedulerThread::last = NULL;
+  result->SchedThread::next = result->SchedThread::last = NULL;
   return result;
 }
 
 void Scheduler::PushThread(Thread * th) {
   if (lastThread) {
-    th->SchedulerThread::last = lastThread;
-    th->SchedulerThread::next = NULL;
-    lastThread->SchedulerThread::next = th;
+    th->SchedThread::last = lastThread;
+    th->SchedThread::next = NULL;
+    lastThread->SchedThread::next = th;
     lastThread = th;
   } else {
     lastThread = firstThread = th;
-    th->SchedulerThread::next = th->SchedulerThread::last = NULL;
+    th->SchedThread::next = th->SchedThread::last = NULL;
   }
 }
 
 void Scheduler::UnlinkThread(Thread * th) {
-  if (!th->SchedulerThread::next && !th->SchedulerThread::last
+  if (!th->SchedThread::next && !th->SchedThread::last
       && th != firstThread) {
     return;
   }
-  if (th->SchedulerThread::next) {
-    th->SchedulerThread::next->SchedulerThread::last
-      = th->SchedulerThread::last;
+  if (th->SchedThread::next) {
+    th->SchedThread::next->SchedThread::last = th->SchedThread::last;
   } else {
-    lastThread = th->SchedulerThread::last;
+    lastThread = th->SchedThread::last;
   }
-  if (th->SchedulerThread::last) {
-    th->SchedulerThread::last->SchedulerThread::next
-      = th->SchedulerThread::next;
+  if (th->SchedThread::last) {
+    th->SchedThread::last->SchedThread::next = th->SchedThread::next;
   } else {
-    firstThread = th->SchedulerThread::next;
+    firstThread = th->SchedThread::next;
   }
-  th->SchedulerThread::next = th->SchedulerThread::last = NULL;
+  th->SchedThread::next = th->SchedThread::last = NULL;
 }
 
 }
