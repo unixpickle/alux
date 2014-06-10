@@ -6,6 +6,8 @@
 #include <utilities/lock.hpp>
 #include <new>
 
+#include <iostream> // TODO: delete this
+
 namespace OS {
 
 static GarbageThread globalGarbage;
@@ -52,8 +54,11 @@ void GarbageThread::CallMain() {
 void GarbageThread::Main() {
   AssertNoncritical();
   while (1) {
+    SetCritical(true);
     Task * t = PopTask();
+    SetCritical(false);
     if (!t) {
+      cout << "GarbageThread::Main() - Nothing to do" << endl;
       SetCritical(true);
       Scheduler::GetGlobal().SetInfiniteTimeout();
       SetCritical(false);

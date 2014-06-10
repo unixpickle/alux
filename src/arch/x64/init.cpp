@@ -23,6 +23,8 @@
 #include <arch/x64/general/failure.hpp>
 #include <arch/general/critical.hpp>
 #include <scheduler-specific/scheduler.hpp>
+#include <scheduler/general/kernel-task.hpp>
+#include <scheduler/general/garbage-thread.hpp>
 #include <iostream>
 #include <cassert>
 
@@ -153,6 +155,14 @@ void InitializeScheduler() {
   IRT::GetGlobal()[IntVectors::LapicTimer] = LapicTickMethod;
   TickTimer::Initialize();
   Scheduler::Initialize();
+  
+  KernelTask::Initialize();
+  GarbageThread::Initialize(&KernelTask::GetGlobal());
+  GarbageThread * thread = &GarbageThread::GetGlobal();
+  SetCritical(true);
+  KernelTask::GetGlobal().AddThread(thread);
+  Scheduler::GetGlobal().AddThread(thread);
+  SetCritical(false);
   Scheduler::GetGlobal().Start();
 }
 

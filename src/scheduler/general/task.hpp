@@ -30,10 +30,10 @@ public:
 protected:
   Task * garbageNext;
   friend class GarbageThread;
+  
+  Task(bool forKernel);
 
 private:
-  Task(bool forKernel);
-  
   uint64_t threadsLock OS_ALIGNED(8); // @critical
   Thread * firstThread;
   
