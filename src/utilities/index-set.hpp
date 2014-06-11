@@ -3,18 +3,18 @@
 
 #include <cstdint>
 #include <common>
+#include <memory/slab.hpp>
 
 namespace OS {
 
+template<int Max, size_t SlabCount = 0x10>
 class IndexSet {
 public:
   class Node {
   public:
-    static const int Max = 0xfe;
-    
     Node * next;
     int count;
-    uint64_t indexes[0xfe];
+    uint64_t indexes[Max];
   };
 
   IndexSet(); // @noncritical
@@ -28,8 +28,16 @@ private:
   Node * firstNode;
   uint64_t numUsed;
   
+  static uint64_t initLock OS_ALIGNED(8);
+  static bool slabInitialized;
+  static Slab<Node, SlabCount> slab;
+  
+  static Node * AllocNode();
+  static void FreeNode(Node * n);
 };
 
 }
+
+#include <utilities/index-set-public.hpp>
 
 #endif

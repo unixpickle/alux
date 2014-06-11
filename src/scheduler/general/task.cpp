@@ -1,5 +1,6 @@
 #include <scheduler/general/task.hpp>
 #include <scheduler/general/garbage-thread.hpp>
+#include <scheduler/general/pid-pool.hpp>
 #include <scheduler-specific/scheduler.hpp>
 #include <utilities/lock.hpp>
 #include <utilities/critical.hpp>
@@ -13,7 +14,7 @@ Task * Task::New(bool forKernel) {
 
 Task::Task(bool forKernel) : ArchTask(forKernel) {
   AssertNoncritical();
-  // TODO: here, allocate a PID
+  pid = PIDPool::GetGlobal().AllocPID(this);
 }
 
 Task::~Task() {
@@ -29,7 +30,7 @@ Task::~Task() {
     th->Delete();
   }
   
-  // TODO: get rid of the PID here, close sockets, etc.
+  PIDPool::GetGlobal().FreePID(GetPID(), this);
 }
 
 void Task::Delete() {
@@ -101,6 +102,10 @@ void Task::Kill(uint64_t status) {
     isKilled = true;
     killStatus = status;
   }
+}
+
+uint64_t Task::GetPID() {
+  return pid;
 }
 
 // PRIVATE

@@ -1,3 +1,4 @@
+#include <scheduler/general/pid-pool.hpp>
 #include <scheduler/general/kernel-task.hpp>
 #include <scheduler/general/garbage-thread.hpp>
 #include <scheduler-specific/scheduler.hpp>
@@ -7,6 +8,7 @@ namespace OS {
 
 void InitializeScheduler() {
   AssertNoncritical();
+  PIDPool::Initialize();
   Scheduler::Initialize();
   KernelTask::Initialize();
   GarbageThread::Initialize(&KernelTask::GetGlobal());

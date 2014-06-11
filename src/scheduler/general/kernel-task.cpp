@@ -8,6 +8,7 @@ static KernelTask globalTask;
 
 void KernelTask::Initialize() {
   new(&globalTask) KernelTask();
+  globalTask.Release();
 }
 
 KernelTask & KernelTask::GetGlobal() {
