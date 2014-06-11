@@ -59,6 +59,7 @@ void TickTimer::SaveAndTick() {
       : "rax", "rdx", "rsi", "r8", "r9", "r10", "r11", "r12", "r13", "r14",
         "r15", "memory");
   }
+  __builtin_unreachable();
 }
 
 void TickTimer::SetTimeout(uint64_t deadline, bool) {
@@ -83,6 +84,7 @@ void TickTimer::WaitTimeout() {
   while (1) {
     __asm__ __volatile__("hlt");
   }
+  __builtin_unreachable();
 }
 
 void LapicTickMethod() {

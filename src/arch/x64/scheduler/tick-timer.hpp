@@ -12,10 +12,10 @@ public:
   static void Initialize();
   static TickTimer & GetGlobal();
   
-  virtual void SaveAndTick();
+  virtual void SaveAndTick() OS_NORETURN;
   virtual void SetTimeout(uint64_t delay, bool precision);
   virtual void ClearTimeout();
-  virtual void WaitTimeout();
+  virtual void WaitTimeout() OS_NORETURN;
 };
 
 void LapicTickMethod();

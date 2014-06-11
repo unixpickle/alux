@@ -3,6 +3,7 @@
 
 #include <scheduler/general/task.hpp>
 #include <scheduler/general/thread.hpp>
+#include <common>
 
 namespace OS {
 
@@ -17,9 +18,9 @@ public:
    * global Scheduler from a different context. This means that the next time
    * the saved thread is run, it will be as if the SaveAndTick() method is
    * returning.
-   * @critical
+   * @critical (no return)
    */
-  virtual void SaveAndTick() = 0;
+  virtual void SaveAndTick() OS_NORETURN = 0;
   
   /**
    * Set a timeout after which the SaveAndTick() method will automatically be
@@ -27,13 +28,13 @@ public:
    * delayed until a noncritical section).
    * @critical
    */
-  virtual void SetTimeout(uint64_t delay, bool precision) = 0; // @critical
+  virtual void SetTimeout(uint64_t delay, bool precision) = 0;
   
   /**
    * Unset any timeout set on the current HardwareThread.
    * @critical
    */
-  virtual void ClearTimeout() = 0; // @critical
+  virtual void ClearTimeout() = 0;
   
   /**
    * Wait for a timeout to occur (i.e. SaveAndTick() to be called). If you have
@@ -42,7 +43,7 @@ public:
    * @discussion By nature, this method will *never* return.
    * @critical -> @noncritical (no return)
    */
-  virtual void WaitTimeout() = 0; // @critical -> @noncritical (no return)
+  virtual void WaitTimeout() OS_NORETURN = 0;
   
 };
 

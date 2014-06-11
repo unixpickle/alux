@@ -48,6 +48,7 @@ void Panic(const char * message) {
   buf[i] = 0xf920;
   
   __asm__("hlt");
+  __builtin_unreachable();
 }
 
 static void PanicIPI() {
