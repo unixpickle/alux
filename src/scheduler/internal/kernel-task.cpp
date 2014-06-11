@@ -1,5 +1,6 @@
-#include <scheduler/general/kernel-task.hpp>
+#include <scheduler/internal/kernel-task.hpp>
 #include <arch/general/failure.hpp>
+#include <utilities/critical.hpp>
 #include <new>
 
 namespace OS {
@@ -8,6 +9,8 @@ static KernelTask globalTask;
 
 void KernelTask::Initialize() {
   new(&globalTask) KernelTask();
+  
+  ScopeCritical scope;
   globalTask.Release();
 }
 

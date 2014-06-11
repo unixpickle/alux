@@ -1,6 +1,6 @@
-#include <scheduler/general/pid-pool.hpp>
-#include <scheduler/general/kernel-task.hpp>
-#include <scheduler/general/garbage-thread.hpp>
+#include <scheduler/internal/pid-pool.hpp>
+#include <scheduler/internal/kernel-task.hpp>
+#include <scheduler/internal/garbage-thread.hpp>
 #include <scheduler-specific/scheduler.hpp>
 #include <utilities/critical.hpp>
 

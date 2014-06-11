@@ -6,6 +6,10 @@ SECTIONS {
     *(.text)
   }
   
+  .bss BLOCK(16) : ALIGN(16) {
+    *(.bss)
+  }
+  
   .rodata BLOCK(16) : ALIGN(16) {
     *(.rodata)
   }

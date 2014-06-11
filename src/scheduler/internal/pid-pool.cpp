@@ -1,4 +1,4 @@
-#include <scheduler/general/pid-pool.hpp>
+#include <scheduler/internal/pid-pool.hpp>
 #include <scheduler/general/task.hpp>
 #include <utilities/critical.hpp>
 #include <utilities/lock.hpp>

@@ -1,4 +1,4 @@
-#include <scheduler/general/garbage-thread.hpp>
+#include <scheduler/internal/garbage-thread.hpp>
 #include <scheduler/general/task.hpp>
 #include <scheduler-specific/scheduler.hpp>
 #include <arch/general/failure.hpp>
