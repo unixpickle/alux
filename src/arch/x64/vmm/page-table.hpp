@@ -14,6 +14,9 @@ private:
   PhysAddr pml4;
 
 public:
+  static int PageSizeDepth(size_t size);
+  static uint64_t EntryMask(size_t pageSize, bool exec, bool kernel);
+  
   PageTable(PhysAddr pml4);
   
   PhysAddr GetPML4();

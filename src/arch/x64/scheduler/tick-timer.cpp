@@ -39,6 +39,7 @@ void TickTimer::SaveAndTick() {
     __asm__("mov %%rax, %%rsp\n"
             "call *%%rbx"
             : : "a" (cpu.dedicatedStack), "b" (CallTick));
+    __builtin_unreachable();
   } else {
     void * statePtr = (void *)&th->ArchThread::state;
     __asm__(
@@ -59,7 +60,6 @@ void TickTimer::SaveAndTick() {
       : "rax", "rdx", "rsi", "r8", "r9", "r10", "r11", "r12", "r13", "r14",
         "r15", "memory");
   }
-  __builtin_unreachable();
 }
 
 void TickTimer::SetTimeout(uint64_t deadline, bool) {

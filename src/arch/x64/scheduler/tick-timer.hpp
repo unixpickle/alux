@@ -12,7 +12,7 @@ public:
   static void Initialize();
   static TickTimer & GetGlobal();
   
-  virtual void SaveAndTick() OS_NORETURN;
+  virtual void SaveAndTick();
   virtual void SetTimeout(uint64_t delay, bool precision);
   virtual void ClearTimeout();
   virtual void WaitTimeout() OS_NORETURN;

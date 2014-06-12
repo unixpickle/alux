@@ -6,6 +6,8 @@
 
 namespace OS {
 
+class Task;
+
 namespace x64 {
 
 class InvlpgInfo {
@@ -14,6 +16,7 @@ public:
   VirtAddr start;
   size_t size;
   volatile bool done;
+  bool isKernel;
 };
 
 /**
@@ -24,6 +27,13 @@ public:
  * @ambicritical
  */
 void DistributeKernelInvlpg(VirtAddr start, size_t size);
+
+/**
+ * Tell every CPU running a task, including ourselves, to invalidate a certain
+ * region of cache.
+ * @ambicritical
+ */
+void DistributeUserInvlpg(VirtAddr start, size_t size, Task * t);
 
 /**
  * Set the system up to call invlpg on all other CPUs.

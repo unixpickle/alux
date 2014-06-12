@@ -15,6 +15,7 @@ public:
   virtual int GetIndex() = 0; // @ambicritical
   virtual void Wake() = 0; // @critical
   virtual Thread * GetThread(); // @critical
+  virtual bool IsRunningTask(Task *);
   
 protected:
   uint64_t threadLock OS_ALIGNED(8);

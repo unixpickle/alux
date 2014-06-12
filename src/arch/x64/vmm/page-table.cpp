@@ -7,6 +7,26 @@ namespace OS {
 
 namespace x64 {
 
+int PageTable::PageSizeDepth(size_t size) {
+  switch (size) {
+    case 0x1000:
+      return 3;
+    case 0x200000:
+      return 2;
+    case 0x40000000:
+      return 1;
+    default:
+      break;
+  }
+  Panic("PageTable::PageSizeDepth() - unknown page size");
+  return -1;
+}
+
+uint64_t PageTable::EntryMask(size_t pageSize, bool exec, bool kernel) {
+  return 3 | (pageSize == 0x1000 ? 0 : 0x80) | (kernel ? 0x100 : 0x4)
+    | (exec ? 0 : (uint64_t)1 << 63);
+}
+
 PageTable::PageTable(PhysAddr base) : pml4(base) {
 }
 

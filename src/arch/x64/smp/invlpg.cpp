@@ -26,7 +26,31 @@ void DistributeKernelInvlpg(VirtAddr start, size_t size) {
   for (int i = 0; i < list.GetCount(); i++) {
     CPU & cpu = list[i];
     if (&cpu == &current) continue;
-    InvlpgInfo info = {NULL, start, size, false};
+    InvlpgInfo info = {NULL, start, size, false, true};
+    {
+      ScopeCriticalLock lock(&cpu.invlpgLock);
+      if (cpu.invlpgInfo) {
+        info.next = cpu.invlpgInfo;
+      }
+      cpu.invlpgInfo = &info;
+    }
+    lapic.SendIPI(cpu.GetAPICID(), IntVectors::Invlpg);
+    while (!info.done) { }
+  }
+}
+
+void DistributeUserInvlpg(VirtAddr start, size_t size, Task * t) {
+  ScopeCritical critical;
+  Invlpg(start, size, false);
+  
+  CPUList & list = CPUList::GetGlobal();
+  CPU & current = list.GetCurrent();
+  LAPIC & lapic = LAPIC::GetCurrent();
+  for (int i = 0; i < list.GetCount(); i++) {
+    CPU & cpu = list[i];
+    if (&cpu == &current) continue;
+    if (!cpu.IsRunningTask(t)) continue;
+    InvlpgInfo info = {NULL, start, size, false, false};
     {
       ScopeCriticalLock lock(&cpu.invlpgLock);
       if (cpu.invlpgInfo) {
@@ -56,7 +80,8 @@ static void HandleInvlpg() {
   ScopeCriticalLock lock(&cpu.invlpgLock);
   while (cpu.invlpgInfo) {
     InvlpgInfo * nextInfo = cpu.invlpgInfo->next;
-    Invlpg(cpu.invlpgInfo->start, cpu.invlpgInfo->size);
+    Invlpg(cpu.invlpgInfo->start, cpu.invlpgInfo->size,
+           cpu.invlpgInfo->isKernel);
     cpu.invlpgInfo->done = true;
     cpu.invlpgInfo = nextInfo;
   }

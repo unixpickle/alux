@@ -50,12 +50,9 @@ protected:
   VirtAddr freeStart;
   size_t freeSize;
   
-  static int PageSizeDepth(size_t size);
-  static uint64_t TableEntryMask(size_t pageSize, bool exec);
-  
   void Setup();
   
-  void SetEntries(VirtAddr virt, PhysAddr phys, size_t virtAdd,
+  void SetEntries(VirtAddr virt, uint64_t phys, size_t virtAdd,
                   size_t physAdd, size_t count);
   
   VirtAddr AllocateRegion(size_t pageSize, size_t pageCount);

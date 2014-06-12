@@ -77,7 +77,7 @@ VirtAddr GlobalMap::Map(PhysAddr phys, size_t pageSize, size_t pageCount,
   ScopeLock mainScope(&allocationLock);
   
   VirtAddr region = AllocateRegion(pageSize, pageCount);
-  uint64_t source = phys | TableEntryMask(pageSize, executable);
+  uint64_t source = phys | PageTable::EntryMask(pageSize, executable, true);
   
   SetEntries(region, source, pageSize, pageSize, pageCount);
   return region;
@@ -85,7 +85,7 @@ VirtAddr GlobalMap::Map(PhysAddr phys, size_t pageSize, size_t pageCount,
 
 void GlobalMap::MapAt(VirtAddr virt, PhysAddr phys, size_t pageSize,
                       size_t pageCount, bool executable) {
-  uint64_t source = phys | TableEntryMask(pageSize, executable);
+  uint64_t source = phys | PageTable::EntryMask(pageSize, executable, true);
   SetEntries(virt, source, pageSize, pageSize, pageCount);
   
   // we may have overwritten something
@@ -100,26 +100,6 @@ VirtAddr GlobalMap::Reserve(size_t pageSize, size_t pageCount) {
   return region;
 }
 
-int GlobalMap::PageSizeDepth(size_t size) {
-  switch (size) {
-    case 0x1000:
-      return 3;
-    case 0x200000:
-      return 2;
-    case 0x40000000:
-      return 1;
-    default:
-      break;
-  }
-  Panic("unknown page size");
-  return -1;
-}
-
-uint64_t GlobalMap::TableEntryMask(size_t pageSize, bool exec) {
-  return 0x103 | (pageSize == 0x1000 ? 0 : 0x80)
-    | (exec ? 0 : (uint64_t)1 << 63);
-}
-
 void GlobalMap::Setup() {
   MapSetup setup(*allocator);
   setup.Map();
@@ -128,9 +108,9 @@ void GlobalMap::Setup() {
   pdpt = setup.GetPDPT();
 }
 
-void GlobalMap::SetEntries(VirtAddr virt, PhysAddr phys, size_t virtAdd,
+void GlobalMap::SetEntries(VirtAddr virt, uint64_t phys, size_t virtAdd,
                            size_t physAdd, size_t count) {
-  int depth = PageSizeDepth(virtAdd);
+  int depth = PageTable::PageSizeDepth(virtAdd);
   VirtAddr curVirt = virt;
   PhysAddr curPhys = phys;
 

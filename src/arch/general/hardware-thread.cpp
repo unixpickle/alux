@@ -21,4 +21,10 @@ Thread * HardwareThread::GetThread() {
   return thread;
 }
 
+bool HardwareThread::IsRunningTask(Task * t) {
+  AssertCritical();
+  ScopeCriticalLock scope(&threadLock);
+  return t == thread->GetTask();
+}
+
 }

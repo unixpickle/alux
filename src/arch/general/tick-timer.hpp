@@ -18,9 +18,9 @@ public:
    * global Scheduler from a different context. This means that the next time
    * the saved thread is run, it will be as if the SaveAndTick() method is
    * returning.
-   * @critical (no return)
+   * @critical -> (@noncritical) -> @critical
    */
-  virtual void SaveAndTick() OS_NORETURN = 0;
+  virtual void SaveAndTick() = 0;
   
   /**
    * Set a timeout after which the SaveAndTick() method will automatically be
