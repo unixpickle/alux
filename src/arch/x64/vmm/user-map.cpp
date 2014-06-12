@@ -119,7 +119,9 @@ void UserMap::FreeTable(PhysAddr table, int depth, int start) {
       uint64_t entry = scratch[i];
       if (entry & 1) {
         PhysAddr addr = entry & 0x7FFFFFFFFFFFF000L;
-        FreeTable(addr, depth + 1);
+        if (!(entry & 0x80)) { // don't free large pages!
+          FreeTable(addr, depth + 1);
+        }
         scratch.InvalidateCache();
       }
     }
