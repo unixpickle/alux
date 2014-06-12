@@ -13,10 +13,6 @@ General architectual ideas that I am playing around with:
 
 I am currently working on the scheduler.
 
- * Implement a Red-Black tree for PID map
- * Implement fast index set based on slab
-   * Grab index at constructor, release at destructor
- * Implement application address-space
  * (x64) Setup NMI handler for syscall
  * Create syscall handler for user-space task
  * Create a sort of TaskCode object
