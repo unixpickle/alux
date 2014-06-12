@@ -119,25 +119,15 @@ static void CPUEntrance() {
   uint32_t lapicId = lapic.GetId();
   SetCritical(false);
   
-  // setup the new GDT entry
-  GDT & gdt = GDT::GetGlobal();
-  TSS * firstTSS = new TSS();
-  uint16_t sel = gdt.AddTSS(firstTSS);
-  
-  // initialize this CPU entry
-  void * cpuStack = (void *)((new uint8_t[0x4000]) + 0x4000);
-  firstTSS->rsp[0] = (uint64_t)cpuStack;
   CPU & cpu = CPUList::GetGlobal().AddEntry(lapicId);
-  cpu.dedicatedStack = cpuStack;
-  cpu.tssSelector = sel;
-  cpu.tss = firstTSS;
-  
-  gdt.Set();
+  GDT::GetGlobal().Set();
   
   __asm__ volatile("ltr %%ax\n"
                    "mov %%rbx, %%rsp\n"
                    "call *%%rcx"
-                   : : "a" (sel), "b" (cpuStack), "c" (CPUMain));
+                   : : "a" (cpu.tssSelector),
+                       "b" (cpu.dedicatedStack),
+                       "c" (CPUMain));
 }
 
 static void CPUMain() {

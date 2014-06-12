@@ -1,6 +1,8 @@
 #include <arch-specific/task.hpp>
 #include <arch/x64/vmm/global-map.hpp>
+#include <arch/x64/vmm/user-map.hpp>
 #include <arch/general/failure.hpp>
+#include <scheduler/general/task.hpp>
 #include <utilities/critical.hpp>
 
 namespace OS {
@@ -10,10 +12,7 @@ namespace x64 {
 ArchTask::ArchTask(bool kernel) {
   AssertNoncritical();
   if (!kernel) {
-    // TODO: here, create the address space with something I haven't
-    // implemented yet
-    Panic("ArchTask(false) - user tasks NYI");
-    addressSpace = NULL;
+    addressSpace = new UserMap(static_cast<Task *>(this));
   } else {
     addressSpace = &GlobalMap::GetGlobal();
   }

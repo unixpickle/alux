@@ -8,6 +8,7 @@
 #include <arch/x64/interrupts/lapic.hpp>
 #include <arch/x64/interrupts/ioapic.hpp>
 #include <arch/x64/interrupts/vectors.hpp>
+#include <arch/x64/interrupts/errors.hpp>
 #include <arch/x64/acpi/sdt.hpp>
 #include <arch/x64/acpi/madt.hpp>
 #include <arch/x64/smp/init.hpp>
@@ -59,6 +60,12 @@ void InitializeInterrupts() {
   
   IDT::Initialize();
   IRT::Initialize();
+  
+  IRT::GetGlobal()[0x2] = HandleNMIReceived;
+  IRT::GetGlobal()[0x12] = HandleMCEReceived;
+  IDT::GetGlobal().SetIST(0x2, 1);
+  IDT::GetGlobal().SetIST(0x12, 1);
+  
   SetIgnoreCriticality(false);
   SetCritical(false);
 }
@@ -122,19 +129,17 @@ void InitializeSMP() {
   // initialize this CPU entry
   void * cpuStack = (void *)((new uint8_t[0x4000]) + 0x4000);
   firstTSS->rsp[0] = (uint64_t)cpuStack;
+  firstTSS->ist[0] = firstTSS->rsp[0];
   
   SetCritical(true);
   uint32_t lapicId = LAPIC::GetCurrent().GetId();
   SetCritical(false);
   
   CPU & cpu = CPUList::GetGlobal().AddEntry(lapicId);
-  cpu.dedicatedStack = cpuStack;
-  cpu.tssSelector = sel;
-  cpu.tss = firstTSS;
   
   // set the current GDT and Task Register
-  gdt.Set();
-  __asm__ volatile("ltr %%ax" : : "a" (sel));
+  GDT::GetGlobal().Set();
+  __asm__ volatile("ltr %%ax" : : "a" (cpu.tssSelector));
   
   StartProcessors();
   InitializeInvlpg();
