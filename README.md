@@ -11,15 +11,7 @@ General architectual ideas that I am playing around with:
 
 ## TODO
 
-I am currently working on the scheduler.
-
- * Create syscall handler for user-space task
- * Create a sort of TaskCode object
- * Implement a page-fault handler for loading code.
- * Setup simple user-space task and test it
- * Create ELF loader
-
-Then, I will direct my attention to the Inter-Process Communication and Kernel-Process Communication systems.
+I am going nuts. Something tells me I need to rewrite this OS again, so that's what I am going to do. This time, I'm going to create all the headers&nbsp;for everything&nbsp;before I *touch* an implementation file. I'm a true nutjob.
 
 ## License
 
