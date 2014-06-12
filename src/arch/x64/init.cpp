@@ -123,13 +123,6 @@ void InitializeSMP() {
   // initialize GDT and TSS
   GDT::Initialize();
   GDT & gdt = GDT::GetGlobal();
-  TSS * firstTSS = new TSS();
-  uint16_t sel = gdt.AddTSS(firstTSS);
-  
-  // initialize this CPU entry
-  void * cpuStack = (void *)((new uint8_t[0x4000]) + 0x4000);
-  firstTSS->rsp[0] = (uint64_t)cpuStack;
-  firstTSS->ist[0] = firstTSS->rsp[0];
   
   SetCritical(true);
   uint32_t lapicId = LAPIC::GetCurrent().GetId();

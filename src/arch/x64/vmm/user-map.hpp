@@ -36,6 +36,9 @@ public:
                      size_t pageCount, bool executable = true);
   virtual VirtAddr Reserve(size_t pageSize, size_t pageCount);
   
+  void MapRO(VirtAddr virt, PhysAddr phys, size_t pageSize, size_t pageCount,
+             bool executable = true);
+  
 protected:
   static const size_t RegionVectorJump = 0x10;
   

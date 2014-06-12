@@ -103,6 +103,14 @@ VirtAddr UserMap::Reserve(size_t pageSize, size_t pageCount) {
   return freeList.Alloc(pageSize, pageCount);
 }
 
+void UserMap::MapRO(VirtAddr virt, PhysAddr phys, size_t pageSize,
+                    size_t pageCount, bool executable) {
+  uint64_t source = phys | PageTable::EntryMask(pageSize, executable, false);
+  source ^= 2;
+  SetEntries(virt, source, pageSize, pageSize, pageCount);
+  DoInvlpg(virt, pageSize * pageCount);
+}
+
 void UserMap::FreeTable(PhysAddr table, int depth, int start) {
   AssertCritical();
   

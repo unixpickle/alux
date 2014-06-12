@@ -13,7 +13,6 @@ General architectual ideas that I am playing around with:
 
 I am currently working on the scheduler.
 
- * (x64) Setup NMI handler for syscall
  * Create syscall handler for user-space task
  * Create a sort of TaskCode object
  * Implement a page-fault handler for loading code.
