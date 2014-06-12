@@ -27,7 +27,7 @@ void Scheduler::Start() {
     if (&list[i] == &thisCPU) continue;
     list[i].Wake();
   }
-  Tick();
+  TickTimer::GetCurrent().SaveAndTick();
 }
 
 void Scheduler::AddThread(Thread * t) {
