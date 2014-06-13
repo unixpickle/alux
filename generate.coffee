@@ -96,6 +96,7 @@ main = ->
     'multitasking'
     'arch/general'
     'scheduler/general'
+    'scheduler/user'
     'scheduler/internal'
   ]
   deps = ['analloc2/src', 'anlock/src']

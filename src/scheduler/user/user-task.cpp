@@ -4,7 +4,7 @@ namespace OS {
 
 UserTask * UserTask::New() {
   // TODO: use SLAB here
-  return new UserTask(false);
+  return new UserTask();
 }
 
 void UserTask::Delete() {
@@ -14,6 +14,9 @@ void UserTask::Delete() {
 
 bool UserTask::IsKernel() {
   return false;
+}
+
+UserTask::UserTask() : super(false) {
 }
 
 }

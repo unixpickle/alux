@@ -7,9 +7,14 @@ namespace OS {
 
 class UserTask : public Task {
 public:
+  typedef Task super;
+  
   static UserTask * New(); // @noncritical
   virtual void Delete();
   virtual bool IsKernel();
+  
+protected:
+  UserTask();
 };
 
 }
