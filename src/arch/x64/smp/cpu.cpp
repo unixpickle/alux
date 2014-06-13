@@ -3,6 +3,7 @@
 #include <arch/x64/interrupts/lapic.hpp>
 #include <arch/x64/interrupts/vectors.hpp>
 #include <arch/x64/segments/gdt.hpp>
+#include <arch/x64/common.hpp>
 #include <critical>
 
 namespace OS {
@@ -15,7 +16,7 @@ namespace x64 {
 
 CPU & CPU::GetCurrent() {
   CPU * address;
-  __asm__("mov (gs:0x8), %0" : "=r" (address));
+  __asm__("mov %%gs:(0x8), %0" : "=r" (address));
   return *address;
 }
 
@@ -36,10 +37,6 @@ CPU::CPU(uint32_t _apicId) : apicId(_apicId) {
   
 uint32_t CPU::GetId() {
   return apicId;
-}
-
-int CPU::GetIndex() {
-  return CPUList::GetGlobal().GetIndex(*this);
 }
 
 void * CPU::GetDedicatedStack() {

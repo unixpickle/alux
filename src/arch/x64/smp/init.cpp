@@ -128,8 +128,8 @@ static void CPUEntrance() {
   __asm__ volatile("ltr %%ax\n"
                    "mov %%rbx, %%rsp\n"
                    "call *%%rcx"
-                   : : "a" (cpu.tssSelector),
-                       "b" (cpu.dedicatedStack),
+                   : : "a" (cpu.GetTSSSelector()),
+                       "b" (cpu.GetDedicatedStack()),
                        "c" (CPUMain));
 }
 

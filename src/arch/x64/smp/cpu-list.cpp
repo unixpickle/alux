@@ -53,7 +53,7 @@ int CPUList::GetIndex(CPU & entry) {
 }
 
 int CPUList::IndexOf(HardwareThread & th) {
-  return CPUList::GetIndex(th);
+  return CPUList::GetIndex(static_cast<CPU &>(th));
 }
 
 }

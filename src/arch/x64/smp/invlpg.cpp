@@ -21,7 +21,7 @@ void DistributeKernelInvlpg(VirtAddr start, size_t size) {
   
   // create a structure, pass it to the IPI, QED
   CPUList & list = CPUList::GetGlobal();
-  CPU & current = list.GetCurrent();
+  CPU & current = CPU::GetCurrent();
   LAPIC & lapic = LAPIC::GetCurrent();
   for (int i = 0; i < list.GetCount(); i++) {
     CPU & cpu = list[i];
@@ -34,7 +34,7 @@ void DistributeKernelInvlpg(VirtAddr start, size_t size) {
       }
       cpu.invlpgInfo = &info;
     }
-    lapic.SendIPI(cpu.GetAPICID(), IntVectors::Invlpg);
+    lapic.SendIPI(cpu.GetId(), IntVectors::Invlpg);
     while (!info.done) { }
   }
 }
@@ -44,7 +44,7 @@ void DistributeUserInvlpg(VirtAddr start, size_t size, Task * t) {
   Invlpg(start, size, false);
   
   CPUList & list = CPUList::GetGlobal();
-  CPU & current = list.GetCurrent();
+  CPU & current = CPU::GetCurrent();
   LAPIC & lapic = LAPIC::GetCurrent();
   for (int i = 0; i < list.GetCount(); i++) {
     CPU & cpu = list[i];
@@ -58,7 +58,7 @@ void DistributeUserInvlpg(VirtAddr start, size_t size, Task * t) {
       }
       cpu.invlpgInfo = &info;
     }
-    lapic.SendIPI(cpu.GetAPICID(), IntVectors::Invlpg);
+    lapic.SendIPI(cpu.GetId(), IntVectors::Invlpg);
     while (!info.done) { }
   }
 }

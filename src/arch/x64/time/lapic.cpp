@@ -26,8 +26,8 @@ void InitializeLapicTimers() {
   LAPIC & lapic = LAPIC::GetCurrent();
   for (int i = 0; i < CPUList::GetGlobal().GetCount(); i++) {
     CPU & cpu = CPUList::GetGlobal()[i];
-    if (cpu.GetAPICID() == lapic.GetId()) continue;
-    lapic.SendIPI(cpu.GetAPICID(), IntVectors::Calibrate);
+    if (cpu.GetId() == lapic.GetId()) continue;
+    lapic.SendIPI(cpu.GetId(), IntVectors::Calibrate);
   }
   CalibrateLAPIC();
   SetCritical(false);

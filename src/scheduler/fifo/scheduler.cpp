@@ -83,7 +83,6 @@ void Scheduler::Resign() {
 }
 
 void Scheduler::Tick() {
-  int index = HardwareThread::GetCurrent().GetIndex();
   AssertCritical();
   
   Thread * toRun = GetNextThread();

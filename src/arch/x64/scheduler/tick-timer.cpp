@@ -33,12 +33,12 @@ TickTimer & TickTimer::GetGlobal() {
 
 void TickTimer::SaveAndTick() {
   AssertCritical();
-  CPU & cpu = CPUList::GetCurrent();
+  CPU & cpu = CPU::GetCurrent();
   Thread * th = cpu.GetThread();
   if (!th) {
     __asm__("mov %%rax, %%rsp\n"
             "call *%%rbx"
-            : : "a" (cpu.dedicatedStack), "b" (CallTick));
+            : : "a" (cpu.GetDedicatedStack()), "b" (CallTick));
     __builtin_unreachable();
   } else {
     void * statePtr = (void *)&th->ArchThread::state;
@@ -56,7 +56,7 @@ void TickTimer::SaveAndTick() {
       "mov %%rcx, %%rsp\n" // load new RSP
       "call *%%rbx\n" // CallTick()
       "save_and_tick_return:"
-      : : "c" (cpu.dedicatedStack), "b" (CallTick), "D" (statePtr)
+      : : "c" (cpu.GetDedicatedStack()), "b" (CallTick), "D" (statePtr)
       : "rax", "rdx", "rsi", "r8", "r9", "r10", "r11", "r12", "r13", "r14",
         "r15", "memory");
   }
