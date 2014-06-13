@@ -43,19 +43,6 @@ void GlobalMap::Set() {
   __asm__("mov %0, %%cr3" : : "r" (table.GetPML4()) : "memory");
 }
 
-int GlobalMap::GetPageSizeCount() {
-  return 2;
-}
-
-size_t GlobalMap::GetPageSize(int index) {
-  if (index) return 0x200000;
-  return 0x1000;
-}
-
-size_t GlobalMap::GetPageAlignment(int index) {
-  return GetPageSize(index);
-}
-
 bool GlobalMap::SupportsNX() {
   return true;
 }

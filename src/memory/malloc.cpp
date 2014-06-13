@@ -19,22 +19,20 @@ Malloc & Malloc::GetGlobal() {
 
 Malloc::Malloc() {
   // calculate the pageSize and pageAlignment to use
-  AddressSpace & space = AddressSpace::GetGlobal();
-  
-  int sizeCount = space.GetPageSizeCount();
+  int sizeCount = AddressSpace::GetPageSizeCount();
   assert(sizeCount > 0);
   
   int useSizeIndex = 0;
-  pageSize = space.GetPageSize(0);
+  pageSize = AddressSpace::GetPageSize(0);
   
   for (int i = 1; i < sizeCount; i++) {
-    size_t size = space.GetPageSize(i);
+    size_t size = AddressSpace::GetPageSize(i);
     if (size > RegionSize) break;
     pageSize = size;
     useSizeIndex = i;
   }
   
-  pageAlignment = space.GetPageAlignment(useSizeIndex);
+  pageAlignment = AddressSpace::GetPageAlignment(useSizeIndex);
   
   allocSize = RegionSize;
   if (RegionSize % pageSize) {

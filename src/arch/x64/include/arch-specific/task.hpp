@@ -12,7 +12,7 @@ public:
   ArchTask(bool kernel = false);
   ~ArchTask();
   
-  AddressSpace * GetAddressSpace();
+  AddressSpace & GetAddressSpace();
   
 protected:
   AddressSpace * addressSpace;

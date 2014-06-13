@@ -26,6 +26,7 @@
 #include <arch/general/critical.hpp>
 #include <scheduler-specific/scheduler.hpp>
 #include <scheduler/general/init.hpp>
+#include <memory/fault.hpp>
 #include <iostream>
 #include <cassert>
 #include <critical>
@@ -160,6 +161,8 @@ void InitializeTimers() {
 void InitializeScheduler() {
   cout << "Initializing scheduler..." << endl;
   IRT::GetGlobal()[IntVectors::LapicTimer] = LapicTickMethod;
+  IRT::GetGlobal()[0xe] = (IRT::Routine)HandleMemoryFault;
+  
   TickTimer::Initialize();
   OS::InitializeScheduler();
   Scheduler::GetGlobal().Start();

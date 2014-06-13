@@ -22,9 +22,6 @@ public:
   PhysAddr GetPML4();
   
   virtual void Set();
-  virtual int GetPageSizeCount();
-  virtual size_t GetPageSize(int index);
-  virtual size_t GetPageAlignment(int index);
   virtual bool SupportsNX();
   virtual bool SupportsRO();
   virtual bool SupportsRemap();

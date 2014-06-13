@@ -15,7 +15,7 @@ public:
     Size(size_t ps, size_t pc) : pageSize(ps), pageCount(pc) {
     }
     
-    size_t Total() {
+    size_t Total() const {
       return pageSize * pageCount;
     }
   };
@@ -33,20 +33,12 @@ public:
   
   static AddressSpace & GetGlobal();
   
-  virtual ~AddressSpace() {}
-  
-  /**
-   * Bind this address space to the current CPU.
-   * @critical
-   */
-  virtual void Set() = 0;
-  
   /**
    * Returns the number of different page sizes supported by this address
    * space.
    * @ambicritical
    */
-  virtual int GetPageSizeCount() = 0;
+  static int GetPageSizeCount();
   
   /**
    * Returns the page size at a given index (0 through GetPageSizeCount() - 1
@@ -54,13 +46,21 @@ public:
    * order, meaning that GetPageSize(0) < GetPageSize(1) ... < GetPageSize(n).
    * @ambicritical
    */
-  virtual size_t GetPageSize(int index) = 0;
+  static size_t GetPageSize(int index);
   
   /**
    * Returns the physical alignment required for pages of a certain size.
    * @ambicritical
    */
-  virtual size_t GetPageAlignment(int index) = 0;
+  static size_t GetPageAlignment(int index);
+  
+  virtual ~AddressSpace() {}
+  
+  /**
+   * Bind this address space to the current CPU.
+   * @critical
+   */
+  virtual void Set() = 0;
   
   /**
    * Returns whether this address space supports the NX bit.

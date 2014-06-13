@@ -20,13 +20,13 @@ ArchTask::ArchTask(bool kernel) {
 
 ArchTask::~ArchTask() {
   AssertNoncritical();
-  if (addressSpace != &GlobalMap::GetGlobal()) {
+  if (addressSpace != &AddressSpace::GetGlobal()) {
     if (addressSpace) delete addressSpace;
   }
 }
 
-AddressSpace * ArchTask::GetAddressSpace() {
-  return addressSpace;
+AddressSpace & ArchTask::GetAddressSpace() {
+  return *addressSpace;
 }
 
 }

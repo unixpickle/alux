@@ -40,18 +40,6 @@ void UserMap::Set() {
   __asm__ __volatile__("mov %%rax, %%cr3" : : "a" (GetPML4()));
 }
 
-int UserMap::GetPageSizeCount() {
-  return GlobalMap::GetGlobal().GetPageSizeCount();
-}
-
-size_t UserMap::GetPageSize(int index) {
-  return GlobalMap::GetGlobal().GetPageSize(index);
-}
-
-size_t UserMap::GetPageAlignment(int index) {
-  return GlobalMap::GetGlobal().GetPageAlignment(index);
-}
-
 bool UserMap::SupportsNX() {
   return true;
 }

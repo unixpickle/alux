@@ -2,9 +2,9 @@
 
 namespace OS {
 
-UserTask * UserTask::New() {
+UserTask * UserTask::New(UserCode * code) {
   // TODO: use SLAB here
-  return new UserTask();
+  return new UserTask(code);
 }
 
 void UserTask::Delete() {
@@ -16,7 +16,12 @@ bool UserTask::IsKernel() {
   return false;
 }
 
-UserTask::UserTask() : super(false) {
+CodeMap & UserTask::GetCodeMap() {
+  return codeMap;
+}
+
+UserTask::UserTask(UserCode * code)
+  : super(false), codeMap(this, code) {
 }
 
 }

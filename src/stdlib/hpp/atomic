@@ -67,6 +67,10 @@ public:
     return Atomic<T>(__sync_fetch_and_add(&value, 1));
   }
   
+  operator T() {
+    return GetValue();
+  }
+  
   T GetValue() {
     T res;
     __atomic_store(&res, &value, __ATOMIC_SEQ_CST);
