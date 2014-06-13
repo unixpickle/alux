@@ -31,10 +31,14 @@ public:
 
   virtual void Wake();
 
+protected:
+  virtual void SetCurrentThread(Thread * th);
+
 private:
   struct CriticalInformation {
     void * dedicatedStack; // top, not bottom
     CPU * thisPtr;
+    void * threadKernStack;
   } OS_PACKED;
 
   uint32_t apicId;

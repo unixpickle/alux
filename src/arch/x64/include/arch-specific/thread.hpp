@@ -34,6 +34,8 @@ public:
 
   void SetKernelCall(void * function, void * argument = NULL);
   void Run();
+  
+  void * GetStackTop();
 };
 
 }

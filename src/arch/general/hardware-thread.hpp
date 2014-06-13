@@ -17,6 +17,8 @@ public:
   virtual bool IsRunningTask(Task *);
   
 protected:
+  virtual void SetCurrentThread(Thread * th);
+  
   uint64_t threadLock OS_ALIGNED(8);
   Thread * thread;
 };

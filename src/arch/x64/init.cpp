@@ -20,6 +20,7 @@
 #include <arch/x64/time/hpet.hpp>
 #include <arch/x64/time/lapic.hpp>
 #include <arch/x64/scheduler/tick-timer.hpp>
+#include <arch/x64/syscall/registers.hpp>
 #include <arch/x64/general/critical.hpp>
 #include <arch/x64/general/panic.hpp>
 #include <arch/general/critical.hpp>
@@ -27,6 +28,7 @@
 #include <scheduler/general/init.hpp>
 #include <iostream>
 #include <cassert>
+#include <critical>
 
 namespace OS {
 
@@ -111,6 +113,13 @@ void InitializeTime() {
     SetCurrentClock(&PIT::GetGlobal());
     PIT::Start();
   }
+}
+
+void InitializeSyscall() {
+  cout << "Initializing syscall on boot CPU..." << endl;
+  
+  ScopeCritical scope;
+  SyscallSetRegisters();
 }
 
 void InitializeSMP() {

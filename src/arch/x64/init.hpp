@@ -10,6 +10,7 @@ void InitializeInterrupts();
 void InitializeACPI();
 void InitializeAPIC();
 void InitializeTime();
+void InitializeSyscall();
 void InitializeSMP();
 void InitializeTimers();
 void InitializeScheduler();

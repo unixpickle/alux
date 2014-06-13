@@ -14,6 +14,7 @@ void MbootEntry(void * mbootPtr) {
   OS::x64::InitializeACPI();
   OS::x64::InitializeAPIC();
   OS::x64::InitializeTime();
+  OS::x64::InitializeSyscall();
   OS::x64::InitializeSMP();
   OS::x64::InitializeTimers();
   OS::x64::InitializeScheduler();

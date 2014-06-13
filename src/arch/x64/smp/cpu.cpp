@@ -4,9 +4,8 @@
 #include <arch/x64/interrupts/vectors.hpp>
 #include <arch/x64/segments/gdt.hpp>
 #include <arch/x64/common.hpp>
+#include <arch-specific/thread.hpp>
 #include <critical>
-
-#include <iostream> // TODO: delete me
 
 namespace OS {
 
@@ -62,6 +61,11 @@ void CPU::Wake() {
   AssertCritical();
   LAPIC & lapic = LAPIC::GetCurrent();
   lapic.SendIPI(GetId(), IntVectors::LapicTimer);
+}
+
+void CPU::SetCurrentThread(Thread * th) {
+  HardwareThread::SetCurrentThread(th);
+  info.threadKernStack = th->GetStackTop();
 }
 
 }

@@ -8,11 +8,7 @@ namespace OS {
 void HardwareThread::SetThread(Thread * th) {
   AssertCritical();
   HardwareThread & hwth = HardwareThread::GetCurrent();
-  ScopeCriticalLock scope(&hwth.threadLock);
-  if (hwth.thread) {
-    hwth.thread->GetTask()->Release();
-  }
-  hwth.thread = th;
+  hwth.SetCurrentThread(th);
 }
 
 Thread * HardwareThread::GetThread() {
@@ -25,6 +21,14 @@ bool HardwareThread::IsRunningTask(Task * t) {
   AssertCritical();
   ScopeCriticalLock scope(&threadLock);
   return t == thread->GetTask();
+}
+
+void HardwareThread::SetCurrentThread(Thread * th) {
+  ScopeCriticalLock scope(&threadLock);
+  if (thread) {
+    thread->GetTask()->Release();
+  }
+  thread = th;
 }
 
 }

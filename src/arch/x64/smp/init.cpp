@@ -5,6 +5,7 @@
 #include <arch/x64/interrupts/idt.hpp>
 #include <arch/x64/vmm/global-map.hpp>
 #include <arch/x64/segments/gdt.hpp>
+#include <arch/x64/syscall/registers.hpp>
 #include <arch/general/clock.hpp>
 #include <panic>
 #include <critical>
@@ -123,6 +124,7 @@ static void CPUEntrance() {
   SetCritical(true);
   cpu.LoadGS();
   GDT::GetGlobal().Set();
+  SyscallSetRegisters();
   SetCritical(false);
   
   __asm__ volatile("ltr %%ax\n"

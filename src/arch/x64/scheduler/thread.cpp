@@ -52,6 +52,10 @@ void ArchThread::Run() {
   );
 }
 
+void * ArchThread::GetStackTop() {
+  return (void *)(kernStack + 0x4000);
+}
+
 }
 
 }
