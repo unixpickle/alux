@@ -31,9 +31,13 @@
 #include <cassert>
 #include <critical>
 
+#include <scheduler/user/user-task.hpp>
+
 namespace OS {
 
 namespace x64 {
+
+static void * GetTestCode(size_t & size);
 
 void InitializeMemory(void * mbootPtr) {
   cout << "Initializing the memory subsystem..." << endl;
@@ -165,7 +169,28 @@ void InitializeScheduler() {
   
   TickTimer::Initialize();
   OS::InitializeScheduler();
+  
+  size_t codeSize;
+  void * code = GetTestCode(codeSize);
+  UserCode * theCode = new UserCode(code, codeSize);
+  UserTask * theTask = UserTask::New(theCode);
+  Thread * th = Thread::New(theTask, false);
+  th->SetUserCall((void *)theTask->GetCodeMap().GetStart());
+  
   Scheduler::GetGlobal().Start();
+}
+
+static void * GetTestCode(size_t & size) {
+  uint64_t start, end;
+  __asm__("mov $test_code_start, %0\n"
+          "mov $test_code_end, %1\n"
+          "test_code_start:\n"
+          "syscall\n"
+          "test_code_loop:\n"
+          "jmp test_code_loop\n"
+          "test_code_end:" : "=r" (start), "=r" (end));
+  size = end - start;
+  return (void *)start;
 }
 
 }
