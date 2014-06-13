@@ -14,10 +14,9 @@ class PIDPool;
 
 class Task : public ArchTask, public SchedTask {
 public:
-  static Task * New(bool forKernel); // @noncritical, retained result
-  
   ~Task(); // @noncritical
-  virtual void Delete(); // @noncritical
+  virtual void Delete() = 0; // @noncritical
+  virtual bool IsKernel() = 0;
   
   void AddThread(Thread * th); // @critical
   void RemoveThread(Thread * th); // @critical

@@ -77,7 +77,11 @@ void Malloc::MakeNewRegion() {
   PhysicalAllocator & physAlloc = PhysicalAllocator::GetGlobal();
   AddressSpace & space = AddressSpace::GetGlobal();
   PhysAddr addr = physAlloc.Alloc(allocSize, pageAlignment, NULL);
-  VirtAddr vAddr = space.Map(addr, pageSize, allocSize / pageSize);
+  
+  AddressSpace::MapInfo info(pageSize, allocSize / pageSize, addr);
+  VirtAddr vAddr = space.Map(info);
+  
+  assert(vAddr > 0);
   
   void * region = (void *)vAddr;
   MallocRegion * last = first;

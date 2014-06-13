@@ -91,12 +91,12 @@ VirtAddr Allocator::AllocateRaw(StepAllocator & alloc, size_t size) {
   
   size_t pageSize = size >= 0x200000 ? 0x200000 : 0x1000;
   size_t pageCount = size / pageSize + (size % pageSize ? 1 : 0);
-  VirtAddr reserved = map.Reserve(pageSize, pageCount);
+  VirtAddr reserved = map.Reserve(GlobalMap::Size(pageSize, pageCount));
   VirtAddr dest = reserved;
   
   while (pageCount--) {
     PhysAddr page = alloc.AllocSize(pageSize);
-    map.MapAt(dest, page, pageSize, 1, false);
+    map.MapAt(dest, GlobalMap::MapInfo(pageSize, 1, page, false));
     dest += pageSize;
   }
   

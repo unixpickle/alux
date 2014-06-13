@@ -52,63 +52,69 @@ size_t UserMap::GetPageAlignment(int index) {
   return GlobalMap::GetGlobal().GetPageAlignment(index);
 }
 
-void UserMap::Unmap(VirtAddr virt, size_t pageSize, size_t pageCount) {
+bool UserMap::SupportsNX() {
+  return true;
+}
+
+bool UserMap::SupportsRO() {
+  return true;
+}
+
+bool UserMap::SupportsRemap() {
+  return true;
+}
+
+void UserMap::Unmap(VirtAddr virt, UserMap::Size size) {
   AssertNoncritical();
   assert(virt >= SpaceStart);
   
-  for (size_t i = 0; i < pageCount; i++) {
+  for (size_t i = 0; i < size.pageCount; i++) {
     ScopeLock scope(&lock);
-    VirtAddr theAddr = virt + (pageSize * i);
+    VirtAddr theAddr = virt + (size.pageSize * i);
     if (!table.Unset(theAddr)) {
       Panic("UserMap::Unmap() - table.Unset() failed");
     }
   }
   {
     ScopeLock scope(&lock);
-    freeList.Free(virt, pageSize, pageCount);
+    freeList.Free(virt, size.pageSize, size.pageCount);
   }
-  DoInvlpg(virt, pageSize * pageCount);
+  DoInvlpg(virt, size.Total());
 }
 
-VirtAddr UserMap::Map(PhysAddr phys, size_t pageSize, size_t pageCount,
-                      bool executable) {
+VirtAddr UserMap::Map(UserMap::MapInfo info) {
   AssertNoncritical();
   
   VirtAddr addr;
   {
     ScopeLock scope(&lock);
-    addr = freeList.Alloc(pageSize, pageCount);
+    addr = freeList.Alloc(info.pageSize, info.pageCount);
   }
   if (!addr) return 0;
   assert(addr >= SpaceStart);
   
-  uint64_t source = phys | PageTable::EntryMask(pageSize, executable, false);
-  SetEntries(addr, source, pageSize, pageSize, pageCount);
+  uint64_t mask = PageTable::EntryMask(info.pageSize, info.executable, false);
+  if (!info.writable) mask ^= 2;
+  uint64_t source = info.physical | mask;
+  SetEntries(addr, source, info.pageSize, info.pageSize, info.pageCount);
   return addr;
 }
 
-void UserMap::MapAt(VirtAddr virt, PhysAddr phys, size_t pageSize,
-                    size_t pageCount, bool executable) {
+void UserMap::MapAt(VirtAddr virt, UserMap::MapInfo info) {
   assert(virt >= SpaceStart);
   AssertNoncritical();
   
-  uint64_t source = phys | PageTable::EntryMask(pageSize, executable, false);
-  SetEntries(virt, source, pageSize, pageSize, pageCount);
-  DoInvlpg(virt, pageSize * pageCount);
+  uint64_t mask = PageTable::EntryMask(info.pageSize, info.executable, false);
+  if (!info.writable) mask ^= 2;
+  uint64_t source = info.physical | mask;
+  SetEntries(virt, source, info.pageSize, info.pageSize, info.pageCount);
+  DoInvlpg(virt, info.Total());
 }
 
-VirtAddr UserMap::Reserve(size_t pageSize, size_t pageCount) {
+VirtAddr UserMap::Reserve(UserMap::Size size) {
   AssertNoncritical();
   ScopeLock scope(&lock);
-  return freeList.Alloc(pageSize, pageCount);
-}
-
-void UserMap::MapRO(VirtAddr virt, PhysAddr phys, size_t pageSize,
-                    size_t pageCount, bool executable) {
-  uint64_t source = phys | PageTable::EntryMask(pageSize, executable, false);
-  source ^= 2;
-  SetEntries(virt, source, pageSize, pageSize, pageCount);
-  DoInvlpg(virt, pageSize * pageCount);
+  return freeList.Alloc(size.pageSize, size.pageCount);
 }
 
 void UserMap::FreeTable(PhysAddr table, int depth, int start) {

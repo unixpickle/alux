@@ -25,12 +25,13 @@ public:
   virtual int GetPageSizeCount();
   virtual size_t GetPageSize(int index);
   virtual size_t GetPageAlignment(int index);
-  virtual void Unmap(VirtAddr virt, size_t pageSize, size_t pageCount);
-  virtual VirtAddr Map(PhysAddr phys, size_t pageSize, size_t pageCount,
-                       bool executable = true);
-  virtual void MapAt(VirtAddr virt, PhysAddr phys, size_t pageSize,
-                     size_t pageCount, bool executable = true);
-  virtual VirtAddr Reserve(size_t pageSize, size_t pageCount);
+  virtual bool SupportsNX();
+  virtual bool SupportsRO();
+  virtual bool SupportsRemap();
+  virtual void Unmap(VirtAddr virt, Size size);
+  virtual VirtAddr Map(MapInfo info);
+  virtual void MapAt(VirtAddr virt, MapInfo info);
+  virtual VirtAddr Reserve(Size size);
   
   friend void InitializeMemory(void *);
   friend class PageTable;
@@ -41,11 +42,7 @@ protected:
   PageTable table;
   PhysAddr pdpt;
   
-   // held whenever an allocation is underway
-  uint64_t allocationLock OS_ALIGNED(8);
-  
-  // held whenever the table is being modified directly (inner lock)
-  uint64_t tableLock;
+  uint64_t lock OS_ALIGNED(8); // @noncritical
   
   VirtAddr freeStart;
   size_t freeSize;
@@ -55,11 +52,11 @@ protected:
   void SetEntries(VirtAddr virt, uint64_t phys, size_t virtAdd,
                   size_t physAdd, size_t count);
   
-  VirtAddr AllocateRegion(size_t pageSize, size_t pageCount);
-  void FreeRegion(VirtAddr, size_t pageSize, size_t pageCount);
+  VirtAddr AllocateRegion(Size size);
+  void FreeRegion(VirtAddr, Size size);
   
   void UpdateFreeRegion();
-  bool HasEnoughFree(size_t pageSize, size_t pageCount);
+  bool HasEnoughFree(Size size);
 };
 
 }

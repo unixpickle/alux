@@ -22,6 +22,10 @@ void KernelTask::Delete() {
   Panic("KernelTask::Delete() - cannot delete global object");
 }
 
+bool KernelTask::IsKernel() {
+  return true;
+}
+
 KernelTask::KernelTask() : Task(true) {
 }
 

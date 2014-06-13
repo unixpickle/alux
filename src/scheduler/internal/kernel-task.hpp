@@ -13,6 +13,7 @@ public:
   KernelTask(); // DO NOT CALL THIS YOURSELF
   
   virtual void Delete(); // @noncritical, don't call
+  virtual bool IsKernel();
 };
 
 }

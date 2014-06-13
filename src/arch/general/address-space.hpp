@@ -8,6 +8,29 @@ namespace OS {
 
 class AddressSpace {
 public:
+  struct Size {
+    size_t pageSize;
+    size_t pageCount;
+    
+    Size(size_t ps, size_t pc) : pageSize(ps), pageCount(pc) {
+    }
+    
+    size_t Total() {
+      return pageSize * pageCount;
+    }
+  };
+  
+  struct MapInfo : public Size {
+    PhysAddr physical;
+    bool executable;
+    bool writable;
+    
+    MapInfo(size_t ps, size_t pc, PhysAddr phys, bool exec = true,
+            bool write = true)
+    : Size(ps, pc), physical(phys), executable(exec), writable(write) {
+    }
+  };
+  
   static AddressSpace & GetGlobal();
   
   virtual ~AddressSpace() {}
@@ -35,29 +58,46 @@ public:
   
   /**
    * Returns the physical alignment required for pages of a certain size.
+   * @ambicritical
    */
   virtual size_t GetPageAlignment(int index) = 0;
+  
+  /**
+   * Returns whether this address space supports the NX bit.
+   * @ambicritical
+   */
+  virtual bool SupportsNX() = 0;
+  
+  /**
+   * Returns whether this address space supports read-only memory.
+   * @ambicritical
+   */
+  virtual bool SupportsRO() = 0;
+  
+  /**
+   * Returns whether this address space allows Reserve() and MapAt() calls.
+   * @ambicritical
+   */
+  virtual bool SupportsRemap() = 0;
   
   /**
    * Unmap a chunk of memory from this address space.
    * @noncritical
    */
-  virtual void Unmap(VirtAddr virt, size_t pageSize, size_t pageCount) = 0;
+  virtual void Unmap(VirtAddr virt, Size size) = 0;
   
   /**
    * Map a physical address somewhere into virtual memory and return its
    * address.
    * @noncritical
    */
-  virtual VirtAddr Map(PhysAddr phys, size_t pageSize, size_t pageCount,
-                       bool executable = true) = 0;
+  virtual VirtAddr Map(MapInfo info) = 0;
   
   /**
    * Map a physical address to a virtual address.
    * @noncritical
    */
-  virtual void MapAt(VirtAddr virt, PhysAddr phys, size_t pageSize,
-                     size_t pageCount, bool executable = true) = 0;
+  virtual void MapAt(VirtAddr virt, MapInfo info) = 0;
   
   /**
    * Reserve a certain amount of space in the virtual address space. When this
@@ -67,7 +107,7 @@ public:
    * memory is unmapped.
    * @noncritical
    */
-  virtual VirtAddr Reserve(size_t pageSize, size_t pageCount) = 0;
+  virtual VirtAddr Reserve(Size size) = 0;
   
 };
 

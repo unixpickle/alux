@@ -56,47 +56,61 @@ size_t GlobalMap::GetPageAlignment(int index) {
   return GetPageSize(index);
 }
 
-void GlobalMap::Unmap(VirtAddr virt, size_t pageSize, size_t pageCount) {
-  {
-    ScopeLock mainScope(&allocationLock);
-    for (size_t i = 0; i < pageCount; i++) {
-      ScopeLock scope(&tableLock);
-      VirtAddr theAddr = virt + (pageSize * i);
-      if (!table.Unset(theAddr)) {
-        Panic("GlobalMap::Unmap() - table.Unset() failed");
-      }
-    }
-    FreeRegion(virt, pageSize, pageCount);
-  }
-  // invalidate the memory
-  DistributeKernelInvlpg(virt, pageSize * pageCount);
+bool GlobalMap::SupportsNX() {
+  return true;
 }
 
-VirtAddr GlobalMap::Map(PhysAddr phys, size_t pageSize, size_t pageCount,
-                        bool executable) {
-  ScopeLock mainScope(&allocationLock);
+bool GlobalMap::SupportsRO() {
+  return false;
+}
+
+bool GlobalMap::SupportsRemap() {
+  return true;
+}
+
+void GlobalMap::Unmap(VirtAddr virt, GlobalMap::Size size) {
+  ScopeLock scope(&lock);
+  for (size_t i = 0; i < size.pageCount; i++) {
+    VirtAddr theAddr = virt + (size.pageSize * i);
+    if (!table.Unset(theAddr)) {
+      Panic("GlobalMap::Unmap() - table.Unset() failed");
+    }
+  }
+  FreeRegion(virt, size);
   
-  VirtAddr region = AllocateRegion(pageSize, pageCount);
-  uint64_t source = phys | PageTable::EntryMask(pageSize, executable, true);
+  // invalidate the memory
+  DistributeKernelInvlpg(virt, size.Total());
+}
+
+VirtAddr GlobalMap::Map(GlobalMap::MapInfo info) {
+  ScopeLock scope(&lock);
   
-  SetEntries(region, source, pageSize, pageSize, pageCount);
+  VirtAddr region = AllocateRegion(info);
+  uint64_t mask = PageTable::EntryMask(info.pageSize, info.executable, true);
+  uint64_t source = info.physical | mask;
+  
+  SetEntries(region, source, info.pageSize, info.pageSize, info.pageCount);
   return region;
 }
 
-void GlobalMap::MapAt(VirtAddr virt, PhysAddr phys, size_t pageSize,
-                      size_t pageCount, bool executable) {
-  uint64_t source = phys | PageTable::EntryMask(pageSize, executable, true);
-  SetEntries(virt, source, pageSize, pageSize, pageCount);
+void GlobalMap::MapAt(VirtAddr virt, GlobalMap::MapInfo info) {
+  ScopeLock scope(&lock);
+  
+  uint64_t mask = PageTable::EntryMask(info.pageSize, info.executable, true);
+  uint64_t source = info.physical | mask;
+  SetEntries(virt, source, info.pageSize, info.pageSize, info.pageCount);
   
   // we may have overwritten something
-  DistributeKernelInvlpg(virt, pageCount * pageSize);
+  DistributeKernelInvlpg(virt, info.Total());
 }
 
-VirtAddr GlobalMap::Reserve(size_t pageSize, size_t pageCount) {
-  ScopeLock mainScope(&allocationLock);
-  VirtAddr region = AllocateRegion(pageSize, pageCount);
-  uint64_t entry = pageSize | (pageSize == 0x1000 ? 0 : 0x80);
-  SetEntries(region, entry, pageSize, 0, pageCount);
+VirtAddr GlobalMap::Reserve(GlobalMap::Size size) {
+  ScopeLock scope(&lock);
+  
+  VirtAddr region = AllocateRegion(size);
+  uint64_t entry = size.pageSize | (size.pageSize == 0x1000 ? 0 : 0x80);
+  SetEntries(region, entry, size.pageSize, 0, size.pageCount);
+  
   return region;
 }
 
@@ -115,7 +129,6 @@ void GlobalMap::SetEntries(VirtAddr virt, uint64_t phys, size_t virtAdd,
   PhysAddr curPhys = phys;
 
   for (size_t i = 0; i < count; i++) {
-    ScopeLock scope(&tableLock);
     bool result = table.Set(curVirt, curPhys, 3, depth);
     if (!result) {
       Panic("GlobalMap::SetEntries() - table.Set() failed");
@@ -125,30 +138,30 @@ void GlobalMap::SetEntries(VirtAddr virt, uint64_t phys, size_t virtAdd,
   }
 }
 
-VirtAddr GlobalMap::AllocateRegion(size_t pageSize, size_t pageCount) {
-  if (!HasEnoughFree(pageSize, pageCount)) {
+VirtAddr GlobalMap::AllocateRegion(GlobalMap::Size size) {
+  if (!HasEnoughFree(size)) {
     UpdateFreeRegion();
-    if (!HasEnoughFree(pageSize, pageCount)) {
+    if (!HasEnoughFree(size)) {
       Panic("GlobalMap::AllocateRegion() - no contiguous regions available");
     }
   }
   
-  if (freeStart % pageSize) {
-    freeSize -= pageSize - freeStart % pageSize;
-    freeStart += pageSize - freeStart % pageSize;
+  if (freeStart % size.pageSize) {
+    freeSize -= size.pageSize - freeStart % size.pageSize;
+    freeStart += size.pageSize - freeStart % size.pageSize;
   }
   VirtAddr result = freeStart;
-  freeSize -= pageSize * pageCount;
-  freeStart += pageSize * pageCount;
+  freeSize -= size.Total();
+  freeStart += size.Total();
   return result;
 }
 
-void GlobalMap::FreeRegion(VirtAddr addr, size_t pageSize, size_t pageCount) {
-  size_t dataSize = pageSize * pageCount;
+void GlobalMap::FreeRegion(VirtAddr addr, GlobalMap::Size size) {
+  size_t dataSize = size.Total();
   if (addr == freeStart + freeSize) {
     // the chunk is right after the free region
     freeSize += dataSize;
-  } else if (addr + pageSize * pageCount == freeStart) {
+  } else if (addr + dataSize == freeStart) {
     // the chunk is right before the free region
     freeSize += dataSize;
     freeStart -= dataSize;
@@ -162,7 +175,6 @@ void GlobalMap::UpdateFreeRegion() {
     size_t nextSize = 0;
     
     while (1) {
-      ScopeLock scope(&tableLock);
       size_t pageSize;
       uint64_t entry = 0;
       int result = table.Walk(nextStart + nextSize, entry, &pageSize);
@@ -182,21 +194,18 @@ void GlobalMap::UpdateFreeRegion() {
   }
 }
 
-bool GlobalMap::HasEnoughFree(size_t pageSize, size_t pageCount) {
-  if (!pageSize || !pageCount) return true;
+bool GlobalMap::HasEnoughFree(GlobalMap::Size size) {
+  if (!size.pageSize || !size.pageCount) return true;
   
-  // when we allocate a page of size pageSize, it must be *aligned* to that
-  // size.
-  VirtAddr start = freeStart;
-  size_t size = freeSize;
-  if (start % pageSize) {
+  // when we allocate a page, it must be aligned to pageSize
+  size_t available = freeSize;
+  if (freeStart % size.pageSize) {
     // force alignment
-    size_t adding = pageSize - start % pageSize;
-    if (adding >= size) return false;
-    start += adding;
-    size -= adding;
+    size_t padding = size.pageSize - freeStart % size.pageSize;
+    if (padding >= available) return false;
+    available -= padding;
   }
-  return size >= (pageSize * pageCount);
+  return size.Total() <= available;
 }
 
 }

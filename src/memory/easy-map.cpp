@@ -32,13 +32,14 @@ EasyMap::EasyMap(PhysAddr _start, size_t _size, bool exec) {
   
   pageCount = endSize / pageSize + (endSize % pageSize ? 1 : 0);
   
-  mapStart = space.Map(aligned, pageSize, pageCount, exec);
+  AddressSpace::MapInfo info(pageSize, pageCount, aligned, exec);
+  mapStart = space.Map(info);
   start = mapStart + alignOffset;
 }
 
 EasyMap::~EasyMap() {
   AddressSpace & space = AddressSpace::GetGlobal();
-  space.Unmap(mapStart, pageSize, pageCount);
+  space.Unmap(mapStart, AddressSpace::Size(pageSize, pageCount));
 }
 
 VirtAddr EasyMap::GetStart() const {

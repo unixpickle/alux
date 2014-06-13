@@ -7,11 +7,6 @@
 
 namespace OS {
 
-Task * Task::New(bool forKernel) {
-  // TODO: use a slab here
-  return new Task(forKernel);
-}
-
 Task::Task(bool forKernel) : ArchTask(forKernel) {
   AssertNoncritical();
   pid = PIDPool::GetGlobal().AllocPID(this);
@@ -31,10 +26,6 @@ Task::~Task() {
   }
   
   PIDPool::GetGlobal().FreePID(GetPID(), this);
-}
-
-void Task::Delete() {
-  delete this; // TODO: use a slab here
 }
 
 void Task::AddThread(Thread * th) {

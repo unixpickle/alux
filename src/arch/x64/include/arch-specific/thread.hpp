@@ -33,6 +33,7 @@ public:
   ~ArchThread();
 
   void SetKernelCall(void * function, void * argument = NULL);
+  void SetUserCall(void * function);
   void Run();
   
   void * GetStackTop();

@@ -1,6 +1,8 @@
 #include <arch-specific/thread.hpp>
 #include <arch/x64/smp/cpu-list.hpp>
 #include <arch/x64/vmm/global-map.hpp>
+#include <arch/x64/vmm/user-map.hpp>
+#include <scheduler/general/task.hpp>
 #include <critical>
 #include <panic>
 
@@ -8,7 +10,7 @@ namespace OS {
 
 namespace x64 {
 
-ArchThread::ArchThread(Task *, bool forKernel) {
+ArchThread::ArchThread(Task * task, bool forKernel) {
   AssertNoncritical();
   kernStack = new uint8_t[0x4000]; // TODO: use slab
   if (forKernel) {
@@ -22,7 +24,12 @@ ArchThread::ArchThread(Task *, bool forKernel) {
             "pop %%rax"
             : "=a" (state.rflags));
   } else {
-    Panic("ArchThread(Task *, false) - user threads NYI");
+    UserMap * map = static_cast<UserMap *>(task->GetAddressSpace());
+    state.cr3 = map->GetPML4();
+    state.ss = 0x20;
+    state.cs = 0x18;
+    state.rsp = 0;
+    state.rflags = 0x200;
   }
 }
 
@@ -34,6 +41,10 @@ ArchThread::~ArchThread() {
 void ArchThread::SetKernelCall(void * function, void * argument) {
   state.rip = (uint64_t)function;
   state.rdi = (uint64_t)argument;
+}
+
+void ArchThread::SetUserCall(void * function) {
+  state.rip = (uint64_t)function;
 }
 
 void ArchThread::Run() {
