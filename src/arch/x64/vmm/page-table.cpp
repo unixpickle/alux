@@ -1,7 +1,7 @@
 #include <arch/x64/vmm/page-table.hpp>
 #include <arch/x64/vmm/scope-scratch.hpp>
 #include <arch/x64/vmm/global-map.hpp>
-#include <arch/general/failure.hpp>
+#include <panic>
 
 namespace OS {
 

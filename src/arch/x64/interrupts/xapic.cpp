@@ -1,7 +1,7 @@
 #include <arch/x64/interrupts/xapic.hpp>
 #include <arch/x64/common.hpp>
-#include <arch/general/failure.hpp>
-#include <utilities/critical.hpp>
+#include <critical>
+#include <panic>
 
 namespace OS {
 

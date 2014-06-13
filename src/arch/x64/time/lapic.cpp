@@ -3,7 +3,7 @@
 #include <arch/x64/interrupts/vectors.hpp>
 #include <arch/x64/smp/cpu-list.hpp>
 #include <arch/general/clock.hpp>
-#include <utilities/critical.hpp>
+#include <critical>
 #include <atomic>
 #include <new>
 

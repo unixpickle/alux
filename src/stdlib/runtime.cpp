@@ -1,5 +1,5 @@
 #include <stdlib/runtime.hpp>
-#include <arch/general/failure.hpp>
+#include <panic>
 
 extern "C" {
 

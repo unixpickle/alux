@@ -1,7 +1,7 @@
 #include <arch/general/hardware-thread.hpp>
 #include <scheduler/general/task.hpp>
-#include <utilities/critical.hpp>
-#include <utilities/lock.hpp>
+#include <critical>
+#include <lock>
 
 namespace OS {
 

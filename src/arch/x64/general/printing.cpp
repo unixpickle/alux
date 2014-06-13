@@ -1,7 +1,7 @@
 #include <arch/x64/common.hpp>
-#include <utilities/lock.hpp>
-#include <utilities/critical.hpp>
-#include <common>
+#include <lock>
+#include <critical>
+#include <macros>
 #include <cstdint>
 
 namespace OS {

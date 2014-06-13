@@ -1,6 +1,6 @@
 #include <arch/x64/vmm/scratch.hpp>
 #include <arch/x64/vmm/kernel-layout.hpp>
-#include <utilities/lock.hpp>
+#include <lock>
 #include <new>
 #include <cassert>
 #include <cstring>

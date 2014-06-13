@@ -1,6 +1,6 @@
 #include <arch/x64/pmm/region-list.hpp>
 #include <arch/x64/pmm/step-allocator.hpp>
-#include <arch/general/failure.hpp>
+#include <panic>
 
 namespace OS {
 

@@ -1,5 +1,5 @@
 #include <arch/x64/vmm/invlpg.hpp>
-#include <utilities/critical.hpp>
+#include <critical>
 
 namespace OS {
 

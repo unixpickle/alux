@@ -2,8 +2,8 @@
 #include <arch/x64/vmm/map-setup.hpp>
 #include <arch/x64/vmm/scratch.hpp>
 #include <arch/x64/smp/invlpg.hpp>
-#include <arch/general/failure.hpp>
-#include <utilities/lock.hpp>
+#include <panic>
+#include <lock>
 #include <cstddef>
 #include <cassert>
 #include <new>

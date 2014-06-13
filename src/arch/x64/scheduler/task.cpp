@@ -1,9 +1,9 @@
 #include <arch-specific/task.hpp>
 #include <arch/x64/vmm/global-map.hpp>
 #include <arch/x64/vmm/user-map.hpp>
-#include <arch/general/failure.hpp>
 #include <scheduler/general/task.hpp>
-#include <utilities/critical.hpp>
+#include <critical>
+#include <panic>
 
 namespace OS {
 

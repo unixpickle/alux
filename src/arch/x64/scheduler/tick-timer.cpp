@@ -2,11 +2,11 @@
 #include <arch/x64/smp/cpu-list.hpp>
 #include <arch/x64/interrupts/lapic.hpp>
 #include <arch/x64/interrupts/vectors.hpp>
-#include <arch/general/failure.hpp>
 #include <arch/general/clock.hpp>
 #include <scheduler-specific/scheduler.hpp>
 #include <utilities/frac.hpp>
-#include <utilities/critical.hpp>
+#include <critical>
+#include <panic>
 #include <new>
 
 namespace OS {

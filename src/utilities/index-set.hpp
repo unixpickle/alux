@@ -1,9 +1,9 @@
 #ifndef __UTILITIES_INDEX_SET_HPP__
 #define __UTILITIES_INDEX_SET_HPP__
 
-#include <cstdint>
-#include <common>
 #include <memory/slab.hpp>
+#include <cstdint>
+#include <macros>
 
 namespace OS {
 

@@ -1,8 +1,8 @@
 #include <arch-specific/thread.hpp>
 #include <arch/x64/smp/cpu-list.hpp>
 #include <arch/x64/vmm/global-map.hpp>
-#include <arch/general/failure.hpp>
-#include <utilities/critical.hpp>
+#include <critical>
+#include <panic>
 
 namespace OS {
 

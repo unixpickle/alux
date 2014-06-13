@@ -1,6 +1,6 @@
 #include <arch/x64/acpi/sdt.hpp>
-#include <arch/general/failure.hpp>
 #include <memory/physcopy.hpp>
+#include <panic>
 #include <cstring>
 
 namespace OS {

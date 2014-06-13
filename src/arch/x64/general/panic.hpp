@@ -1,5 +1,5 @@
-#ifndef __X64_FAILURE_HPP__
-#define __X64_FAILURE_HPP__
+#ifndef __X64_PANIC_HPP__
+#define __X64_PANIC_HPP__
 
 namespace OS {
 

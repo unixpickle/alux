@@ -3,9 +3,9 @@
 
 #include <arch/x64/pmm/step-allocator.hpp>
 #include <arch/general/physical-allocator.hpp>
-#include <arch/general/failure.hpp>
 #include <analloc2>
-#include <common>
+#include <panic>
+#include <macros>
 
 namespace OS {
 

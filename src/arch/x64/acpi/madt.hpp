@@ -2,7 +2,7 @@
 #define __X64_MADT_HPP__
 
 #include <memory/easy-map.hpp>
-#include <common>
+#include <macros>
 
 namespace OS {
 

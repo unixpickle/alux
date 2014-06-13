@@ -1,4 +1,4 @@
-#include <utilities/critical.hpp>
+#include <critical>
 
 namespace OS {
 

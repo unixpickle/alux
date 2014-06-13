@@ -1,8 +1,8 @@
 #ifndef __X64_SCOPE_SCRATCH_HPP__
 #define __X64_SCOPE_SCRATCH_HPP__
 
-#include <utilities/critical.hpp>
 #include <arch-specific/types.hpp>
+#include <critical>
 
 namespace OS {
 

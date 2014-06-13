@@ -1,9 +1,9 @@
 #include <scheduler/internal/garbage-thread.hpp>
 #include <scheduler/general/task.hpp>
 #include <scheduler-specific/scheduler.hpp>
-#include <arch/general/failure.hpp>
-#include <utilities/critical.hpp>
-#include <utilities/lock.hpp>
+#include <critical>
+#include <lock>
+#include <panic>
 #include <new>
 
 namespace OS {

@@ -1,7 +1,7 @@
 #include <arch/x64/smp/cpu-list.hpp>
 #include <arch/x64/segments/gdt.hpp>
-#include <arch/general/failure.hpp>
-#include <utilities/critical.hpp>
+#include <critical>
+#include <panic>
 #include <cassert>
 #include <new>
 

@@ -1,5 +1,5 @@
-#include <utilities/lock.hpp>
-#include <utilities/critical.hpp>
+#include <lock>
+#include <critical>
 #include <new>
 
 #define _INDEX_SET_TEMPLATE_ template<int Max, size_t SlabCount>

@@ -3,9 +3,9 @@
 #include <arch/x64/vmm/global-map.hpp>
 #include <arch/x64/smp/invlpg.hpp>
 #include <arch/general/physical-allocator.hpp>
-#include <arch/general/failure.hpp>
-#include <utilities/critical.hpp>
-#include <utilities/lock.hpp>
+#include <panic>
+#include <critical>
+#include <lock>
 #include <cassert>
 
 namespace OS {

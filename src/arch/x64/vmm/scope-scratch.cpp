@@ -1,6 +1,6 @@
 #include <arch/x64/vmm/scope-scratch.hpp>
 #include <arch/x64/vmm/scratch.hpp>
-#include <arch/general/failure.hpp>
+#include <panic>
 
 namespace OS {
 

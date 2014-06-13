@@ -21,7 +21,7 @@
 #include <arch/x64/time/lapic.hpp>
 #include <arch/x64/scheduler/tick-timer.hpp>
 #include <arch/x64/general/critical.hpp>
-#include <arch/x64/general/failure.hpp>
+#include <arch/x64/general/panic.hpp>
 #include <arch/general/critical.hpp>
 #include <scheduler-specific/scheduler.hpp>
 #include <scheduler/general/init.hpp>

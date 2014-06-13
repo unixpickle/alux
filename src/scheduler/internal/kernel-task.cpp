@@ -1,6 +1,6 @@
 #include <scheduler/internal/kernel-task.hpp>
-#include <arch/general/failure.hpp>
-#include <utilities/critical.hpp>
+#include <critical>
+#include <panic>
 #include <new>
 
 namespace OS {

@@ -2,7 +2,7 @@
 #include <arch/x64/interrupts/x2apic.hpp>
 #include <arch/x64/acpi/madt.hpp>
 #include <arch/x64/common.hpp>
-#include <utilities/critical.hpp>
+#include <critical>
 #include <cassert>
 #include <new>
 

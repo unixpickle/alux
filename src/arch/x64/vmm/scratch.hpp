@@ -2,7 +2,7 @@
 #define __X64_SCRATCH_HPP__
 
 #include <arch/x64/pmm/page-allocator.hpp>
-#include <common>
+#include <macros>
 
 namespace OS {
 

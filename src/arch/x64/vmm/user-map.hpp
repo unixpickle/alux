@@ -4,7 +4,7 @@
 #include <arch/x64/vmm/page-table.hpp>
 #include <arch/x64/vmm/free-list.hpp>
 #include <arch/general/address-space.hpp>
-#include <common>
+#include <macros>
 
 namespace OS {
 

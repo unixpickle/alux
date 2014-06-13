@@ -3,7 +3,7 @@
 
 #include <scheduler/general/thread.hpp>
 #include <cstdint>
-#include <common>
+#include <macros>
 
 namespace OS {
 

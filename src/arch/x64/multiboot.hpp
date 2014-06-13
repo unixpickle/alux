@@ -1,7 +1,7 @@
 #ifndef __X64_MULTIBOOT_HPP__
 #define __X64_MULTIBOOT_HPP__
 
-#include <common>
+#include <macros>
 
 namespace OS {
 

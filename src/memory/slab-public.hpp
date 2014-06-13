@@ -1,4 +1,4 @@
-#include <utilities/lock.hpp>
+#include <lock>
 
 namespace OS {
 

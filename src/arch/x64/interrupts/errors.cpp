@@ -1,4 +1,4 @@
-#include <arch/general/failure.hpp>
+#include <panic>
 
 namespace OS {
 

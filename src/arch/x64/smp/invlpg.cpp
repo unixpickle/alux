@@ -3,8 +3,8 @@
 #include <arch/x64/interrupts/irt.hpp>
 #include <arch/x64/interrupts/vectors.hpp>
 #include <arch/x64/interrupts/lapic.hpp>
-#include <utilities/critical.hpp>
-#include <utilities/lock.hpp>
+#include <critical>
+#include <lock>
 
 namespace OS {
 

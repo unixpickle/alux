@@ -1,8 +1,8 @@
 #include <arch/x64/interrupts/irt-handlers.hpp>
 #include <arch/x64/interrupts/irt.hpp>
-#include <arch/x64/common.hpp>
 #include <arch/x64/general/critical.hpp>
-#include <arch/general/failure.hpp>
+#include <arch/x64/common.hpp>
+#include <panic>
 #include <iostream>
 
 extern "C" {

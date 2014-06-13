@@ -3,7 +3,7 @@
 #include <arch/x64/interrupts/lapic.hpp>
 #include <arch/x64/interrupts/vectors.hpp>
 #include <arch/x64/segments/gdt.hpp>
-#include <utilities/critical.hpp>
+#include <critical>
 
 namespace OS {
 

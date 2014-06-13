@@ -1,5 +1,5 @@
-#ifndef __UTILITIES_LOCK_HPP__
-#define __UTILITIES_LOCK_HPP__
+#ifndef __LOCK_HPP__
+#define __LOCK_HPP__
 
 #include <cstdint>
 

@@ -4,7 +4,7 @@
 #include <scheduler-specific/task.hpp>
 #include <arch-specific/task.hpp>
 #include <cstdint>
-#include <common>
+#include <macros>
 
 namespace OS {
 

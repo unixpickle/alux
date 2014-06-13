@@ -6,8 +6,8 @@
 #include <arch/x64/vmm/global-map.hpp>
 #include <arch/x64/segments/gdt.hpp>
 #include <arch/general/clock.hpp>
-#include <arch/general/failure.hpp>
-#include <utilities/critical.hpp>
+#include <panic>
+#include <critical>
 #include <iostream>
 
 extern "C" {

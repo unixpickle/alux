@@ -2,7 +2,7 @@
 #define __FIFO_SCHEDULER_HPP__
 
 #include <scheduler/general/thread.hpp>
-#include <common>
+#include <macros>
 #include <cstdint>
 
 namespace OS {

@@ -1,8 +1,8 @@
 #include <arch/x64/pmm/allocator.hpp>
 #include <arch/x64/pmm/region-list.hpp>
 #include <arch/x64/vmm/global-map.hpp>
-#include <arch/general/failure.hpp>
-#include <utilities/lock.hpp>
+#include <lock>
+#include <panic>
 #include <new>
 
 namespace OS {

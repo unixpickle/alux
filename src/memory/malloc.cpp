@@ -1,9 +1,9 @@
 #include <memory/malloc.hpp>
 #include <arch/general/address-space.hpp>
 #include <arch/general/physical-allocator.hpp>
-#include <arch/general/failure.hpp>
 #include <cassert>
 #include <new>
+#include <panic>
 
 namespace OS {
 

@@ -108,8 +108,8 @@ main = ->
   finder.search 'src/scheduler/' + scheduler
   
   includes = [
-    'src/stdlib/cheaders'
-    'src/stdlib/cppheaders'
+    'src/stdlib/h'
+    'src/stdlib/hpp'
     'src'
     'dependencies/anslabs/include'
     'dependencies/analloc2/include'

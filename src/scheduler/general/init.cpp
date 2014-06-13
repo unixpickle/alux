@@ -2,7 +2,7 @@
 #include <scheduler/internal/kernel-task.hpp>
 #include <scheduler/internal/garbage-thread.hpp>
 #include <scheduler-specific/scheduler.hpp>
-#include <utilities/critical.hpp>
+#include <critical>
 
 namespace OS {
 

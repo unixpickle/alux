@@ -1,8 +1,8 @@
 #include <arch/x64/vmm/free-list.hpp>
 #include <memory/slab.hpp>
-#include <utilities/lock.hpp>
-#include <utilities/critical.hpp>
-#include <common>
+#include <lock>
+#include <critical>
+#include <macros>
 
 namespace OS {
 

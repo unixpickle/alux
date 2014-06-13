@@ -5,7 +5,7 @@
 #include <arch/x64/vmm/page-table.hpp>
 #include <arch/x64/init.hpp> // so I can make InitializeMemory() a friend
 #include <arch/general/address-space.hpp>
-#include <common>
+#include <macros>
 
 namespace OS {
 

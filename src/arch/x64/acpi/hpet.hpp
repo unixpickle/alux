@@ -2,7 +2,7 @@
 #define __X64_ACPI_HPET__
 
 #include <cstdint>
-#include <common>
+#include <macros>
 
 namespace OS {
 

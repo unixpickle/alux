@@ -2,8 +2,8 @@
 #include <arch/general/hardware-thread-list.hpp>
 #include <arch/general/tick-timer.hpp>
 #include <arch/general/clock.hpp>
-#include <utilities/lock.hpp>
-#include <utilities/critical.hpp>
+#include <critical>
+#include <lock>
 #include <new>
 
 namespace OS {

@@ -1,7 +1,7 @@
 #ifndef __ATOMIC_HPP__
 #define __ATOMIC_HPP__
 
-#include <common>
+#include <macros>
 
 namespace OS {
 

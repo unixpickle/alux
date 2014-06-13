@@ -1,6 +1,6 @@
 #include <arch/x64/interrupts/ioapic.hpp>
-#include <arch/general/failure.hpp>
 #include <arch/x64/common.hpp>
+#include <panic>
 #include <iostream>
 #include <cstring>
 #include <new>

@@ -2,8 +2,8 @@
 #include <scheduler/internal/garbage-thread.hpp>
 #include <scheduler/internal/pid-pool.hpp>
 #include <scheduler-specific/scheduler.hpp>
-#include <utilities/lock.hpp>
-#include <utilities/critical.hpp>
+#include <critical>
+#include <lock>
 
 namespace OS {
 

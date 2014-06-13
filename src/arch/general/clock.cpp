@@ -1,6 +1,6 @@
 #include <arch/general/clock.hpp>
-#include <utilities/critical.hpp>
 #include <utilities/frac.hpp>
+#include <critical>
 #include <math>
 
 namespace OS {

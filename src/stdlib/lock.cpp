@@ -1,5 +1,5 @@
-#include <utilities/lock.hpp>
-#include <utilities/critical.hpp>
+#include <lock>
+#include <critical>
 
 extern "C" {
 

@@ -1,5 +1,5 @@
 #include <arch/x64/init.hpp>
-#include <arch/general/failure.hpp>
+#include <panic>
 #include <cstdint>
 #include <iostream>
 

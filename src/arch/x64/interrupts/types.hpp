@@ -3,7 +3,7 @@
 
 #include <cstring>
 #include <cstdint>
-#include <common>
+#include <macros>
 
 /**
  * Represents this x86-64 machine code:

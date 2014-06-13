@@ -1,8 +1,8 @@
 #include <new>
-#include <arch/general/failure.hpp>
 #include <memory/malloc.hpp>
-#include <utilities/lock.hpp>
-#include <common>
+#include <lock>
+#include <macros>
+#include <panic>
 
 static uint64_t lock OS_ALIGNED(8) = 0;
 static bool initialized = false;

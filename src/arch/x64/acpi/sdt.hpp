@@ -1,7 +1,7 @@
 #ifndef __X64_SDT_HPP__
 #define __X64_SDT_HPP__
 
-#include <common>
+#include <macros>
 #include <cstdint>
 #include <memory/easy-map.hpp>
 

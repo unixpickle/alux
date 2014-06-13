@@ -1,7 +1,7 @@
 #include <scheduler/internal/pid-pool.hpp>
 #include <scheduler/general/task.hpp>
-#include <utilities/critical.hpp>
-#include <utilities/lock.hpp>
+#include <critical>
+#include <lock>
 
 namespace OS {
 

@@ -1,6 +1,6 @@
 #include <arch/x64/pmm/region-list.hpp>
 #include <arch/x64/multiboot.hpp>
-#include <arch/general/failure.hpp>
+#include <panic>
 #include <cassert>
 #include <new>
 

@@ -1,7 +1,7 @@
 #ifndef __X64_TSS_HPP__
 #define __X64_TSS_HPP__
 
-#include <common>
+#include <macros>
 #include <cstdint>
 
 namespace OS {
