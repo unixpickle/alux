@@ -64,7 +64,7 @@ void TickTimer::SaveAndTick() {
 
 void TickTimer::SetTimeout(uint64_t deadline, bool) {
   AssertCritical();
-  CPU & cpu = CPUList::GetGlobal().GetCurrent();
+  CPU & cpu = CPU::GetCurrent();
 
   uint64_t regularClock = Clock::GetGlobal().GetTicksPerMin();
   Frac64 conversion(cpu.frequencies.lapic, regularClock);

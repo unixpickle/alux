@@ -52,7 +52,7 @@ static void CalibrateLAPIC() {
   uint64_t value = lapic.ReadReg(LAPIC::RegTimerCurrCount);
   lapic.WriteReg(LAPIC::RegLVTTimer, 0x10000);
 
-  CPU & cpu = CPUList::GetGlobal().GetCurrent();
+  CPU & cpu = CPU::GetCurrent();
   cpu.frequencies.lapic = (uint64_t)(0xffffffff - value) * 120;
   
   --remaining;

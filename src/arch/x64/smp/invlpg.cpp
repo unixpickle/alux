@@ -76,7 +76,7 @@ static void HandleInvlpg() {
     lapic.SendEOI();
   }
   
-  CPU & cpu = CPUList::GetGlobal().GetCurrent();
+  CPU & cpu = CPU::GetCurrent();
   ScopeCriticalLock lock(&cpu.invlpgLock);
   while (cpu.invlpgInfo) {
     InvlpgInfo * nextInfo = cpu.invlpgInfo->next;
