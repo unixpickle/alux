@@ -52,11 +52,8 @@ int CPUList::GetIndex(CPU & entry) {
   return (int)(diff / sizeof(CPU));
 }
 
-CPU & CPUList::GetCurrent() {
-  AssertCritical();
-  int index = GDT::GetGlobal().GetTSSIndex();
-  assert(index >= 0 && index < count);
-  return (*this)[index];
+int CPUList::IndexOf(HardwareThread & th) {
+  return CPUList::GetIndex(th);
 }
 
 }

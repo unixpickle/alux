@@ -11,7 +11,13 @@ General architectual ideas that I am playing around with:
 
 ## TODO
 
-I am going nuts. Something tells me I need to rewrite this OS again, so that's what I am going to do. This time, I'm going to create all the headers&nbsp;for everything&nbsp;before I *touch* an implementation file. I'm a true nutjob.
+Okay, fine, I'll just finish this version of the kernel and start working on the user space. Here's how I plan to do that:
+
+ * Setup the GS register to contain CPU information
+ * Setup syscall handler which loads CPU stack
+ * Create TaskCode object which manages which pages of a user-space task have been loaded in
+ * Create a function like CreateUserThread()
+ * Test by running a simple "Hello World" user thread.
 
 ## License
 

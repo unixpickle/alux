@@ -33,7 +33,7 @@ TickTimer & TickTimer::GetGlobal() {
 
 void TickTimer::SaveAndTick() {
   AssertCritical();
-  CPU & cpu = CPUList::GetGlobal().GetCurrent();
+  CPU & cpu = CPUList::GetCurrent();
   Thread * th = cpu.GetThread();
   if (!th) {
     __asm__("mov %%rax, %%rsp\n"

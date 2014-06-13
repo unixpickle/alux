@@ -8,10 +8,16 @@
 namespace OS {
 
 HardwareThread & HardwareThread::GetCurrent() {
-  return x64::CPUList::GetGlobal().GetCurrent();
+  return x64::CPU::GetCurrent();
 }
 
 namespace x64 {
+
+CPU & CPU::GetCurrent() {
+  CPU * address;
+  __asm__("mov (gs:0x8), %0" : "=r" (address));
+  return *address;
+}
 
 CPU::CPU(uint32_t _apicId) : apicId(_apicId) {
   AssertNoncritical();
@@ -20,26 +26,47 @@ CPU::CPU(uint32_t _apicId) : apicId(_apicId) {
   uint16_t sel = GDT::GetGlobal().AddTSS(tss);
   
   // initialize this CPU entry
-  dedicatedStack = (void *)((new uint8_t[0x4000]) + 0x4000);
-  tss->rsp[0] = (uint64_t)dedicatedStack;
+  info.dedicatedStack = (void *)((new uint8_t[0x4000]) + 0x4000);
+  tss->rsp[0] = (uint64_t)info.dedicatedStack;
   tss->ist[0] = tss->rsp[0];
   tssSelector = sel;
+
+  info.thisPtr = this;
 }
   
-uint32_t CPU::GetAPICID() {
+uint32_t CPU::GetId() {
   return apicId;
 }
 
 int CPU::GetIndex() {
-  return (size_t)GetAPICID();
+  return CPUList::GetGlobal().GetIndex(*this);
+}
+
+void * CPU::GetDedicatedStack() {
+  return info.dedicatedStack;
+}
+
+TSS * CPU::GetTSS() {
+  return tss;
+}
+
+uint64_t CPU::GetTSSSelector() {
+  return tssSelector;
+}
+
+void CPU::LoadGS() {
+  AssertCritical();
+  WriteMSR(0x101, (uint64_t)&info);
+  __asm__ __volatile__("swapgs");
 }
 
 void CPU::Wake() {
   AssertCritical();
   LAPIC & lapic = LAPIC::GetCurrent();
-  lapic.SendIPI(GetAPICID(), IntVectors::LapicTimer);
+  lapic.SendIPI(GetId(), IntVectors::LapicTimer);
 }
 
 }
 
 }
+

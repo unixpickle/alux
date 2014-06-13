@@ -1,4 +1,5 @@
 #include <arch/x64/segments/gdt.hpp>
+#include <critical>
 #include <cassert>
 #include <cstring>
 #include <new>
@@ -16,6 +17,7 @@ GDTPointer GDTPointer::GetCurrent() {
 }
 
 void GDT::Initialize() {
+  AssertNoncritical();
   new(&globalGDT) GDT();
 }
 
@@ -24,6 +26,7 @@ GDT & GDT::GetGlobal() {
 }
 
 GDT::GDT() {
+  AssertNoncritical();
   GDTPointer curPtr = GDTPointer::GetCurrent();
   
   offset = initOffset = (size_t)curPtr.limit + 1;
@@ -34,6 +37,7 @@ GDT::GDT() {
 }
 
 void GDT::Set() {
+  AssertCritical();
   GDTPointer ptr = {0xffff, (uint64_t)buffer};
   __asm__("lgdt (%0)" : : "r" (&ptr));
 }
@@ -59,16 +63,7 @@ uint16_t GDT::GetFirstTSS() {
   return (uint16_t)initOffset;
 }
 
-int GDT::GetTSSIndex() {
-  uint16_t reg;
-  __asm__("str %%ax" : "=a" (reg));
-  return GetTSSIndex(reg);
-}
-
-int GDT::GetTSSIndex(uint16_t sel) {
-  return (int)(sel - initOffset) / 0x10;
 }
 
 }
 
-}

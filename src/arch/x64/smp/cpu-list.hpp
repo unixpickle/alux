@@ -25,8 +25,9 @@ public:
   CPU & AddEntry(uint32_t apicId); // @ambicritical, unsynchronized
 
   virtual CPU & operator[](int idx); // @ambicritical, unsynchronized
-  CPU & GetCurrent(); // @critical
+
   int GetIndex(CPU & entry);
+  virtual int IndexOf(HardwareThread & th);
 };
 
 }

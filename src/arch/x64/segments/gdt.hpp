@@ -46,18 +46,6 @@ public:
    * @ambicritical
    */
   uint16_t GetFirstTSS();
-  
-  /**
-   * Get the TSS index by looking at the current task register.
-   * @critical
-   */
-  int GetTSSIndex();
-  
-  /**
-   * Get the TSS index of a selector.
-   * @ambicritical
-   */
-  int GetTSSIndex(uint16_t sel);
 
 private:
   uint8_t * buffer;

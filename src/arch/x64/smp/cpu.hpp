@@ -11,25 +11,36 @@ namespace x64 {
 
 class CPU : public HardwareThread {
 public:
-  uint16_t tssSelector;
-  TSS * tss;
-  void * dedicatedStack; // top of the stack, not bottom of it
+  static CPU & GetCurrent();
+
   struct {
     uint64_t lapic;
   } frequencies;
   
+  // used for passing INVLPG requests
   uint64_t invlpgLock OS_ALIGNED(8); // @critical
   InvlpgInfo * invlpgInfo;
   
   CPU(uint32_t apicId);
     
-  uint32_t GetAPICID();
-  virtual int GetIndex();
+  uint32_t GetId();
+  void * GetDedicatedStack(); // @ambicritical
+  TSS * GetTSS(); // @ambicritical
+  uint64_t GetTSSSelector(); // @ambicritical
+  void LoadGS(); // @critical
+
   virtual void Wake();
 
 private:
+  struct CriticalInformation {
+    void * dedicatedStack; // top, not bottom
+    CPU * thisPtr;
+  } OS_PACKED;
+
   uint32_t apicId;
-  
+  uint16_t tssSelector;
+  TSS * tss;
+  CriticalInformation info;
 };
 
 }

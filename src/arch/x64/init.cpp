@@ -129,10 +129,11 @@ void InitializeSMP() {
   SetCritical(false);
   
   CPU & cpu = CPUList::GetGlobal().AddEntry(lapicId);
-  
-  // set the current GDT and Task Register
+  SetCritical(true);
+  cpu.LoadGS();
   GDT::GetGlobal().Set();
-  __asm__ volatile("ltr %%ax" : : "a" (cpu.tssSelector));
+  __asm__ volatile("ltr %%ax" : : "a" (cpu.GetTSSSelector()));
+  SetCritical(false);
   
   StartProcessors();
   InitializeInvlpg();

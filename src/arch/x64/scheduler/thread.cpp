@@ -38,8 +38,8 @@ void ArchThread::SetKernelCall(void * function, void * argument) {
 
 void ArchThread::Run() {
   AssertCritical();
-  CPU & cpu = CPUList::GetGlobal().GetCurrent();
-  cpu.tss->rsp[0] = (uint64_t)kernStack + 0x4000; // for interrupts
+  CPU & cpu = CPU::GetCurrent();
+  cpu.GetTSS()->rsp[0] = (uint64_t)kernStack + 0x4000; // for interrupts
   __asm__ __volatile__(
     "mov %%rax, %%cr3\n"
     "sub $0x28, %%rsp\n"

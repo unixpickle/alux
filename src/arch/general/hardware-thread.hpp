@@ -12,7 +12,6 @@ public:
   static void SetThread(Thread * th); // @critical
   static HardwareThread & GetCurrent();
   
-  virtual int GetIndex() = 0; // @ambicritical
   virtual void Wake() = 0; // @critical
   virtual Thread * GetThread(); // @critical
   virtual bool IsRunningTask(Task *);
@@ -25,3 +24,4 @@ protected:
 }
 
 #endif
+

@@ -11,6 +11,7 @@ public:
   
   virtual int GetCount() = 0;
   virtual HardwareThread & operator[](int index) = 0;
+  virtual int IndexOf(HardwareThread & th) = 0;
 };
 
 }

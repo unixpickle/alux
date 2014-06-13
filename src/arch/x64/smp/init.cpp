@@ -120,7 +120,10 @@ static void CPUEntrance() {
   SetCritical(false);
   
   CPU & cpu = CPUList::GetGlobal().AddEntry(lapicId);
+  SetCritical(true);
+  cpu.LoadGS();
   GDT::GetGlobal().Set();
+  SetCritical(false);
   
   __asm__ volatile("ltr %%ax\n"
                    "mov %%rbx, %%rsp\n"

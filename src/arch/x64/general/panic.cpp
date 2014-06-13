@@ -28,8 +28,8 @@ void Panic(const char * message) {
     x64::LAPIC & lapic = x64::LAPIC::GetCurrent();
     for (int i = 0; i < list.GetCount(); i++) {
       x64::CPU & cpu = list[i];
-      if (cpu.GetAPICID() == lapic.GetId()) continue;
-      lapic.SendIPI(cpu.GetAPICID(), x64::IntVectors::Panic);
+      if (cpu.GetId() == lapic.GetId()) continue;
+      lapic.SendIPI(cpu.GetId(), x64::IntVectors::Panic);
     }
   }
     
