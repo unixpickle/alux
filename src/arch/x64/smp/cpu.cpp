@@ -6,6 +6,8 @@
 #include <arch/x64/common.hpp>
 #include <critical>
 
+#include <iostream> // TODO: delete me
+
 namespace OS {
 
 HardwareThread & HardwareThread::GetCurrent() {
@@ -53,8 +55,7 @@ uint64_t CPU::GetTSSSelector() {
 
 void CPU::LoadGS() {
   AssertCritical();
-  WriteMSR(0x101, (uint64_t)&info);
-  __asm__ __volatile__("swapgs");
+  WriteMSR(0xc0000101, (uint64_t)&info);
 }
 
 void CPU::Wake() {
