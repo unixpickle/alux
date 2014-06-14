@@ -8,13 +8,15 @@ RawSyscallHandler:
   mov r10, rsp
   mov rsp, [gs:0x10]
   push r10
+  push rcx
+  mov rcx, rbx
   
   call _SyscallMain
   
-  pop r10
-  mov r10, rsp
+  pop rcx
+  pop rsp
   sti ; STI doesn't take effect until *after* its following instruction
-  sysret
+  o64 sysret
 
 _RawSyscallHandler:
   jmp RawSyscallHandler

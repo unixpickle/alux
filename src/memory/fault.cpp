@@ -21,6 +21,7 @@ void HandleMemoryFault(VirtAddr addr, bool exec, bool write) {
   SetCritical(true);
   
   if (result) return;
+  SetCritical(false);
   Panic("Unhandled user page fault.");
   // TODO: here, we would ideally kill the task that faulted, but for now I
   // would rather just Panic so we can see what happened.

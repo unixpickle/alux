@@ -2,12 +2,20 @@
 #include <arch/x64/interrupts/irt.hpp>
 #include <arch/x64/general/critical.hpp>
 #include <arch/x64/common.hpp>
+#include <memory/fault.hpp>
 #include <panic>
 #include <iostream>
 
 extern "C" {
 
 void InterruptCoded(void * caller, uint64_t vector, uint64_t code) {
+  if (vector == 0xe) {
+    uint64_t addr;
+    __asm__("mov %%cr2, %0" : "=r" (addr));
+    OS::HandleMemoryFault(addr, (code & 1) != 0, (code & 8) != 0);
+    return;
+  }
+  
   OS::x64::IRT & table = OS::x64::IRT::GetGlobal();
   if (table[vector]) return table[vector]();
 

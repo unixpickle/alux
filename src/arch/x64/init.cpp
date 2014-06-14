@@ -26,7 +26,6 @@
 #include <arch/general/critical.hpp>
 #include <scheduler-specific/scheduler.hpp>
 #include <scheduler/general/init.hpp>
-#include <memory/fault.hpp>
 #include <iostream>
 #include <cassert>
 #include <critical>
@@ -165,7 +164,6 @@ void InitializeTimers() {
 void InitializeScheduler() {
   cout << "Initializing scheduler..." << endl;
   IRT::GetGlobal()[IntVectors::LapicTimer] = LapicTickMethod;
-  IRT::GetGlobal()[0xe] = (IRT::Routine)HandleMemoryFault;
   
   TickTimer::Initialize();
   OS::InitializeScheduler();
@@ -176,6 +174,10 @@ void InitializeScheduler() {
   UserTask * theTask = UserTask::New(theCode);
   Thread * th = Thread::New(theTask, false);
   th->SetUserCall((void *)theTask->GetCodeMap().GetStart());
+  SetCritical(true);
+  theTask->AddThread(th);
+  Scheduler::GetGlobal().AddThread(th);
+  SetCritical(false);
   
   Scheduler::GetGlobal().Start();
 }
@@ -184,6 +186,7 @@ static void * GetTestCode(size_t & size) {
   uint64_t start, end;
   __asm__("mov $test_code_start, %0\n"
           "mov $test_code_end, %1\n"
+          "jmp test_code_end\n"
           "test_code_start:\n"
           "syscall\n"
           "test_code_loop:\n"

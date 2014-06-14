@@ -26,8 +26,8 @@ ArchThread::ArchThread(Task * task, bool forKernel) {
   } else {
     UserMap & map = static_cast<UserMap &>(task->GetAddressSpace());
     state.cr3 = map.GetPML4();
-    state.ss = 0x20;
-    state.cs = 0x18;
+    state.ss = 0x23;
+    state.cs = 0x1b;
     state.rsp = 0;
     state.rflags = 0x200;
   }
