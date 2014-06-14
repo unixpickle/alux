@@ -10,27 +10,34 @@ namespace OS {
 namespace x64 {
 
 static IRT globalTable;
+static Module * deps[1];
 
-void IRT::Initialize() {
+void IRT::InitGlobal() {
   new(&globalTable) IRT();
-  
-  globalTable.ConfigureDummy();
-  IDT::GetGlobal().Load();
-  PICRemap(0xf0, 0xf8, 0xff, 0xff);
-  // if there are a few interrupts waiting, we can trigger our handlers for all
-  // of them and send appropriate EOIs to the PIC.
-  __asm__("sti\nnop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\n"
-          "nop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\ncli");
-  globalTable.Configure();
 }
 
 IRT & IRT::GetGlobal() {
   return globalTable;
 }
 
-IRT::IRT() {
+void IRT::Initialize() {
   routines = new Routine[0x100];
   bzero(routines, 0x800);
+  
+  ConfigureDummy();
+  IDT::GetGlobal().Load();
+  PICRemap(0xf0, 0xf8, 0xff, 0xff);
+  // if there are a few interrupts waiting, we can trigger our handlers for all
+  // of them and send appropriate EOIs to the PIC.
+  __asm__("sti\nnop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\n"
+          "nop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\ncli");
+  Configure();
+}
+
+Module ** IRT::GetDependencies(size_t & count) {
+  deps[0] = &IDT::GetGlobal();
+  count = 1;
+  return deps;
 }
 
 void IRT::ConfigureDummy() {

@@ -34,6 +34,12 @@ void IOAPICModule::Initialize() {
   if (!info) Panic("No base I/O APIC found");
   
   new(&baseAPIC) IOAPIC(info);
+  
+  for (uint32_t i = 0; i < baseAPIC.GetPinCount(); i++) {
+    baseAPIC.MaskPin((uint8_t)i);
+  }
+  
+  IOAPIC::StartUsing();
 }
 
 Module ** IOAPICModule::GetDependencies(size_t & count) {

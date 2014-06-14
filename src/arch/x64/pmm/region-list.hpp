@@ -1,6 +1,7 @@
 #ifndef __X64_REGION_LIST_HPP__
 #define __X64_REGION_LIST_HPP__
 
+#include <module/module.hpp>
 #include <analloc2>
 
 namespace OS {
@@ -9,12 +10,15 @@ namespace x64 {
 
 typedef ANAlloc::Region MemoryRegion;
 
-class RegionList {
+class RegionList : public Module {
 public:
   static const int MaximumCount = 8;  
   
-  static void Initialize(void * mbootPtr);
+  static void InitGlobal(void * mbootPtr);
   static RegionList & GetGlobal();
+  
+  virtual void Initialize();
+  virtual Module ** GetDependencies(size_t & count);
   
   RegionList();
   MemoryRegion * GetRegions();

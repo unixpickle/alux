@@ -2,6 +2,7 @@
 #define __X64_IRT_HPP__
 
 #include <arch/x64/interrupts/types.hpp>
+#include <module/module.hpp>
 
 namespace OS {
 
@@ -10,14 +11,15 @@ namespace x64 {
 /**
 * Interrupt Routine Table -- my own invention
 */
-class IRT {
+class IRT : public Module {
 public:
   typedef void (* Routine)();
   
-  static void Initialize(); // @noncritical
+  static void InitGlobal(); // @noncritical
   static IRT & GetGlobal(); // @ambicritical
   
-  IRT();
+  virtual void Initialize();
+  virtual Module ** GetDependencies(size_t & count);
   
   Routine & operator[](uint8_t idx); // @ambicritical, unsyrchronized
   void Unset(uint8_t idx); // @ambicritical, unsyrchronized

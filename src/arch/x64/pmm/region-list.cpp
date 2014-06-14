@@ -9,12 +9,18 @@ namespace OS {
 namespace x64 {
 
 static RegionList globalRegions;
+static MultibootBootInfo * multibootPtr;
 
 void RegionList::Initialize(void * mbootPtr) {
   new(&globalRegions) RegionList();
-  
-  MultibootBootInfo * multibootPtr = (MultibootBootInfo *)mbootPtr;
-  
+  multibootPtr = (MultibootBootInfo *)mbootPtr;
+}
+
+RegionList & RegionList::GetGlobal() {
+  return globalRegions;
+}
+
+void RegionList::Initialize() {
   // loop through and generate the regions
   uint32_t mmapLen = multibootPtr->mmap_length;
   uint32_t mmapAddr = multibootPtr->mmap_addr;
@@ -55,19 +61,20 @@ void RegionList::Initialize(void * mbootPtr) {
       size_t lowSize = (size_t)(0x100000000L - start);
       MemoryRegion lowerRegion(start, lowSize);
       MemoryRegion upperRegion(0x100000000L, len - lowSize);
-      globalRegions.AddRegion(lowerRegion);
-      globalRegions.AddRegion(upperRegion);
+      AddRegion(lowerRegion);
+      AddRegion(upperRegion);
     } else {
-      globalRegions.AddRegion(region);
+      AddRegion(region);
     }
   }
-  if (!globalRegions.GetRegionCount()) {
-    Panic("GlobalMap() - no regions found");
+  if (!GetRegionCount()) {
+    Panic("RegionList::Initialize() - no regions found");
   }
 }
 
-RegionList & RegionList::GetGlobal() {
-  return globalRegions;
+Module ** RegionList::GetDependencies(size_t & count) {
+  count = 0;
+  return NULL;
 }
 
 RegionList::RegionList() : regionCount(0) {

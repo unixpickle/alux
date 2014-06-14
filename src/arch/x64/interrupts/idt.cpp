@@ -8,12 +8,17 @@ namespace x64 {
 
 static IDT globalTable;
 
-void IDT::Initialize() {
+void IDT::InitGlobal() {
   new(&globalTable) IDT();
 }
 
 IDT & IDT::GetGlobal() {
   return globalTable;
+}
+
+Module ** IDT::GetDependencies(size_t & count) {
+  count = 0;
+  return NULL;
 }
 
 void IDT::SetEntry(int idx, void * fn, uint8_t flags) {
