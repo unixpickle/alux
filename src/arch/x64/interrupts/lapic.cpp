@@ -1,7 +1,7 @@
-#include <arch/x64/interrupts/xapic.hpp>
-#include <arch/x64/interrupts/x2apic.hpp>
 #include <arch/x64/acpi/madt.hpp>
+#include <arch/x64/acpi/acpi-module.hpp>
 #include <arch/x64/common.hpp>
+#include <arch/general/global-map.hpp>
 #include <critical>
 #include <cassert>
 #include <new>
@@ -13,12 +13,29 @@ namespace x64 {
 static XAPIC xapic;
 static X2APIC x2apic;
 static int PreferredDivide = 0x3;
+static LAPICModule gModule;
+static Module * deps[2];
 
-void LAPIC::Initialize() {
+void LAPICModule::InitGlobal() {
+  new(&gModule) LAPICModule();
+}
+
+LAPICModule & LAPICModule::GetGlobal() {
+  return gModule;
+}
+
+void LAPICModule::Initialize() {
   MADT * madt = MADT::GetGlobal();
   assert(madt != NULL);
   new(&xapic) XAPIC((uint64_t)madt->GetHeader().lapicAddr);
   new(&x2apic) X2APIC();
+}
+
+Module ** LAPICModule::GetDependencies(size_t & count) {
+  deps[0] = &ACPIModule::GetGlobal();
+  deps[1] = &GlobalMap::GetGlobal();
+  count = 2;
+  return deps;
 }
 
 LAPIC & LAPIC::GetCurrent() {

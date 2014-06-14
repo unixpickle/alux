@@ -2,10 +2,11 @@
 #define __GENERAL_CLOCK_HPP__
 
 #include <cstdint>
+#include <module/module.hpp>
 
 namespace OS {
 
-class Clock {
+class Clock : public Module {
 public:
   static Clock & GetGlobal(); // @ambicritical
   

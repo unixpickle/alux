@@ -31,8 +31,6 @@ public:
     }
   };
   
-  static AddressSpace & GetGlobal();
-  
   /**
    * Returns the number of different page sizes supported by this address
    * space.

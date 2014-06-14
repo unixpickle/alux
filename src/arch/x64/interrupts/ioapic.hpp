@@ -3,10 +3,20 @@
 
 #include <arch/x64/acpi/madt.hpp>
 #include <memory/easy-map.hpp>
+#include <module/module.hpp>
 
 namespace OS {
 
 namespace x64 {
+
+class IOAPICModule : public Module {
+public:
+  static void InitGlobal();
+  static IOAPICModule & GetGlobal();
+  
+  virtual void Initialize();
+  virtual Module ** GetDependencies(size_t & count);
+};
 
 class IOAPIC {
 public:
@@ -14,7 +24,6 @@ public:
   
   static const int RegVersion = 0x1;
   
-  static void Initialize(); // @noncritical
   static IOAPIC & GetBase(); // @ambicritical
   static void StartUsing(); // @critical
   

@@ -1,26 +1,35 @@
+#include <arch/x64/general/text-console.hpp>
 #include <arch/x64/common.hpp>
 #include <lock>
-#include <critical>
 #include <macros>
 #include <cstdint>
+#include <critical>
 
 namespace OS {
 
-static int color = 0xa;
-static int x = 0, y = 0;
-static uint16_t * buffer = (uint16_t *)0xb8000;
-static uint64_t mainLock OS_ALIGNED(8) = 0;
+Console & Console::GetGlobal() {
+  return x64::TextConsole::GetGlobal();
+}
 
-static void SetPosition(unsigned short x, unsigned short y);
-static void ScrollUp();
+namespace x64 {
 
-void InitializeConsole() {
+static TextConsole gConsole;
+
+void TextConsole::InitGlobal() {
+  new(&gConsole) TextConsole();
+}
+
+TextConsole & TextConsole::GetGlobal() {
+  return gConsole;
+}
+
+void TextConsole::Initialize() {
   for (int i = 0; i < 80 * 25; i++) {
     buffer[i] = 0;
   }
 }
 
-void PrintString(const char * string) {
+void TextConsole::PrintString(const char * string) {
   AssertNoncritical();
   ScopeLock scope(&mainLock);
   while (*string) {
@@ -64,14 +73,14 @@ void PrintString(const char * string) {
   SetPosition(x, y);
 }
 
-void SetColor(int _color) {
+void TextConsole::SetColor(TextConsole::Color _color, bool bright) {
   AssertNoncritical();
   ScopeLock scope(&mainLock);
-  color = _color;
+  color = (uint8_t)_color | (bright ? 7 : 0);
 }
 
-static void SetPosition(unsigned short x, unsigned short y) {
-  unsigned short position = (y * 80) + x;
+void TextConsole::SetPosition(uint16_t _x, uint16_t _y) {
+  uint16_t position = (_y * 80) + _x;
   // tell the VGA index register we are sending the `low` byte
   x64::OutB(0x3D4, 0x0f);
   x64::OutB(0x3D5, (unsigned char)(position & 0xff));
@@ -79,10 +88,10 @@ static void SetPosition(unsigned short x, unsigned short y) {
   x64::OutB(0x3D4, 0x0e);
   x64::OutB(0x3D5, (unsigned char)((position >> 8) & 0xff));
 
-  buffer[position] = color << 8;
+  buffer[position] = (uint16_t)color << 8;
 }
 
-static void ScrollUp() {
+void TextConsole::ScrollUp() {
   // copy the buffer into itself, one line up
   int i;
   for (i = 0; i < 80 * (25 - 1); i++) {
@@ -93,6 +102,8 @@ static void ScrollUp() {
   for (; i < 80 * 25; i++) {
     buffer[i] = 0;
   }
+}
+
 }
 
 }

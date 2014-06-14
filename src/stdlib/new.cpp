@@ -3,9 +3,7 @@
 #include <lock>
 #include <macros>
 #include <panic>
-
-static uint64_t lock OS_ALIGNED(8) = 0;
-static bool initialized = false;
+#include <critical>
 
 void * operator new(size_t, void * p) {
   return p;
@@ -16,28 +14,30 @@ void * operator new[](size_t, void * p) {
 }
 
 void * operator new(size_t s) {
+  AssertNoncritical();
   OS::ScopeLock scope(&lock);
-  
-  if (!initialized) {
-    OS::Malloc::Initialize();
-    initialized = true;
-  }
-  void * res = OS::Malloc::GetGlobal().Alloc(s);
+  OS::Malloc & theMalloc = OS::Malloc::GetGlobal();
+  assert(!theMalloc.IsUninitialized());
+  void * res = theMalloc.Alloc(s);
   if (!res) OS::Panic("operator new - OOM");
   return res;
 }
 
 void * operator new[](size_t s) {
+  AssertNoncritical();
   return operator new(s);
 }
 
 void operator delete(void * p) {
+  AssertNoncritical();
   OS::ScopeLock scope(&lock);
-  assert(initialized);
-  OS::Malloc::GetGlobal().Free(p);
+  OS::Malloc & theMalloc = OS::Malloc::GetGlobal();
+  assert(!theMalloc.IsUninitialized());
+  theMalloc.Free(p);
 }
 
 void operator delete[](void * p) {
+  AssertNoncritical();
   operator delete(p);
 }
 

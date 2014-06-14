@@ -16,10 +16,11 @@ public:
   virtual void Load();
   
   virtual void Initialize() {}
+  virtual bool IsUninitialized();
   
 protected:
   virtual Module ** GetDependencies(size_t & count) = 0;
-  virtual Module ** GetSuperDependencies(size_t & count) = 0;
+  virtual Module ** GetSuperDependencies(size_t & count);
   
 private:
   Atomic<int> loadStartCount;

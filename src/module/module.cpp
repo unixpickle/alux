@@ -22,4 +22,13 @@ void Module::Load() {
   }
 }
 
+bool Module::IsUninitialized() {
+  return loadStartCount == 0;
+}
+
+Module ** Module::GetSuperDependencies(size_t & count) {
+  count = 0;
+  return NULL;
+}
+
 }

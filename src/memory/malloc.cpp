@@ -8,8 +8,9 @@
 namespace OS {
 
 static Malloc globalMalloc;
+static Module * deps[2];
 
-void Malloc::Initialize() {
+void Malloc::InitGlobal() {
   new(&globalMalloc) Malloc();
 }
 
@@ -17,7 +18,7 @@ Malloc & Malloc::GetGlobal() {
   return globalMalloc;
 }
 
-Malloc::Malloc() {
+void Malloc::Initialize() {
   // calculate the pageSize and pageAlignment to use
   int sizeCount = AddressSpace::GetPageSizeCount();
   assert(sizeCount > 0);
@@ -38,6 +39,13 @@ Malloc::Malloc() {
   if (RegionSize % pageSize) {
     allocSize += pageSize - (RegionSize % pageSize);
   }
+}
+
+Module ** Malloc::GetDependencies(size_t & count) {
+  deps[0] = &PhysicalAllocator::GetGlobal();
+  deps[1] = &AddressSpace::GetGlobal();
+  count = 2;
+  return deps;
 }
 
 void * Malloc::Alloc(size_t size, bool getNew) {

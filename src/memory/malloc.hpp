@@ -2,10 +2,11 @@
 #define __MEMORY_MALLOC_HPP__
 
 #include <memory/region.hpp>
+#include <module/module.hpp>
 
 namespace OS {
 
-class Malloc {
+class Malloc : public Module {
 private:
   MallocRegion * first;
   size_t pageSize;
@@ -15,10 +16,11 @@ private:
 public:
   static const size_t RegionSize = 0x200000;
   
-  static void Initialize();
+  static void InitGlobal();
   static Malloc & GetGlobal();
   
-  Malloc();
+  virtual void Initialize();
+  virtual Module ** GetDependencies(size_t & count);
   
   void * Alloc(size_t, bool getNew = true); // @ambicritical, unsynchronized
   void Free(void *); // @ambicritical, unsynchronized

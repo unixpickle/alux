@@ -1,5 +1,7 @@
 #include <arch/x64/interrupts/ioapic.hpp>
+#include <arch/x64/acpi/acpi-module.hpp>
 #include <arch/x64/common.hpp>
+#include <arch/general/global-map.hpp>
 #include <panic>
 #include <iostream>
 #include <cstring>
@@ -10,8 +12,18 @@ namespace OS {
 namespace x64 {
 
 static IOAPIC baseAPIC;
+static IOAPICModule gModule;
+static Module * deps;
 
-void IOAPIC::Initialize() {
+void IOAPICModule::InitGlobal() {
+  new(&gModule) IOAPICModule();
+}
+
+IOAPICModule & IOAPICModule::GetGlobal() {
+  return gModule;
+}
+
+void IOAPICModule::Initialize() {
   MADT * madt = MADT::GetGlobal();
   if (!madt) Panic("I/O APIC support requires MADT");
   
@@ -22,6 +34,13 @@ void IOAPIC::Initialize() {
   if (!info) Panic("No base I/O APIC found");
   
   new(&baseAPIC) IOAPIC(info);
+}
+
+Module ** IOAPICModule::GetDependencies(size_t & count) {
+  deps[0] = &GlobalMap::GetGlobal();
+  deps[1] = &ACPIModule::GetGlobal()
+  count = 2;
+  return deps;
 }
 
 IOAPIC & IOAPIC::GetBase() {

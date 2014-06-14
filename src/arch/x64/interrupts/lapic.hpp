@@ -1,16 +1,24 @@
 #ifndef __X64_LAPIC_HPP__
 #define __X64_LAPIC_HPP__
 
+#include <module/module.hpp>
 #include <cstdint>
 
 namespace OS {
 
 namespace x64 {
 
+class LAPICModule : public Module {
+public:
+  static void InitGlobal();
+  static LAPICModule & GetGlobal();
+  
+  virtual void Initialize();
+  virtual Module ** GetDependencies(size_t & count);
+};
+
 class LAPIC {
 public:
-  static void Initialize(); // @noncritical
-  
   /**
    * During the boot process, this must only be called on one CPU at a time.
    * @critical

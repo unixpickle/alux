@@ -2,10 +2,11 @@
 #define __GENERAL_PHYSICAL_ALLOCATOR__
 
 #include <arch-specific/types.hpp>
+#include <module/module.hpp>
 
 namespace OS {
 
-class PhysicalAllocator {
+class PhysicalAllocator : public Module {
 public:
   static PhysicalAllocator & GetGlobal();
   

@@ -5,7 +5,7 @@
 
 namespace OS {
 
-class HardwareThreadList {
+class HardwareThreadList : public Module {
 public:
   static HardwareThreadList & GetGlobal();
   
