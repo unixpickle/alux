@@ -12,7 +12,7 @@ class ACPIModule : public Module {
   static ACPIModule & GetGlobal();
   
   virtual void Initialize();
-  virtual Module ** GetDependencies(size_t & count);
+  virtual DepList GetDependencies();
 };
 
 }

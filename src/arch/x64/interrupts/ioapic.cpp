@@ -2,6 +2,7 @@
 #include <arch/x64/acpi/acpi-module.hpp>
 #include <arch/x64/common.hpp>
 #include <arch/general/global-map.hpp>
+#include <arch/general/console.hpp>
 #include <panic>
 #include <iostream>
 #include <cstring>
@@ -13,7 +14,6 @@ namespace x64 {
 
 static IOAPIC baseAPIC;
 static IOAPICModule gModule;
-static Module * deps;
 
 void IOAPICModule::InitGlobal() {
   new(&gModule) IOAPICModule();
@@ -42,11 +42,9 @@ void IOAPICModule::Initialize() {
   IOAPIC::StartUsing();
 }
 
-Module ** IOAPICModule::GetDependencies(size_t & count) {
-  deps[0] = &GlobalMap::GetGlobal();
-  deps[1] = &ACPIModule::GetGlobal()
-  count = 2;
-  return deps;
+DepList IOAPICModule::GetDependencies() {
+  return DepList(&GlobalMap::GetGlobal(), &ACPIModule::GetGlobal(),
+                 &Console::GetGlobal());
 }
 
 IOAPIC & IOAPIC::GetBase() {

@@ -19,7 +19,7 @@ public:
   static IRT & GetGlobal(); // @ambicritical
   
   virtual void Initialize();
-  virtual Module ** GetDependencies(size_t & count);
+  virtual DepList GetDependencies();
   
   Routine & operator[](uint8_t idx); // @ambicritical, unsyrchronized
   void Unset(uint8_t idx); // @ambicritical, unsyrchronized

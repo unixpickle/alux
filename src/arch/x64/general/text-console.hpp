@@ -15,6 +15,8 @@ public:
   static TextConsole & GetGlobal();
   
   virtual void Initialize();
+  virtual DepList GetDependencies();
+  
   virtual void PrintString(const char * string);
   virtual void SetColor(Color color, bool bright);
   

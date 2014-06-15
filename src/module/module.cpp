@@ -7,17 +7,15 @@ void Module::Load() {
     return;
   }
   
-  size_t count;
-  Module ** deps = GetDependencies(count);
-  for (size_t i = 0; i < count; i++) {
+  DepList deps(GetDependencies(count));
+  for (size_t i = 0; i < deps.count; i++) {
     deps[i]->Load();
   }
   
   Initialize();
   
-  size_t count;
-  Module ** deps = GetSuperDependencies(count);
-  for (size_t i = 0; i < count; i++) {
+  deps = GetSuperDependencies(count);
+  for (size_t i = 0; i < deps.count; i++) {
     deps[i]->Load();
   }
 }
@@ -26,9 +24,8 @@ bool Module::IsUninitialized() {
   return loadStartCount == 0;
 }
 
-Module ** Module::GetSuperDependencies(size_t & count) {
-  count = 0;
-  return NULL;
+DepList Module::GetSuperDependencies() {
+  return DepList();
 }
 
 }

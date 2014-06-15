@@ -3,6 +3,7 @@
 #include <arch/x64/interrupts/irt-handlers.hpp>
 #include <arch/x64/interrupts/raw-handlers.hpp>
 #include <arch/x64/interrupts/pic.hpp>
+#include <memory/malloc.hpp>
 #include <new>
 
 namespace OS {
@@ -10,7 +11,6 @@ namespace OS {
 namespace x64 {
 
 static IRT globalTable;
-static Module * deps[1];
 
 void IRT::InitGlobal() {
   new(&globalTable) IRT();
@@ -34,10 +34,8 @@ void IRT::Initialize() {
   Configure();
 }
 
-Module ** IRT::GetDependencies(size_t & count) {
-  deps[0] = &IDT::GetGlobal();
-  count = 1;
-  return deps;
+DepList IRT::GetDependencies() {
+  return DepList(&IDT::GetGlobal(), &Malloc::GetGlobal());
 }
 
 void IRT::ConfigureDummy() {

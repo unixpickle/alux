@@ -2,6 +2,7 @@
 #define __GENERAL_HARDWARE_THREAD_LIST_HPP__
 
 #include <arch/general/hardware-thread.hpp>
+#include <module/module.hpp>
 
 namespace OS {
 

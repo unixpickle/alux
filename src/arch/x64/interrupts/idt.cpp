@@ -16,9 +16,8 @@ IDT & IDT::GetGlobal() {
   return globalTable;
 }
 
-Module ** IDT::GetDependencies(size_t & count) {
-  count = 0;
-  return NULL;
+virtual DepList GetDependencies() {
+  return DepList();
 }
 
 void IDT::SetEntry(int idx, void * fn, uint8_t flags) {

@@ -11,7 +11,6 @@ namespace OS {
 namespace x64 {
 
 static ACPIModule globalModule;
-static Module * deps[2];
 
 void ACPIModule::InitGlobal() {
   new(&globalModule) ACPIModule();
@@ -27,11 +26,8 @@ void ACPIModule::Initialize() {
   MADT::Initialize();
 }
 
-Module ** ACPIModule::GetDependencies(size_t & count) {
-  deps[0] = &Malloc::GetGlobal();
-  deps[1] = &GlobalMap::GetGlobal();
-  count = 2;
-  return deps;
+DepList ACPIModule::GetDependencies() {
+  return DepList(&Malloc::GetGlobal(), &GlobalMap::GetGlobal());
 }
 
 };

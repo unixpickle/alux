@@ -2,6 +2,7 @@
 #include <arch/x64/acpi/acpi-module.hpp>
 #include <arch/x64/common.hpp>
 #include <arch/general/global-map.hpp>
+#include <memory/malloc.hpp>
 #include <critical>
 #include <cassert>
 #include <new>
@@ -31,11 +32,9 @@ void LAPICModule::Initialize() {
   new(&x2apic) X2APIC();
 }
 
-Module ** LAPICModule::GetDependencies(size_t & count) {
-  deps[0] = &ACPIModule::GetGlobal();
-  deps[1] = &GlobalMap::GetGlobal();
-  count = 2;
-  return deps;
+DepList LAPICModule::GetDependencies() {
+  return DepList(&ACPIModule::GetGlobal(), &GlobalMap::GetGlobal(),
+                 &Malloc::GetGlobal());
 }
 
 LAPIC & LAPIC::GetCurrent() {

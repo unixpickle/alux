@@ -3,6 +3,7 @@
 
 #include <arch/x64/pmm/step-allocator.hpp>
 #include <arch/general/physical-allocator.hpp>
+#include <module/module.hpp>
 #include <analloc2>
 #include <panic>
 #include <macros>
@@ -11,20 +12,18 @@ namespace OS {
 
 namespace x64 {
 
-class Allocator : public PageAllocator, public PhysicalAllocator {
+class Allocator : public PageAllocator, public PhysicalAllocator,
+                  public Module {
 public:
   static const int MaximumAllocators = 0x10;
   typedef ANAlloc::BBTree TreeType;
   typedef ANAlloc::AllocatorList<MaximumAllocators, TreeType> AllocatorList;
   
-  static void Initialize(StepAllocator & allocator);
+  static void InitGlobal();
   static Allocator & GetGlobal();
   
-  Allocator() {
-    Panic("Allocator::Allocator() - only for the compiler");
-  }
-  
-  Allocator(StepAllocator & alloc);
+  virtual DepList GetDependencies();
+  virtual void Initialize();
   
   PhysAddr AllocLower(size_t size, size_t align, size_t * realSize);
   

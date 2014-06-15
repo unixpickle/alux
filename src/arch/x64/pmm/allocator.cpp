@@ -15,15 +15,22 @@ namespace x64 {
 
 static Allocator allocator;
 
-void Allocator::Initialize(StepAllocator & alloc) {
-  new(&allocator) Allocator(alloc);
+void Allocator::InitGlobal() {
+  new(&allocator) Allocator();
 }
 
 Allocator & Allocator::GetGlobal() { 
   return allocator;
 }
 
-Allocator::Allocator(StepAllocator & alloc) {
+DepList GetDependencies() {
+  return DepList(&GlobalMap::GetGlobal(), &RegionList::GetGlobal());
+}
+
+void Allocator::Initialize() {
+  PageAllocator & theAllocator = *GlobalMap::GetGlobal().allocator;
+  StepAllocator & alloc = static_cast<StepAllocator &>(theAllocator);
+  
   RegionList & regions = RegionList::GetGlobal();
   for (int i = 0; i < regions.GetRegionCount(); i++) {
     totalSpace += regions.GetRegions()[i].GetSize();

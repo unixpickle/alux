@@ -4,19 +4,23 @@
 #include <arch/x64/pmm/page-allocator.hpp>
 #include <arch/x64/vmm/page-table.hpp>
 #include <arch/x64/init.hpp> // so I can make InitializeMemory() a friend
-#include <arch/general/address-space.hpp>
+#include <arch/general/global-map.hpp>
 #include <macros>
 
 namespace OS {
 
 namespace x64 {
 
-class GlobalMap : public AddressSpace {
+class GlobalMap : public OS::GlobalMap {
 public:
-  static void Initialize(PageAllocator * anAlloc);
+  static void InitGlobal();
   static GlobalMap & GetGlobal();
   
   GlobalMap();
+  
+  virtual void Initialize();
+  virtual DepList GetDependencies();
+  virtual DepList GetSuperDependencies();
   
   PhysAddr GetPDPT();
   PhysAddr GetPML4();

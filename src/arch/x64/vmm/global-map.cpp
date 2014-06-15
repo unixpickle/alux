@@ -1,7 +1,10 @@
 #include <arch/x64/vmm/global-map.hpp>
 #include <arch/x64/vmm/map-setup.hpp>
 #include <arch/x64/vmm/scratch.hpp>
+#include <arch/x64/vmm/kernel-layout.hpp>
+#include <arch/x64/pmm/region-list.hpp>
 #include <arch/x64/smp/invlpg.hpp>
+#include <arch/general/physical-allocator.hpp>
 #include <panic>
 #include <lock>
 #include <cstddef>
@@ -10,18 +13,17 @@
 
 namespace OS {
 
-AddressSpace & AddressSpace::GetGlobal() {
+GlobalMap & GlobalMap::GetGlobal() {
   return x64::GlobalMap::GetGlobal();
 }
 
 namespace x64 {
 
 static GlobalMap instance;
+static StepAllocator step(0);
 
-void GlobalMap::Initialize(PageAllocator * anAlloc) {
+void GlobalMap::InitGlobal() {
   new(&instance) GlobalMap();
-  instance.allocator = anAlloc;
-  instance.Setup();
 }
 
 GlobalMap & GlobalMap::GetGlobal() {
@@ -29,6 +31,20 @@ GlobalMap & GlobalMap::GetGlobal() {
 }
 
 GlobalMap::GlobalMap() : table(0), allocator(NULL), pdpt(0) {
+}
+
+void GlobalMap::Initialize() {
+  new(&step) StepAllocator(KernelSize());
+  allocator = &step;
+  Setup();
+}
+
+DepList GlobalMap::GetDependencies() {
+  return DepList(&RegionList::GetGlobal());
+}
+
+DepList GlobalMap::GetSuperDependencies() {
+  return DepList(&PhysicalAllocator::GetGlobal());
 }
 
 PhysAddr GlobalMap::GetPDPT() {

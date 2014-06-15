@@ -29,6 +29,10 @@ void TextConsole::Initialize() {
   }
 }
 
+DepList TextConsole::GetDependencies() {
+  return DepList();
+}
+
 void TextConsole::PrintString(const char * string) {
   AssertNoncritical();
   ScopeLock scope(&mainLock);

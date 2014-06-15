@@ -14,7 +14,7 @@ public:
   static LAPICModule & GetGlobal();
   
   virtual void Initialize();
-  virtual Module ** GetDependencies(size_t & count);
+  virtual DepList GetDependencies();
 };
 
 class LAPIC {
