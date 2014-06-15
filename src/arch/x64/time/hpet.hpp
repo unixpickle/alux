@@ -3,6 +3,7 @@
 
 #include <arch/general/clock.hpp>
 #include <memory/easy-map.hpp>
+#include <module/dep-list.hpp>
 
 namespace OS {
 

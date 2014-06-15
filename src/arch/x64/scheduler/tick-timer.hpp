@@ -9,8 +9,11 @@ namespace x64 {
 
 class TickTimer : public OS::TickTimer {
 public:
-  static void Initialize();
+  static void InitGlobal();
   static TickTimer & GetGlobal();
+  
+  virtual void Initialize();
+  virtual DepList GetDependencies();
   
   virtual void SaveAndTick();
   virtual void SetTimeout(uint64_t delay, bool precision);

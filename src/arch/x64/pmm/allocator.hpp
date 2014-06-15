@@ -12,8 +12,7 @@ namespace OS {
 
 namespace x64 {
 
-class Allocator : public PageAllocator, public PhysicalAllocator,
-                  public Module {
+class Allocator : public PhysicalAllocator, public PageAllocator {
 public:
   static const int MaximumAllocators = 0x10;
   typedef ANAlloc::BBTree TreeType;

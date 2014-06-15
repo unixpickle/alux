@@ -6,9 +6,9 @@
 
 namespace OS {
 
-class Clock : public Module {
+class Clock {
 public:
-  static Clock & GetGlobal(); // @ambicritical
+  static Clock & GetClock(); // uses the ClockModule global
   
   /**
    * @ambicritical
@@ -34,6 +34,13 @@ public:
    * @noncritical
    */
   virtual void MicroSleep(uint64_t micros);
+};
+
+class ClockModule : public Module {
+public:
+  static ClockModule & GetGlobal();
+  
+  virtual Clock & GetClock() = 0;
 };
 
 }

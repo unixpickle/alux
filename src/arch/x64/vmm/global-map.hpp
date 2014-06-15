@@ -3,13 +3,14 @@
 
 #include <arch/x64/pmm/page-allocator.hpp>
 #include <arch/x64/vmm/page-table.hpp>
-#include <arch/x64/init.hpp> // so I can make InitializeMemory() a friend
 #include <arch/general/global-map.hpp>
 #include <macros>
 
 namespace OS {
 
 namespace x64 {
+
+class Allocator;
 
 class GlobalMap : public OS::GlobalMap {
 public:
@@ -34,7 +35,6 @@ public:
   virtual void MapAt(VirtAddr virt, MapInfo info);
   virtual VirtAddr Reserve(Size size);
   
-  friend void InitializeMemory(void *);
   friend class PageTable;
   friend class Allocator;
   

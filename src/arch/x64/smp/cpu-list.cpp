@@ -1,8 +1,18 @@
 #include <arch/x64/smp/cpu-list.hpp>
+#include <arch/x64/smp/init.hpp>
+#include <arch/x64/smp/invlpg.hpp>
 #include <arch/x64/segments/gdt.hpp>
+#include <arch/x64/interrupts/lapic.hpp>
+#include <arch/x64/interrupts/irt.hpp>
+#include <arch/x64/interrupts/errors.hpp>
+#include <arch/x64/acpi/acpi-module.hpp>
+#include <arch/x64/acpi/madt.hpp>
+#include <arch/x64/general/panic.hpp>
+#include <arch/general/clock.hpp>
+#include <memory/malloc.hpp>
 #include <critical>
-#include <panic>
 #include <cassert>
+#include <panic>
 #include <new>
 
 namespace OS {
@@ -15,20 +25,42 @@ namespace x64 {
 
 static CPUList globalList;
 
-void CPUList::Initialize(int capacity) {
-  new(&globalList) CPUList(capacity);
+void CPUList::InitGlobal() {
+  new(&globalList) CPUList();
 }
 
 CPUList & CPUList::GetGlobal() {
   return globalList;
 }
 
-CPUList::CPUList() {
-  Panic("CPUList::CPUList() - method for compiler satisfaction only");
+void CPUList::Initialize() {
+  AssertNoncritical();
+  
+  capacity = MADT::GetGlobal()->CountLAPICs(false);
+  buffer = new uint8_t[sizeof(CPU) * capacity];
+  
+  SetCritical(true);
+  uint32_t lapicId = LAPIC::GetCurrent().GetId();
+  SetCritical(false);
+  
+  CPU & cpu = AddEntry(lapicId);
+  {
+    ScopeCritical critical;
+    cpu.LoadGS();
+    GDT::GetGlobal().Set();
+    __asm__ volatile("ltr %%ax" : : "a" (cpu.GetTSSSelector()));
+  }
+  
+  StartProcessors();
+  InitializePanic();
+  InitializeInvlpg();
 }
 
-CPUList::CPUList(int _capacity) : capacity(_capacity), count(0) {
-  buffer = new uint8_t[sizeof(CPU) * capacity];
+DepList CPUList::GetDependencies() {
+  return DepList(&Malloc::GetGlobal(), &GDT::GetGlobal(),
+                 &LAPICModule::GetGlobal(), &IRT::GetGlobal(),
+                 &ACPIModule::GetGlobal(), &ClockModule::GetGlobal(),
+                 &InterruptErrors::GetGlobal());
 }
 
 int CPUList::GetCount() {
@@ -36,6 +68,7 @@ int CPUList::GetCount() {
 }
 
 CPU & CPUList::AddEntry(uint32_t apicId) {
+  AssertNoncritical();
   assert(count < capacity);
   void * addr = (void *)(buffer + sizeof(CPU) * count);
   new(addr) CPU(apicId);

@@ -23,7 +23,7 @@ Allocator & Allocator::GetGlobal() {
   return allocator;
 }
 
-DepList GetDependencies() {
+DepList Allocator::GetDependencies() {
   return DepList(&GlobalMap::GetGlobal(), &RegionList::GetGlobal());
 }
 

@@ -1,5 +1,8 @@
 #include <arch/x64/time/hpet.hpp>
 #include <arch/x64/acpi/hpet.hpp>
+#include <arch/x64/acpi/acpi-module.hpp>
+#include <arch/general/global-map.hpp>
+#include <memory/malloc.hpp>
 #include <new>
 
 namespace OS {

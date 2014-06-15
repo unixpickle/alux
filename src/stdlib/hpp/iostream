@@ -1,7 +1,20 @@
 #ifndef __IOSTREAM_HPP__
 #define __IOSTREAM_HPP__
 
+#include <module/module.hpp>
+
 namespace OS {
+
+class OutStreamModule : public Module {
+public:
+  static void InitGlobal();
+  static OutStreamModule & GetGlobal();
+
+  OutStreamModule() {}
+
+  virtual void Initialize();
+  virtual DepList GetDependencies();
+};
 
 class OutStream {
 public:
@@ -79,9 +92,6 @@ public:
 extern OutStreamOut cout;
 extern OutStreamErr cerr;
 extern const char * endl;
-
-bool HasInitializedOutStream();
-void InitializeOutStream();
 
 }
 

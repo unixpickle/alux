@@ -5,6 +5,10 @@
 
 namespace OS {
 
+Clock & Clock::GetClock() {
+  return ClockModule::GetGlobal().GetClock();
+}
+
 void Clock::WaitUntil(uint64_t deadline) {
   AssertNoncritical();
   while (GetTime() < deadline);

@@ -4,6 +4,7 @@
 #include <arch/x64/acpi/madt.hpp>
 #include <arch/general/global-map.hpp>
 #include <memory/malloc.hpp>
+#include <iostream>
 #include <new>
 
 namespace OS {
@@ -21,19 +22,18 @@ ACPIModule & ACPIModule::GetGlobal() {
 }
   
 void ACPIModule::Initialize() {
+  cout << "Initializing ACPI parser..." << endl;
+  
   SDT::Initialize();
   HPETInfo::GetGlobal();
   MADT::Initialize();
 }
 
 DepList ACPIModule::GetDependencies() {
-  return DepList(&Malloc::GetGlobal(), &GlobalMap::GetGlobal());
-}
-
-};
-
+  return DepList(&Malloc::GetGlobal(), &GlobalMap::GetGlobal(),
+                 &OutStreamModule::GetGlobal());
 }
 
 }
 
-#endif
+}

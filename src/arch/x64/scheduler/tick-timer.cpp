@@ -2,6 +2,7 @@
 #include <arch/x64/smp/cpu-list.hpp>
 #include <arch/x64/interrupts/lapic.hpp>
 #include <arch/x64/interrupts/vectors.hpp>
+#include <arch/x64/time/lapic.hpp>
 #include <arch/general/clock.hpp>
 #include <scheduler-specific/scheduler.hpp>
 #include <utilities/frac.hpp>
@@ -11,7 +12,7 @@
 
 namespace OS {
 
-TickTimer & TickTimer::GetCurrent() {
+TickTimer & TickTimer::GetGlobal() {
   return x64::TickTimer::GetGlobal();
 }
 
@@ -23,12 +24,21 @@ static void CallTick() {
   Scheduler::GetGlobal().Tick();
 }
 
-void TickTimer::Initialize() {
+void TickTimer::InitGlobal() {
   new(&globalTimer) TickTimer();
 }
 
 TickTimer & TickTimer::GetGlobal() {
   return globalTimer;
+}
+
+void TickTimer::Initialize() {
+  InitializeLapicTimers();
+}
+
+DepList TickTimer::GetDependencies() {
+  return DepList(&LAPICModule::GetGlobal(), &ClockModule::GetGlobal(),
+                 &CPUList::GetGlobal());
 }
 
 void TickTimer::SaveAndTick() {
@@ -66,7 +76,7 @@ void TickTimer::SetTimeout(uint64_t deadline, bool) {
   AssertCritical();
   CPU & cpu = CPU::GetCurrent();
 
-  uint64_t regularClock = Clock::GetGlobal().GetTicksPerMin();
+  uint64_t regularClock = Clock::GetClock().GetTicksPerMin();
   Frac64 conversion(cpu.frequencies.lapic, regularClock);
   uint64_t lapicTicks = conversion.Multiply(deadline);
 

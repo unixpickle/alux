@@ -20,13 +20,13 @@ InterruptErrors & InterruptErrors::GetGlobal() {
 
 void InterruptErrors::Initialize() {
   IRT::GetGlobal()[0x2] = &InterruptErrors::HandleNMI;
-  IRT::GetGlobal()[0x12] = &InterruptErrors::HandleMCE
+  IRT::GetGlobal()[0x12] = &InterruptErrors::HandleMCE;
   IDT::GetGlobal().SetIST(0x2, 1);
   IDT::GetGlobal().SetIST(0x12, 1);
 }
 
 DepList InterruptErrors::GetDependencies() {
-  return DepList(&IDT::GetGlobal(), IRT::GetGlobal())
+  return DepList(&IDT::GetGlobal(), &IRT::GetGlobal());
 }
 
 void InterruptErrors::HandleNMI() {

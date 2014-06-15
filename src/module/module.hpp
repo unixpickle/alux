@@ -9,6 +9,8 @@ namespace OS {
 
 class Module {
 public:
+  Module();
+  ~Module();
   Module(const Module &) = delete;
   Module(Module &&) = delete;
   Module & operator=(const Module &) = delete;

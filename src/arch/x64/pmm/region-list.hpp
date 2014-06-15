@@ -18,7 +18,7 @@ public:
   static RegionList & GetGlobal();
   
   virtual void Initialize();
-  virtual Module ** GetDependencies(size_t & count);
+  virtual DepList GetDependencies();
   
   RegionList();
   MemoryRegion * GetRegions();

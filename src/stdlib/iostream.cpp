@@ -1,8 +1,30 @@
-#include <arch/general/printing.hpp>
+#include <arch/general/console.hpp>
 #include <iostream>
 #include <new>
 
 namespace OS {
+
+static OutStreamModule gModule;
+OutStreamErr cerr;
+OutStreamOut cout;
+const char * endl = "\n";
+
+void OutStreamModule::InitGlobal() {
+  new(&gModule) OutStreamModule();
+}
+
+OutStreamModule & OutStreamModule::GetGlobal() {
+  return gModule;
+}
+
+void OutStreamModule::Initialize() {
+  new(&cerr) OutStreamErr;
+  new(&cout) OutStreamOut;
+}
+
+DepList OutStreamModule::GetDependencies() {
+  return DepList(&Console::GetGlobal());
+}
 
 OutStream & OutStream::operator<<(const char * ch) {
   return cerr << "OutStream::operator<<("
@@ -59,30 +81,17 @@ OutStream & OutStream::operator<<(unsigned long long number) {
 }
 
 OutStream & OutStreamErr::operator<<(const char * str) {
-  SetColor(PrintColorRed | PrintColorBrightMask);
-  PrintString(str);
+  Console & console = Console::GetGlobal();
+  console.SetColor(Console::ColorRed, true);
+  console.PrintString(str);
   return *this;
 }
 
 OutStream & OutStreamOut::operator<<(const char * str) {
-  SetColor(PrintColorGreen | PrintColorBrightMask);
-  PrintString(str);
+  Console & console = Console::GetGlobal();
+  console.SetColor(Console::ColorGreen, true);
+  console.PrintString(str);
   return *this;
-}
-
-OutStreamErr cerr;
-OutStreamOut cout;
-const char * endl = "\n";
-static bool hasInited = false;
-
-bool HasInitializedOutStream() {
-  return hasInited;
-}
-
-void InitializeOutStream() {
-  new(&cerr) OutStreamErr;
-  new(&cout) OutStreamOut;
-  hasInited = true;
 }
 
 }

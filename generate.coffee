@@ -94,6 +94,8 @@ main = ->
     'utilities'
     'memory'
     'multitasking'
+    'module'
+    'entry'
     'arch/general'
     'scheduler/general'
     'scheduler/user'

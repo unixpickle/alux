@@ -1,22 +1,20 @@
-#ifndef __X64_ACPI_MODULE_HPP__
-#define __X64_ACPI_MODULE_HPP__
+#ifndef __MAIN_HPP__
+#define __MAIN_HPP__
 
 #include <module/module.hpp>
 
 namespace OS {
 
-namespace x64 {
-
-class ACPIModule : public Module {
+class MainModule : public Module {
 public:
   static void InitGlobal();
-  static ACPIModule & GetGlobal();
+  static MainModule & GetGlobal();
   
   virtual void Initialize();
   virtual DepList GetDependencies();
+  
+  void Main();
 };
-
-}
 
 }
 

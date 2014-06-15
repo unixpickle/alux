@@ -2,17 +2,20 @@
 #define __FIFO_SCHEDULER_HPP__
 
 #include <scheduler/general/thread.hpp>
+#include <module/module.hpp>
 #include <macros>
 #include <cstdint>
 
 namespace OS {
 
-class Scheduler {
+class Scheduler : public Module {
 public:
   static const uint64_t Jiffy = 6000; // 100Hz
   
-  static void Initialize();
+  static void InitGlobal();
   static Scheduler & GetGlobal();
+  
+  virtual DepList GetDependencies();
   
   void Start(); // @noncritical
   

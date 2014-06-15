@@ -4,10 +4,10 @@
 #include <arch/general/critical.hpp>
 #include <cassert>
 
-#define AssertCritical() assert(IgnoreCriticality() || \
-  GetCritical())
-#define AssertNoncritical() assert(IgnoreCriticality() || \
-  !GetCritical())
+#define AssertCritical() assert(::OS::IgnoreCriticality() || \
+  ::OS::GetCritical())
+#define AssertNoncritical() assert(::OS::IgnoreCriticality() || \
+  !::OS::GetCritical())
 
 namespace OS {
 

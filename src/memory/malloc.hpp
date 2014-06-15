@@ -20,7 +20,7 @@ public:
   static Malloc & GetGlobal();
   
   virtual void Initialize();
-  virtual Module ** GetDependencies(size_t & count);
+  virtual DepList GetDependencies();
   
   void * Alloc(size_t, bool getNew = true); // @ambicritical, unsynchronized
   void Free(void *); // @ambicritical, unsynchronized

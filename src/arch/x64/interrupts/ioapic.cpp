@@ -2,10 +2,9 @@
 #include <arch/x64/acpi/acpi-module.hpp>
 #include <arch/x64/common.hpp>
 #include <arch/general/global-map.hpp>
-#include <arch/general/console.hpp>
-#include <panic>
 #include <iostream>
 #include <cstring>
+#include <panic>
 #include <new>
 
 namespace OS {
@@ -44,7 +43,7 @@ void IOAPICModule::Initialize() {
 
 DepList IOAPICModule::GetDependencies() {
   return DepList(&GlobalMap::GetGlobal(), &ACPIModule::GetGlobal(),
-                 &Console::GetGlobal());
+                 &OutStreamModule::GetGlobal());
 }
 
 IOAPIC & IOAPIC::GetBase() {

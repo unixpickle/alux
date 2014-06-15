@@ -11,7 +11,7 @@ namespace x64 {
 static RegionList globalRegions;
 static MultibootBootInfo * multibootPtr;
 
-void RegionList::Initialize(void * mbootPtr) {
+void RegionList::InitGlobal(void * mbootPtr) {
   new(&globalRegions) RegionList();
   multibootPtr = (MultibootBootInfo *)mbootPtr;
 }
@@ -72,9 +72,8 @@ void RegionList::Initialize() {
   }
 }
 
-Module ** RegionList::GetDependencies(size_t & count) {
-  count = 0;
-  return NULL;
+DepList RegionList::GetDependencies() {
+  return DepList();
 }
 
 RegionList::RegionList() : regionCount(0) {

@@ -1,4 +1,5 @@
 #include <arch/x64/segments/gdt.hpp>
+#include <memory/malloc.hpp>
 #include <critical>
 #include <cassert>
 #include <cstring>
@@ -16,8 +17,7 @@ GDTPointer GDTPointer::GetCurrent() {
   return result;
 }
 
-void GDT::Initialize() {
-  AssertNoncritical();
+void GDT::InitGlobal() {
   new(&globalGDT) GDT();
 }
 
@@ -25,7 +25,7 @@ GDT & GDT::GetGlobal() {
   return globalGDT;
 }
 
-GDT::GDT() {
+void GDT::Initialize() {
   AssertNoncritical();
   GDTPointer curPtr = GDTPointer::GetCurrent();
   
@@ -34,6 +34,10 @@ GDT::GDT() {
   buffer = new uint8_t[0x10000];
   memcpy(buffer, (void *)curPtr.start, offset);
   bzero(buffer + offset, 0x10000 - offset);
+}
+
+DepList GDT::GetDependencies() {
+  return DepList(&Malloc::GetGlobal());
 }
 
 void GDT::Set() {

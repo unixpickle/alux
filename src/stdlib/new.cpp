@@ -1,9 +1,11 @@
-#include <new>
 #include <memory/malloc.hpp>
+#include <new>
 #include <lock>
 #include <macros>
 #include <panic>
 #include <critical>
+
+static uint64_t lock OS_ALIGNED(8);
 
 void * operator new(size_t, void * p) {
   return p;

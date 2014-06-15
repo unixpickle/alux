@@ -3,6 +3,7 @@
 
 #include <arch/x64/segments/tss.hpp>
 #include <cstddef>
+#include <module/module.hpp>
 
 namespace OS {
 
@@ -16,12 +17,13 @@ public:
   static GDTPointer GetCurrent(); // uses SGDT, @critical
 } OS_PACKED;
 
-class GDT {
+class GDT : public Module {
 public:
-  static void Initialize();
+  static void InitGlobal();
   static GDT & GetGlobal();
 
-  GDT(); // do not call this directly
+  virtual void Initialize();
+  virtual DepList GetDependencies();
   
   /**
    * Run LGDT to load this GDT.

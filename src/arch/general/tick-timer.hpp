@@ -3,13 +3,14 @@
 
 #include <scheduler/general/task.hpp>
 #include <scheduler/general/thread.hpp>
+#include <module/module.hpp>
 #include <macros>
 
 namespace OS {
 
-class TickTimer {
+class TickTimer : public Module {
 public:
-  static TickTimer & GetCurrent(); // @critical
+  static TickTimer & GetGlobal(); // @critical
  
   /**
    * This is the fundamental method that a scheduler uses to save the

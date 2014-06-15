@@ -1,6 +1,8 @@
 #ifndef __MODULE_DEP_LIST_HPP__
 #define __MODULE_DEP_LIST_HPP__
 
+#include <cassert>
+
 namespace OS {
 
 class Module;
@@ -23,11 +25,12 @@ struct DepList {
   DepList & operator=(const DepList & list) {
     count = list.count;
     for (int i = 0; i < count; i++) {
-      modules[i] = list[i];
+      modules[i] = list.modules[i];
     }
+    return *this;
   }
   
-  Module *& operator[](int idx) const {
+  Module *& operator[](int idx) {
     return modules[idx];
   }
   

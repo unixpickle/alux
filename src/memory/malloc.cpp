@@ -1,5 +1,5 @@
 #include <memory/malloc.hpp>
-#include <arch/general/address-space.hpp>
+#include <arch/general/global-map.hpp>
 #include <arch/general/physical-allocator.hpp>
 #include <cassert>
 #include <new>
@@ -41,11 +41,8 @@ void Malloc::Initialize() {
   }
 }
 
-Module ** Malloc::GetDependencies(size_t & count) {
-  deps[0] = &PhysicalAllocator::GetGlobal();
-  deps[1] = &AddressSpace::GetGlobal();
-  count = 2;
-  return deps;
+DepList Malloc::GetDependencies() {
+  return DepList(&PhysicalAllocator::GetGlobal(), &GlobalMap::GetGlobal());
 }
 
 void * Malloc::Alloc(size_t size, bool getNew) {
@@ -81,7 +78,7 @@ void Malloc::Free(void * addr) {
 
 void Malloc::MakeNewRegion() {
   PhysicalAllocator & physAlloc = PhysicalAllocator::GetGlobal();
-  AddressSpace & space = AddressSpace::GetGlobal();
+  AddressSpace & space = GlobalMap::GetGlobal();
   PhysAddr addr = physAlloc.Alloc(allocSize, pageAlignment, NULL);
   
   AddressSpace::MapInfo info(pageSize, allocSize / pageSize, addr);

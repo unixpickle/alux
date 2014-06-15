@@ -7,9 +7,9 @@
 #include <arch/x64/segments/gdt.hpp>
 #include <arch/x64/syscall/registers.hpp>
 #include <arch/general/clock.hpp>
-#include <panic>
 #include <critical>
 #include <iostream>
+#include <panic>
 
 extern "C" {
 #include <anlock.h>
@@ -37,6 +37,9 @@ void StartProcessors() {
   IterateApicIds(StartCPU);
   
   code = NULL;
+  
+  ScopeCritical scope;
+  SyscallSetRegisters();
 }
 
 static void IterateApicIds(void (* func)(uint32_t)) {
@@ -80,13 +83,13 @@ static void StartCPU(uint32_t apicId) {
   lapic.SendIPI(apicId, 0, 5, 1, 1);
   SetCritical(false);
   
-  Clock::GetGlobal().Sleep(1);
+  Clock::GetClock().Sleep(1);
   
   SetCritical(true);
   lapic.SendIPI(apicId, 0, 5, 0, 1);
   SetCritical(false);
   
-  Clock::GetGlobal().Sleep(1);
+  Clock::GetClock().Sleep(1);
 
   // send STARTUP IPI (and resend if needed, as it is on some AMD systems)
   for (int j = 0; j < 2; j++) {
@@ -97,7 +100,7 @@ static void StartCPU(uint32_t apicId) {
 
     // wait a maximum of 200ms before sending another IPI or failing
     for (int i = 0; i < 20; i++) {
-      Clock::GetGlobal().MicroSleep(10000);
+      Clock::GetClock().MicroSleep(10000);
       anlock_lock(&curCpuLock);
       int newCount = CPUList::GetGlobal().GetCount();
       anlock_unlock(&curCpuLock);

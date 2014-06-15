@@ -3,7 +3,7 @@
 
 #include <arch/general/console.hpp>
 #include <cstdint>
-#include <common>
+#include <macros>
 
 namespace OS {
 

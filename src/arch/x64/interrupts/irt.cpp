@@ -3,7 +3,9 @@
 #include <arch/x64/interrupts/irt-handlers.hpp>
 #include <arch/x64/interrupts/raw-handlers.hpp>
 #include <arch/x64/interrupts/pic.hpp>
+#include <arch/x64/general/critical.hpp>
 #include <memory/malloc.hpp>
+#include <critical>
 #include <new>
 
 namespace OS {
@@ -32,6 +34,9 @@ void IRT::Initialize() {
   __asm__("sti\nnop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\n"
           "nop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\ncli");
   Configure();
+  
+  SetIgnoreCriticality(false);
+  SetCritical(false);
 }
 
 DepList IRT::GetDependencies() {

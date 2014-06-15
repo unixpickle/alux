@@ -10,12 +10,17 @@ namespace OS {
 
 static Scheduler globalObj;
 
-void Scheduler::Initialize() {
+void Scheduler::InitGlobal() {
   new(&globalObj) Scheduler();
 }
 
 Scheduler & Scheduler::GetGlobal() {
   return globalObj;
+}
+
+DepList Scheduler::GetDependencies() {
+  return DepList(&HardwareThreadList::GetGlobal(), &TickTimer::GetGlobal(),
+                 &ClockModule::GetGlobal());
 }
 
 void Scheduler::Start() {
@@ -27,7 +32,7 @@ void Scheduler::Start() {
     if (&list[i] == &thisCPU) continue;
     list[i].Wake();
   }
-  TickTimer::GetCurrent().SaveAndTick();
+  TickTimer::GetGlobal().SaveAndTick();
 }
 
 void Scheduler::AddThread(Thread * t) {
@@ -51,7 +56,7 @@ void Scheduler::SetTimeout(uint64_t deadline, bool) {
     assert(th != NULL);
     th->SchedThread::nextTick = deadline;
   }
-  TickTimer::GetCurrent().SaveAndTick();
+  TickTimer::GetGlobal().SaveAndTick();
 }
 
 void Scheduler::SetInfiniteTimeout() {
@@ -63,7 +68,7 @@ void Scheduler::SetInfiniteTimeout() {
     assert(th != NULL);
     th->SchedThread::nextTick = UINT64_MAX;
   }
-  TickTimer::GetCurrent().SaveAndTick();
+  TickTimer::GetGlobal().SaveAndTick();
 }
 
 bool Scheduler::ClearTimeout(Thread *) {
@@ -79,7 +84,7 @@ bool Scheduler::ClearTimeout(Thread *) {
 
 void Scheduler::Resign() {
   AssertCritical();
-  TickTimer::GetCurrent().SaveAndTick();
+  TickTimer::GetGlobal().SaveAndTick();
 }
 
 void Scheduler::Tick() {
@@ -87,7 +92,7 @@ void Scheduler::Tick() {
   
   Thread * toRun = GetNextThread();
   if (!toRun) {
-    TickTimer::GetCurrent().WaitTimeout();
+    TickTimer::GetGlobal().WaitTimeout();
   } else {
     toRun->Run();
   }
@@ -104,7 +109,7 @@ Thread * Scheduler::GetNextThread() {
     HardwareThread::SetThread(NULL);
   }
   
-  Clock & clock = Clock::GetGlobal();
+  Clock & clock = Clock::GetClock();
   uint64_t now = clock.GetTime();
   uint64_t nextTick = now + clock.GetTicksPerMin() / Jiffy;
   
@@ -143,7 +148,7 @@ Thread * Scheduler::GetNextThread() {
     current->SchedThread::nextTick = 0;
     HardwareThread::SetThread(current);
   }
-  TickTimer::GetCurrent().SetTimeout(nextTick - now, true);
+  TickTimer::GetGlobal().SetTimeout(nextTick - now, true);
   return current;
 }
 

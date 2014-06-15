@@ -1,3 +1,6 @@
+#include <arch/x64/interrupts/lapic.hpp>
+#include <arch/x64/interrupts/xapic.hpp>
+#include <arch/x64/interrupts/x2apic.hpp>
 #include <arch/x64/acpi/madt.hpp>
 #include <arch/x64/acpi/acpi-module.hpp>
 #include <arch/x64/common.hpp>
@@ -30,6 +33,10 @@ void LAPICModule::Initialize() {
   assert(madt != NULL);
   new(&xapic) XAPIC((uint64_t)madt->GetHeader().lapicAddr);
   new(&x2apic) X2APIC();
+  
+  LAPIC & lapic = LAPIC::GetCurrent();
+  lapic.Enable();
+  lapic.SetDefaults();
 }
 
 DepList LAPICModule::GetDependencies() {

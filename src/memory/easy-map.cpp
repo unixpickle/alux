@@ -1,10 +1,10 @@
 #include <memory/easy-map.hpp>
-#include <arch/general/address-space.hpp>
+#include <arch/general/global-map.hpp>
 
 namespace OS {
 
 EasyMap::EasyMap(PhysAddr _start, size_t _size, bool exec) {
-  AddressSpace & space = AddressSpace::GetGlobal();
+  AddressSpace & space = GlobalMap::GetGlobal();
   
   // this little algorithm will find the page size we should use
   pageAlign = space.GetPageAlignment(0);
@@ -38,7 +38,7 @@ EasyMap::EasyMap(PhysAddr _start, size_t _size, bool exec) {
 }
 
 EasyMap::~EasyMap() {
-  AddressSpace & space = AddressSpace::GetGlobal();
+  AddressSpace & space = GlobalMap::GetGlobal();
   space.Unmap(mapStart, AddressSpace::Size(pageSize, pageCount));
 }
 

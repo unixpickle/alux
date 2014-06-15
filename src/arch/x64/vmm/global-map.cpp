@@ -3,6 +3,7 @@
 #include <arch/x64/vmm/scratch.hpp>
 #include <arch/x64/vmm/kernel-layout.hpp>
 #include <arch/x64/pmm/region-list.hpp>
+#include <arch/x64/pmm/step-allocator.hpp>
 #include <arch/x64/smp/invlpg.hpp>
 #include <arch/general/physical-allocator.hpp>
 #include <panic>

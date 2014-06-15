@@ -1,5 +1,6 @@
 #include <arch/x64/general/text-console.hpp>
 #include <arch/x64/common.hpp>
+#include <new>
 #include <lock>
 #include <macros>
 #include <cstdint>

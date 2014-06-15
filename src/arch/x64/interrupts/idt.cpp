@@ -16,7 +16,7 @@ IDT & IDT::GetGlobal() {
   return globalTable;
 }
 
-virtual DepList GetDependencies() {
+DepList IDT::GetDependencies() {
   return DepList();
 }
 

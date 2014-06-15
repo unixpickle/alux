@@ -46,7 +46,7 @@ static void CalibrateLAPIC() {
   lapic.WriteReg(LAPIC::RegLVTTimer, 0xff);
   lapic.WriteReg(LAPIC::RegTimerInitCount, 0xffffffff);
   SetCritical(false);
-  Clock::GetGlobal().MicroSleep(500000);
+  Clock::GetClock().MicroSleep(500000);
   SetCritical(true);
 
   uint64_t value = lapic.ReadReg(LAPIC::RegTimerCurrCount);
