@@ -6,8 +6,6 @@
 #include <panic>
 #include <new>
 
-#include <iostream> // TODO: delete this
-
 namespace OS {
 
 static GarbageThread globalGarbage;
@@ -54,7 +52,6 @@ void GarbageThread::CallMain() {
 void GarbageThread::Main() {
   AssertNoncritical();
   while (1) {
-    cout << "in garbage thread!" << endl;
     SetCritical(true);
     Task * t = PopTask();
     SetCritical(false);
