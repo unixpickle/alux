@@ -39,6 +39,9 @@ void Scratch::Initialize() {
     PhysAddr scratchPT = scratchStart + (0x1000 * i);
     ((uint64_t *)scratchPDT)[i] = scratchPT | 3;
   }
+  
+  // now that scratch is setup, we don't need the old address space
+  GlobalMap::GetGlobal().Set();
 }
 
 DepList Scratch::GetDependencies() {

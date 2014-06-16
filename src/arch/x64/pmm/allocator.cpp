@@ -43,9 +43,6 @@ void Allocator::Initialize() {
                                regions.GetRegionCount());
   allocators.SetInfo(info);
   allocators.GenerateDescriptions(true); // `true` is needed to sort it
-
-  // using the global map requires that we actually *set* it
-  GlobalMap::GetGlobal().Set();
   
   PageAllocator & theAllocator = *GlobalMap::GetGlobal().allocator;
   StepAllocator & alloc = static_cast<StepAllocator &>(theAllocator);
