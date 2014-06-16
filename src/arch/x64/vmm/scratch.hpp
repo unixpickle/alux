@@ -1,27 +1,31 @@
 #ifndef __X64_SCRATCH_HPP__
 #define __X64_SCRATCH_HPP__
 
-#include <arch/x64/pmm/page-allocator.hpp>
+#include <arch-specific/types.hpp>
+#include <module/module.hpp>
+#include <cstdint>
 #include <macros>
 
 namespace OS {
 
 namespace x64 {
 
-class Scratch {
+class Scratch : public Module {
 public:
   static const int PTCount = 1;
   static const VirtAddr StartAddr = 0x7FC0000000L;
   
-  static void Initialize(PhysAddr pdpt, PageAllocator & alloc);
+  static void InitGlobal();
   static Scratch & GetGlobal();
+  
+  virtual void Initialize();
+  virtual DepList GetDependencies();
   
   VirtAddr Alloc(PhysAddr page); // @critical
   void Reassign(VirtAddr addr, PhysAddr newAddr); // @critical
   void Free(VirtAddr addr); // @critical
 
 protected:
-  void Setup(PhysAddr pdpt, PageAllocator & alloc);
   bool GetBitmap(int idx);
   void FlipBitmap(int idx);
   

@@ -1,5 +1,6 @@
 #include <arch/x64/scheduler/tick-timer.hpp>
 #include <arch/x64/smp/cpu-list.hpp>
+#include <arch/x64/interrupts/irt.hpp>
 #include <arch/x64/interrupts/lapic.hpp>
 #include <arch/x64/interrupts/vectors.hpp>
 #include <arch/x64/time/lapic.hpp>
@@ -7,6 +8,7 @@
 #include <scheduler-specific/scheduler.hpp>
 #include <utilities/frac.hpp>
 #include <critical>
+#include <iostream>
 #include <panic>
 #include <new>
 
@@ -33,12 +35,15 @@ TickTimer & TickTimer::GetGlobal() {
 }
 
 void TickTimer::Initialize() {
+  cout << "Initializing tick timer..." << endl;
   InitializeLapicTimers();
+  IRT::GetGlobal()[IntVectors::LapicTimer] = LapicTickMethod;
 }
 
 DepList TickTimer::GetDependencies() {
   return DepList(&LAPICModule::GetGlobal(), &ClockModule::GetGlobal(),
-                 &CPUList::GetGlobal());
+                 &CPUList::GetGlobal(), &IRT::GetGlobal(),
+                 &OutStreamModule::GetGlobal());
 }
 
 void TickTimer::SaveAndTick() {

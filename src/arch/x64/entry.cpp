@@ -12,7 +12,9 @@
 #include <arch/x64/smp/cpu-list.hpp>
 #include <arch/x64/time/clock-module.hpp>
 #include <arch/x64/vmm/global-map.hpp>
+#include <arch/x64/vmm/scratch.hpp>
 #include <scheduler-specific/scheduler.hpp>
+#include <memory/malloc.hpp>
 #include <entry/main.hpp>
 #include <iostream>
 #include <cstdint>
@@ -37,9 +39,11 @@ static void InitializeSingletons(void * mboot) {
   CPUList::InitGlobal();
   ClockModule::InitGlobal();
   GlobalMap::InitGlobal();
+  Scratch::InitGlobal();
   Scheduler::InitGlobal();
   OutStreamModule::InitGlobal();
-  OS::MainModule::InitGlobal();
+  MainModule::InitGlobal();
+  Malloc::InitGlobal();
 }
 
 }

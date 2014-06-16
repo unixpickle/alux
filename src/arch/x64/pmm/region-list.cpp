@@ -1,7 +1,8 @@
 #include <arch/x64/pmm/region-list.hpp>
 #include <arch/x64/multiboot.hpp>
-#include <panic>
+#include <iostream>
 #include <cassert>
+#include <panic>
 #include <new>
 
 namespace OS {
@@ -21,6 +22,8 @@ RegionList & RegionList::GetGlobal() {
 }
 
 void RegionList::Initialize() {
+  cout << "Initializing region list..." << endl;
+  
   // loop through and generate the regions
   uint32_t mmapLen = multibootPtr->mmap_length;
   uint32_t mmapAddr = multibootPtr->mmap_addr;
@@ -73,7 +76,7 @@ void RegionList::Initialize() {
 }
 
 DepList RegionList::GetDependencies() {
-  return DepList();
+  return DepList(&OutStreamModule::GetGlobal());
 }
 
 RegionList::RegionList() : regionCount(0) {

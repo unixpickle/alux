@@ -26,8 +26,7 @@ void IOAPICModule::Initialize() {
   MADT * madt = MADT::GetGlobal();
   if (!madt) Panic("I/O APIC support requires MADT");
   
-  cout << "MADT info: IOAPICs=" << madt->CountIOAPICs() << " LAPICS="
-    << madt->CountLAPICs(false) << endl;
+  cout << "Initializing I/O APIC..." << endl;
   
   MADT::IOAPIC * info = madt->LookupIOAPIC(0);
   if (!info) Panic("No base I/O APIC found");

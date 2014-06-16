@@ -1,8 +1,10 @@
 #include <arch/x64/pmm/allocator.hpp>
 #include <arch/x64/pmm/region-list.hpp>
 #include <arch/x64/vmm/global-map.hpp>
-#include <lock>
+#include <arch/x64/vmm/scratch.hpp>
+#include <iostream>
 #include <panic>
+#include <lock>
 #include <new>
 
 namespace OS {
@@ -24,12 +26,12 @@ Allocator & Allocator::GetGlobal() {
 }
 
 DepList Allocator::GetDependencies() {
-  return DepList(&GlobalMap::GetGlobal(), &RegionList::GetGlobal());
+  return DepList(&GlobalMap::GetGlobal(), &Scratch::GetGlobal(),
+                 &RegionList::GetGlobal(), &OutStreamModule::GetGlobal());
 }
 
 void Allocator::Initialize() {
-  PageAllocator & theAllocator = *GlobalMap::GetGlobal().allocator;
-  StepAllocator & alloc = static_cast<StepAllocator &>(theAllocator);
+  cout << "Initializing physical allocator..." << endl;
   
   RegionList & regions = RegionList::GetGlobal();
   for (int i = 0; i < regions.GetRegionCount(); i++) {
@@ -41,6 +43,12 @@ void Allocator::Initialize() {
                                regions.GetRegionCount());
   allocators.SetInfo(info);
   allocators.GenerateDescriptions(true); // `true` is needed to sort it
+
+  // using the global map requires that we actually *set* it
+  GlobalMap::GetGlobal().Set();
+  
+  PageAllocator & theAllocator = *GlobalMap::GetGlobal().allocator;
+  StepAllocator & alloc = static_cast<StepAllocator &>(theAllocator);
 
   VirtAddr newAddress = AllocateRaw(alloc, allocators.BitmapByteCount());
   allocators.GenerateAllocators((uint8_t *)newAddress);

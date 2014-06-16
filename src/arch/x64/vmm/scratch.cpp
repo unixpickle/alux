@@ -1,9 +1,11 @@
 #include <arch/x64/vmm/scratch.hpp>
 #include <arch/x64/vmm/kernel-layout.hpp>
+#include <arch/x64/vmm/global-map.hpp>
 #include <lock>
 #include <new>
 #include <cassert>
 #include <cstring>
+#include <iostream>
 
 namespace OS {
 
@@ -11,15 +13,38 @@ namespace x64 {
 
 static Scratch globalScratch;
 
-void Scratch::Initialize(PhysAddr pdpt, PageAllocator & alloc) {
+void Scratch::InitGlobal() {
   new(&globalScratch) Scratch();
-  globalScratch.Setup(pdpt, alloc);
 }
 
 Scratch & Scratch::GetGlobal() {
   return globalScratch;
 }
+
+void Scratch::Initialize() {
+  cout << "Initializing scratch tables..." << endl;
   
+  PageAllocator & alloc = *GlobalMap::GetGlobal().allocator;
+  PhysAddr pdpt = GlobalMap::GetGlobal().GetPDPT();
+  
+  PhysAddr scratchPDT = alloc.AllocPage();
+  bzero((void *)scratchPDT, 0x1000);
+  
+  // put the scratch PDT into the kernel PDPT
+  ((uint64_t *)pdpt)[0x1ff] = scratchPDT | 3;
+  
+  // setup the page tables and put them in the scratch PDT
+  uint64_t scratchStart = ScratchPTStart();
+  for (int i = 0; i < PTCount; i++) {
+    PhysAddr scratchPT = scratchStart + (0x1000 * i);
+    ((uint64_t *)scratchPDT)[i] = scratchPT | 3;
+  }
+}
+
+DepList Scratch::GetDependencies() {
+  return DepList(&GlobalMap::GetGlobal(), &OutStreamModule::GetGlobal());
+}
+
 VirtAddr Scratch::Alloc(PhysAddr page) {
   assert(!(page & 0xfff));
   ScopeCriticalLock scope(&lock);
@@ -58,21 +83,6 @@ void Scratch::Free(VirtAddr addr) {
   int bitIndex = (int)((addr - StartAddr) / 0x1000);
   assert(GetBitmap(bitIndex));
   FlipBitmap(bitIndex);
-}
-
-void Scratch::Setup(PhysAddr pdpt, PageAllocator & alloc) {
-  PhysAddr scratchPDT = alloc.AllocPage();
-  bzero((void *)scratchPDT, 0x1000);
-  
-  // put the scratch PDT into the kernel PDPT
-  ((uint64_t *)pdpt)[0x1ff] = scratchPDT | 3;
-  
-  // setup the page tables and put them in the scratch PDT
-  uint64_t scratchStart = ScratchPTStart();
-  for (int i = 0; i < PTCount; i++) {
-    PhysAddr scratchPT = scratchStart + (0x1000 * i);
-    ((uint64_t *)scratchPDT)[i] = scratchPT | 3;
-  }
 }
 
 bool Scratch::GetBitmap(int idx) {

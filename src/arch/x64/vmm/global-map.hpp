@@ -11,6 +11,7 @@ namespace OS {
 namespace x64 {
 
 class Allocator;
+class Scratch;
 
 class GlobalMap : public OS::GlobalMap {
 public:
@@ -37,6 +38,7 @@ public:
   
   friend class PageTable;
   friend class Allocator;
+  friend class Scratch;
   
 protected:
   PageAllocator * allocator;

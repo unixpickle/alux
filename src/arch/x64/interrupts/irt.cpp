@@ -6,6 +6,7 @@
 #include <arch/x64/general/critical.hpp>
 #include <memory/malloc.hpp>
 #include <critical>
+#include <iostream>
 #include <new>
 
 namespace OS {
@@ -23,6 +24,8 @@ IRT & IRT::GetGlobal() {
 }
 
 void IRT::Initialize() {
+  cout << "Initializing Interrupt Routine Table..." << endl;
+  
   routines = new Routine[0x100];
   bzero(routines, 0x800);
   
@@ -40,7 +43,8 @@ void IRT::Initialize() {
 }
 
 DepList IRT::GetDependencies() {
-  return DepList(&IDT::GetGlobal(), &Malloc::GetGlobal());
+  return DepList(&IDT::GetGlobal(), &Malloc::GetGlobal(),
+                 &OutStreamModule::GetGlobal());
 }
 
 void IRT::ConfigureDummy() {

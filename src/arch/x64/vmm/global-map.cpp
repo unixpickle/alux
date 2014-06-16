@@ -6,10 +6,11 @@
 #include <arch/x64/pmm/step-allocator.hpp>
 #include <arch/x64/smp/invlpg.hpp>
 #include <arch/general/physical-allocator.hpp>
+#include <iostream>
+#include <cassert>
+#include <cstddef>
 #include <panic>
 #include <lock>
-#include <cstddef>
-#include <cassert>
 #include <new>
 
 namespace OS {
@@ -35,17 +36,18 @@ GlobalMap::GlobalMap() : table(0), allocator(NULL), pdpt(0) {
 }
 
 void GlobalMap::Initialize() {
+  cout << "Initializing global map..." << endl;
   new(&step) StepAllocator(KernelSize());
   allocator = &step;
   Setup();
 }
 
 DepList GlobalMap::GetDependencies() {
-  return DepList(&RegionList::GetGlobal());
+  return DepList(&RegionList::GetGlobal(), &OutStreamModule::GetGlobal());
 }
 
 DepList GlobalMap::GetSuperDependencies() {
-  return DepList(&PhysicalAllocator::GetGlobal());
+  return DepList(&PhysicalAllocator::GetGlobal(), &Scratch::GetGlobal());
 }
 
 PhysAddr GlobalMap::GetPDPT() {

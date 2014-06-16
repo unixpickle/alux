@@ -113,7 +113,7 @@ entry64:
   mov ss, ax
 
   ; find signature '_X64_ENTRYPOINT!'
-  mov rsi, LOADBASE + 0x5000
+  mov rsi, LOADBASE + 0x8000
   mov rax, 0x544e455f3436585f ; first qword
   mov rbx, 0x21544e494f505952 ; second qword
 
@@ -140,7 +140,7 @@ entry64:
 align 8
 
 initial_stack:
-  times 0x1000 db 0x0
+  times 0x4000 db 0x0 ; 16KB stack should be acceptable
 .end:
 
 gdt:
@@ -200,5 +200,5 @@ initial_pdt:
 %endrep
 
 ; pad the result file to 0x100 bytes
-times (0x5000 - ($ - multiboot_header)) db 0x0
+times (0x8000 - ($ - multiboot_header)) db 0x0
 
