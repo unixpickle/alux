@@ -20,6 +20,7 @@ public:
   
   virtual void Initialize();
   virtual DepList GetDependencies();
+  virtual DepList GetSuperDependencies();
 
   virtual int GetCount(); // @ambicritical, unsynchronized
   CPU & AddEntry(uint32_t apicId); // @noncritical, unsynchronized

@@ -7,7 +7,7 @@
 #include <arch/x64/interrupts/errors.hpp>
 #include <arch/x64/acpi/acpi-module.hpp>
 #include <arch/x64/acpi/madt.hpp>
-#include <arch/x64/general/panic.hpp>
+#include <arch/x64/panic/panic-module.hpp>
 #include <arch/general/clock.hpp>
 #include <memory/malloc.hpp>
 #include <critical>
@@ -52,7 +52,6 @@ void CPUList::Initialize() {
   }
   
   StartProcessors();
-  InitializePanic();
   InitializeInvlpg();
 }
 
@@ -61,6 +60,10 @@ DepList CPUList::GetDependencies() {
                  &LAPICModule::GetGlobal(), &IRT::GetGlobal(),
                  &ACPIModule::GetGlobal(), &ClockModule::GetGlobal(),
                  &InterruptErrors::GetGlobal());
+}
+
+DepList CPUList::GetSuperDependencies() {
+  return DepList(&PanicModule::GetGlobal());
 }
 
 int CPUList::GetCount() {

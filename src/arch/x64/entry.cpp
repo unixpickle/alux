@@ -13,6 +13,7 @@
 #include <arch/x64/time/clock-module.hpp>
 #include <arch/x64/vmm/global-map.hpp>
 #include <arch/x64/vmm/scratch.hpp>
+#include <arch/x64/panic/panic-module.hpp>
 #include <scheduler-specific/scheduler.hpp>
 #include <memory/malloc.hpp>
 #include <entry/main.hpp>
@@ -44,6 +45,7 @@ static void InitializeSingletons(void * mboot) {
   OutStreamModule::InitGlobal();
   MainModule::InitGlobal();
   Malloc::InitGlobal();
+  PanicModule::InitGlobal();
 }
 
 }
