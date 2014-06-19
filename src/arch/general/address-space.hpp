@@ -52,6 +52,9 @@ public:
    */
   static size_t GetPageAlignment(int index);
   
+  static bool ShouldLocateCode();
+  static VirtAddr GetCodeLocation();
+  
   virtual ~AddressSpace() {}
   
   /**

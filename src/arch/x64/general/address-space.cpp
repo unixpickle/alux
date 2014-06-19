@@ -15,4 +15,12 @@ size_t AddressSpace::GetPageAlignment(int index) {
   return GetPageSize(index);
 }
 
+bool AddressSpace::ShouldLocateCode() {
+  return true;
+}
+
+VirtAddr AddressSpace::GetCodeLocation() {
+  return 0x8000000000L;
+}
+
 }

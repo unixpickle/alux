@@ -18,13 +18,22 @@ CodeMap::CodeMap(Task * t, UserCode * c) : task(t), code(c) {
   AddressSpace & space = t->GetAddressSpace();
   if (space.SupportsRemap()) {
     pages = new PageStatus[size.pageCount];
-    spaceStart = space.Reserve(size);
+    if (AddressSpace::ShouldLocateCode()) {
+      spaceStart = AddressSpace::GetCodeLocation();
+    } else {
+      spaceStart = space.Reserve(size);
+    }
   } else {
     PhysicalAllocator & allocator = PhysicalAllocator::GetGlobal();
     allocated = allocator.Alloc(size.Total(), code->GetPageAlignment(), NULL);
     assert(allocated != 0);
     AddressSpace::MapInfo info(size.pageSize, size.pageCount, allocated);
-    spaceStart = space.Map(info);
+    if (AddressSpace::ShouldLocateCode()) {
+      spaceStart = AddressSpace::GetCodeLocation();
+      space.MapAt(spaceStart, info);
+    } else {
+      spaceStart = space.Map(info);
+    }
     assert(spaceStart != 0);
   }
 }
