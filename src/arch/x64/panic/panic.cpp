@@ -3,8 +3,6 @@
 
 namespace OS {
 
-static bool hasPanicked = false;
-
 void Panic(const char * message) {
   __asm__("cli");
   x64::PanicModule::GetGlobal().DistributeError();

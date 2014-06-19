@@ -1,23 +1,46 @@
 #include <arch/x64/smp/cpu-list.hpp>
+#include <arch/x64/smp/invlpg.hpp>
 #include <arch/x64/vmm/invlpg.hpp>
 #include <arch/x64/interrupts/irt.hpp>
 #include <arch/x64/interrupts/vectors.hpp>
 #include <arch/x64/interrupts/lapic.hpp>
 #include <critical>
 #include <lock>
+#include <new>
 
 namespace OS {
 
 namespace x64 {
 
-static bool distributeInvlpg = false;
-
+static InvlpgModule gModule;
 static void HandleInvlpg();
+
+void InvlpgModule::InitGlobal() {
+  new(&gModule) InvlpgModule();
+}
+
+InvlpgModule & InvlpgModule::GetGlobal() {
+  return gModule;
+}
+
+void InvlpgModule::Initialize() {
+  IRT::GetGlobal()[IntVectors::Invlpg] = HandleInvlpg;
+  isInitialized = true;
+}
+
+DepList InvlpgModule::GetDependencies() {
+  return DepList(&CPUList::GetGlobal(), &IRT::GetGlobal(),
+                 &LAPICModule::GetGlobal());
+}
+
+bool InvlpgModule::IsInitialized() {
+  return isInitialized;
+}
 
 void DistributeKernelInvlpg(VirtAddr start, size_t size) {
   ScopeCritical critical;
   Invlpg(start, size);
-  if (!distributeInvlpg) return;
+  if (!gModule.IsInitialized()) return;
   
   // create a structure, pass it to the IPI, QED
   CPUList & list = CPUList::GetGlobal();
@@ -42,6 +65,7 @@ void DistributeKernelInvlpg(VirtAddr start, size_t size) {
 void DistributeUserInvlpg(VirtAddr start, size_t size, Task * t) {
   ScopeCritical critical;
   Invlpg(start, size, false);
+  if (!gModule.IsInitialized()) return;
   
   CPUList & list = CPUList::GetGlobal();
   CPU & current = CPU::GetCurrent();
@@ -61,12 +85,6 @@ void DistributeUserInvlpg(VirtAddr start, size_t size, Task * t) {
     lapic.SendIPI(cpu.GetId(), IntVectors::Invlpg);
     while (!info.done) { }
   }
-}
-
-void InitializeInvlpg() {
-  // register the interrupt
-  IRT::GetGlobal()[IntVectors::Invlpg] = HandleInvlpg;
-  distributeInvlpg = true;
 }
 
 static void HandleInvlpg() {

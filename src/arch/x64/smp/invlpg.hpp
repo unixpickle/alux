@@ -2,6 +2,7 @@
 #define __X64_SMP_INVLPG_HPP__
 
 #include <arch-specific/types.hpp>
+#include <module/module.hpp>
 #include <cstddef>
 
 namespace OS {
@@ -19,6 +20,20 @@ public:
   bool isKernel;
 };
 
+class InvlpgModule : public Module {
+public:
+  static void InitGlobal();
+  static InvlpgModule & GetGlobal();
+  
+  virtual void Initialize();
+  virtual DepList GetDependencies();
+  
+  bool IsInitialized();
+  
+private:
+  volatile bool isInitialized;
+};
+
 /**
  * When a page in the kernel address space is mapped or changed, a simple
  * invlpg is not enough because the other CPUs' caches may still contain stale
@@ -34,12 +49,6 @@ void DistributeKernelInvlpg(VirtAddr start, size_t size);
  * @ambicritical
  */
 void DistributeUserInvlpg(VirtAddr start, size_t size, Task * t);
-
-/**
- * Set the system up to call invlpg on all other CPUs.
- * @noncritical
- */
-void InitializeInvlpg();
 
 }
 

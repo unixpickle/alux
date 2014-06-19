@@ -52,7 +52,6 @@ void CPUList::Initialize() {
   }
   
   StartProcessors();
-  InitializeInvlpg();
 }
 
 DepList CPUList::GetDependencies() {
@@ -63,7 +62,7 @@ DepList CPUList::GetDependencies() {
 }
 
 DepList CPUList::GetSuperDependencies() {
-  return DepList(&PanicModule::GetGlobal());
+  return DepList(&PanicModule::GetGlobal(), &InvlpgModule::GetGlobal());
 }
 
 int CPUList::GetCount() {
