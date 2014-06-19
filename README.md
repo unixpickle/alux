@@ -13,7 +13,7 @@ General architectual ideas that I am playing around with:
 
 Okay, fine, I'll just finish this version of the kernel and start working on the user space. Here's how I plan to do that:
 
- * Make Initialize() and GetDependencies() protected
+ * Create ELF binary loader for x86-64 and embed a binary blob in the compiled application
  * Test by running a simple "Hello World" user thread.
 
 ## License
