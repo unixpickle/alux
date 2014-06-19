@@ -18,14 +18,14 @@ public:
   static void InitGlobal(); // @noncritical
   static IRT & GetGlobal(); // @ambicritical
   
-  virtual void Initialize();
-  virtual DepList GetDependencies();
-  
   Routine & operator[](uint8_t idx); // @ambicritical, unsyrchronized
   void Unset(uint8_t idx); // @ambicritical, unsyrchronized
 
 protected:
   Routine * routines;
+  
+  virtual void Initialize();
+  virtual DepList GetDependencies();
   
   void ConfigureDummy();
   void Configure();

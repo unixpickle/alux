@@ -14,6 +14,7 @@ public:
   static void InitGlobal();
   static IOAPICModule & GetGlobal();
   
+protected:
   virtual void Initialize();
   virtual DepList GetDependencies();
 };

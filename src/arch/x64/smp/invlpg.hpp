@@ -25,13 +25,9 @@ public:
   static void InitGlobal();
   static InvlpgModule & GetGlobal();
   
+private:
   virtual void Initialize();
   virtual DepList GetDependencies();
-  
-  bool IsInitialized();
-  
-private:
-  volatile bool isInitialized;
 };
 
 /**

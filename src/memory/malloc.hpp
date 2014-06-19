@@ -19,13 +19,13 @@ public:
   static void InitGlobal();
   static Malloc & GetGlobal();
   
-  virtual void Initialize();
-  virtual DepList GetDependencies();
-  
   void * Alloc(size_t, bool getNew = true); // @ambicritical, unsynchronized
   void Free(void *); // @ambicritical, unsynchronized
   
 protected:
+  virtual void Initialize();
+  virtual DepList GetDependencies();
+  
   void MakeNewRegion();
 };
 

@@ -13,11 +13,12 @@ public:
   static void InitGlobal();
   static IDT & GetGlobal();
   
-  virtual DepList GetDependencies();
-  
   void SetEntry(int idx, void * fn, uint8_t flags);
   void SetIST(int idx, uint8_t ist);
-  void Load();
+  void Load(); // TODO: rename this not to conflict with Module
+  
+protected:
+  virtual DepList GetDependencies();
   
 private:
   IdtEntry entries[0x100] OS_ALIGNED(8);

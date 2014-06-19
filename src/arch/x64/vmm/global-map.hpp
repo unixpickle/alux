@@ -20,10 +20,6 @@ public:
   
   GlobalMap();
   
-  virtual void Initialize();
-  virtual DepList GetDependencies();
-  virtual DepList GetSuperDependencies();
-  
   PhysAddr GetPDPT();
   PhysAddr GetPML4();
   
@@ -49,6 +45,10 @@ protected:
   
   VirtAddr freeStart;
   size_t freeSize;
+  
+  virtual void Initialize();
+  virtual DepList GetDependencies();
+  virtual DepList GetSuperDependencies();
   
   void Setup();
   

@@ -15,8 +15,6 @@ public:
   static void InitGlobal();
   static Scheduler & GetGlobal();
   
-  virtual DepList GetDependencies();
-  
   void Start(); // @noncritical
   
   // operations acting on the scheduler as a whole
@@ -42,6 +40,8 @@ protected:
   uint64_t lock OS_ALIGNED(8) = 0;
   Thread * firstThread = NULL;
   Thread * lastThread = NULL;
+  
+  virtual DepList GetDependencies();
   
   Thread * GetNextThread(); // @critical
   Thread * PopThread(); // @critical, nosync

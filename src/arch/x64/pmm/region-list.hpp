@@ -17,9 +17,6 @@ public:
   static void InitGlobal(void * mbootPtr);
   static RegionList & GetGlobal();
   
-  virtual void Initialize();
-  virtual DepList GetDependencies();
-  
   RegionList();
   MemoryRegion * GetRegions();
   int GetRegionCount();
@@ -29,6 +26,9 @@ public:
 protected:
   MemoryRegion regions[MaximumCount];
   int regionCount;
+  
+  virtual void Initialize();
+  virtual DepList GetDependencies();
   
   void AddRegion(MemoryRegion & region);
 };

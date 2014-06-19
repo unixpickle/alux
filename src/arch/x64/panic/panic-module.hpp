@@ -12,12 +12,12 @@ public:
   static void InitGlobal();
   static PanicModule & GetGlobal();
   
-  virtual void Initialize();
-  virtual DepList GetDependencies();
-  
   void DistributeError();
   
 protected:
+  virtual void Initialize();
+  virtual DepList GetDependencies();
+  
   bool hasBeenInitialized;
   bool hasPanicked;
 };

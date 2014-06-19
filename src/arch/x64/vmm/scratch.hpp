@@ -18,9 +18,6 @@ public:
   static void InitGlobal();
   static Scratch & GetGlobal();
   
-  virtual void Initialize();
-  virtual DepList GetDependencies();
-  
   VirtAddr Alloc(PhysAddr page); // @critical
   void Reassign(VirtAddr addr, PhysAddr newAddr); // @critical
   void Free(VirtAddr addr); // @critical
@@ -32,6 +29,9 @@ protected:
   uint64_t lock OS_ALIGNED(8);
   uint64_t bitmaps[PTCount * 8];
   uint64_t * scratchPTs[PTCount];
+  
+  virtual void Initialize();
+  virtual DepList GetDependencies();
   
   static VirtAddr ScratchPTStart();
   static VirtAddr ScratchAddress(int cellIndex);

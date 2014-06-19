@@ -12,6 +12,7 @@ public:
   static void InitGlobal();
   static InterruptErrors & GetGlobal();
   
+protected:
   virtual void Initialize();
   virtual DepList GetDependencies();
   

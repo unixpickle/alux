@@ -12,6 +12,7 @@ public:
 
   OutStreamModule() {}
 
+protected:
   virtual void Initialize();
   virtual DepList GetDependencies();
 };

@@ -9,18 +9,9 @@ namespace OS {
 namespace x64 {
 
 class CPUList : public HardwareThreadList {
-private:
-  int capacity;
-  int count;
-  uint8_t * buffer;
-
 public:
   static void InitGlobal(); // @noncritical
   static CPUList & GetGlobal(); // @noncritical
-  
-  virtual void Initialize();
-  virtual DepList GetDependencies();
-  virtual DepList GetSuperDependencies();
 
   virtual int GetCount(); // @ambicritical, unsynchronized
   CPU & AddEntry(uint32_t apicId); // @noncritical, unsynchronized
@@ -29,6 +20,16 @@ public:
 
   int GetIndex(CPU & entry);
   virtual int IndexOf(HardwareThread & th);
+  
+protected:
+  virtual void Initialize();
+  virtual DepList GetDependencies();
+  virtual DepList GetSuperDependencies();
+  
+private:
+  int capacity;
+  int count;
+  uint8_t * buffer;
 };
 
 }

@@ -17,11 +17,10 @@ public:
   Module & operator=(Module &&) = delete;
   
   virtual void Load();
-  
-  virtual void Initialize() {}
   virtual bool IsUninitialized();
   
 protected:
+  virtual void Initialize() {}
   virtual DepList GetDependencies() = 0;
   virtual DepList GetSuperDependencies();
   

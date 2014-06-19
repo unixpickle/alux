@@ -14,11 +14,12 @@ public:
   static void InitGlobal();
   static TextConsole & GetGlobal();
   
-  virtual void Initialize();
-  virtual DepList GetDependencies();
-  
   virtual void PrintString(const char * string);
   virtual void SetColor(Color color, bool bright);
+  
+protected:
+  virtual void Initialize();
+  virtual DepList GetDependencies();
   
 private:
   uint8_t color = 0xa;

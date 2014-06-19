@@ -12,13 +12,14 @@ public:
   static void InitGlobal();
   static TickTimer & GetGlobal();
   
-  virtual void Initialize();
-  virtual DepList GetDependencies();
-  
   virtual void SaveAndTick();
   virtual void SetTimeout(uint64_t delay, bool precision);
   virtual void ClearTimeout();
   virtual void WaitTimeout() OS_NORETURN;
+  
+protected:
+  virtual void Initialize();
+  virtual DepList GetDependencies();
 };
 
 void LapicTickMethod();

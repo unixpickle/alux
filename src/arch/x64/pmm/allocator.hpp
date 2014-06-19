@@ -21,9 +21,6 @@ public:
   static void InitGlobal();
   static Allocator & GetGlobal();
   
-  virtual DepList GetDependencies();
-  virtual void Initialize();
-  
   PhysAddr AllocLower(size_t size, size_t align, size_t * realSize);
   
   virtual PhysAddr Alloc(size_t size, size_t align, size_t * realSize);
@@ -34,6 +31,10 @@ public:
   
   virtual PhysAddr AllocPage();
   virtual void FreePage(PhysAddr p);
+  
+protected:
+  virtual DepList GetDependencies();
+  virtual void Initialize();
   
 private:
   AllocatorList allocators;

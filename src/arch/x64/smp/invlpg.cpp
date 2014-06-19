@@ -25,7 +25,6 @@ InvlpgModule & InvlpgModule::GetGlobal() {
 
 void InvlpgModule::Initialize() {
   IRT::GetGlobal()[IntVectors::Invlpg] = HandleInvlpg;
-  isInitialized = true;
 }
 
 DepList InvlpgModule::GetDependencies() {
@@ -33,14 +32,10 @@ DepList InvlpgModule::GetDependencies() {
                  &LAPICModule::GetGlobal());
 }
 
-bool InvlpgModule::IsInitialized() {
-  return isInitialized;
-}
-
 void DistributeKernelInvlpg(VirtAddr start, size_t size) {
   ScopeCritical critical;
   Invlpg(start, size);
-  if (!gModule.IsInitialized()) return;
+  if (gModule.IsUninitialized()) return;
   
   // create a structure, pass it to the IPI, QED
   CPUList & list = CPUList::GetGlobal();
@@ -65,7 +60,7 @@ void DistributeKernelInvlpg(VirtAddr start, size_t size) {
 void DistributeUserInvlpg(VirtAddr start, size_t size, Task * t) {
   ScopeCritical critical;
   Invlpg(start, size, false);
-  if (!gModule.IsInitialized()) return;
+  if (!gModule.IsUninitialized()) return;
   
   CPUList & list = CPUList::GetGlobal();
   CPU & current = CPU::GetCurrent();

@@ -12,6 +12,7 @@ public:
   static void InitGlobal();
   static ACPIModule & GetGlobal();
   
+protected:
   virtual void Initialize();
   virtual DepList GetDependencies();
 };

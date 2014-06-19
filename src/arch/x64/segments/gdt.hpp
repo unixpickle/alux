@@ -21,9 +21,6 @@ class GDT : public Module {
 public:
   static void InitGlobal();
   static GDT & GetGlobal();
-
-  virtual void Initialize();
-  virtual DepList GetDependencies();
   
   /**
    * Run LGDT to load this GDT.
@@ -48,6 +45,10 @@ public:
    * @ambicritical
    */
   uint16_t GetFirstTSS();
+
+protected:
+  virtual void Initialize();
+  virtual DepList GetDependencies();
 
 private:
   uint8_t * buffer;

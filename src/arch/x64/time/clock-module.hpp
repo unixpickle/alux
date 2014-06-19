@@ -12,10 +12,11 @@ public:
   static void InitGlobal();
   static ClockModule & GetGlobal();
   
+  virtual OS::Clock & GetClock();
+  
+protected:
   virtual void Initialize();
   virtual DepList GetDependencies();
-  
-  virtual OS::Clock & GetClock();
   
 private:
   Clock * realClock;

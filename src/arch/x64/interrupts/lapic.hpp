@@ -13,6 +13,7 @@ public:
   static void InitGlobal();
   static LAPICModule & GetGlobal();
   
+protected:
   virtual void Initialize();
   virtual DepList GetDependencies();
 };
