@@ -12,11 +12,11 @@ static uint64_t GetBinEnd() {
 }
 
 void * GetProgramStart() {
-  return (void *)(GetBinEnd() + 0x8);
+  return (void *)(GetBinEnd() + 0x100008);
 }
 
 size_t GetProgramSize() {
-  uint64_t * ptr = (uint64_t *)GetBinEnd();
+  uint64_t * ptr = (uint64_t *)(GetBinEnd() + 0x100000);
   return (size_t)*ptr;
 }
 

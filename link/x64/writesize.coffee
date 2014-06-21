@@ -18,4 +18,4 @@ fs.stat file, (err, info) ->
       die err if err?
       fs.close fd, ->
         console.log 'done'
-        process.exit
+        process.exit 0

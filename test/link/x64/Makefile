@@ -8,4 +8,4 @@ $(OUTPUT_FILE): $(BUILDDIR)/entry.o
 	fi
 
 $(BUILDDIR)/entry.o:
-	$(CXX) -c entry.cpp $(CXXFLAGS) -o $(BUILDDIR)/entry.o
+	$(NASM) $(NASMFLAGS) entry.s -o $(BUILDDIR)/entry.o

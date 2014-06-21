@@ -1,7 +1,7 @@
 PROJECT_ROOT = $(shell pwd)
 TARGET_ARCH ?= x64
-BUILDDIR ?= $(PROJECT_ROOT)/build
-OBJDIR ?= $(BUILDDIR)/objects
+BUILDDIR = $(PROJECT_ROOT)/build
+OBJDIR = $(BUILDDIR)/objects
 CXX ?= "g++"
 CC ?= gcc
 LD ?= ld

@@ -7,4 +7,4 @@ export CXXFLAGS=${CXXFLAGS}\ "-integrated-as -target x86_64-pc-none-elf64"
 export CFLAGS=${CFLAGS}\ "-integrated-as -target x86_64-pc-none-elf64"
 export LD=$1
 
-cd test && make clean && make
+make clean && make test

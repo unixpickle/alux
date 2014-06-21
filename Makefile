@@ -38,6 +38,11 @@ $(BUILDDIR): dependencies
 	mkdir $(OBJDIR)
 	coffee generate.coffee
 
+test: $(BUILDDIR)/$(OUTFILE)
+	$(MAKE) -C test
+	coffee set-length.coffee $(BUILDDIR)/$(OUTFILE) test/build/test.bin
+	cat test/build/test.bin >>$(BUILDDIR)/$(OUTFILE)
+
 dependencies:
 	mkdir dependencies
 	git clone https://github.com/unixpickle/anlock.git dependencies/anlock
@@ -56,6 +61,7 @@ $(BUILDDIR)/grub_root: $(BUILDDIR)/$(OUTFILE)
 
 clean:
 	rm -rf build
+	cd test && make clean && cd ..
 
 clean-all: clean
 	rm -rf dependencies
