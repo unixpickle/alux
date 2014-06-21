@@ -7,6 +7,8 @@ $(OUTPUT_FILE): $(CUSTOM_OUTDIR)
 	if [ "$(OUTPUT_FORMAT)" = "binary" ]; then \
 		cp $(CUSTOM_OUTDIR)/x64-multiboot-init.bin $(OUTPUT_FILE); \
 		cat $(OUTPUT_FILE).1 >>$(OUTPUT_FILE); \
+		coffee writesize.coffee $(OUTPUT_FILE); \
+		cat zero-size.dat >>$(OUTPUT_FILE); \
 	  rm $(OUTPUT_FILE).1; \
 	else \
 	  mv $(OUTPUT_FILE).1 $(OUTPUT_FILE).elf; \

@@ -27,6 +27,9 @@ multiboot_header:
   dd 0                ; bssEndAddr, 0 = no BSS segment
   dd start            ; entry point
 
+exec_size:
+  dq 0
+
 start:
   mov esp, initial_stack.end
   mov ebp, esp

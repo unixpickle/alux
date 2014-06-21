@@ -10,13 +10,17 @@
 #include <arch/x64/scheduler/tick-timer.hpp>
 #include <arch/x64/segments/gdt.hpp>
 #include <arch/x64/smp/cpu-list.hpp>
+#include <arch/x64/smp/invlpg.hpp>
 #include <arch/x64/time/clock-module.hpp>
 #include <arch/x64/vmm/global-map.hpp>
 #include <arch/x64/vmm/scratch.hpp>
 #include <arch/x64/panic/panic-module.hpp>
+#include <arch/x64/program.hpp>
 #include <scheduler-specific/scheduler.hpp>
+#include <scheduler/user/user-task.hpp>
 #include <memory/malloc.hpp>
 #include <entry/main.hpp>
+#include <critical>
 #include <iostream>
 #include <cstdint>
 #include <panic>
@@ -46,6 +50,7 @@ static void InitializeSingletons(void * mboot) {
   MainModule::InitGlobal();
   Malloc::InitGlobal();
   PanicModule::InitGlobal();
+  InvlpgModule::InitGlobal();
 }
 
 }
@@ -61,6 +66,21 @@ void MbootEntry(void * mbootPtr) {
   OS::cout << "MbootEntry(" << (uintptr_t)mbootPtr << ")" << OS::endl;
   
   OS::MainModule::GetGlobal().Load();
+  
+  if (!OS::x64::GetProgramSize()) {
+    OS::Panic("No launch program specified!");
+  }
+  OS::UserCode * code = new OS::UserCode(OS::x64::GetProgramStart(),
+                                         OS::x64::GetProgramSize());
+  OS::UserTask * task = OS::UserTask::New(code);
+  OS::Thread * thread = OS::Thread::New(task, false);
+  thread->SetUserCall((void *)OS::AddressSpace::GetCodeLocation());
+  
+  {
+    OS::ScopeCritical critical;
+    OS::Scheduler::GetGlobal().AddThread(thread);
+  }
+  
   OS::MainModule::GetGlobal().Main();
   
   OS::Panic("OS::MainModule::Main() shouldn't return");
