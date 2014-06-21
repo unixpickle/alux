@@ -28,6 +28,26 @@ FreeList::~FreeList() {
   }
 }
 
+bool FreeList::AllocAt(VirtAddr start, size_t pageSize, size_t pageCount) {
+  Region * reg = first;
+  Region * last = NULL;
+  size_t size = pageSize * pageCount;
+  
+  if (start % pageSize) return false;
+  
+  while (reg) {
+    if (reg->start > start || reg->start + reg->size < start + size) {
+      last = reg;
+      reg = reg->next;
+      continue;
+    }
+    size_t chopSize = start - reg->start;
+    AllocInRegion(reg, last, chopSize, size);
+    return true;
+  }
+  return false;
+}
+
 VirtAddr FreeList::Alloc(size_t pageSize, size_t pageCount) {
   AssertNoncritical();
   Region * last = NULL;
@@ -47,26 +67,7 @@ VirtAddr FreeList::Alloc(size_t pageSize, size_t pageCount) {
       chopSize = pageSize - (reg->start % pageSize);
     }
     VirtAddr result = reg->start + chopSize;
-    if (reg->start + chopSize + totalSize == reg->size) {
-      // we are totally removing the end of the chunk
-      if (chopSize) {
-        reg->size = chopSize;
-      } else {
-        if (last) last->next = reg->next;
-        else first = reg->next;
-        FreeRegion(reg);
-      }
-    } else {
-      // we only need to remove a piece of the chunk
-      if (chopSize) {
-        Region * chopRegion = AllocRegion(reg->start, chopSize);
-        chopRegion->next = reg;
-        if (last) last->next = chopRegion;
-        else first = chopRegion;
-      }
-      reg->size -= totalSize + chopSize;
-      reg->start += totalSize + chopSize;
-    }
+    AllocInRegion(reg, last, chopSize, totalSize);
     return result;
   }
   
@@ -142,6 +143,31 @@ FreeList::Region * FreeList::AllocRegion(VirtAddr start, size_t size) {
 void FreeList::FreeRegion(FreeList::Region * reg) {
   AssertNoncritical();
   slab.Delete(reg);
+}
+
+void FreeList::AllocInRegion(Region * reg, Region * last,
+                             size_t chopSize, size_t totalSize) {
+  VirtAddr result = reg->start + chopSize;
+  if (reg->start + chopSize + totalSize == reg->size) {
+    // we are totally removing the end of the chunk
+    if (chopSize) {
+      reg->size = chopSize;
+    } else {
+      if (last) last->next = reg->next;
+      else first = reg->next;
+      FreeRegion(reg);
+    }
+  } else {
+    // we only need to remove a piece of the chunk
+    if (chopSize) {
+      Region * chopRegion = AllocRegion(reg->start, chopSize);
+      chopRegion->next = reg;
+      if (last) last->next = chopRegion;
+      else first = chopRegion;
+    }
+    reg->size -= totalSize + chopSize;
+    reg->start += totalSize + chopSize;
+  }
 }
 
 }

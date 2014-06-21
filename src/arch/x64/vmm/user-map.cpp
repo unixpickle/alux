@@ -52,6 +52,10 @@ bool UserMap::SupportsRemap() {
   return true;
 }
 
+bool UserMap::SupportsPlacementReserve() {
+  return true;
+}
+
 void UserMap::Unmap(VirtAddr virt, UserMap::Size size) {
   AssertNoncritical();
   assert(virt >= SpaceStart);
@@ -103,6 +107,15 @@ VirtAddr UserMap::Reserve(UserMap::Size size) {
   AssertNoncritical();
   ScopeLock scope(&lock);
   return freeList.Alloc(size.pageSize, size.pageCount);
+}
+
+void UserMap::ReserveAt(VirtAddr addr, UserMap::Size size) {
+  assert(addr >= SpaceStart);
+  AssertNoncritical();
+  ScopeLock scope(&lock);
+  if (!freeList.AllocAt(addr, size.pageSize, size.pageCount)) {
+    Panic("UserMap::ReserveAt() failed");
+  }
 }
 
 void UserMap::FreeTable(PhysAddr table, int depth, int start) {

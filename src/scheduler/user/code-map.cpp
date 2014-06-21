@@ -16,14 +16,25 @@ CodeMap::CodeMap(Task * t, UserCode * c) : task(t), code(c) {
   code->Retain();
   
   AddressSpace & space = t->GetAddressSpace();
-  if (space.SupportsRemap()) {
+  
+  bool canRemap;
+  if (AddressSpace::ShouldLocateCode()) {
+    canRemap = space.SupportsPlacementReserve();
+  } else {
+    space.SupportsRemap();
+  }
+  
+  if (canRemap) {
+    // on-demand page loading for code section
     pages = new PageStatus[size.pageCount];
     if (AddressSpace::ShouldLocateCode()) {
       spaceStart = AddressSpace::GetCodeLocation();
+      space.ReserveAt(spaceStart, size);
     } else {
       spaceStart = space.Reserve(size);
     }
   } else {
+    // allocate all of the code and map it
     PhysicalAllocator & allocator = PhysicalAllocator::GetGlobal();
     allocated = allocator.Alloc(size.Total(), code->GetPageAlignment(), NULL);
     assert(allocated != 0);

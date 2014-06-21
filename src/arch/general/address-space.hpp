@@ -82,6 +82,11 @@ public:
   virtual bool SupportsRemap() = 0;
   
   /**
+   * Returns whether this address space allows ReserveAt() calls.
+   */
+  virtual bool SupportsPlacementReserve() = 0;
+  
+  /**
    * Unmap a chunk of memory from this address space.
    * @noncritical
    */
@@ -109,6 +114,11 @@ public:
    * @noncritical
    */
   virtual VirtAddr Reserve(Size size) = 0;
+  
+  /**
+   * Reserves a certain amount of space at a specified memory location.
+   */
+  virtual void ReserveAt(VirtAddr virt, Size size) = 0;
   
 };
 

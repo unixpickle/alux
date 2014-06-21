@@ -26,6 +26,12 @@ public:
   ~FreeList(); // @noncritical
   
   /**
+   * Allocate a contiguous, aligned region at a specified address.
+   * @noncritical
+   */
+  bool AllocAt(VirtAddr start, size_t pageSize, size_t pageCount);
+  
+  /**
    * Allocate a contiguous, aligned region of virtual memory.
    * @noncritical
    */
@@ -42,6 +48,8 @@ protected:
   
   static Region * AllocRegion(VirtAddr, size_t);
   static void FreeRegion(Region * reg);
+  
+  void AllocInRegion(Region * reg, Region * last, size_t chop, size_t size);
 };
 
 }

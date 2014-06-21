@@ -74,6 +74,10 @@ bool GlobalMap::SupportsRemap() {
   return true;
 }
 
+bool GlobalMap::SupportsPlacementReserve() {
+  return false;
+}
+
 void GlobalMap::Unmap(VirtAddr virt, GlobalMap::Size size) {
   ScopeLock scope(&lock);
   for (size_t i = 0; i < size.pageCount; i++) {
@@ -118,6 +122,10 @@ VirtAddr GlobalMap::Reserve(GlobalMap::Size size) {
   SetEntries(region, entry, size.pageSize, 0, size.pageCount);
   
   return region;
+}
+
+void GlobalMap::ReserveAt(VirtAddr, Size) {
+  Panic("GlobalMap::ReserveAt() unsupported.");
 }
 
 void GlobalMap::Setup() {
