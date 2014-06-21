@@ -12,7 +12,7 @@ void InterruptCoded(void * caller, uint64_t vector, uint64_t code) {
   if (vector == 0xe) {
     uint64_t addr;
     __asm__("mov %%cr2, %0" : "=r" (addr));
-    OS::HandleMemoryFault(addr, (code & 1) != 0, (code & 8) != 0);
+    OS::HandleMemoryFault(addr, (code & 0x10) != 0, (code & 2) != 0);
     return;
   }
   

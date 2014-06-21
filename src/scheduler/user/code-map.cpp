@@ -6,6 +6,8 @@
 #include <cstring>
 #include <lock>
 
+#include <iostream> // TODO: delete this
+
 namespace OS {
 
 CodeMap::CodeMap(Task * t, UserCode * c) : task(t), code(c) {
@@ -68,6 +70,9 @@ bool CodeMap::HandleFault(VirtAddr addr, bool, bool write) {
   AssertNoncritical();
   HoldScope hold(task);
   if (!hold.DidHold()) return false;
+  
+  cout << "writing is " << write << " to address " << addr << endl;
+  
   ScopeLock scope(&lock);
   
   if (!pages) return false; // no remap
