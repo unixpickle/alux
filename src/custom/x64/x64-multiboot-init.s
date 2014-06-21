@@ -168,19 +168,19 @@ gdt:
     db 10010010b                 ; Access.
     db 00000000b                 ; Granularity.
     db 0                         ; Base (high).
-    .code_user: equ $ - gdt
-    dw 0                         ; Limit (low).
-    dw 0                         ; Base (low).
-    db 0                         ; Base (middle)
-    db 11111000b                 ; Access with DPL = 3
-    db 00100000b                 ; Granularity.
-    db 0                         ; Base (high).
     .data_user: equ $ - gdt
     dw 0                         ; Limit (low).
     dw 0                         ; Base (low).
     db 0                         ; Base (middle)
     db 11110010b                 ; Access.
     db 00000000b                 ; Granularity.
+    db 0                         ; Base (high).
+    .code_user: equ $ - gdt
+    dw 0                         ; Limit (low).
+    dw 0                         ; Base (low).
+    db 0                         ; Base (middle)
+    db 11111000b                 ; Access with DPL = 3
+    db 00100000b                 ; Granularity.
     db 0                         ; Base (high).
 global gdt_pointer
 gdt_pointer:

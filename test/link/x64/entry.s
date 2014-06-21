@@ -4,9 +4,6 @@ extern _main
 
 global _Entry
 _Entry:
-  syscall
-  jmp _Entry
-
   mov rsp, initial_stack.end
   call _main
 .loop:

@@ -12,7 +12,7 @@ static const uint32_t MsrSFMask = 0xC0000084;
 
 void SyscallSetRegisters() {
   AssertCritical();
-  uint64_t star = (8L << 0x20) | (0x1bL << 0x30);
+  uint64_t star = (8L << 0x20) | (0x13L << 0x30);
   WriteMSR(MsrSTAR, star);
   WriteMSR(MsrSFMask, 0x200); // disable interrupts
   WriteMSR(MsrLSTAR, (uint64_t)RawSyscallHandler);

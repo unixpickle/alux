@@ -15,7 +15,8 @@ RawSyscallHandler:
   
   pop rcx
   pop rsp
-  sti ; STI doesn't take effect until *after* its following instruction
+  
+  mov r11, 0x200
   o64 sysret
 
 _RawSyscallHandler:
