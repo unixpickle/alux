@@ -1,8 +1,6 @@
 #include <cstdint>
 #include <cstddef>
 
-#include <iostream> // TODO: delete this
-
 namespace OS {
 
 namespace x64 {

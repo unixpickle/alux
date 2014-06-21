@@ -3,8 +3,6 @@
 #include <critical>
 #include <lock>
 
-#include <panic> // TODO: delete this
-
 namespace OS {
 
 void HardwareThread::SetThread(Thread * th) {
