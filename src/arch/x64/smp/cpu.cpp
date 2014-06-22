@@ -57,6 +57,14 @@ void CPU::LoadGS() {
   WriteMSR(0xc0000101, (uint64_t)&info);
 }
 
+UserMap * CPU::GetCurrentMap() {
+  return currentMap;
+}
+
+void CPU::SetCurrentMap(UserMap * map) {
+  currentMap = map;
+}
+
 void CPU::Wake() {
   AssertCritical();
   LAPIC & lapic = LAPIC::GetCurrent();

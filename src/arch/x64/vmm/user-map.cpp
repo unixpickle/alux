@@ -1,7 +1,7 @@
 #include <arch/x64/vmm/user-map.hpp>
 #include <arch/x64/vmm/scope-scratch.hpp>
 #include <arch/x64/vmm/global-map.hpp>
-#include <arch/x64/smp/invlpg.hpp>
+#include <arch/x64/vmm/tlb.hpp>
 #include <arch/general/physical-allocator.hpp>
 #include <panic>
 #include <critical>
@@ -12,8 +12,7 @@ namespace OS {
 
 namespace x64 {
 
-UserMap::UserMap(Task * t)
-  : table(0), freeList(SpaceStart, SpaceSize), task(t) {
+UserMap::UserMap() : table(0), freeList(SpaceStart, SpaceSize) {
   PhysAddr pml4 = PhysicalAllocator::GetGlobal().Alloc(0x1000, 0x1000, NULL);
   if (!pml4) Panic("UserMap::UserMap() - could not allocate PML4");
   
@@ -37,6 +36,8 @@ PhysAddr UserMap::GetPML4() {
 }
 
 void UserMap::Set() {
+  AssertCritical();
+  TLB::GetGlobal().WillSetUserMap(this);
   __asm__ __volatile__("mov %%rax, %%cr3" : : "a" (GetPML4()));
 }
 
@@ -148,7 +149,7 @@ void UserMap::FreeTable(PhysAddr table, int depth, int start) {
 }
 
 void UserMap::DoInvlpg(VirtAddr virt, size_t size) {
-  DistributeUserInvlpg(virt, size, task);
+  TLB::GetGlobal().InvlpgUser(virt, size, this);
 }
 
 void UserMap::SetEntries(VirtAddr virt, uint64_t phys, size_t virtAdd,

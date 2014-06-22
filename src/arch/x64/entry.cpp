@@ -10,8 +10,8 @@
 #include <arch/x64/scheduler/tick-timer.hpp>
 #include <arch/x64/segments/gdt.hpp>
 #include <arch/x64/smp/cpu-list.hpp>
-#include <arch/x64/smp/invlpg.hpp>
 #include <arch/x64/time/clock-module.hpp>
+#include <arch/x64/vmm/tlb.hpp>
 #include <arch/x64/vmm/global-map.hpp>
 #include <arch/x64/vmm/scratch.hpp>
 #include <arch/x64/panic/panic-module.hpp>
@@ -50,7 +50,7 @@ static void InitializeSingletons(void * mboot) {
   MainModule::InitGlobal();
   Malloc::InitGlobal();
   PanicModule::InitGlobal();
-  InvlpgModule::InitGlobal();
+  TLB::InitGlobal();
 }
 
 }

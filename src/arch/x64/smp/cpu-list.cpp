@@ -1,6 +1,6 @@
 #include <arch/x64/smp/cpu-list.hpp>
 #include <arch/x64/smp/init.hpp>
-#include <arch/x64/smp/invlpg.hpp>
+#include <arch/x64/vmm/tlb.hpp>
 #include <arch/x64/segments/gdt.hpp>
 #include <arch/x64/interrupts/lapic.hpp>
 #include <arch/x64/interrupts/irt.hpp>
@@ -62,7 +62,7 @@ DepList CPUList::GetDependencies() {
 }
 
 DepList CPUList::GetSuperDependencies() {
-  return DepList(&PanicModule::GetGlobal(), &InvlpgModule::GetGlobal());
+  return DepList(&PanicModule::GetGlobal(), &TLB::GetGlobal());
 }
 
 int CPUList::GetCount() {

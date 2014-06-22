@@ -2,12 +2,14 @@
 #define __X64_CPU_HPP__
 
 #include <arch/x64/segments/tss.hpp>
-#include <arch/x64/smp/invlpg.hpp>
+#include <arch/x64/vmm/tlb.hpp>
 #include <arch/general/hardware-thread.hpp>
 
 namespace OS {
 
 namespace x64 {
+
+class UserMap;
 
 class CPU : public HardwareThread {
 public:
@@ -29,6 +31,9 @@ public:
   uint64_t GetTSSSelector(); // @ambicritical
   void LoadGS(); // @critical
 
+  UserMap * GetCurrentMap();
+  void SetCurrentMap(UserMap * map);
+
   virtual void Wake();
 
 protected:
@@ -41,9 +46,12 @@ private:
     void * threadKernStack;
   } OS_PACKED;
 
+  UserMap * currentMap OS_ALIGNED(8);
+
   uint32_t apicId;
   uint16_t tssSelector;
   TSS * tss;
+  
   CriticalInformation info;
 };
 

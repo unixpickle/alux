@@ -2,10 +2,11 @@
 #include <arch/x64/vmm/map-setup.hpp>
 #include <arch/x64/vmm/scratch.hpp>
 #include <arch/x64/vmm/kernel-layout.hpp>
+#include <arch/x64/vmm/tlb.hpp>
 #include <arch/x64/pmm/region-list.hpp>
 #include <arch/x64/pmm/step-allocator.hpp>
-#include <arch/x64/smp/invlpg.hpp>
 #include <arch/general/physical-allocator.hpp>
+#include <critical>
 #include <iostream>
 #include <cassert>
 #include <cstddef>
@@ -59,6 +60,9 @@ PhysAddr GlobalMap::GetPML4() {
 }
 
 void GlobalMap::Set() {
+  AssertCritical();
+  
+  TLB::GetGlobal().WillSetUserMap(NULL);
   __asm__("mov %0, %%cr3" : : "r" (table.GetPML4()) : "memory");
 }
 
@@ -89,7 +93,7 @@ void GlobalMap::Unmap(VirtAddr virt, GlobalMap::Size size) {
   FreeRegion(virt, size);
   
   // invalidate the memory
-  DistributeKernelInvlpg(virt, size.Total());
+  TLB::GetGlobal().InvlpgGlobal(virt, size.Total());
 }
 
 VirtAddr GlobalMap::Map(GlobalMap::MapInfo info) {
@@ -111,7 +115,7 @@ void GlobalMap::MapAt(VirtAddr virt, GlobalMap::MapInfo info) {
   SetEntries(virt, source, info.pageSize, info.pageSize, info.pageCount);
   
   // we may have overwritten something
-  DistributeKernelInvlpg(virt, info.Total());
+  TLB::GetGlobal().InvlpgGlobal(virt, info.Total());
 }
 
 VirtAddr GlobalMap::Reserve(GlobalMap::Size size) {

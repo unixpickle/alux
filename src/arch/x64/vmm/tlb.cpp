@@ -1,6 +1,5 @@
+#include <arch/x64/vmm/tlb.hpp>
 #include <arch/x64/smp/cpu-list.hpp>
-#include <arch/x64/smp/invlpg.hpp>
-#include <arch/x64/vmm/invlpg.hpp>
 #include <arch/x64/interrupts/irt.hpp>
 #include <arch/x64/interrupts/vectors.hpp>
 #include <arch/x64/interrupts/lapic.hpp>
@@ -12,30 +11,28 @@ namespace OS {
 
 namespace x64 {
 
-static InvlpgModule gModule;
+static TLB gTLB;
+
 static void HandleInvlpg();
+static void Invlpg(VirtAddr start, size_t size, bool kernel = true);
 
-void InvlpgModule::InitGlobal() {
-  new(&gModule) InvlpgModule();
+void TLB::InitGlobal() {
+  new(&gTLB) TLB();
 }
 
-InvlpgModule & InvlpgModule::GetGlobal() {
-  return gModule;
+TLB & TLB::GetGlobal() {
+  return gTLB;
 }
 
-void InvlpgModule::Initialize() {
-  IRT::GetGlobal()[IntVectors::Invlpg] = HandleInvlpg;
+void TLB::WillSetUserMap(UserMap * map) {
+  if (gTLB.IsUninitialized()) return;
+  CPU::GetCurrent().SetCurrentMap(map);
 }
 
-DepList InvlpgModule::GetDependencies() {
-  return DepList(&CPUList::GetGlobal(), &IRT::GetGlobal(),
-                 &LAPICModule::GetGlobal());
-}
-
-void DistributeKernelInvlpg(VirtAddr start, size_t size) {
+void TLB::InvlpgGlobal(VirtAddr start, size_t size) {
   ScopeCritical critical;
   Invlpg(start, size);
-  if (gModule.IsUninitialized()) return;
+  if (gTLB.IsUninitialized()) return;
   
   // create a structure, pass it to the IPI, QED
   CPUList & list = CPUList::GetGlobal();
@@ -57,18 +54,26 @@ void DistributeKernelInvlpg(VirtAddr start, size_t size) {
   }
 }
 
-void DistributeUserInvlpg(VirtAddr start, size_t size, Task * t) {
+void TLB::InvlpgUser(VirtAddr start, size_t size, UserMap * sender) {
   ScopeCritical critical;
-  Invlpg(start, size, false);
-  if (!gModule.IsUninitialized()) return;
+  if (gTLB.IsUninitialized()) {
+    Invlpg(start, size, false);
+    return;
+  }
   
-  CPUList & list = CPUList::GetGlobal();
   CPU & current = CPU::GetCurrent();
+  CPUList & list = CPUList::GetGlobal();
+  
+  // invalidate the cache on this CPU if we are using the sending space.
+  if (current.GetCurrentMap() == sender) {
+    Invlpg(start, size, false);
+  }
+  
   LAPIC & lapic = LAPIC::GetCurrent();
   for (int i = 0; i < list.GetCount(); i++) {
     CPU & cpu = list[i];
     if (&cpu == &current) continue;
-    if (!cpu.IsRunningTask(t)) continue;
+    if (cpu.GetCurrentMap() != sender) continue;
     InvlpgInfo info = {NULL, start, size, false, false};
     {
       ScopeCriticalLock lock(&cpu.invlpgLock);
@@ -80,6 +85,15 @@ void DistributeUserInvlpg(VirtAddr start, size_t size, Task * t) {
     lapic.SendIPI(cpu.GetId(), IntVectors::Invlpg);
     while (!info.done) { }
   }
+}
+
+void TLB::Initialize() {
+  IRT::GetGlobal()[IntVectors::Invlpg] = HandleInvlpg;
+}
+
+DepList TLB::GetDependencies() {
+  return DepList(&CPUList::GetGlobal(), &IRT::GetGlobal(),
+                 &LAPICModule::GetGlobal());
 }
 
 static void HandleInvlpg() {
@@ -97,6 +111,31 @@ static void HandleInvlpg() {
            cpu.invlpgInfo->isKernel);
     cpu.invlpgInfo->done = true;
     cpu.invlpgInfo = nextInfo;
+  }
+}
+
+static void Invlpg(VirtAddr start, size_t size, bool kernel) {
+  AssertCritical();
+  
+  if (size > 0x200000L) {
+    // at this point, it's more efficient to just clear all the caches
+    if (kernel) {
+      __asm__("mov %%cr4, %%rax\n"
+              "xor $0x80, %%rax\n"
+              "mov %%rax, %%cr4\n"
+              "or $0x80, %%rax\n"
+              "mov %%rax, %%cr4" : : : "rax", "memory");
+    } else {
+      __asm__("mov %%cr3, %%rax\n"
+              "mov %%rax, %%cr3"
+              : : : "rax", "memory");
+    }
+    return;
+  }
+  
+  // invalidate one cache entry at a time
+  for (VirtAddr addr = start; addr < start + size; addr += 0x1000) {
+    __asm__("invlpg (%0)" : : "r" (addr) : "memory");
   }
 }
 

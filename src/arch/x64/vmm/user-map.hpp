@@ -20,7 +20,7 @@ public:
   static const VirtAddr SpaceStart = 0x8000000000L;
   static const size_t SpaceSize = 0xFF8000000000L;
   
-  UserMap(Task * t);
+  UserMap();
   ~UserMap();
   
   PhysAddr GetPML4();
@@ -50,9 +50,12 @@ protected:
   void SetEntries(VirtAddr virt, uint64_t phys, size_t virtAdd,
                   size_t physAdd, size_t count);
   
-  void DoInvlpg(VirtAddr virt, size_t size); // @ambicritical
+  /**
+   * Tell the TLB to perform TLB invalidations using this map as the "sender."
+   * @ambicritical
+   */
+  void DoInvlpg(VirtAddr virt, size_t size);
   
-  Task * task;
   uint64_t lock OS_ALIGNED(8); // @noncritical
   
   PageTable table;
