@@ -18,7 +18,7 @@ PIDPool & PIDPool::GetGlobal() {
 
 uint64_t PIDPool::AllocPID(Task * task) {
   AssertNoncritical();
-  uint64_t pid = indexSet.Pop();
+  uint64_t pid = indexSet->Pop();
   
   ScopeLock scope(&mapLock);
   uint64_t bucket = pid % IdealMaximum;
@@ -43,7 +43,7 @@ void PIDPool::FreePID(uint64_t pid, Task * task) {
       task->pidPoolNext->pidPoolLast = task->pidPoolLast;
     }
   }
-  indexSet.Push(pid);
+  indexSet->Push(pid);
 }
 
 Task * PIDPool::Find(uint64_t pid) {
@@ -62,6 +62,14 @@ Task * PIDPool::Find(uint64_t pid) {
     t = t->pidPoolNext;
   }
   return NULL;
+}
+
+void PIDPool::Initialize() {
+  indexSet = new IndexSetType();
+}
+
+DepList PIDPool::GetDependencies() {
+  return DepList(&Scheduler::GetGlobal());
 }
 
 }

@@ -8,26 +8,18 @@
 
 namespace OS {
 
-static GarbageThread globalGarbage;
+static GarbageThread gGarbage;
 
-void GarbageThread::Initialize(Task * kernelTask) {
-  new(&globalGarbage) GarbageThread(kernelTask);
+void GarbageThread::InitGlobal() {
+  new(&gGarbage) GarbageThread();
 }
 
 GarbageThread & GarbageThread::GetGlobal() {
-  return globalGarbage;
+  return gGarbage;
 }
 
-GarbageThread::GarbageThread() : Thread(NULL, false) {
-  Panic("GarbageThread::GarbageThread() - present only for the compiler");
-}
-
-GarbageThread::GarbageThread(Task * owner) : Thread(owner, true) {
-  SetKernelCall((void *)&GarbageThread::CallMain);
-}
-
-void GarbageThread::Delete() {
-  Panic("GarbageThread::Delete() - global object cannot be deleted");
+Thread * GarbageThread::GetThread() {
+  return thread;
 }
 
 void GarbageThread::PushTask(Task * t) {
@@ -40,13 +32,28 @@ void GarbageThread::PushTask(Task * t) {
   Wakeup();
 }
 
-void GarbageThread::Wakeup() {
-  AssertCritical();
-  Scheduler::GetGlobal().ClearTimeout(&GarbageThread::GetGlobal());
+void GarbageThread::Initialize() {
+  AssertNoncritical();
+  Task * task = KernelTask::GetGlobal().GetTask();
+  thread = Thread::NewKernel(task, &GarbageThread::CallMain);
+  
+  ScopeCritical critical;
+  task->AddThread(thread);
+  Scheduler::GetGlobal().AddThread(thread);
+}
+
+DepList GarbageThread::GetDependencies() {
+  return DepList(&KernelTask::GetGlobal(), &Scheduler::GetGlobal());
 }
 
 void GarbageThread::CallMain() {
+  AssertNoncritical();
   GarbageThread::GetGlobal().Main();
+}
+
+void GarbageThread::Wakeup() {
+  AssertCritical();
+  Scheduler::GetGlobal().ClearTimeout(GetThread());
 }
 
 void GarbageThread::Main() {

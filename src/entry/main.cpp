@@ -5,6 +5,7 @@
 #include <scheduler/internal/garbage-thread.hpp>
 #include <scheduler-specific/scheduler.hpp>
 #include <memory/malloc.hpp>
+#include <iostream>
 #include <critical>
 #include <new>
 
@@ -22,19 +23,12 @@ MainModule & MainModule::GetGlobal() {
 
 void MainModule::Initialize() {
   AssertNoncritical();
-  PIDPool::Initialize();
-  Scheduler::GetGlobal().Load();
-  KernelTask::Initialize();
-  GarbageThread::Initialize(&KernelTask::GetGlobal());
-  GarbageThread * thread = &GarbageThread::GetGlobal();
-  
-  ScopeCritical critical;
-  KernelTask::GetGlobal().AddThread(thread);
-  Scheduler::GetGlobal().AddThread(thread);
+  cout << "MainModule::Initialize()" << endl;
+  // for now, there is nothing I can see needing to do here
 }
 
 DepList MainModule::GetDependencies() {
-  return DepList(&Scheduler::GetGlobal(), &Malloc::GetGlobal());
+  return DepList(&Malloc::GetGlobal(), &KernelTask::GetGlobal());
 }
 
 void MainModule::Main() {

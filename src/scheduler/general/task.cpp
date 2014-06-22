@@ -2,14 +2,15 @@
 #include <scheduler/internal/garbage-thread.hpp>
 #include <scheduler/internal/pid-pool.hpp>
 #include <scheduler-specific/scheduler.hpp>
+#include <arch/general/user-map.hpp>
+#include <arch/general/global-map.hpp>
 #include <critical>
 #include <lock>
 
 namespace OS {
 
-Task::Task(bool forKernel) : ArchTask(forKernel) {
-  AssertNoncritical();
-  pid = PIDPool::GetGlobal().AllocPID(this);
+Task * Task::New(bool kern) {
+  return new Task(kern);
 }
 
 Task::~Task() {
@@ -26,6 +27,15 @@ Task::~Task() {
   }
   
   PIDPool::GetGlobal().FreePID(GetPID(), this);
+  if (userSpace) userSpace->Delete();
+}
+
+void Task::Delete() {
+  delete this;
+}
+
+bool Task::IsKernel() {
+  return isKernel;
 }
 
 void Task::AddThread(Thread * th) {
@@ -97,6 +107,28 @@ void Task::Kill(uint64_t status) {
 
 uint64_t Task::GetPID() {
   return pid;
+}
+
+AddressSpace & Task::GetAddressSpace() {
+  if (userSpace) return *userSpace;
+  return GlobalMap::GetGlobal();
+}
+
+UserMap * Task::GetUserAddressSpace() {
+  return userSpace;
+}
+
+// PROTECTED
+
+Task::Task(bool forKernel) : isKernel(forKernel) {
+  AssertNoncritical();
+  pid = PIDPool::GetGlobal().AllocPID(this);
+  
+  if (isKernel) {
+    userSpace = NULL;
+  } else {
+    userSpace = UserMap::New();
+  }
 }
 
 // PRIVATE

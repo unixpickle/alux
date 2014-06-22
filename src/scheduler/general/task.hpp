@@ -2,7 +2,6 @@
 #define __SCHEDULER_TASK_HPP__
 
 #include <scheduler-specific/task.hpp>
-#include <arch-specific/task.hpp>
 #include <cstdint>
 #include <macros>
 
@@ -11,12 +10,16 @@ namespace OS {
 class Thread;
 class GarbageThread;
 class PIDPool;
+class UserMap;
+class AddressSpace;
 
-class Task : public ArchTask, public SchedTask {
+class Task : public SchedTask {
 public:
+  Task * New(bool forKernel);
+  
   ~Task(); // @noncritical
-  virtual void Delete() = 0; // @noncritical
-  virtual bool IsKernel() = 0;
+  virtual void Delete(); // @noncritical
+  virtual bool IsKernel();
   
   void AddThread(Thread * th); // @critical
   void RemoveThread(Thread * th); // @critical
@@ -28,6 +31,8 @@ public:
   void Kill(uint64_t status); // @critical
 
   uint64_t GetPID();
+  AddressSpace & GetAddressSpace();
+  UserMap * GetUserAddressSpace();
 
 protected:
   Task * garbageNext;
@@ -39,6 +44,7 @@ protected:
 
 private:
   uint64_t pid;
+  bool isKernel;
   
   uint64_t threadsLock OS_ALIGNED(8); // @critical
   Thread * firstThread;
@@ -48,6 +54,8 @@ private:
   uint64_t holdCount;
   uint64_t killStatus;
   bool isKilled;
+  
+  UserMap * userSpace;
   
   void Terminate(); // @critical
 };

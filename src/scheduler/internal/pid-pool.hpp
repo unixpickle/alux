@@ -2,17 +2,21 @@
 #define __SCHEDULER_PID_POOL_HPP__
 
 #include <utilities/index-set.hpp>
+#include <module/module.hpp>
 
 namespace OS {
 
 class Task;
 
-class PIDPool {
+// TODO: make this guy a module!
+class PIDPool : public Module {
 public:
   static const int IdealMaximum = 0x100;
   static const int MaxExpectedFactor = 0x10;
   
-  static void Initialize(); // @noncritical
+  typedef IndexSet<IdealMaximum, MaxExpectedFactor> IndexSetType;
+  
+  static void InitGlobal(); // @noncritical
   static PIDPool & GetGlobal(); // @ambicritical
   
   uint64_t AllocPID(Task *); // @noncritical
@@ -25,8 +29,12 @@ public:
    */
   Task * Find(uint64_t);
   
+protected:
+  virtual void Initialize();
+  virtual DepList GetDependencies();
+  
 private:
-  IndexSet<IdealMaximum, MaxExpectedFactor> indexSet;
+  IndexSetType * indexSet;
   
   uint64_t mapLock OS_ALIGNED(8);
   Task * buckets[IdealMaximum];

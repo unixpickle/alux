@@ -19,6 +19,9 @@
 #include <arch/general/user-map.hpp>
 #include <scheduler-specific/scheduler.hpp>
 #include <scheduler/user/user-task.hpp>
+#include <scheduler/internal/pid-pool.hpp>
+#include <scheduler/internal/kernel-task.hpp>
+#include <scheduler/internal/garbage-thread.hpp>
 #include <memory/malloc.hpp>
 #include <entry/main.hpp>
 #include <critical>
@@ -52,6 +55,9 @@ static void InitializeSingletons(void * mboot) {
   Malloc::InitGlobal();
   PanicModule::InitGlobal();
   TLB::InitGlobal();
+  PIDPool::InitGlobal();
+  KernelTask::InitGlobal();
+  GarbageThread::InitGlobal();
 }
 
 }

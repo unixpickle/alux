@@ -1,19 +1,25 @@
 #ifndef __SCHEDULER_KERNEL_TASK_HPP__
 #define __SCHEDULER_KERNEL_TASK_HPP__
 
+#include <module/module.hpp>
 #include <scheduler/general/task.hpp>
 
 namespace OS {
 
-class KernelTask : public Task {
+class KernelTask : public Module {
 public:
-  static void Initialize(); // @noncritical
+  static void InitGlobal(); // @noncritical
   static KernelTask & GetGlobal(); // @ambicritical
   
-  KernelTask(); // DO NOT CALL THIS YOURSELF
+  Task * GetTask();
   
-  virtual void Delete(); // @noncritical, don't call
-  virtual bool IsKernel();
+protected:
+  virtual void Initialize();
+  virtual DepList GetDependencies();
+  virtual DepList GetSuperDependencies();
+  
+private:
+  Task * task;
 };
 
 }
