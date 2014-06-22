@@ -99,6 +99,15 @@ void Scheduler::ExitThread() {
                                       (void *)th);
 }
 
+void Scheduler::ExitTask(uint64_t status) {
+  AssertCritical();
+  Thread * th = HardwareThread::GetThread();
+  assert(th != NULL);
+  Task * task = th->GetTask();
+  task->Kill(status);
+  ExitThread();
+}
+
 void Scheduler::Tick() {
   AssertCritical();
   

@@ -37,6 +37,7 @@ public:
   bool ClearTimeout(Thread *); // @critical
   void Resign(); // @critical
   void ExitThread() OS_NORETURN; // @critical
+  void ExitTask(uint64_t status) OS_NORETURN; // @critical
 
   /**
    * Called by the architecture when a CPU timer fires or when the scheduler

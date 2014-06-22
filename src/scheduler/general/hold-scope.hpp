@@ -2,6 +2,7 @@
 #define __SCHEDULER_HOLD_SCOPE_HPP__
 
 #include <cstdint>
+#include <macros>
 
 namespace OS {
 
@@ -14,7 +15,7 @@ public:
   
   bool DidHold(); // @ambicritical
   Task * GetTask();
-  void Exit(uint64_t status);
+  void Exit(uint64_t status) OS_NORETURN;
   
 protected:
   Task * task;

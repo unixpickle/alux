@@ -38,10 +38,8 @@ Task * HoldScope::GetTask() {
 void HoldScope::Exit(uint64_t status) {
   assert(didHold);
   SetCritical(true);
-  task->Kill(status);
   task->Unhold();
-  Scheduler::GetGlobal().ExitThread();
-  Panic("HoldScope exit failed; scheduler did not exit thread");
+  Scheduler::GetGlobal().ExitTask(status);
 }
 
 }
