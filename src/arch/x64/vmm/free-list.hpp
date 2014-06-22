@@ -21,8 +21,6 @@ public:
     bool IsAdjacentBehind(VirtAddr addr);
   };
   
-  FreeList(VirtAddr start, size_t size); // @noncritical
-  
   ~FreeList(); // @noncritical
   
   /**
@@ -44,7 +42,7 @@ public:
   void Free(VirtAddr addr, size_t pageSize, size_t pageCount);
   
 protected:
-  Region * first;
+  Region * first = NULL;
   
   static Region * AllocRegion(VirtAddr, size_t);
   static void FreeRegion(Region * reg);

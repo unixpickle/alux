@@ -1,6 +1,7 @@
 #include <scheduler/user/code-map.hpp>
 #include <scheduler/general/hold-scope.hpp>
 #include <arch/general/physical-allocator.hpp>
+#include <arch/general/user-map.hpp>
 #include <memory/easy-map.hpp>
 #include <critical>
 #include <cstring>
@@ -15,20 +16,20 @@ CodeMap::CodeMap(Task * t, UserCode * c) : task(t), code(c) {
   
   code->Retain();
   
-  AddressSpace & space = t->GetAddressSpace();
+  UserMap & space = static_cast<UserMap &>(t->GetAddressSpace());
   
   bool canRemap;
-  if (AddressSpace::ShouldLocateCode()) {
+  if (UserMap::ShouldLocateCode()) {
     canRemap = space.SupportsPlacementReserve();
   } else {
-    space.SupportsRemap();
+    canRemap = space.SupportsRemap();
   }
   
   if (canRemap) {
     // on-demand page loading for code section
     pages = new PageStatus[size.pageCount];
-    if (AddressSpace::ShouldLocateCode()) {
-      spaceStart = AddressSpace::GetCodeLocation();
+    if (UserMap::ShouldLocateCode()) {
+      spaceStart = UserMap::GetCodeLocation();
       space.ReserveAt(spaceStart, size);
     } else {
       spaceStart = space.Reserve(size);
@@ -39,8 +40,8 @@ CodeMap::CodeMap(Task * t, UserCode * c) : task(t), code(c) {
     allocated = allocator.Alloc(size.Total(), code->GetPageAlignment(), NULL);
     assert(allocated != 0);
     AddressSpace::MapInfo info(size.pageSize, size.pageCount, allocated);
-    if (AddressSpace::ShouldLocateCode()) {
-      spaceStart = AddressSpace::GetCodeLocation();
+    if (UserMap::ShouldLocateCode()) {
+      spaceStart = UserMap::GetCodeLocation();
       space.MapAt(spaceStart, info);
     } else {
       spaceStart = space.Map(info);

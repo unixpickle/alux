@@ -3,7 +3,7 @@
 
 #include <arch/x64/vmm/page-table.hpp>
 #include <arch/x64/vmm/free-list.hpp>
-#include <arch/general/address-space.hpp>
+#include <arch/general/user-map.hpp>
 #include <macros>
 
 namespace OS {
@@ -15,7 +15,7 @@ namespace x64 {
 /**
  * This manages the structure of a user-space task's memory mapping.
  */
-class UserMap : public AddressSpace {
+class UserMap : public OS::UserMap {
 public:
   static const VirtAddr SpaceStart = 0x8000000000L;
   static const size_t SpaceSize = 0xFF8000000000L;
@@ -24,6 +24,8 @@ public:
   ~UserMap();
   
   PhysAddr GetPML4();
+  
+  virtual void Delete();
   
   virtual void Set();
   virtual bool SupportsNX();

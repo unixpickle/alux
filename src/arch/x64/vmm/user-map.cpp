@@ -10,11 +10,27 @@
 
 namespace OS {
 
+UserMap * UserMap::New() {
+  return new x64::UserMap();
+}
+
+bool UserMap::ShouldLocateCode() {
+  return true;
+}
+
+VirtAddr UserMap::GetCodeLocation() {
+  return 0x8000000000L;
+}
+
 namespace x64 {
 
-UserMap::UserMap() : table(0), freeList(SpaceStart, SpaceSize) {
+UserMap::UserMap() : table(0) {
   PhysAddr pml4 = PhysicalAllocator::GetGlobal().Alloc(0x1000, 0x1000, NULL);
   if (!pml4) Panic("UserMap::UserMap() - could not allocate PML4");
+  
+  // push both canonical regions to the free list
+  freeList.Free(0x8000000000L, 0x1000L, 0x7F8000000L);
+  freeList.Free(0xFFFF800000000000, 0x1000L, 0x800000000L);
   
   {
     TypedScratch<uint64_t> scratch(pml4);
@@ -33,6 +49,10 @@ UserMap::~UserMap() {
 
 PhysAddr UserMap::GetPML4() {
   return table.GetPML4();
+}
+
+void UserMap::Delete() {
+  delete this;
 }
 
 void UserMap::Set() {

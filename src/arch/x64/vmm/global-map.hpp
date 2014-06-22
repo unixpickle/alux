@@ -27,12 +27,10 @@ public:
   virtual bool SupportsNX();
   virtual bool SupportsRO();
   virtual bool SupportsRemap();
-  virtual bool SupportsPlacementReserve();
   virtual void Unmap(VirtAddr virt, Size size);
   virtual VirtAddr Map(MapInfo info);
   virtual void MapAt(VirtAddr virt, MapInfo info);
   virtual VirtAddr Reserve(Size size);
-  virtual void ReserveAt(VirtAddr, Size);
   
   friend class PageTable;
   friend class Allocator;

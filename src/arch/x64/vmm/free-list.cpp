@@ -14,11 +14,6 @@ static uint64_t slabInitLock OS_ALIGNED(8);
 static bool slabInitialized;
 static SlabType slab;
 
-FreeList::FreeList(VirtAddr start, size_t size) {
-  AssertNoncritical();
-  first = AllocRegion(start, size);
-}
-
 FreeList::~FreeList() {
   Region * reg = first;
   while (reg) {

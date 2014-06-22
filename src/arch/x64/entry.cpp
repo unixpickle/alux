@@ -16,6 +16,7 @@
 #include <arch/x64/vmm/scratch.hpp>
 #include <arch/x64/panic/panic-module.hpp>
 #include <arch/x64/program.hpp>
+#include <arch/general/user-map.hpp>
 #include <scheduler-specific/scheduler.hpp>
 #include <scheduler/user/user-task.hpp>
 #include <memory/malloc.hpp>
@@ -74,7 +75,7 @@ void MbootEntry(void * mbootPtr) {
                                          OS::x64::GetProgramSize());
   OS::UserTask * task = OS::UserTask::New(code);
   OS::Thread * thread = OS::Thread::New(task, false);
-  thread->SetUserCall((void *)OS::AddressSpace::GetCodeLocation());
+  thread->SetUserCall((void *)OS::UserMap::GetCodeLocation());
   
   {
     OS::ScopeCritical critical;

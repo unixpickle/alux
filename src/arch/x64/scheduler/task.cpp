@@ -12,7 +12,7 @@ namespace x64 {
 ArchTask::ArchTask(bool kernel) {
   AssertNoncritical();
   if (!kernel) {
-    addressSpace = new UserMap();
+    addressSpace = UserMap::New();
   } else {
     addressSpace = &GlobalMap::GetGlobal();
   }
@@ -20,9 +20,10 @@ ArchTask::ArchTask(bool kernel) {
 
 ArchTask::~ArchTask() {
   AssertNoncritical();
+  if (!addressSpace) return;
   AddressSpace * space = &GlobalMap::GetGlobal();
   if (addressSpace != space) {
-    if (addressSpace) delete addressSpace;
+    static_cast<UserMap *>(addressSpace)->Delete();
   }
 }
 
