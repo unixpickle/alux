@@ -66,9 +66,9 @@ CodeMap::~CodeMap() {
 }
 
 bool CodeMap::HandleFault(VirtAddr addr, bool, bool write) {
-  AssertNoncritical();
-  HoldScope hold(task);
+  HoldScope hold;
   if (!hold.DidHold()) return false;
+  
   ScopeLock scope(&lock);
   
   if (!pages) return false; // no remap

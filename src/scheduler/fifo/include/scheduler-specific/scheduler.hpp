@@ -24,10 +24,19 @@ public:
 
   // operations acting on the current thread or a specific thread
   
-  void SetTimeout(uint64_t deadline, bool precise); // @critical
-  void SetInfiniteTimeout(); // @critical
+  /**
+   * Set a timeout.
+   * @param deadline The deadline after which the timeout should end
+   * @param precise Whether precision is required with this timeout
+   * @param unlock If non-null, this anlock will be unlocked after the timeout
+   * has been set.
+   * @critical
+   */
+  void SetTimeout(uint64_t deadline, bool precise, uint64_t * unlock = NULL);
+  void SetInfiniteTimeout(uint64_t * unlock = NULL); // @critical
   bool ClearTimeout(Thread *); // @critical
   void Resign(); // @critical
+  void ExitThread() OS_NORETURN; // @critical
 
   /**
    * Called by the architecture when a CPU timer fires or when the scheduler
@@ -42,6 +51,7 @@ protected:
   Thread * lastThread = NULL;
   
   static void SwitchThread(Thread *);
+  static void TerminateThread(void * thPtr);
   
   virtual DepList GetDependencies();
   

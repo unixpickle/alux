@@ -5,6 +5,9 @@
 
 namespace OS {
 
+void LockHold(uint64_t * lock);
+void LockRelease(uint64_t * lock);
+
 class ScopeLock {
 private:
   uint64_t * lock;

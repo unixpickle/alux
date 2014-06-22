@@ -1,4 +1,5 @@
 #include <scheduler-specific/scheduler.hpp>
+#include <scheduler/internal/garbage-thread.hpp>
 #include <arch/general/hardware-thread-list.hpp>
 #include <arch/general/tick-timer.hpp>
 #include <arch/general/clock.hpp>
@@ -49,7 +50,7 @@ void Scheduler::RemoveThread(Thread * t) {
   UnlinkThread(t);
 }
 
-void Scheduler::SetTimeout(uint64_t deadline, bool) {
+void Scheduler::SetTimeout(uint64_t deadline, bool, uint64_t * unlock) {
   AssertCritical();
   {
     ScopeCriticalLock scope(&lock);
@@ -57,11 +58,12 @@ void Scheduler::SetTimeout(uint64_t deadline, bool) {
     Thread * th = HardwareThread::GetThread();
     assert(th != NULL);
     th->SchedThread::nextTick = deadline;
+    if (unlock) LockRelease(unlock);
   }
   TickTimer::GetGlobal().SaveAndTick();
 }
 
-void Scheduler::SetInfiniteTimeout() {
+void Scheduler::SetInfiniteTimeout(uint64_t * unlock) {
   AssertCritical();
   {
     ScopeCriticalLock scope(&lock);
@@ -69,6 +71,7 @@ void Scheduler::SetInfiniteTimeout() {
     Thread * th = HardwareThread::GetThread();
     assert(th != NULL);
     th->SchedThread::nextTick = UINT64_MAX;
+    if (unlock) LockRelease(unlock);
   }
   TickTimer::GetGlobal().SaveAndTick();
 }
@@ -87,6 +90,13 @@ bool Scheduler::ClearTimeout(Thread *) {
 void Scheduler::Resign() {
   AssertCritical();
   TickTimer::GetGlobal().SaveAndTick();
+}
+
+void Scheduler::ExitThread() {
+  AssertCritical();
+  Thread * th = HardwareThread::GetThread();
+  TickTimer::GetGlobal().TickAtMethod(&Scheduler::TerminateThread,
+                                      (void *)th);
 }
 
 void Scheduler::Tick() {
@@ -121,6 +131,20 @@ void Scheduler::SwitchThread(Thread * t) {
     t->SchedThread::nextTick = 0;
     HardwareThread::SetThread(t);
   }
+}
+
+void Scheduler::TerminateThread(void * thPtr) {
+  Thread * thread = (Thread *)thPtr;
+  Task * task = thread->GetTask();
+  if (!task->Retain()) {
+    // the task is dying anyway
+    return Scheduler::GetGlobal().Tick();
+  }
+  Scheduler::GetGlobal().RemoveThread(thread); // never run it again
+  SwitchThread(NULL); // release the task, unset it from the CPU
+  task->RemoveThread(thread); // remove the task's reference to the thread
+  GarbageThread::GetGlobal().PushThread(thread);
+  task->Release(); // release our reference
 }
 
 Thread * Scheduler::GetNextThread() {

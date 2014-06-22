@@ -7,6 +7,7 @@ namespace OS {
 
 class Task;
 class State;
+class GarbageThread;
 
 class Thread : public SchedThread {
 public:
@@ -22,7 +23,9 @@ public:
   
 protected:
   Thread * taskNext, * taskLast;
+  Thread * garbageNext;
   friend class Task;
+  friend class GarbageThread;
   
   Thread(Task * owner, bool kernel, void * func); // @noncritical
   Thread(Task * owner, void * func, void * arg); // @noncritical

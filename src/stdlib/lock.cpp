@@ -9,6 +9,14 @@ extern "C" {
 
 namespace OS {
 
+void LockHold(uint64_t * lock) {
+  anlock_lock(lock);
+}
+
+void LockRelease(uint64_t * lock) {
+  anlock_unlock(lock);
+}
+
 ScopeLock::ScopeLock(uint64_t * _lock) : lock(_lock) {
   AssertNoncritical();
   anlock_lock(lock);

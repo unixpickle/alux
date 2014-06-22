@@ -14,14 +14,16 @@ public:
   Thread * GetThread();
   
   void PushTask(Task * t); // @critical
+  void PushThread(Thread * t); // @critical
   
 protected:
   virtual void Initialize();
   virtual DepList GetDependencies();
   
 private:
-  uint64_t tasksLock OS_ALIGNED(8) = 0; // @critical
+  uint64_t lock OS_ALIGNED(8) = 0;
   Task * firstTask = NULL;
+  Thread * firstThread = NULL;
   
   Thread * thread;
   
@@ -29,7 +31,8 @@ private:
   
   void Wakeup(); // @critical
   void Main(); // @noncritical
-  Task * PopTask(); // @critical
+  Task * PopTask(); // @ambicritical, unsynchronized
+  Thread * PopThread(); // @ambicritical, unsynchronized
 };
 
 }

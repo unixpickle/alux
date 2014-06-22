@@ -17,10 +17,7 @@ void HandleMemoryFault(VirtAddr addr, bool exec, bool write) {
   }
   
   UserTask * task = static_cast<UserTask *>(t);
-  SetCritical(false);
   bool result = task->GetCodeMap().HandleFault(addr, exec, write);
-  SetCritical(true);
-  
   if (result) return;
   
   Panic("Unhandled user page fault.");

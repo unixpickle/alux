@@ -25,11 +25,21 @@ Thread * GarbageThread::GetThread() {
 
 void GarbageThread::PushTask(Task * t) {
   AssertCritical();
-  {
-    ScopeCriticalLock scope(&tasksLock);
-    t->garbageNext = firstTask;
-    firstTask = t;
-  }
+  ScopeCriticalLock scope(&lock);
+  
+  t->garbageNext = firstTask;
+  firstTask = t;
+  
+  Wakeup();
+}
+
+void GarbageThread::PushThread(Thread * t) {
+  AssertCritical();
+  ScopeCriticalLock scope(&lock);
+  
+  t->garbageNext = firstThread;
+  firstThread = t;
+  
   Wakeup();
 }
 
@@ -59,27 +69,35 @@ void GarbageThread::Wakeup() {
 
 void GarbageThread::Main() {
   AssertNoncritical();
+  SetCritical(true);
   while (1) {
-    SetCritical(true);
-    Task * t = PopTask();
-    SetCritical(false);
-    if (!t) {
-      SetCritical(true);
-      Scheduler::GetGlobal().SetInfiniteTimeout();
-      SetCritical(false);
+    LockHold(&lock);
+    Task * task = PopTask();
+    Thread * thread = PopThread();
+    if (!task && !thread) {
+      Scheduler::GetGlobal().SetInfiniteTimeout(&lock);
       continue;
     }
-    t->Delete();
+    LockRelease(&lock);
+    SetCritical(false);
+    if (task) task->Delete();
+    if (thread) thread->Delete();
+    SetCritical(true);
   }
 }
 
 Task * GarbageThread::PopTask() {
-  AssertCritical();
-  ScopeCriticalLock scope(&tasksLock);
-  
   if (!firstTask) return NULL;
   Task * result = firstTask;
   firstTask = result->garbageNext;
+  result->garbageNext = NULL;
+  return result;
+}
+
+Thread * GarbageThread::PopThread() {
+  if (!firstThread) return NULL;
+  Thread * result = firstThread;
+  firstThread = result->garbageNext;
   result->garbageNext = NULL;
   return result;
 }
