@@ -17,8 +17,14 @@ public:
     Region * next;
     
     Region(VirtAddr, size_t);
+    VirtAddr End();
     bool CanHold(size_t pageSize, size_t pageCount);
     bool IsAdjacentBehind(VirtAddr addr);
+    bool Contains(Region & reg);
+    bool IsBehind(VirtAddr addr);
+    bool IsFilledBy(Region & reg);
+    bool IsEndedBy(Region & reg);
+    bool IsStartedBy(Region & reg);
   };
   
   ~FreeList(); // @noncritical
@@ -47,7 +53,7 @@ protected:
   static Region * AllocRegion(VirtAddr, size_t);
   static void FreeRegion(Region * reg);
   
-  void AllocInRegion(Region * reg, Region * last, size_t chop, size_t size);
+  void AllocInRegion(Region * reg, Region * last, Region & requested);
 };
 
 }

@@ -3,6 +3,7 @@
 #include <arch/general/tick-timer.hpp>
 #include <arch/general/clock.hpp>
 #include <arch/general/state.hpp>
+#include <arch/general/global-map.hpp>
 #include <critical>
 #include <lock>
 #include <new>
@@ -53,7 +54,7 @@ void Scheduler::SetTimeout(uint64_t deadline, bool) {
   {
     ScopeCriticalLock scope(&lock);
 
-    Thread * th = HardwareThread::GetCurrent().GetThread();
+    Thread * th = HardwareThread::GetThread();
     assert(th != NULL);
     th->SchedThread::nextTick = deadline;
   }
@@ -65,7 +66,7 @@ void Scheduler::SetInfiniteTimeout() {
   {
     ScopeCriticalLock scope(&lock);
   
-    Thread * th = HardwareThread::GetCurrent().GetThread();
+    Thread * th = HardwareThread::GetThread();
     assert(th != NULL);
     th->SchedThread::nextTick = UINT64_MAX;
   }
@@ -76,7 +77,7 @@ bool Scheduler::ClearTimeout(Thread *) {
   AssertCritical();
   ScopeCriticalLock scope(&lock);
   
-  Thread * th = HardwareThread::GetCurrent().GetThread();
+  Thread * th = HardwareThread::GetThread();
   assert(th != NULL);
   bool wasDelayed = th->SchedThread::nextTick != 0;
   th->SchedThread::nextTick = 0;
@@ -101,14 +102,29 @@ void Scheduler::Tick() {
 
 // PRIVATE //
 
-Thread * Scheduler::GetNextThread() {
-  ScopeCriticalLock scope(&lock);
+void Scheduler::SwitchThread(Thread * t) {
+  if (t) {
+    t->GetTask()->GetAddressSpace().Set();
+  } else {
+    GlobalMap::GetGlobal().Set();
+  }
   
   Thread * running = HardwareThread::GetCurrent().GetThread();
   if (running) {
-    running->SchedThread::isRunning = false;
     HardwareThread::SetThread(NULL);
+    running->SchedThread::isRunning = false;
+    running->GetTask()->Release();
   }
+  
+  if (t) {
+    t->SchedThread::isRunning = true;
+    t->SchedThread::nextTick = 0;
+    HardwareThread::SetThread(t);
+  }
+}
+
+Thread * Scheduler::GetNextThread() {
+  ScopeCriticalLock scope(&lock);
   
   Clock & clock = Clock::GetClock();
   uint64_t now = clock.GetTime();
@@ -144,11 +160,7 @@ Thread * Scheduler::GetNextThread() {
     break;
   }
   
-  if (current) {
-    current->SchedThread::isRunning = true;
-    current->SchedThread::nextTick = 0;
-    HardwareThread::SetThread(current);
-  }
+  SwitchThread(current);
   TickTimer::GetGlobal().SetTimeout(nextTick - now, true);
   return current;
 }

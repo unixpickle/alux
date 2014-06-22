@@ -4,6 +4,8 @@
 #include <critical>
 #include <macros>
 
+#include <iostream> // TODO: delete this
+
 namespace OS {
 
 namespace x64 {
@@ -24,20 +26,20 @@ FreeList::~FreeList() {
 }
 
 bool FreeList::AllocAt(VirtAddr start, size_t pageSize, size_t pageCount) {
-  Region * reg = first;
-  Region * last = NULL;
-  size_t size = pageSize * pageCount;
-  
   if (start % pageSize) return false;
   
+  Region * reg = first;
+  Region * last = NULL;
+  
+  Region requested(start, pageSize * pageCount);
+  
   while (reg) {
-    if (reg->start > start || reg->start + reg->size < start + size) {
+    if (!reg->Contains(requested)) {
       last = reg;
       reg = reg->next;
       continue;
     }
-    size_t chopSize = start - reg->start;
-    AllocInRegion(reg, last, chopSize, size);
+    AllocInRegion(reg, last, requested);
     return true;
   }
   return false;
@@ -61,9 +63,9 @@ VirtAddr FreeList::Alloc(size_t pageSize, size_t pageCount) {
     if (reg->start % pageSize) {
       chopSize = pageSize - (reg->start % pageSize);
     }
-    VirtAddr result = reg->start + chopSize;
-    AllocInRegion(reg, last, chopSize, totalSize);
-    return result;
+    Region requested(reg->start + chopSize, totalSize);
+    AllocInRegion(reg, last, requested);
+    return requested.start;
   }
   
   return 0;
@@ -74,15 +76,14 @@ void FreeList::Free(VirtAddr addr, size_t pageSize, size_t pageCount) {
   
   Region * reg = first;
   Region * last = NULL;
-  size_t size = pageSize * pageCount;
+  
+  Region releasing(addr, pageSize * pageCount);
   
   while (reg) {
-    if (reg->start == addr + size) {
-      reg->start -= size;
-      reg->size += size;
-      return;
-    } else if (reg->IsAdjacentBehind(addr)) {
-      reg->size += size;
+    if (reg->IsAdjacentBehind(addr)) {
+      // |...|reg|releasing|...|
+      
+      reg->size += releasing.size;
       while (reg->next) {
         Region * theNext = reg->next;
         if (!reg->IsAdjacentBehind(theNext->start)) break;
@@ -91,7 +92,15 @@ void FreeList::Free(VirtAddr addr, size_t pageSize, size_t pageCount) {
         FreeRegion(theNext);
       }
       return;
-    } else if (addr > reg->start + reg->size) {
+    } else if (releasing.IsAdjacentBehind(reg->start)) {
+      // |...|releasing|reg|...|
+      
+      reg->start -= releasing.size;
+      reg->size += releasing.size;
+      return;
+    } else if (releasing.IsBehind(reg->start)) {
+      // |...|releasing|...|reg|...|
+      
       break;
     }
     
@@ -99,16 +108,21 @@ void FreeList::Free(VirtAddr addr, size_t pageSize, size_t pageCount) {
     reg = reg->next;
   }
   
-  Region * newRegion = AllocRegion(addr, size);
-  if (last) {
-    last->next = newRegion;
-  } else {
-    first = newRegion;
-  }
+  Region * newRegion = AllocRegion(addr, releasing.size);
+  newRegion->next = reg;
+  if (last) last->next = newRegion;
+  else first = newRegion;
 }
+
+// FreeList::Region
 
 FreeList::Region::Region(VirtAddr _start, size_t _size)
   : start(_start), size(_size) {
+  assert(start + size > start || start + size == 0);
+}
+
+VirtAddr FreeList::Region::End() {
+  return start + size;
 }
 
 bool FreeList::Region::CanHold(size_t pageSize, size_t pageCount) {
@@ -120,8 +134,37 @@ bool FreeList::Region::CanHold(size_t pageSize, size_t pageCount) {
 }
 
 bool FreeList::Region::IsAdjacentBehind(VirtAddr addr) {
+  if (start + size == 0) return false;
   return start + size == addr;
 }
+
+bool FreeList::Region::Contains(FreeList::Region & reg) {
+  if (start > reg.start) return false;
+  if (start + size != 0) {
+    if (reg.start + reg.size == 0) return false;
+    return reg.start + reg.size <= start + size;
+  }
+  return true;
+}
+
+bool FreeList::Region::IsBehind(VirtAddr addr) {
+  if (start + size == 0) return false;
+  return (start + size <= addr);
+}
+
+bool FreeList::Region::IsFilledBy(FreeList::Region & reg) {
+  return reg.start == start && reg.size == size;
+}
+
+bool FreeList::Region::IsEndedBy(FreeList::Region & reg) {
+  return reg.start + reg.size == start + size;
+}
+
+bool FreeList::Region::IsStartedBy(FreeList::Region & reg) {
+  return reg.start == start;
+}
+
+// FreeList private
 
 FreeList::Region * FreeList::AllocRegion(VirtAddr start, size_t size) {
   AssertNoncritical();
@@ -141,27 +184,21 @@ void FreeList::FreeRegion(FreeList::Region * reg) {
 }
 
 void FreeList::AllocInRegion(Region * reg, Region * last,
-                             size_t chopSize, size_t totalSize) {
-  VirtAddr result = reg->start + chopSize;
-  if (reg->start + chopSize + totalSize == reg->size) {
-    // we are totally removing the end of the chunk
-    if (chopSize) {
-      reg->size = chopSize;
-    } else {
-      if (last) last->next = reg->next;
-      else first = reg->next;
-      FreeRegion(reg);
-    }
+                             Region & requested) {
+  if (reg->IsFilledBy(requested)) {
+    if (last) last->next = reg->next;
+    else first = reg->next;
+    FreeRegion(reg);
+  } else if (reg->IsStartedBy(requested)) {
+    reg->start += requested.size;
+  } else if (reg->IsEndedBy(requested)) {
+    reg->size -= requested.size;
   } else {
-    // we only need to remove a piece of the chunk
-    if (chopSize) {
-      Region * chopRegion = AllocRegion(reg->start, chopSize);
-      chopRegion->next = reg;
-      if (last) last->next = chopRegion;
-      else first = chopRegion;
-    }
-    reg->size -= totalSize + chopSize;
-    reg->start += totalSize + chopSize;
+    size_t suffixSize = reg->End() - requested.End();
+    Region * suffix = AllocRegion(requested.End(), suffixSize);
+    reg->size = requested.start - reg->start;
+    suffix->next = reg->next;
+    reg->next = suffix;
   }
 }
 

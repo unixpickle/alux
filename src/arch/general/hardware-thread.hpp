@@ -10,14 +10,15 @@ namespace OS {
 class HardwareThread {
 public:
   static void SetThread(Thread * th); // @critical
+  static Thread * GetThread();
+  
   static HardwareThread & GetCurrent();
   
   virtual void Wake() = 0; // @critical
-  virtual Thread * GetThread(); // @critical
-  virtual bool IsRunningTask(Task *);
   
 protected:
   virtual void SetCurrentThread(Thread * th);
+  virtual Thread * GetCurrentThread();
   
   uint64_t threadLock OS_ALIGNED(8);
   Thread * thread;

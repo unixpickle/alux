@@ -41,6 +41,8 @@ protected:
   Thread * firstThread = NULL;
   Thread * lastThread = NULL;
   
+  static void SwitchThread(Thread *);
+  
   virtual DepList GetDependencies();
   
   Thread * GetNextThread(); // @critical

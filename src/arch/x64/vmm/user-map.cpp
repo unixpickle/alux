@@ -8,6 +8,8 @@
 #include <lock>
 #include <cassert>
 
+#include <iostream> // TODO: delete this
+
 namespace OS {
 
 UserMap * UserMap::New() {
@@ -30,7 +32,7 @@ UserMap::UserMap() : table(0) {
   
   // push both canonical regions to the free list
   freeList.Free(0x8000000000L, 0x1000L, 0x7F8000000L);
-  freeList.Free(0xFFFF800000000000, 0x1000L, 0x800000000L);
+  freeList.Free(0xFFFF800000000000L, 0x1000L, 0x800000000L);
   
   {
     TypedScratch<uint64_t> scratch(pml4);
@@ -135,6 +137,8 @@ void UserMap::ReserveAt(VirtAddr addr, UserMap::Size size) {
   AssertNoncritical();
   ScopeLock scope(&lock);
   if (!freeList.AllocAt(addr, size.pageSize, size.pageCount)) {
+    cout << "attempted to AllocAt(" << addr << "," << size.pageSize << ","
+      << size.pageCount << ")" << endl;
     Panic("UserMap::ReserveAt() failed");
   }
 }
