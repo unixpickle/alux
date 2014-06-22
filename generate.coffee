@@ -96,6 +96,7 @@ main = ->
     'multitasking'
     'module'
     'entry'
+    'syscall'
     'arch/general'
     'scheduler/general'
     'scheduler/user'

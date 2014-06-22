@@ -109,7 +109,7 @@ void Scheduler::SwitchThread(Thread * t) {
     GlobalMap::GetGlobal().Set();
   }
   
-  Thread * running = HardwareThread::GetCurrent().GetThread();
+  Thread * running = HardwareThread::GetThread();
   if (running) {
     HardwareThread::SetThread(NULL);
     running->SchedThread::isRunning = false;

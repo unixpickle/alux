@@ -5,24 +5,17 @@
 
 namespace OS {
 
+HardwareThread::HardwareThread() : thread(NULL) {
+}
+
 void HardwareThread::SetThread(Thread * th) {
   AssertCritical();
-  HardwareThread::GetCurrent().SetCurrentThread(th);
+  HardwareThread::GetCurrent().thread = th;
 }
 
 Thread * HardwareThread::GetThread() {
   AssertCritical();
-  return HardwareThread::GetCurrent().GetCurrentThread();
-}
-
-void HardwareThread::SetCurrentThread(Thread * th) {
-  ScopeCriticalLock scope(&threadLock);
-  thread = th;
-}
-
-Thread * HardwareThread::GetCurrentThread() {
-  ScopeCriticalLock scope(&threadLock);
-  return thread;
+  return HardwareThread::GetCurrent().thread;
 }
 
 }

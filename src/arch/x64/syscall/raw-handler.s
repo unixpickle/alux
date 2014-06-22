@@ -17,6 +17,8 @@ RawSyscallHandler:
   pop rsp
   
   mov r11, 0x200
+  ; TODO: here, verify that RCX is canonical! Serious security holes could
+  ; be created if I do not get around to this!
   o64 sysret
 
 _RawSyscallHandler:

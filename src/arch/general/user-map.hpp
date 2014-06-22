@@ -40,6 +40,16 @@ public:
   virtual void ReserveAt(VirtAddr addr, Size size) = 0;
   
   /**
+   * Ensures the security of a certain range. This answers the question: if the
+   * kernel tried to access memory in this range, would it be accessing memory
+   * that may not belong to the user-space's task? Finding this answer may
+   * involve seeing if the memory was ever allocated with a Reserve or Map, or
+   * it may simply involve chucking if the range is above some boundary.
+   * @noncritical
+   */
+  virtual bool OwnsRange(VirtAddr start, size_t size) = 0;
+  
+  /**
    * Delete this instance. You should treat this like the `delete` operator in
    * that you may not access any members of a map after calling it's Delete().
    * @noncritical

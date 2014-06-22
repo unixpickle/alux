@@ -1,0 +1,10 @@
+#ifndef __IOSTREAM_HPP__
+#define __IOSTREAM_HPP__
+
+namespace std {
+
+void puts(const char * buff);
+
+}
+
+#endif

@@ -4,6 +4,7 @@
 #include <scheduler/general/thread.hpp>
 #include <cstdint>
 #include <macros>
+#include <atomic>
 
 namespace OS {
 
@@ -14,14 +15,11 @@ public:
   
   static HardwareThread & GetCurrent();
   
+  HardwareThread();
   virtual void Wake() = 0; // @critical
   
 protected:
-  virtual void SetCurrentThread(Thread * th);
-  virtual Thread * GetCurrentThread();
-  
-  uint64_t threadLock OS_ALIGNED(8);
-  Thread * thread;
+  Atomic<Thread *> thread;
 };
 
 }

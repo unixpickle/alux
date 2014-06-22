@@ -1,3 +1,5 @@
+#include <iostream>
+
 void Main();
 
 extern "C" {
@@ -13,5 +15,5 @@ void _main() {
 }
 
 void Main() {
-  __asm__("syscall");
+  std::puts("hello from user-space!");
 }

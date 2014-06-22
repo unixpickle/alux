@@ -1,6 +1,7 @@
 #include <arch/x64/syscall/handler.hpp>
 #include <arch/general/hardware-thread.hpp>
 #include <scheduler/general/hold-scope.hpp>
+#include <syscall/handler.hpp>
 #include <critical>
 #include <iostream>
 
@@ -28,13 +29,11 @@ void HandleSyscall(uint64_t call, uint64_t arg1,
                    uint64_t arg2, uint64_t arg3,
                    uint64_t arg4, uint64_t arg5) {
   AssertCritical();
-  HoldScope scope(HardwareThread::GetCurrent().GetThread()->GetTask());
-  if (!scope.DidHold()) return;
   
-  SetCritical(false);
-  cout << "HandleSyscall(" << call << "," << arg1 << "," << arg2 << "," << arg3
-    << "," << arg4 << "," << arg5 << ")" << endl;
-  SetCritical(true);
+  // TODO: here, put architecture-specific system calls
+  
+  SyscallHandler((uint16_t)call, (void *)arg1, (void *)arg2, (void *)arg3,
+                 arg4, arg5);
 }
 
 }

@@ -143,6 +143,12 @@ void UserMap::ReserveAt(VirtAddr addr, UserMap::Size size) {
   }
 }
 
+bool UserMap::OwnsRange(VirtAddr start, size_t size) {
+  if (start + size < start) return false;
+  if (start < 0x8000000000L) return false;
+  return true;
+}
+
 void UserMap::FreeTable(PhysAddr table, int depth, int start) {
   AssertCritical();
   

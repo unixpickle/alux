@@ -1,0 +1,6 @@
+#ifndef __CSTDDEF_HPP__
+#define __CSTDDEF_HPP__
+
+#include <stddef.h>
+
+#endif

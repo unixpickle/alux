@@ -12,6 +12,7 @@ if not arch in ['x64']
 # add things to this array as needed
 mainSources = [
   'entry'
+  'stdlib'
 ]
 
 finder = new SourceFinder()
@@ -20,8 +21,9 @@ for source in mainSources
 finder.search 'src/arch/' + arch
 
 includes = [
-  'src/arch/' + arch + '/include'
   'src'
+  'src/arch/' + arch + '/include'
+  'src/stdlib/hpp'
 ]
 
 objdir = process.env['OBJDIR']
