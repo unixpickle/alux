@@ -1,5 +1,6 @@
 #include <scheduler/internal/pid-pool.hpp>
 #include <scheduler/general/task.hpp>
+#include <scheduler-specific/scheduler.hpp>
 #include <critical>
 #include <lock>
 
@@ -7,8 +8,7 @@ namespace OS {
 
 static PIDPool thePool;
 
-void PIDPool::Initialize() {
-  AssertNoncritical();
+void PIDPool::InitGlobal() {
   new(&thePool) PIDPool();
 }
 

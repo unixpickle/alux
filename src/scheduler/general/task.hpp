@@ -15,7 +15,7 @@ class AddressSpace;
 
 class Task : public SchedTask {
 public:
-  Task * New(bool forKernel);
+  static Task * New(bool forKernel);
   
   ~Task(); // @noncritical
   virtual void Delete(); // @noncritical

@@ -39,4 +39,8 @@ Task * Thread::GetTask() {
   return task;
 }
 
+State & Thread::GetState() {
+  return *state;
+}
+
 }

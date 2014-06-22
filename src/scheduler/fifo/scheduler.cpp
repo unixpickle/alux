@@ -2,6 +2,7 @@
 #include <arch/general/hardware-thread-list.hpp>
 #include <arch/general/tick-timer.hpp>
 #include <arch/general/clock.hpp>
+#include <arch/general/state.hpp>
 #include <critical>
 #include <lock>
 #include <new>
@@ -94,7 +95,7 @@ void Scheduler::Tick() {
   if (!toRun) {
     TickTimer::GetGlobal().WaitTimeout();
   } else {
-    toRun->Run();
+    toRun->GetState().Load();
   }
 }
 

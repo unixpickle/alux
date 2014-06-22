@@ -80,8 +80,8 @@ void MbootEntry(void * mbootPtr) {
   OS::UserCode * code = new OS::UserCode(OS::x64::GetProgramStart(),
                                          OS::x64::GetProgramSize());
   OS::UserTask * task = OS::UserTask::New(code);
-  OS::Thread * thread = OS::Thread::New(task, false);
-  thread->SetUserCall((void *)OS::UserMap::GetCodeLocation());
+  void * threadEntry = (void *)OS::UserMap::GetCodeLocation();
+  OS::Thread * thread = OS::Thread::NewUser(task, threadEntry);
   
   {
     OS::ScopeCritical critical;

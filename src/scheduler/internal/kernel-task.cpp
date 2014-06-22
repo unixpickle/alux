@@ -10,7 +10,7 @@ namespace OS {
 
 static KernelTask gTask;
 
-void KernelTask::Initialize() {
+void KernelTask::InitGlobal() {
   new(&gTask) KernelTask();
 }
 
@@ -26,11 +26,11 @@ void KernelTask::Initialize() {
   task = Task::New(true);
 }
 
-DepList GetDependencies() {
+DepList KernelTask::GetDependencies() {
   return DepList(&Scheduler::GetGlobal(), &PIDPool::GetGlobal());
 }
 
-DepList GetSuperDependencies() {
+DepList KernelTask::GetSuperDependencies() {
   return DepList(&GarbageThread::GetGlobal());
 }
 

@@ -18,6 +18,7 @@ public:
   
   virtual void Delete(); // @noncritical
   Task * GetTask(); // @ambicritical
+  State & GetState();
   
 protected:
   Thread * taskNext, * taskLast;

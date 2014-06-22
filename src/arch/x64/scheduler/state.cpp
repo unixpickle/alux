@@ -1,5 +1,7 @@
 #include <arch/x64/scheduler/state.hpp>
+#include <arch/x64/smp/cpu.hpp>
 #include <critical>
+#include <cstddef>
 
 namespace OS {
 
@@ -25,7 +27,7 @@ State::State(void * call, void * arg, bool _kernel)
   
   if (kernel) {
     state.ss = 0;
-    state.rsp = (uint64_t)kernStack + 0x4000;
+    state.rsp = GetStackTop();
     state.cs = 8;
   } else {
     state.ss = 0x1b;
@@ -43,7 +45,7 @@ void State::Load() {
   AssertCritical();
   if (!kernel) {
     CPU & cpu = CPU::GetCurrent();
-    cpu.GetTSS()->rsp[0] = (uint64_t)stack + 0x4000;
+    cpu.SetKernelStack((void *)GetStackTop());
   }
   __asm__ __volatile__(
     "sub $0x28, %%rsp\n"
@@ -58,6 +60,14 @@ void State::Load() {
 
 void State::Delete() {
   delete this;
+}
+
+IRETState * State::GetIRETState() {
+  return &state;
+}
+
+uint64_t State::GetStackTop() {
+  return (uint64_t)stack + 0x4000;
 }
 
 }

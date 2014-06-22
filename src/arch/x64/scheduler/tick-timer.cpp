@@ -1,4 +1,5 @@
 #include <arch/x64/scheduler/tick-timer.hpp>
+#include <arch/x64/scheduler/state.hpp>
 #include <arch/x64/smp/cpu-list.hpp>
 #include <arch/x64/interrupts/irt.hpp>
 #include <arch/x64/interrupts/lapic.hpp>
@@ -56,7 +57,8 @@ void TickTimer::SaveAndTick() {
             : : "a" (cpu.GetDedicatedStack()), "b" (CallTick));
     __builtin_unreachable();
   } else {
-    void * statePtr = (void *)&th->ArchThread::state;
+    State & state = static_cast<State &>(th->GetState());
+    void * statePtr = (void *)state.GetIRETState();
     __asm__(
       "movq $save_and_tick_return, (%%rdi)\n" // save RIP
       "xor %%rax, %%rax\n"

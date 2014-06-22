@@ -16,6 +16,9 @@ public:
   virtual void Load();
   virtual void Delete();
   
+  IRETState * GetIRETState();
+  uint64_t GetStackTop();
+  
 private:
   IRETState state;
   uint64_t rdi;

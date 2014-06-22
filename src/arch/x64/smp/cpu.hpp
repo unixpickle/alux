@@ -33,11 +33,10 @@ public:
 
   UserMap * GetCurrentMap();
   void SetCurrentMap(UserMap * map);
+  
+  void SetKernelStack(void * top);
 
   virtual void Wake();
-
-protected:
-  virtual void SetCurrentThread(Thread * th);
 
 private:
   struct CriticalInformation {

@@ -1,4 +1,5 @@
 #include <scheduler/internal/garbage-thread.hpp>
+#include <scheduler/internal/kernel-task.hpp>
 #include <scheduler/general/task.hpp>
 #include <scheduler-specific/scheduler.hpp>
 #include <critical>
@@ -35,7 +36,7 @@ void GarbageThread::PushTask(Task * t) {
 void GarbageThread::Initialize() {
   AssertNoncritical();
   Task * task = KernelTask::GetGlobal().GetTask();
-  thread = Thread::NewKernel(task, &GarbageThread::CallMain);
+  thread = Thread::NewKernel(task, (void *)&GarbageThread::CallMain);
   
   ScopeCritical critical;
   task->AddThread(thread);

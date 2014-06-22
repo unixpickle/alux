@@ -4,7 +4,6 @@
 #include <arch/x64/interrupts/vectors.hpp>
 #include <arch/x64/segments/gdt.hpp>
 #include <arch/x64/common.hpp>
-#include <arch-specific/thread.hpp>
 #include <critical>
 
 namespace OS {
@@ -65,15 +64,15 @@ void CPU::SetCurrentMap(UserMap * map) {
   currentMap = map;
 }
 
+void CPU::SetKernelStack(void * top) {
+  tss->rsp[0] = (uint64_t)top;
+  info.threadKernStack = top;
+}
+
 void CPU::Wake() {
   AssertCritical();
   LAPIC & lapic = LAPIC::GetCurrent();
   lapic.SendIPI(GetId(), IntVectors::LapicTimer);
-}
-
-void CPU::SetCurrentThread(Thread * th) {
-  HardwareThread::SetCurrentThread(th);
-  info.threadKernStack = th->GetStackTop();
 }
 
 }
