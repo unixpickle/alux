@@ -11,11 +11,21 @@ General architectual ideas that I am playing around with:
 
 ## TODO
 
-Okay, fine, I'll just finish this version of the kernel and start working on the user space. Here's how I plan to do that:
+I have a test user-space compiling and running. So far, I have created a basic print system call, and some system calls for running and exiting tasks and threads.
 
- * Allow the architecture code to map the code
- * Create ELF binary loader for x86-64 and embed a binary blob in the compiled application
- * Test by running a simple "Hello World" user thread.
+I want to expand the scheduler with an IPC mechanism, and I want to implement some useful syscalls. To do this, I plan to modify the kernel and my tests simultaneously for rapid testing and development.
+
+ * Create system calls for accessing the clock and console
+ * Create (privileged) system calls for allocating, mapping, and freeing memory
+ * Come up with a viable IPC mechanism and implement it
+ * Create tests that implement:
+   * Threading, mutexes, semaphores
+   * Memory management
+   * Launching and killing sub-tasks
+   * Basic I/O (e.g. keyboard driver, console)
+   * Assertions, exit statuses
+   * Static variables
+   * NX regions of memory
 
 ## License
 
