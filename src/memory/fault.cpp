@@ -1,5 +1,7 @@
 #include <arch/general/hardware-thread.hpp>
+#include <scheduler-specific/scheduler.hpp>
 #include <scheduler/user/user-task.hpp>
+#include <scheduler/user/kill-reasons.hpp>
 #include <critical>
 #include <cassert>
 #include <panic>
@@ -20,9 +22,7 @@ void HandleMemoryFault(VirtAddr addr, bool exec, bool write) {
   bool result = task->GetCodeMap().HandleFault(addr, exec, write);
   if (result) return;
   
-  Panic("Unhandled user page fault.");
-  // TODO: here, we would ideally kill the task that faulted, but for now I
-  // would rather just Panic so we can see what happened.
+  Scheduler::GetGlobal().ExitTask(KillReasons::MemoryFault);
 }
 
 }

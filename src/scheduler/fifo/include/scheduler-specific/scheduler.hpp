@@ -51,11 +51,11 @@ protected:
   Thread * firstThread = NULL;
   Thread * lastThread = NULL;
   
-  static void SwitchThread(Thread *);
   static void TerminateThread(void * thPtr);
   
   virtual DepList GetDependencies();
   
+  void SwitchThread(Thread *); // @critical
   Thread * GetNextThread(); // @critical
   Thread * PopThread(); // @critical, nosync
   void PushThread(Thread *); // @critical, nosync

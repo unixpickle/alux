@@ -11,12 +11,10 @@ class Thread;
 
 class SchedThread {
 public:
-  SchedThread() : nextTick(0) {}
-  
   Thread * next = NULL;
   Thread * last = NULL;
   
-  Atomic<uint64_t> nextTick;
+  uint64_t nextTick = 0;
   bool isRunning = false;
 };
 

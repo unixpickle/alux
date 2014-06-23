@@ -3,12 +3,11 @@
 #include <arch/x64/vmm/global-map.hpp>
 #include <arch/x64/vmm/tlb.hpp>
 #include <arch/general/physical-allocator.hpp>
-#include <panic>
 #include <critical>
-#include <lock>
 #include <cassert>
-
-#include <iostream> // TODO: delete this
+#include <cstring>
+#include <panic>
+#include <lock>
 
 namespace OS {
 
@@ -31,7 +30,7 @@ UserMap::UserMap() : table(0) {
   if (!pml4) Panic("UserMap::UserMap() - could not allocate PML4");
   
   // push both canonical regions to the free list
-  freeList.Free(0x8000000000L, 0x1000L, 0x7F8000000L);
+  freeList.Free(SpaceStart, 0x1000L, 0x7F8000000L);
   freeList.Free(0xFFFF800000000000L, 0x1000L, 0x800000000L);
   
   {
@@ -46,6 +45,7 @@ UserMap::UserMap() : table(0) {
 }
 
 UserMap::~UserMap() {
+  ScopeCritical scope;
   FreeTable(table.GetPML4(), 0, 1);
 }
 
@@ -137,15 +137,25 @@ void UserMap::ReserveAt(VirtAddr addr, UserMap::Size size) {
   AssertNoncritical();
   ScopeLock scope(&lock);
   if (!freeList.AllocAt(addr, size.pageSize, size.pageCount)) {
-    cout << "attempted to AllocAt(" << addr << "," << size.pageSize << ","
-      << size.pageCount << ")" << endl;
     Panic("UserMap::ReserveAt() failed");
   }
 }
 
-bool UserMap::OwnsRange(VirtAddr start, size_t size) {
+bool UserMap::CopyToKernel(void * dest, VirtAddr start, size_t size) {
   if (start + size < start) return false;
-  if (start < 0x8000000000L) return false;
+  if (start < SpaceStart) return false;
+  
+  memcpy(dest, (void *)start, size);
+  
+  return true;
+}
+
+bool UserMap::CopyFromKernel(VirtAddr dest, void * start, size_t size) {
+  if (dest + size < dest) return false;
+  if (dest < SpaceStart) return false;
+  
+  memcpy((void *)dest, start, size);
+  
   return true;
 }
 
@@ -167,8 +177,8 @@ void UserMap::FreeTable(PhysAddr table, int depth, int start) {
         PhysAddr addr = entry & 0x7FFFFFFFFFFFF000L;
         if (!(entry & 0x80)) { // don't free large pages!
           FreeTable(addr, depth + 1);
+          scratch.InvalidateCache();
         }
-        scratch.InvalidateCache();
       }
     }
   }

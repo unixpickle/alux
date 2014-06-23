@@ -1,6 +1,8 @@
 #include <syscall/handler.hpp>
 #include <syscall/console.hpp>
+#include <scheduler-specific/scheduler.hpp>
 #include <scheduler/general/hold-scope.hpp>
+#include <scheduler/user/kill-reasons.hpp>
 #include <arch/general/hardware-thread.hpp>
 #include <iostream>
 #include <critical>
@@ -24,6 +26,9 @@ void SyscallHandler(uint16_t callNumber,
   switch (callNumber) {
   case 0:
     SyscallPrint((const char *)arg1);
+    break;
+  default:
+    Scheduler::GetGlobal().ExitTask(KillReasons::InvalidSyscall);
     break;
   }
 }

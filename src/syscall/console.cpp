@@ -1,10 +1,9 @@
 #include <scheduler/general/hold-scope.hpp>
 #include <scheduler/general/task.hpp>
+#include <scheduler/user/kill-reasons.hpp>
 #include <arch/general/user-map.hpp>
 #include <iostream>
 #include <critical>
-
-#include <panic> // TODO: delete this
 
 namespace OS {
 
@@ -15,12 +14,11 @@ void SyscallPrint(const char * strBuf) {
   UserMap * map = scope.GetTask()->GetUserAddressSpace();
   assert(map != NULL);
   while (1) {
-    if (!map->OwnsRange((VirtAddr)strBuf, 1)) {
-      // TODO: kill the task here
-      Panic("printed from invalid memory");
+    char str[2] = {0, 0};
+    if (!map->CopyToKernel((void *)str, (VirtAddr)strBuf, 1)) {
+      scope.Exit(KillReasons::UnownedMemory);
     }
-    if (!*strBuf) break;
-    char str[2] = {*strBuf, 0};
+    if (!str[0]) break;
     cout << str;
     strBuf++;
   }

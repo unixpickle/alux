@@ -40,14 +40,22 @@ public:
   virtual void ReserveAt(VirtAddr addr, Size size) = 0;
   
   /**
-   * Ensures the security of a certain range. This answers the question: if the
-   * kernel tried to access memory in this range, would it be accessing memory
-   * that may not belong to the user-space's task? Finding this answer may
-   * involve seeing if the memory was ever allocated with a Reserve or Map, or
-   * it may simply involve chucking if the range is above some boundary.
+   * Performs a copy from user virtual memory to kernel virtual memory. Here's
+   * the thing: a user-space task cannot access kernel memory, but a kernel
+   * subroutine definitely can. Thus, we can't use a normal memcpy() with a
+   * pointer passed from user-space. Instead, we use this method to make sure
+   * that the copy is safe. This method may trigger a normal page fault to
+   * signal an illegal access, or it may return false. A return value of true
+   * signifies that the copy occured without fault.
    * @noncritical
    */
-  virtual bool OwnsRange(VirtAddr start, size_t size) = 0;
+  virtual bool CopyToKernel(void * dest, VirtAddr start, size_t size) = 0;
+  
+  /**
+   * Same as CopyToKernel(), but backwards.
+   * @noncritical
+   */
+  virtual bool CopyFromKernel(VirtAddr dest, void * start, size_t size) = 0;
   
   /**
    * Delete this instance. You should treat this like the `delete` operator in

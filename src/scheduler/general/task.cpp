@@ -15,6 +15,7 @@ Task * Task::New(bool kern) {
 
 Task::~Task() {
   AssertNoncritical();
+  
   // no need to lock our threads list anymore since it can't change externally
   // while nobody can retain us.
   while (firstThread) {
@@ -99,6 +100,7 @@ void Task::Kill(uint64_t status) {
   AssertCritical();
   ScopeCriticalLock lock(&stateLock);
   assert(retainCount || holdCount);
+  
   if (!isKilled) {
     isKilled = true;
     killStatus = status;

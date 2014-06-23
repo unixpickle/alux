@@ -15,5 +15,8 @@ void _main() {
 }
 
 void Main() {
-  std::puts("hello from user-space!");
+  std::puts("hello from user-space!\n");
+  std::puts("screw the man!");
+  std::puts((const char *)0x1337);
+  std::puts("I stuck it to the man!");
 }
