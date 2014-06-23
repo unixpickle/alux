@@ -11,7 +11,9 @@ class GarbageThread;
 
 class Thread : public SchedThread {
 public:
-  static Thread * NewUser(Task * owner, void * call); // @noncritical
+  // next 4 methods are all @noncritical
+  static Thread * NewUser(Task * owner, void * call);
+  static Thread * NewUser(Task * owner, void * call, void * arg);
   static Thread * NewKernel(Task * owner, void * call);
   static Thread * NewKernel(Task * owner, void * call, void * arg);
   
@@ -28,7 +30,7 @@ protected:
   friend class GarbageThread;
   
   Thread(Task * owner, bool kernel, void * func); // @noncritical
-  Thread(Task * owner, void * func, void * arg); // @noncritical
+  Thread(Task * owner, bool kernel, void * func, void * arg); // @noncritical
   
 private:
   Task * task;

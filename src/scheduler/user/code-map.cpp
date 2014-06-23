@@ -117,4 +117,8 @@ VirtAddr CodeMap::GetStart() {
   return spaceStart;
 }
 
+UserCode * CodeMap::GetUserCode() {
+  return code;
+}
+
 }

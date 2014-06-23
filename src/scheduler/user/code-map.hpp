@@ -22,6 +22,8 @@ public:
   
   VirtAddr GetStart(); // @ambicritical
   
+  UserCode * GetUserCode();
+  
 protected:
   uint64_t lock OS_ALIGNED(8); // @noncritical
   

@@ -1,18 +1,20 @@
 section .text
 
 extern _main
+extern _ThreadExit
 
 global _Entry
 _Entry:
-  mov rsp, initial_stack.end
+  mov rsp, initial_stack_end
   call _main
-.loop:
-  jmp .loop
+  call _ThreadExit
 
 section .data
 
 align 16
 
+global initial_stack
+global initial_stack_end
 initial_stack:
   times 0x4000 db 0
-.end:
+initial_stack_end:

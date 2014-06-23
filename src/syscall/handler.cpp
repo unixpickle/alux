@@ -1,5 +1,6 @@
 #include <syscall/handler.hpp>
 #include <syscall/console.hpp>
+#include <syscall/scheduler.hpp>
 #include <scheduler-specific/scheduler.hpp>
 #include <scheduler/general/hold-scope.hpp>
 #include <scheduler/user/kill-reasons.hpp>
@@ -18,14 +19,24 @@ void SyscallHandler(uint16_t callNumber,
   AssertCritical();
   
   // just for now, until all of these arguments are passed to things
-  (void)arg2;
   (void)arg3;
-  (void)arg4;
   (void)arg5;
   
   switch (callNumber) {
   case 0:
     SyscallPrint((const char *)arg1);
+    break;
+  case 1:
+    SyscallLaunchThread(arg1, arg2);
+    break;
+  case 2:
+    SyscallFork(arg1, arg2);
+    break;
+  case 3:
+    SyscallExit(arg4 != 0);
+    break;
+  case 4:
+    SyscallThreadExit();
     break;
   default:
     Scheduler::GetGlobal().ExitTask(KillReasons::InvalidSyscall);

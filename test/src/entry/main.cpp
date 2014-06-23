@@ -1,4 +1,5 @@
 #include <iostream>
+#include <cunistd>
 
 void Main();
 
@@ -14,9 +15,13 @@ void _main() {
 
 }
 
+void ForkedCall();
+
 void Main() {
-  std::puts("hello from user-space!\n");
-  std::puts("screw the man!");
-  std::puts((const char *)0x1337);
-  std::puts("I stuck it to the man!");
+  std::puts("this is the parent process");
+  fork((void *)ForkedCall);
+}
+
+void ForkedCall() {
+  std::puts("this is coming from a subprocess\n");
 }

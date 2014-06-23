@@ -17,6 +17,10 @@ State * State::NewUser(void * call) {
   return new x64::State(call, NULL, false);
 }
 
+State * State::NewUser(void * call, void * arg) {
+  return new x64::State(call, arg, false);
+}
+
 namespace x64 {
 
 State::State(void * call, void * arg, bool _kernel)
