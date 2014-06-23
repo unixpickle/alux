@@ -18,7 +18,7 @@ Several files outline the scheduler-related abstractions that the architecture-s
 
 The scheduling algorithm should not be set in stone. For this reason, the scheduling algorithm is abstracted into its own API. The scheduler helps to manage power consumption and instructs the architecture-specific code to run different tasks at different times. This is the only responsibility of the scheduler, and thus it is easy to focus on algorithms without worrying about synchronization, context switching, etc.
 
-The scheduler-specific system must provide three headers, `&lt;scheduler-specific/scheduler.hpp&gt;`, `&lt;scheduler-specific/task.hpp&gt;`, and `&lt;scheduler-specific/thread.hpp&gt;`.
+The scheduler-specific system must provide three headers, `<scheduler-specific/scheduler.hpp>`, `<scheduler-specific/task.hpp>`, and `<scheduler-specific/thread.hpp>`.
 
 `scheduler.hpp` should provide a class that follows this format in the `OS` namespace:
 
@@ -59,7 +59,7 @@ The scheduler must allow the operating system to do the following:
 
 ## The `Task` and `Thread` classes
 
-The `Task` class is declared in [&lt;scheduler/general/task.hpp&gt;](src/scheduler/general/task.hpp) and the `Thread` class is declared in [&lt;scheduler/general/thread.hpp&gt;](src/scheduler/general/thread.hpp). `Task` is a subclass of `SchedTask`. Similarly, `Thread` is a subclass of `SchedThread`.
+The `Task` class is declared in [&lt;scheduler/general/task.hpp&gt;](../src/scheduler/general/task.hpp) and the `Thread` class is declared in [&lt;scheduler/general/thread.hpp&gt;](../src/scheduler/general/thread.hpp). `Task` is a subclass of `SchedTask`. Similarly, `Thread` is a subclass of `SchedThread`.
 
 ### The `Thread` class
 
