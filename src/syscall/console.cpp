@@ -8,7 +8,6 @@
 namespace OS {
 
 void SyscallPrint(const char * strBuf) {
-  SetCritical(false);
   HoldScope scope;
   
   UserMap * map = scope.GetTask()->GetUserAddressSpace();
@@ -22,8 +21,6 @@ void SyscallPrint(const char * strBuf) {
     cout << str;
     strBuf++;
   }
-  
-  SetCritical(true);
 }
 
 }
