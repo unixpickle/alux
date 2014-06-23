@@ -8,6 +8,8 @@
 
 namespace OS {
 
+class GarbageThread;
+
 class Scheduler : public Module {
 public:
   static const uint64_t Jiffy = 6000; // 100Hz
@@ -20,7 +22,6 @@ public:
   // operations acting on the scheduler as a whole
   
   void AddThread(Thread *); // @critical
-  void RemoveThread(Thread *); // @critical
 
   // operations acting on the current thread or a specific thread
   
@@ -47,6 +48,10 @@ public:
   void Tick();
   
 protected:
+  friend class Task;
+  void RemoveThread(Thread *); // @critical
+  
+private:
   uint64_t lock OS_ALIGNED(8) = 0;
   Thread * firstThread = NULL;
   Thread * lastThread = NULL;

@@ -44,12 +44,6 @@ void Scheduler::AddThread(Thread * t) {
   PushThread(t);
 }
 
-void Scheduler::RemoveThread(Thread * t) {
-  AssertCritical();
-  ScopeCriticalLock scope(&lock);
-  UnlinkThread(t);
-}
-
 void Scheduler::SetTimeout(uint64_t deadline, bool, uint64_t * unlock) {
   AssertCritical();
   {
@@ -120,6 +114,14 @@ void Scheduler::Tick() {
   }
 }
 
+// PROTECTED //
+
+void Scheduler::RemoveThread(Thread * t) {
+  AssertCritical();
+  ScopeCriticalLock scope(&lock);
+  UnlinkThread(t);
+}
+
 // PRIVATE //
 
 void Scheduler::TerminateThread(void * thPtr) {
@@ -132,11 +134,28 @@ void Scheduler::TerminateThread(void * thPtr) {
     return Scheduler::GetGlobal().Tick();
   }
   Scheduler & scheduler = Scheduler::GetGlobal();
-  scheduler.RemoveThread(thread); // never run it again
-  scheduler.SwitchThread(NULL); // release the task, unset it from the CPU
-  task->RemoveThread(thread); // remove the task's reference to the thread
+  
+  // first, we need to make sure the thread is no longer scheduled by the
+  // scheduler
+  scheduler.RemoveThread(thread);
+  
+  // now, get rid of the CPU's reference to the task, and switch to the global
+  // address space
+  scheduler.SwitchThread(NULL);
+  
+  // next, remove the thread from the task so if/when the task terminates it
+  // does not try to remove the thread from the scheduler
+  task->RemoveThread(thread);
+  
+  // allow the task to die
+  task->Release();
+  
+  // give the garbage thread a reference to the thread so it can destroy the
+  // thread's resources
   GarbageThread::GetGlobal().PushThread(thread);
-  task->Release(); // release our reference
+  
+  // run the loop so that the garbage thread and other threads may pick up
+  // again
   scheduler.Tick();
 }
 
@@ -144,24 +163,34 @@ void Scheduler::SwitchThread(Thread * t) {
   Thread * running;
   {
     ScopeCriticalLock scope(&lock);
+    
+    // switch address spaces so that we're not stuck in the old task's address
+    // space when we release it (which could cause problems)
     if (t) {
       t->GetTask()->GetAddressSpace().Set();
     } else {
       GlobalMap::GetGlobal().Set();
     }
   
+    // if there is a current task, unset it from the CPU and mark it as not
+    // running
     running = HardwareThread::GetThread();
     if (running) {
       HardwareThread::SetThread(NULL);
       running->SchedThread::isRunning = false;
     }
   
+    // if there is a new task, make sure it's marked as running and set it to
+    // the CPU
     if (t) {
-      t->SchedThread::isRunning = true;
+      assert(t->SchedThread::isRunning);
       t->SchedThread::nextTick = 0;
       HardwareThread::SetThread(t);
     }
   }
+  // release the task while *not* holding the scheduler lock to avoid deadlock
+  // when the Release() call triggers the task to terminate and to request the
+  // scheduler to wakeup the garbage thread
   if (running) running->GetTask()->Release();
 }
 
