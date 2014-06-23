@@ -6,7 +6,11 @@
 extern "C" {
 
 enum SyscallNumber {
-  SyscallNumberPrint
+  SyscallNumberPrint,
+  SyscallNumberLaunchThread,
+  SyscallNumberFork,
+  SyscallNumberExit,
+  SyscallNumberThreadExit
 };
 
 struct NewThreadInfo {
