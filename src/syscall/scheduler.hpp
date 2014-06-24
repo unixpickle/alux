@@ -8,6 +8,7 @@ void SyscallFork(void * address, void * argument);
 void SyscallExit(bool wasError);
 void SyscallThreadExit();
 uint64_t SyscallGetPID();
+uint64_t SyscallGetThreadID();
 
 }
 

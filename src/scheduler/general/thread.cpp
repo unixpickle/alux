@@ -1,4 +1,5 @@
 #include <scheduler/general/thread.hpp>
+#include <scheduler/general/task.hpp>
 #include <arch/general/state.hpp>
 
 namespace OS {
@@ -21,6 +22,12 @@ Thread * Thread::NewKernel(Task * owner, void * call, void * arg) {
 
 Thread::~Thread() {
   state->Delete();
+}
+
+void Thread::CleanupGarbage() {
+  GetTask()->RemoveThread(this);
+  GetTask()->Release();
+  Delete();
 }
 
 Thread::Thread(Task * owner, bool kernel, void * func) : task(owner) {

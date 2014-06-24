@@ -67,7 +67,6 @@ CodeMap::~CodeMap() {
 
 bool CodeMap::HandleFault(VirtAddr addr, bool, bool write) {
   HoldScope hold;
-  if (!hold.DidHold()) return false;
   
   ScopeLock scope(&lock);
   

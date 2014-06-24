@@ -21,6 +21,11 @@ public:
   virtual uint64_t GetTicksPerMin() = 0;
 
   /**
+   * @ambicritical
+   */
+  virtual uint64_t GetMicroTime();
+
+  /**
    * @noncritical
    */
   virtual void WaitUntil(uint64_t deadline);

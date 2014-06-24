@@ -2,19 +2,30 @@
 #define __SCHEDULER_GARBAGE_THREAD_HPP__
 
 #include <module/module.hpp>
-#include <scheduler/general/thread.hpp>
+#include <cstdint>
+#include <macros>
 
 namespace OS {
 
+class Thread;
+
 class GarbageThread : public Module {
 public:
+  class Garbage {
+  protected:
+    friend class GarbageThread;
+    
+    Garbage * garbageNext;
+    
+    virtual void CleanupGarbage() = 0;
+  };
+  
   static void InitGlobal(); // @noncritical
   static GarbageThread & GetGlobal(); // @ambicritical
   
   Thread * GetThread();
   
-  void PushTask(Task * t); // @critical
-  void PushThread(Thread * t); // @critical
+  void Push(Garbage * garbage); // @ambicritical
   
 protected:
   virtual void Initialize();
@@ -22,17 +33,15 @@ protected:
   
 private:
   uint64_t lock OS_ALIGNED(8) = 0;
-  Task * firstTask = NULL;
-  Thread * firstThread = NULL;
+  Garbage * first = NULL;
   
   Thread * thread;
   
-  static void CallMain();
+  static void CallMain(); // @noncritical
   
   void Wakeup(); // @critical
   void Main(); // @noncritical
-  Task * PopTask(); // @ambicritical, unsynchronized
-  Thread * PopThread(); // @ambicritical, unsynchronized
+  Garbage * Pop(); // @ambicritical, unsynchronized
 };
 
 }

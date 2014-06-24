@@ -2,6 +2,7 @@
 #define __SCHEDULER_TASK_HPP__
 
 #include <scheduler-specific/task.hpp>
+#include <scheduler/internal/garbage-thread.hpp>
 #include <utilities/index-set.hpp>
 #include <cstdint>
 #include <macros>
@@ -9,12 +10,11 @@
 namespace OS {
 
 class Thread;
-class GarbageThread;
 class PIDPool;
 class UserMap;
 class AddressSpace;
 
-class Task : public SchedTask {
+class Task : public SchedTask, public GarbageThread::Garbage {
 public:
   static Task * New(bool forKernel);
   
@@ -24,6 +24,7 @@ public:
   
   void AddThread(Thread * th); // @noncritical
   void RemoveThread(Thread * th); // @noncritical
+  void UnsleepThreadById(uint64_t ident); // @noncritical
   
   bool Retain(); // @critical
   void Release(); // @critical
@@ -36,12 +37,11 @@ public:
   UserMap * GetUserAddressSpace();
 
 protected:
-  Task * garbageNext;
   Task * pidPoolNext, * pidPoolLast;
-  friend class GarbageThread;
   friend class PIDPool;
   
   Task(bool forKernel);
+  virtual void CleanupGarbage();
 
 private:
   uint64_t pid;

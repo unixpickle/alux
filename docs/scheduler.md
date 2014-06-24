@@ -97,9 +97,9 @@ When a task is killed, it is pushed to the garbage thread, which runs in kernel 
 
 While the mechanics of hold counts are fairly straight-forward, they can be a pain to implement. The `HoldScope` class uses constructor and destructor side-effects to alleviate this process.
 
-When a `HoldScope` is initialized, it attempts to hold the current task. Furthermore, it enters a non-critical section (if one was not already in place). Right after initializing a `HoldScope`, you should check `DidHold()` on it. If this returns `false`, the hold failed and you should not perform important operations. Otherwise, you may use your non-critical section knowing that it will not be interrupted due to task termination.
+When a `HoldScope` is initialized, it attempts to hold the current task. Furthermore, it enters a non-critical section (if one was not already in place). If the initializer cannot hold the current task, it terminates the current thread. Thus, after initializng a `HoldScope`, you may use your non-critical section knowing that it will not be interrupted due to task termination.
 
-The hold scope also provides some utilities. Say you use a hold scope in a system call, and that system call notices that the calling task has attempted to do something illegal. The proper thing to do is terminate the current task with an error code. To make this possible, you may call the `Exit(uint64_t)` method on a `HoldScope` to terminate the current task and automatically unhold it.
+The hold scope also provides some utilities. Say you use a hold scope in a system call, and that system call notices that the calling task has attempted to do something illegal. The proper thing to do is terminate the current task with an error code. To make this easy, you may call the `Exit(uint64_t)` method on a `HoldScope` to terminate the current task and automatically unhold it.
 
 Since the hold scope obtains the current `Task` in order to hold it, it is able to provide a convenient `GetTask()` method. This way, you don't always have to run `HardwareThread::GetThread()->GetTask()`.
 

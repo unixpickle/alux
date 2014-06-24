@@ -10,33 +10,33 @@ namespace OS {
 HoldScope::HoldScope() : wasCritical(GetCritical()) {
   SetCritical(true);
   
-  Thread * th = HardwareThread::GetThread();
-  assert(th != NULL);
-  task = th->GetTask();
-  didHold = task->Hold();
+  thread = HardwareThread::GetThread();
+  assert(thread != NULL);
+  task = thread->GetTask();
+  assert(task != NULL);
+  
+  if (!task->Hold()) {
+    Scheduler::GetGlobal().ExitThread();
+  }
   
   SetCritical(false);
 }
 
 HoldScope::~HoldScope() {
-  if (didHold) {
-    SetCritical(true);
-    task->Unhold();
-  }
+  SetCritical(true);
+  task->Unhold();
   SetCritical(wasCritical);
 }
 
-bool HoldScope::DidHold() {
-  return didHold;
-}
-
 Task * HoldScope::GetTask() {
-  assert(didHold);
   return task;
 }
 
+Thread * HoldScope::GetThread() {
+  return thread;
+}
+
 void HoldScope::Exit(uint64_t status) {
-  assert(didHold);
   SetCritical(true);
   task->Unhold();
   Scheduler::GetGlobal().ExitTask(status);

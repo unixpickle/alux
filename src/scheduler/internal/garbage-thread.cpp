@@ -1,10 +1,11 @@
 #include <scheduler/internal/garbage-thread.hpp>
-#include <scheduler/internal/kernel-task.hpp>
-#include <scheduler/general/task.hpp>
 #include <scheduler-specific/scheduler.hpp>
+#include <scheduler/internal/kernel-task.hpp>
+#include <scheduler/general/thread.hpp>
+#include <scheduler/general/task.hpp>
 #include <critical>
-#include <lock>
 #include <panic>
+#include <lock>
 #include <new>
 
 namespace OS {
@@ -23,22 +24,12 @@ Thread * GarbageThread::GetThread() {
   return thread;
 }
 
-void GarbageThread::PushTask(Task * t) {
-  AssertCritical();
+void GarbageThread::Push(GarbageThread::Garbage * g) {
+  ScopeCritical critical;
   ScopeCriticalLock scope(&lock);
   
-  t->garbageNext = firstTask;
-  firstTask = t;
-  
-  Wakeup();
-}
-
-void GarbageThread::PushThread(Thread * t) {
-  AssertCritical();
-  ScopeCriticalLock scope(&lock);
-  
-  t->garbageNext = firstThread;
-  firstThread = t;
+  g->garbageNext = first;
+  first = g;
   
   Wakeup();
 }
@@ -73,39 +64,25 @@ void GarbageThread::Main() {
   SetCritical(true);
   while (1) {
     LockHold(&lock);
-    Task * task = PopTask();
-    Thread * thread = PopThread();
-    if (!task && !thread) {
+    Garbage * g = Pop();
+    if (!g) {
       Scheduler::GetGlobal().SetInfiniteTimeout(&lock);
       continue;
     }
     LockRelease(&lock);
     
     SetCritical(false);
-    if (task) task->Delete();
-    if (thread) {
-      thread->GetTask()->RemoveThread(thread);
-      thread->GetTask()->Release();
-      thread->Delete();
-    }
+    g->CleanupGarbage();
     SetCritical(true);
   }
 }
 
-Task * GarbageThread::PopTask() {
-  if (!firstTask) return NULL;
-  Task * result = firstTask;
-  firstTask = result->garbageNext;
-  result->garbageNext = NULL;
-  return result;
-}
-
-Thread * GarbageThread::PopThread() {
-  if (!firstThread) return NULL;
-  Thread * result = firstThread;
-  firstThread = result->garbageNext;
-  result->garbageNext = NULL;
-  return result;
+GarbageThread::Garbage * GarbageThread::Pop() {
+  if (!first) return NULL;
+  Garbage * res = first;
+  first = first->garbageNext;
+  res->garbageNext = NULL;
+  return res;
 }
 
 }

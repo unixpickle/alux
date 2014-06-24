@@ -9,7 +9,6 @@ namespace OS {
 
 uint64_t SyscallLaunchThread(void * address, void * argument) {
   HoldScope scope;
-  if (!scope.DidHold()) return ~(uint64_t)0;
   
   Thread * th = Thread::NewUser(scope.GetTask(), address, argument);
   scope.GetTask()->AddThread(th);
@@ -23,7 +22,6 @@ uint64_t SyscallLaunchThread(void * address, void * argument) {
 
 void SyscallFork(void * address, void * argument) {
   HoldScope scope;
-  if (!scope.DidHold()) return;
   
   UserTask * thisTask = static_cast<UserTask *>(scope.GetTask());
   Task * task = UserTask::New(thisTask->GetCodeMap().GetUserCode());
@@ -58,8 +56,12 @@ void SyscallThreadExit() {
 
 uint64_t SyscallGetPID() {
   HoldScope scope;
-  if (!scope.DidHold()) return ~(uint64_t)0;
   return scope.GetTask()->GetPID();
+}
+
+uint64_t SyscallGetThreadID() {
+  HoldScope scope;
+  return scope.GetThread()->GetThreadId();
 }
 
 }

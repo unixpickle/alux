@@ -6,12 +6,21 @@
 extern "C" {
 
 enum SyscallNumber {
+  // console
   SyscallNumberPrint,
+  // threading
   SyscallNumberLaunchThread,
   SyscallNumberFork,
   SyscallNumberExit,
   SyscallNumberThreadExit,
-  SyscallNumberGetPID
+  SyscallNumberGetPID,
+  SyscallNumberGetThreadID,
+  // time
+  SyscallNumberGetBootMicroTime,
+  SyscallNumberSetTimeout,
+  SyscallNumberSetInfiniteTimeout,
+  SyscallNumberClearTimeout,
+  SyscallNumberClearClear
 };
 
 struct NewThreadInfo {

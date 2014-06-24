@@ -1,6 +1,7 @@
 #include <syscall/handler.hpp>
 #include <syscall/console.hpp>
 #include <syscall/scheduler.hpp>
+#include <syscall/time.hpp>
 #include <scheduler-specific/scheduler.hpp>
 #include <scheduler/general/hold-scope.hpp>
 #include <scheduler/user/kill-reasons.hpp>
@@ -39,6 +40,24 @@ uint64_t SyscallHandler(uint16_t callNumber,
       break;
     case 5:
       return SyscallGetPID();
+      break;
+    case 6:
+      return SyscallGetThreadID();
+      break;
+    case 7:
+      return SyscallGetBootMicroTime();
+      break;
+    case 8:
+      SyscallSetTimeout(arg4);
+      break;
+    case 9:
+      SyscallSetInfiniteTimeout();
+      break;
+    case 10:
+      SyscallClearTimeout(arg4);
+      break;
+    case 11:
+      SyscallClearClear();
       break;
     default:
       Scheduler::GetGlobal().ExitTask(KillReasons::InvalidSyscall);

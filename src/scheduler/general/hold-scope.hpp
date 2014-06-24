@@ -7,19 +7,21 @@
 namespace OS {
 
 class Task;
+class Thread;
 
 class HoldScope {
 public:
   HoldScope(); // @ambicritical (x) -> @noncritical
   ~HoldScope(); // @ambicritical -> @ambicritical (x)
   
-  bool DidHold(); // @ambicritical
   Task * GetTask();
+  Thread * GetThread();
+  
   void Exit(uint64_t status) OS_NORETURN;
   
 protected:
+  Thread * thread;
   Task * task;
-  bool didHold;
   bool wasCritical;
 };
 

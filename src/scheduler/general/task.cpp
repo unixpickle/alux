@@ -70,6 +70,25 @@ void Task::RemoveThread(Thread * th) {
   }
 }
 
+void Task::UnsleepThreadById(uint64_t ident) {
+  AssertNoncritical();
+  ScopeLock lock(&threadsLock);
+  Thread * th = firstThread;
+  while (th) {
+    if (th->GetThreadId() == ident) break;
+    th = th->taskNext;
+  }
+  if (!th) return;
+  
+  ScopeLock timeoutLock(&th->timeoutLock);
+  if (th->isSleeping) {
+    ScopeCritical critical;
+    Scheduler::GetGlobal().ClearTimeout(th);
+  } else {
+    th->shouldClearTimeout = true;
+  }
+}
+
 bool Task::Retain() {
   AssertCritical();
   ScopeCriticalLock lock(&stateLock);
@@ -128,6 +147,10 @@ UserMap * Task::GetUserAddressSpace() {
 
 // PROTECTED
 
+void Task::CleanupGarbage() {
+  Delete();
+}
+
 Task::Task(bool forKernel) : isKernel(forKernel) {
   AssertNoncritical();
   pid = PIDPool::GetGlobal().AllocPID(this);
@@ -142,7 +165,7 @@ Task::Task(bool forKernel) : isKernel(forKernel) {
 // PRIVATE
 
 void Task::Terminate() {
-  GarbageThread::GetGlobal().PushTask(this);
+  GarbageThread::GetGlobal().Push(this);
 }
 
 }

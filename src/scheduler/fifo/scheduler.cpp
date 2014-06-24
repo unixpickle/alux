@@ -145,7 +145,7 @@ void Scheduler::TerminateThread(void * thPtr) {
   
   // the garbage thread will release the thread's task and remove the thread
   // from it
-  GarbageThread::GetGlobal().PushThread(thread);
+  GarbageThread::GetGlobal().Push(thread);
   
   // run the loop so that the garbage thread and other threads may pick up
   // again
