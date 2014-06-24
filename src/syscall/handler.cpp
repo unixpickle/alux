@@ -10,24 +10,23 @@
 
 namespace OS {
 
-void SyscallHandler(uint16_t callNumber,
-                    void * arg1,
-                    void * arg2,
-                    void * arg3,
-                    uint64_t arg4,
-                    uint64_t arg5) {
+uint64_t SyscallHandler(uint16_t callNumber,
+                        void * arg1,
+                        void * arg2,
+                        void * arg3,
+                        uint64_t arg4,
+                        uint64_t arg5) {
   AssertCritical();
   
-  // just for now, until all of these arguments are passed to things
+  // just for now, until I need this argument for something
   (void)arg3;
-  (void)arg5;
   
   switch (callNumber) {
   case 0:
-    SyscallPrint((const char *)arg1);
+    SyscallPrint((const char *)arg1, (uint8_t)arg4, (bool)arg5);
     break;
   case 1:
-    SyscallLaunchThread(arg1, arg2);
+    return SyscallLaunchThread(arg1, arg2);
     break;
   case 2:
     SyscallFork(arg1, arg2);
@@ -42,6 +41,7 @@ void SyscallHandler(uint16_t callNumber,
     Scheduler::GetGlobal().ExitTask(KillReasons::InvalidSyscall);
     break;
   }
+  return 0;
 }
 
 }

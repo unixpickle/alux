@@ -4,6 +4,7 @@ global _RawSyscallHandler
 global RawSyscallHandler
 extern _SyscallMain
 
+_RawSyscallHandler:
 RawSyscallHandler:
   mov r10, rsp
   mov rsp, [gs:0x10]
@@ -20,6 +21,3 @@ RawSyscallHandler:
   ; TODO: here, verify that RCX is canonical! Serious security holes could
   ; be created if I do not get around to this!
   o64 sysret
-
-_RawSyscallHandler:
-  jmp RawSyscallHandler

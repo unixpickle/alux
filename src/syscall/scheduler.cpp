@@ -7,15 +7,18 @@
 
 namespace OS {
 
-void SyscallLaunchThread(void * address, void * argument) {
+uint64_t SyscallLaunchThread(void * address, void * argument) {
   HoldScope scope;
-  if (!scope.DidHold()) return;
+  if (!scope.DidHold()) return ~(uint64_t)0;
   
   Thread * th = Thread::NewUser(scope.GetTask(), address, argument);
+  scope.GetTask()->AddThread(th);
+  uint64_t theId = th->GetThreadId();
   
   ScopeCritical critical;
-  scope.GetTask()->AddThread(th);
   Scheduler::GetGlobal().AddThread(th);
+  
+  return theId;
 }
 
 void SyscallFork(void * address, void * argument) {
@@ -26,9 +29,10 @@ void SyscallFork(void * address, void * argument) {
   Task * task = UserTask::New(thisTask->GetCodeMap().GetUserCode());
   Thread * th = Thread::NewUser(task, address, argument);
   
+  task->AddThread(th);
+  
   {
     ScopeCritical critical;
-    task->AddThread(th);
     Scheduler::GetGlobal().AddThread(th);
     task->Release();
   }

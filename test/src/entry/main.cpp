@@ -18,7 +18,7 @@ void _main() {
 void ForkedCall();
 
 void Main() {
-  std::puts("this is the parent process");
+  std::puts("this is the parent process", std::ColorLightGray, false);
   fork((void *)ForkedCall);
 }
 

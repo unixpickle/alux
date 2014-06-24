@@ -40,7 +40,10 @@ bool Task::IsKernel() {
 }
 
 void Task::AddThread(Thread * th) {
-  AssertCritical();
+  AssertNoncritical();
+  
+  th->threadId = threadIds.Pop();
+  
   ScopeCriticalLock lock(&threadsLock);
   th->taskNext = firstThread;
   th->taskLast = NULL;
@@ -51,7 +54,10 @@ void Task::AddThread(Thread * th) {
 }
 
 void Task::RemoveThread(Thread * th) {
-  AssertCritical();
+  AssertNoncritical();
+  
+  threadIds.Push(th->threadId);
+  
   ScopeCriticalLock lock(&threadsLock);
   if (th == firstThread) {
     firstThread = th->taskNext;

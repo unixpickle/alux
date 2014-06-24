@@ -2,13 +2,18 @@
 #include <scheduler/general/task.hpp>
 #include <scheduler/user/kill-reasons.hpp>
 #include <arch/general/user-map.hpp>
-#include <iostream>
-#include <critical>
+#include <arch/general/console.hpp>
 
 namespace OS {
 
-void SyscallPrint(const char * strBuf) {
+void SyscallPrint(const char * strBuf, uint8_t color, bool bright) {
   HoldScope scope;
+  
+  if (color > 7) color = 7;
+  bright = (bright != false);
+  
+  Console & console = Console::GetGlobal();
+  console.SetColor((Console::Color)color, bright);
   
   UserMap * map = scope.GetTask()->GetUserAddressSpace();
   assert(map != NULL);
@@ -18,7 +23,7 @@ void SyscallPrint(const char * strBuf) {
       scope.Exit(KillReasons::UnownedMemory);
     }
     if (!str[0]) break;
-    cout << str;
+    console.PrintString(str);
     strBuf++;
   }
 }

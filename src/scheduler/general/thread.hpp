@@ -23,11 +23,15 @@ public:
   Task * GetTask(); // @ambicritical
   State & GetState();
   
+  uint64_t GetThreadId();
+  
 protected:
   Thread * taskNext, * taskLast;
   Thread * garbageNext;
   friend class Task;
   friend class GarbageThread;
+  
+  uint64_t threadId;
   
   Thread(Task * owner, bool kernel, void * func); // @noncritical
   Thread(Task * owner, bool kernel, void * func, void * arg); // @noncritical

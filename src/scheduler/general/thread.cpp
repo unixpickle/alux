@@ -52,4 +52,8 @@ State & Thread::GetState() {
   return *state;
 }
 
+uint64_t Thread::GetThreadId() {
+  return threadId;
+}
+
 }

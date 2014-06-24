@@ -3,7 +3,18 @@
 
 namespace std {
 
-void puts(const char * buff);
+enum Color {
+  ColorBlack = 0,
+  ColorBlue = 1,
+  ColorGreen = 2,
+  ColorCyan = 3,
+  ColorRed = 4,
+  ColorMagenta = 5,
+  ColorBrown = 6,
+  ColorLightGray = 7
+};
+
+void puts(const char * buff, Color color = ColorLightGray, bool bright = true);
 
 }
 

@@ -83,9 +83,10 @@ void MbootEntry(void * mbootPtr) {
   void * threadEntry = (void *)OS::UserMap::GetCodeLocation();
   OS::Thread * thread = OS::Thread::NewUser(task, threadEntry);
   
+  task->AddThread(thread);
+  
   {
     OS::ScopeCritical critical;
-    task->AddThread(thread);
     OS::Scheduler::GetGlobal().AddThread(thread);
     task->Release();
   }

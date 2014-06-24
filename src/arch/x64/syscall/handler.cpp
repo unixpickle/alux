@@ -7,16 +7,16 @@
 
 extern "C" {
 
-void SyscallMain(uint64_t call, uint64_t arg1,
-                 uint64_t arg2, uint64_t arg3,
-                 uint64_t arg4, uint64_t arg5) {
-  OS::x64::HandleSyscall(call, arg1, arg2, arg3, arg4, arg5);
+uint64_t SyscallMain(uint64_t call, uint64_t arg1,
+                     uint64_t arg2, uint64_t arg3,
+                     uint64_t arg4, uint64_t arg5) {
+  return OS::x64::HandleSyscall(call, arg1, arg2, arg3, arg4, arg5);
 }
 
-void _SyscallMain(uint64_t call, uint64_t arg1,
-                  uint64_t arg2, uint64_t arg3,
-                  uint64_t arg4, uint64_t arg5) {
-  OS::x64::HandleSyscall(call, arg1, arg2, arg3, arg4, arg5);
+uint64_t _SyscallMain(uint64_t call, uint64_t arg1,
+                      uint64_t arg2, uint64_t arg3,
+                      uint64_t arg4, uint64_t arg5) {
+  return OS::x64::HandleSyscall(call, arg1, arg2, arg3, arg4, arg5);
 }
 
 }
@@ -25,15 +25,15 @@ namespace OS {
 
 namespace x64 {
 
-void HandleSyscall(uint64_t call, uint64_t arg1,
-                   uint64_t arg2, uint64_t arg3,
-                   uint64_t arg4, uint64_t arg5) {
+uint64_t HandleSyscall(uint64_t call, uint64_t arg1,
+                       uint64_t arg2, uint64_t arg3,
+                       uint64_t arg4, uint64_t arg5) {
   AssertCritical();
   
   // TODO: here, put architecture-specific system calls
   
-  SyscallHandler((uint16_t)call, (void *)arg1, (void *)arg2, (void *)arg3,
-                 arg4, arg5);
+  return SyscallHandler((uint16_t)call, (void *)arg1, (void *)arg2,
+                        (void *)arg3, arg4, arg5);
 }
 
 }

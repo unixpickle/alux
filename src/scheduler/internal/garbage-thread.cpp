@@ -79,9 +79,14 @@ void GarbageThread::Main() {
       continue;
     }
     LockRelease(&lock);
+    
     SetCritical(false);
     if (task) task->Delete();
-    if (thread) thread->Delete();
+    if (thread) {
+      thread->GetTask()->RemoveThread(thread);
+      thread->GetTask()->Release();
+      thread->Delete();
+    }
     SetCritical(true);
   }
 }

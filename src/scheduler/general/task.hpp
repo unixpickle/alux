@@ -2,6 +2,7 @@
 #define __SCHEDULER_TASK_HPP__
 
 #include <scheduler-specific/task.hpp>
+#include <utilities/index-set.hpp>
 #include <cstdint>
 #include <macros>
 
@@ -21,8 +22,8 @@ public:
   virtual void Delete(); // @noncritical
   virtual bool IsKernel();
   
-  void AddThread(Thread * th); // @critical
-  void RemoveThread(Thread * th); // @critical
+  void AddThread(Thread * th); // @noncritical
+  void RemoveThread(Thread * th); // @noncritical
   
   bool Retain(); // @critical
   void Release(); // @critical
@@ -48,6 +49,8 @@ private:
   
   uint64_t threadsLock OS_ALIGNED(8); // @critical
   Thread * firstThread;
+  
+  IndexSet<0x10> threadIds;
   
   uint64_t stateLock OS_ALIGNED(8); // @critical
   uint64_t retainCount = 1;

@@ -143,15 +143,8 @@ void Scheduler::TerminateThread(void * thPtr) {
   // address space
   scheduler.SwitchThread(NULL);
   
-  // next, remove the thread from the task so if/when the task terminates it
-  // does not try to remove the thread from the scheduler
-  task->RemoveThread(thread);
-  
-  // allow the task to die
-  task->Release();
-  
-  // give the garbage thread a reference to the thread so it can destroy the
-  // thread's resources
+  // the garbage thread will release the thread's task and remove the thread
+  // from it
   GarbageThread::GetGlobal().PushThread(thread);
   
   // run the loop so that the garbage thread and other threads may pick up

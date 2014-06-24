@@ -3,7 +3,7 @@
 
 namespace OS {
 
-void SyscallPrint(const char * strBuf);
+void SyscallPrint(const char * strBuf, uint8_t color, bool bright);
 
 }
 
