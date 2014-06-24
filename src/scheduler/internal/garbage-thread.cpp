@@ -48,8 +48,9 @@ void GarbageThread::Initialize() {
   Task * task = KernelTask::GetGlobal().GetTask();
   thread = Thread::NewKernel(task, (void *)&GarbageThread::CallMain);
   
-  ScopeCritical critical;
   task->AddThread(thread);
+  
+  ScopeCritical critical;
   Scheduler::GetGlobal().AddThread(thread);
 }
 

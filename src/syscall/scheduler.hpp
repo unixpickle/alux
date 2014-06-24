@@ -7,6 +7,7 @@ uint64_t SyscallLaunchThread(void * address, void * argument);
 void SyscallFork(void * address, void * argument);
 void SyscallExit(bool wasError);
 void SyscallThreadExit();
+uint64_t SyscallGetPID();
 
 }
 

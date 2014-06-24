@@ -44,7 +44,7 @@ void Task::AddThread(Thread * th) {
   
   th->threadId = threadIds.Pop();
   
-  ScopeCriticalLock lock(&threadsLock);
+  ScopeLock lock(&threadsLock);
   th->taskNext = firstThread;
   th->taskLast = NULL;
   if (firstThread) {
@@ -58,7 +58,7 @@ void Task::RemoveThread(Thread * th) {
   
   threadIds.Push(th->threadId);
   
-  ScopeCriticalLock lock(&threadsLock);
+  ScopeLock lock(&threadsLock);
   if (th == firstThread) {
     firstThread = th->taskNext;
     if (firstThread) firstThread->taskLast = NULL;

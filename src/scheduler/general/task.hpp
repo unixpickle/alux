@@ -47,7 +47,7 @@ private:
   uint64_t pid;
   bool isKernel;
   
-  uint64_t threadsLock OS_ALIGNED(8); // @critical
+  uint64_t threadsLock OS_ALIGNED(8); // @noncritical
   Thread * firstThread;
   
   IndexSet<0x10> threadIds;

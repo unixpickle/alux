@@ -56,4 +56,10 @@ void SyscallThreadExit() {
   Scheduler::GetGlobal().ExitThread();
 }
 
+uint64_t SyscallGetPID() {
+  HoldScope scope;
+  if (!scope.DidHold()) return ~(uint64_t)0;
+  return scope.GetTask()->GetPID();
+}
+
 }

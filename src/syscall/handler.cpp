@@ -22,24 +22,27 @@ uint64_t SyscallHandler(uint16_t callNumber,
   (void)arg3;
   
   switch (callNumber) {
-  case 0:
-    SyscallPrint((const char *)arg1, (uint8_t)arg4, (bool)arg5);
-    break;
-  case 1:
-    return SyscallLaunchThread(arg1, arg2);
-    break;
-  case 2:
-    SyscallFork(arg1, arg2);
-    break;
-  case 3:
-    SyscallExit(arg4 != 0);
-    break;
-  case 4:
-    SyscallThreadExit();
-    break;
-  default:
-    Scheduler::GetGlobal().ExitTask(KillReasons::InvalidSyscall);
-    break;
+    case 0:
+      SyscallPrint((const char *)arg1, (uint8_t)arg4, (bool)arg5);
+      break;
+    case 1:
+      return SyscallLaunchThread(arg1, arg2);
+      break;
+    case 2:
+      SyscallFork(arg1, arg2);
+      break;
+    case 3:
+      SyscallExit(arg4 != 0);
+      break;
+    case 4:
+      SyscallThreadExit();
+      break;
+    case 5:
+      return SyscallGetPID();
+      break;
+    default:
+      Scheduler::GetGlobal().ExitTask(KillReasons::InvalidSyscall);
+      break;
   }
   return 0;
 }

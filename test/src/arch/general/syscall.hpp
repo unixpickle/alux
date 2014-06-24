@@ -10,7 +10,8 @@ enum SyscallNumber {
   SyscallNumberLaunchThread,
   SyscallNumberFork,
   SyscallNumberExit,
-  SyscallNumberThreadExit
+  SyscallNumberThreadExit,
+  SyscallNumberGetPID
 };
 
 struct NewThreadInfo {
@@ -19,7 +20,8 @@ struct NewThreadInfo {
   void * argument;
 } __attribute__((packed));
 
-void Syscall(uint16_t name, void * arg1, void * arg2, void * arg3, uint64_t arg4, uint64_t arg5);
+uint64_t Syscall(uint16_t name, void * arg1, void * arg2, void * arg3,
+                 uint64_t arg4, uint64_t arg5);
 void ThreadEntry(NewThreadInfo * info);
 void ThreadExit();
 
