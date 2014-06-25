@@ -86,20 +86,14 @@ void Scheduler::Resign() {
   TickTimer::GetGlobal().SaveAndTick();
 }
 
-void Scheduler::ExitThread() {
-  AssertCritical();
-  Thread * th = HardwareThread::GetThread();
-  TickTimer::GetGlobal().TickAtMethod(&Scheduler::TerminateThread,
-                                      (void *)th);
-}
-
 void Scheduler::ExitTask(uint64_t status) {
   AssertCritical();
   Thread * th = HardwareThread::GetThread();
   assert(th != NULL);
   Task * task = th->GetTask();
   task->Kill(status);
-  ExitThread();
+  
+  Thread::Exit();
 }
 
 void Scheduler::Tick() {
@@ -120,36 +114,6 @@ void Scheduler::RemoveThread(Thread * t) {
   AssertCritical();
   ScopeCriticalLock scope(&lock);
   UnlinkThread(t);
-}
-
-// PRIVATE //
-
-void Scheduler::TerminateThread(void * thPtr) {
-  AssertCritical();
-  
-  Thread * thread = (Thread *)thPtr;
-  Task * task = thread->GetTask();
-  if (!task->Retain()) {
-    // the task is dying anyway
-    return Scheduler::GetGlobal().Tick();
-  }
-  Scheduler & scheduler = Scheduler::GetGlobal();
-  
-  // first, we need to make sure the thread is no longer scheduled by the
-  // scheduler
-  scheduler.RemoveThread(thread);
-  
-  // now, get rid of the CPU's reference to the task, and switch to the global
-  // address space
-  scheduler.SwitchThread(NULL);
-  
-  // the garbage thread will release the thread's task and remove the thread
-  // from it
-  GarbageThread::GetGlobal().Push(thread);
-  
-  // run the loop so that the garbage thread and other threads may pick up
-  // again
-  scheduler.Tick();
 }
 
 void Scheduler::SwitchThread(Thread * t) {
@@ -184,7 +148,7 @@ void Scheduler::SwitchThread(Thread * t) {
   // release the task while *not* holding the scheduler lock to avoid deadlock
   // when the Release() call triggers the task to terminate and to request the
   // scheduler to wakeup the garbage thread
-  if (running) running->GetTask()->Release();
+  if (running) running->Release();
 }
 
 Thread * Scheduler::GetNextThread() {
@@ -220,14 +184,12 @@ Thread * Scheduler::GetNextThread() {
       continue;
     }
     
-    if (!current->GetTask()->Retain()) continue;
+    if (!current->Retain()) continue;
     break;
   }
   
   TickTimer::GetGlobal().SetTimeout(nextTick - now, true);
-  if (current) {
-    current->isRunning = true;
-  }
+  if (current) current->SchedThread::isRunning = true;
   return current;
 }
 

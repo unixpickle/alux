@@ -1,9 +1,11 @@
 #include <scheduler/general/task.hpp>
+#include <scheduler/general/thread.hpp>
 #include <scheduler/internal/garbage-thread.hpp>
 #include <scheduler/internal/pid-pool.hpp>
 #include <scheduler-specific/scheduler.hpp>
 #include <arch/general/user-map.hpp>
 #include <arch/general/global-map.hpp>
+#include <arch/general/hardware-thread.hpp>
 #include <critical>
 #include <lock>
 
@@ -11,6 +13,17 @@ namespace OS {
 
 Task * Task::New(bool kern) {
   return new Task(kern);
+}
+
+void Task::Exit(uint64_t status) {
+  AssertCritical();
+  
+  Thread * th = HardwareThread::GetThread();
+  assert(th != NULL);
+  Task * task = th->GetTask();
+  task->Kill(status);
+  
+  Thread::Exit();
 }
 
 Task::~Task() {

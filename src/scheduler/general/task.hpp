@@ -16,7 +16,8 @@ class AddressSpace;
 
 class Task : public SchedTask, public GarbageThread::Garbage {
 public:
-  static Task * New(bool forKernel);
+  static Task * New(bool forKernel); // @noncritical
+  static void Exit(uint64_t status) OS_NORETURN; // @critical
   
   ~Task(); // @noncritical
   virtual void Delete(); // @noncritical
@@ -51,6 +52,7 @@ private:
   Thread * firstThread;
   
   IndexSet<0x10> threadIds;
+  IndexSet<0x20> descriptors;
   
   uint64_t stateLock OS_ALIGNED(8); // @critical
   uint64_t retainCount = 1;

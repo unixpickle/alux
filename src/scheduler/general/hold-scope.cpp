@@ -16,7 +16,7 @@ HoldScope::HoldScope() : wasCritical(GetCritical()) {
   assert(task != NULL);
   
   if (!task->Hold()) {
-    Scheduler::GetGlobal().ExitThread();
+    Thread::Exit();
   }
   
   SetCritical(false);
@@ -39,7 +39,7 @@ Thread * HoldScope::GetThread() {
 void HoldScope::Exit(uint64_t status) {
   SetCritical(true);
   task->Unhold();
-  Scheduler::GetGlobal().ExitTask(status);
+  Task::Exit(status);
 }
 
 }

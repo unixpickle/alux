@@ -46,12 +46,12 @@ void SyscallExit(bool wasError) {
   if (wasError) killReason = KillReasons::UserError;
   else killReason = KillReasons::Natural;
   
-  Scheduler::GetGlobal().ExitTask(killReason);
+  Task::Exit(killReason);
 }
 
 void SyscallThreadExit() {
   ScopeCritical critical;
-  Scheduler::GetGlobal().ExitThread();
+  Thread::Exit();
 }
 
 uint64_t SyscallGetPID() {

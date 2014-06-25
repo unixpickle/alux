@@ -17,6 +17,8 @@ public:
   static Thread * NewKernel(Task * owner, void * call);
   static Thread * NewKernel(Task * owner, void * call, void * arg);
   
+  static void Exit() OS_NORETURN; // @critical
+  
   ~Thread();
   
   virtual void Delete(); // @noncritical
@@ -24,6 +26,9 @@ public:
   State & GetState();
   
   uint64_t GetThreadId();
+  
+  bool Retain(); // @critical
+  void Release(); // @critical
   
   uint64_t timeoutLock OS_ALIGNED(8) = 0; // @noncritical
   bool shouldClearTimeout = false;
@@ -43,6 +48,10 @@ protected:
 private:
   Task * task;
   State * state;
+  
+  uint64_t retainLock OS_ALIGNED(8) = 0;
+  uint64_t retainCount = 0;
+  bool isKilled;
 };
 
 }

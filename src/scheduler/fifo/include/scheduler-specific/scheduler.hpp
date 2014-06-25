@@ -37,7 +37,6 @@ public:
   void SetInfiniteTimeout(uint64_t * unlock = NULL); // @critical
   bool ClearTimeout(Thread *); // @critical
   void Resign(); // @critical
-  void ExitThread() OS_NORETURN; // @critical
   void ExitTask(uint64_t status) OS_NORETURN; // @critical
 
   /**
@@ -49,14 +48,13 @@ public:
   
 protected:
   friend class Task;
+  friend class Thread;
   void RemoveThread(Thread *); // @critical
   
 private:
   uint64_t lock OS_ALIGNED(8) = 0;
   Thread * firstThread = NULL;
   Thread * lastThread = NULL;
-  
-  static void TerminateThread(void * thPtr);
   
   virtual DepList GetDependencies();
   
