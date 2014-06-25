@@ -46,14 +46,6 @@ public:
    */
   virtual void WaitTimeout() OS_NORETURN = 0;
   
-  /**
-   * Trigger a tick at a method, passing a specified argument. This will not
-   * save the state of the current thread, so it may never be returned from.
-   * This should only be used to terminate a thread.
-   * @critical -> @noncritical (no return)
-   */
-  virtual void TickAtMethod(void (*)(void *), void * arg) OS_NORETURN = 0;
-  
 };
 
 }

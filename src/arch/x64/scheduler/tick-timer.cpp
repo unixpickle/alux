@@ -104,15 +104,6 @@ void TickTimer::WaitTimeout() {
   __builtin_unreachable();
 }
 
-void TickTimer::TickAtMethod(void (* method)(void *), void * arg) {
-  AssertCritical();
-  CPU & cpu = CPU::GetCurrent();
-  __asm__("mov %%rax, %%rsp\n"
-          "call *%%rbx"
-          : : "a" (cpu.GetDedicatedStack()), "b" (method), "D" (arg));
-  __builtin_unreachable();
-}
-
 void LapicTickMethod() {
   AssertCritical();
   LAPIC::GetCurrent().SendEOI();

@@ -16,7 +16,6 @@ public:
   virtual void SetTimeout(uint64_t delay, bool precision);
   virtual void ClearTimeout();
   virtual void WaitTimeout() OS_NORETURN;
-  virtual void TickAtMethod(void (*)(void *), void * arg) OS_NORETURN;
   
 protected:
   virtual void Initialize();
