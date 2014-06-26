@@ -100,7 +100,10 @@ void Thread::CleanupGarbage() {
     Scheduler::GetGlobal().RemoveThread(this);
   }
   GetTask()->RemoveThread(this);
-  GetTask()->Release();
+  {
+    ScopeCritical critical;
+    GetTask()->Release();
+  }
   Delete();
 }
 
