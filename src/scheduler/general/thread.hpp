@@ -11,11 +11,14 @@ class State;
 
 class Thread : public SchedThread, public GarbageThread::Garbage {
 public:
-  // next 4 methods are all @noncritical
+  // next 4 methods are all @noncritical and *may* return NULL
   static Thread * NewUser(Task * owner, void * call);
   static Thread * NewUser(Task * owner, void * call, void * arg);
   static Thread * NewKernel(Task * owner, void * call);
   static Thread * NewKernel(Task * owner, void * call, void * arg);
+  
+  static void InitializeCounter();
+  static uint64_t GetCounter();
   
   static void Exit() OS_NORETURN; // @critical
   
@@ -50,7 +53,7 @@ private:
   State * state;
   
   uint64_t retainLock OS_ALIGNED(8) = 0;
-  uint64_t retainCount = 0;
+  uint64_t retainCount = 1;
   bool isKilled;
 };
 

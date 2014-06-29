@@ -18,6 +18,8 @@
 #include <arch/x64/program.hpp>
 #include <arch/general/user-map.hpp>
 #include <scheduler-specific/scheduler.hpp>
+#include <scheduler/general/thread.hpp>
+#include <scheduler/general/task.hpp>
 #include <scheduler/user/user-task.hpp>
 #include <scheduler/internal/pid-pool.hpp>
 #include <scheduler/internal/kernel-task.hpp>
@@ -58,6 +60,9 @@ static void InitializeSingletons(void * mboot) {
   PIDPool::InitGlobal();
   KernelTask::InitGlobal();
   GarbageThread::InitGlobal();
+  
+  Thread::InitializeCounter();
+  Task::InitializeCounter();
 }
 
 }
@@ -83,11 +88,14 @@ void MbootEntry(void * mbootPtr) {
   void * threadEntry = (void *)OS::UserMap::GetCodeLocation();
   OS::Thread * thread = OS::Thread::NewUser(task, threadEntry);
   
+  assert(thread != NULL);
+  
   task->AddThread(thread);
   
   {
     OS::ScopeCritical critical;
     OS::Scheduler::GetGlobal().AddThread(thread);
+    thread->Release();
     task->Release();
   }
   

@@ -1,3 +1,7 @@
+# NOTICE
+
+These docs are out of date. I will be updating them once the scheduling system is more complete.
+
 # Scheduler & Task System
 
 The Alux task system and scheduler sit on top of two different parallel layers of abstraction. One of these is the architecture, and the other is the scheduling algorithm.

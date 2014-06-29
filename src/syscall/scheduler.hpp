@@ -9,6 +9,8 @@ void SyscallExit(bool wasError);
 void SyscallThreadExit();
 uint64_t SyscallGetPID();
 uint64_t SyscallGetThreadID();
+uint64_t SyscallGetTaskCount();
+uint64_t SyscallGetThreadCount();
 
 }
 

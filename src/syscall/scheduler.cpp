@@ -16,6 +16,7 @@ uint64_t SyscallLaunchThread(void * address, void * argument) {
   
   ScopeCritical critical;
   Scheduler::GetGlobal().AddThread(th);
+  th->Release();
   
   return theId;
 }
@@ -62,6 +63,16 @@ uint64_t SyscallGetPID() {
 uint64_t SyscallGetThreadID() {
   HoldScope scope;
   return scope.GetThread()->GetThreadId();
+}
+
+uint64_t SyscallGetTaskCount() {
+  ScopeCritical critical;
+  return Task::GetCounter();
+}
+
+uint64_t SyscallGetThreadCount() {
+  ScopeCritical critical;
+  return Thread::GetCounter();
 }
 
 }

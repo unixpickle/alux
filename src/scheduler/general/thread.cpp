@@ -6,20 +6,34 @@
 
 namespace OS {
 
+static Atomic<uint64_t> threadCount(0);
+
 Thread * Thread::NewUser(Task * owner, void * call) {
+  if (!owner->Retain()) return NULL;
   return new Thread(owner, false, call);
 }
 
 Thread * Thread::NewUser(Task * owner, void * call, void * arg) {
+  if (!owner->Retain()) return NULL;
   return new Thread(owner, false, call, arg);
 }
 
 Thread * Thread::NewKernel(Task * owner, void * call) {
+  if (!owner->Retain()) return NULL;
   return new Thread(owner, true, call);
 }
 
 Thread * Thread::NewKernel(Task * owner, void * call, void * arg) {
+  if (!owner->Retain()) return NULL;
   return new Thread(owner, true, call, arg);
+}
+
+void Thread::InitializeCounter() {
+  new(&threadCount) Atomic<uint64_t>(0);
+}
+
+uint64_t Thread::GetCounter() {
+  return threadCount;
 }
 
 void Thread::Exit() {
@@ -37,9 +51,11 @@ void Thread::Exit() {
 
 Thread::~Thread() {
   state->Delete();
+  --threadCount;
 }
 
 Thread::Thread(Task * owner, bool kernel, void * func) : task(owner) {
+  ++threadCount;
   if (kernel) {
     state = State::NewKernel(func);
   } else {
@@ -49,6 +65,7 @@ Thread::Thread(Task * owner, bool kernel, void * func) : task(owner) {
 
 Thread::Thread(Task * owner, bool kernel, void * func, void * arg)
   : task(owner) {
+  ++threadCount;
   if (kernel) {
     state = State::NewKernel(func, arg);
   } else {

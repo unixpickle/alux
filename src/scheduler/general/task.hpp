@@ -17,6 +17,10 @@ class AddressSpace;
 class Task : public SchedTask, public GarbageThread::Garbage {
 public:
   static Task * New(bool forKernel); // @noncritical
+  
+  static void InitializeCounter();
+  static uint64_t GetCounter();
+  
   static void Exit(uint64_t status) OS_NORETURN; // @critical
   
   ~Task(); // @noncritical

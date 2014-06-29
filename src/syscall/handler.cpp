@@ -59,6 +59,12 @@ uint64_t SyscallHandler(uint16_t callNumber,
     case 11:
       SyscallClearClear();
       break;
+    case 12:
+      return SyscallGetTaskCount();
+      break;
+    case 13:
+      return SyscallGetThreadCount();
+      break;
     default:
       Scheduler::GetGlobal().ExitTask(KillReasons::InvalidSyscall);
       break;

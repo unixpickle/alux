@@ -11,8 +11,18 @@
 
 namespace OS {
 
+static Atomic<uint64_t> taskCount(0);
+
 Task * Task::New(bool kern) {
   return new Task(kern);
+}
+
+void Task::InitializeCounter() {
+  new(&taskCount) Atomic<uint64_t>(0);
+}
+
+uint64_t Task::GetCounter() {
+  return taskCount;
 }
 
 void Task::Exit(uint64_t status) {
@@ -42,6 +52,8 @@ Task::~Task() {
   
   PIDPool::GetGlobal().FreePID(GetPID(), this);
   if (userSpace) userSpace->Delete();
+  
+  --taskCount;
 }
 
 void Task::Delete() {
@@ -166,6 +178,8 @@ void Task::CleanupGarbage() {
 
 Task::Task(bool forKernel) : isKernel(forKernel) {
   AssertNoncritical();
+  ++taskCount;
+  
   pid = PIDPool::GetGlobal().AllocPID(this);
   
   if (isKernel) {

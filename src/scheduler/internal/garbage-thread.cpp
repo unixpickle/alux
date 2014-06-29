@@ -39,10 +39,13 @@ void GarbageThread::Initialize() {
   Task * task = KernelTask::GetGlobal().GetTask();
   thread = Thread::NewKernel(task, (void *)&GarbageThread::CallMain);
   
+  assert(thread != NULL);
+  
   task->AddThread(thread);
   
   ScopeCritical critical;
   Scheduler::GetGlobal().AddThread(thread);
+  thread->Release();
 }
 
 DepList GarbageThread::GetDependencies() {
