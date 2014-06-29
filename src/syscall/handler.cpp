@@ -4,6 +4,7 @@
 #include <syscall/time.hpp>
 #include <scheduler-specific/scheduler.hpp>
 #include <scheduler/general/hold-scope.hpp>
+#include <scheduler/general/task.hpp>
 #include <scheduler/user/kill-reasons.hpp>
 #include <arch/general/hardware-thread.hpp>
 #include <iostream>
@@ -66,7 +67,7 @@ uint64_t SyscallHandler(uint16_t callNumber,
       return SyscallGetThreadCount();
       break;
     default:
-      Scheduler::GetGlobal().ExitTask(KillReasons::InvalidSyscall);
+      Task::Exit(KillReasons::InvalidSyscall);
       break;
   }
   return 0;

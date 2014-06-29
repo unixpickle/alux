@@ -27,6 +27,13 @@ void Main() {
   }
   std::puts("[OK]");
   
+  std::print("testing fork and thread...");
+  if (!ForkAndThreadTest()) {
+    std::puts("[fail]", std::ColorRed, true);
+    return;
+  }
+  std::puts("[OK]");
+  
   std::puts("this is the parent process", std::ColorLightGray, false);
   if (getpid() != 1) {
     std::puts("weird process ID found (expected 1)", std::ColorRed, true);

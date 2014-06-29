@@ -4,6 +4,7 @@
 extern "C" {
 
 bool BasicThreadTest();
+bool ForkAndThreadTest();
 
 }
 

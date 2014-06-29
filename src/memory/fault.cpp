@@ -22,7 +22,7 @@ void HandleMemoryFault(VirtAddr addr, bool exec, bool write) {
   bool result = task->GetCodeMap().HandleFault(addr, exec, write);
   if (result) return;
   
-  Scheduler::GetGlobal().ExitTask(KillReasons::MemoryFault);
+  Task::Exit(KillReasons::MemoryFault);
 }
 
 }

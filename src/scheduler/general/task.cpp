@@ -124,10 +124,12 @@ bool Task::Retain() {
 
 void Task::Release() {
   AssertCritical();
-  ScopeCriticalLock lock(&stateLock);
-  if (!--retainCount && !holdCount && isKilled) {
-    Terminate();
+  bool shouldTerm;
+  {
+    ScopeCriticalLock lock(&stateLock);
+    shouldTerm = !--retainCount && !holdCount && isKilled;
   }
+  if (shouldTerm) Terminate();
 }
 
 bool Task::Hold() {
@@ -140,8 +142,12 @@ bool Task::Hold() {
 
 void Task::Unhold() {
   AssertCritical();
-  ScopeCriticalLock lock(&stateLock);
-  if (!--holdCount && !retainCount && isKilled) {
+  bool shouldTerm;
+  {
+    ScopeCriticalLock lock(&stateLock);
+    shouldTerm = !--holdCount && !retainCount && isKilled;
+  }
+  if (shouldTerm) {
     Terminate();
   }
 }

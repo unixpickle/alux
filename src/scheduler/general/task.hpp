@@ -29,6 +29,8 @@ public:
   
   void AddThread(Thread * th); // @noncritical
   void RemoveThread(Thread * th); // @noncritical
+  
+  // TODO: get rid of this in favor of returning a referenced Thread
   void UnsleepThreadById(uint64_t ident); // @noncritical
   
   bool Retain(); // @critical

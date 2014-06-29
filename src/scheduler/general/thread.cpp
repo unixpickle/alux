@@ -106,19 +106,27 @@ bool Thread::Retain() {
   ScopeCriticalLock scope(&retainLock);
   if (isKilled) return false;
   if (!GetTask()->Retain()) return false;
-  retainCount++;
+  ++retainCount;
   
   return true;
 }
 
 void Thread::Release() {
   AssertCritical();
-  ScopeCriticalLock scope(&retainLock);
-  assert(retainCount != 0);
-  if (!--retainCount && isKilled) {
+  bool shouldCleanup;
+  Task * t = GetTask();
+  {
+    ScopeCriticalLock scope(&retainLock);
+    assert(retainCount != 0);
+    shouldCleanup = !--retainCount && isKilled;
+  }
+  
+  if (shouldCleanup) {
     GarbageThread::GetGlobal().Push(this);
   } else {
-    GetTask()->Release();
+    // we can't use GetTask() because we may have been deallocated by a
+    // different Release() call in some situations
+    t->Release();
   }
 }
 

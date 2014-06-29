@@ -86,19 +86,8 @@ void Scheduler::Resign() {
   TickTimer::GetGlobal().SaveAndTick();
 }
 
-void Scheduler::ExitTask(uint64_t status) {
-  AssertCritical();
-  Thread * th = HardwareThread::GetThread();
-  assert(th != NULL);
-  Task * task = th->GetTask();
-  task->Kill(status);
-  
-  Thread::Exit();
-}
-
 void Scheduler::Tick() {
   AssertCritical();
-  
   Thread * toRun = GetNextThread();
   SwitchThread(toRun);
   if (!toRun) {

@@ -37,7 +37,6 @@ public:
   void SetInfiniteTimeout(uint64_t * unlock = NULL); // @critical
   bool ClearTimeout(Thread *); // @critical
   void Resign(); // @critical
-  void ExitTask(uint64_t status) OS_NORETURN; // @critical
 
   /**
    * Called by the architecture when a CPU timer fires or when the scheduler
