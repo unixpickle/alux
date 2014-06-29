@@ -15,6 +15,9 @@ enum Color {
 };
 
 void puts(const char * buff, Color color = ColorLightGray, bool bright = true);
+void print(const char * buff,
+           Color color = ColorLightGray,
+           bool bright = true);
 
 }
 

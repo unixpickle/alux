@@ -11,7 +11,7 @@ if not arch in ['x64']
 
 # add things to this array as needed
 mainSources = [
-  'entry'
+  'main'
   'stdlib'
 ]
 

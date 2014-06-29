@@ -9,22 +9,34 @@ namespace OS {
 static Atomic<uint64_t> threadCount(0);
 
 Thread * Thread::NewUser(Task * owner, void * call) {
-  if (!owner->Retain()) return NULL;
+  {
+    ScopeCritical critical;
+    if (!owner->Retain()) return NULL;
+  }
   return new Thread(owner, false, call);
 }
 
 Thread * Thread::NewUser(Task * owner, void * call, void * arg) {
-  if (!owner->Retain()) return NULL;
+  {
+    ScopeCritical critical;
+    if (!owner->Retain()) return NULL;
+  }
   return new Thread(owner, false, call, arg);
 }
 
 Thread * Thread::NewKernel(Task * owner, void * call) {
-  if (!owner->Retain()) return NULL;
+  {
+    ScopeCritical critical;
+    if (!owner->Retain()) return NULL;
+  }
   return new Thread(owner, true, call);
 }
 
 Thread * Thread::NewKernel(Task * owner, void * call, void * arg) {
-  if (!owner->Retain()) return NULL;
+  {
+    ScopeCritical critical;
+    if (!owner->Retain()) return NULL;
+  }
   return new Thread(owner, true, call, arg);
 }
 
