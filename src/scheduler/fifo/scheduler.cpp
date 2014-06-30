@@ -91,8 +91,8 @@ void Scheduler::Tick() {
   
   uint64_t delay;
   Thread * toRun = GetNextThread(delay);
-  TickTimer::GetGlobal().SetTimeout(delay, true);
   SwitchThread(toRun);
+  TickTimer::GetGlobal().SetTimeout(delay, true);
   
   if (!toRun) {
     TickTimer::GetGlobal().WaitTimeout();
