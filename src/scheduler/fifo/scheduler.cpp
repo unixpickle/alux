@@ -110,21 +110,23 @@ void Scheduler::RemoveThread(Thread * t) {
 }
 
 void Scheduler::SwitchThread(Thread * t) {
-  Thread * running;
-  {
-    ScopeCriticalLock scope(&lock);
-    
-    // switch address spaces so that we're not stuck in the old task's address
-    // space when we release it (which could cause problems)
-    if (t) {
-      t->GetTask()->GetAddressSpace().Set();
-    } else {
+  Thread * running = HardwareThread::GetThread();
+  
+  // switch address spaces so that we're not stuck in the old task's address
+  // space when we release it (which could cause problems)
+  if (t) {
+    t->GetTask()->GetAddressSpace().Set();
+  } else {
+    if (running) {
       GlobalMap::GetGlobal().Set();
     }
+  }
+  
+  {
+    ScopeCriticalLock scope(&lock);
   
     // if there is a current task, unset it from the CPU and mark it as not
     // running
-    running = HardwareThread::GetThread();
     if (running) {
       HardwareThread::SetThread(NULL);
       running->SchedThread::isRunning = false;
