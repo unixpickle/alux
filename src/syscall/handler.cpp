@@ -7,8 +7,9 @@
 #include <scheduler/general/task.hpp>
 #include <scheduler/user/kill-reasons.hpp>
 #include <arch/general/hardware-thread.hpp>
-#include <iostream>
 #include <critical>
+
+#include <panic> // TODO: delete this
 
 namespace OS {
 
@@ -22,6 +23,8 @@ uint64_t SyscallHandler(uint16_t callNumber,
   
   // just for now, until I need this argument for something
   (void)arg3;
+  
+  Panic("foobarrrr");
   
   switch (callNumber) {
     case 0:

@@ -25,7 +25,7 @@ private:
   uint8_t color = 0xa;
   int x = 0, y = 0;
   uint16_t * buffer = (uint16_t *)0xb8000;
-  uint64_t mainLock OS_ALIGNED(8) = 0;
+  uint64_t mainLock OS_ALIGNED(8) = 0; // @critical
   
   void SetPosition(uint16_t x, uint16_t y);
   void ScrollUp();

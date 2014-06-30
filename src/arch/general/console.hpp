@@ -21,12 +21,12 @@ public:
   } Color;
 
   /**
-   * @noncritical
+   * @ambicritical
    */
   virtual void PrintString(const char * string) = 0;
 
   /**
-   * @noncritical
+   * @ambicritical
    */
   virtual void SetColor(Color color, bool bright) = 0;
 };

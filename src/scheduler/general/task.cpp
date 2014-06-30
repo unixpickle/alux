@@ -135,7 +135,7 @@ void Task::Release() {
 bool Task::Hold() {
   AssertCritical();
   ScopeCriticalLock lock(&stateLock);
-  if (isKilled && !holdCount) return false;
+  if (isKilled) return false;
   holdCount++;
   return true;
 }
@@ -147,9 +147,7 @@ void Task::Unhold() {
     ScopeCriticalLock lock(&stateLock);
     shouldTerm = !--holdCount && !retainCount && isKilled;
   }
-  if (shouldTerm) {
-    Terminate();
-  }
+  if (shouldTerm) Terminate();
 }
 
 void Task::Kill(uint64_t status) {

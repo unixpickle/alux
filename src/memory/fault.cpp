@@ -6,10 +6,19 @@
 #include <cassert>
 #include <panic>
 
+#include <scheduler/general/hold-scope.hpp> // TODO: delete this
+#include <iostream> // TODO: delete this
+
 namespace OS {
 
 void HandleMemoryFault(VirtAddr addr, bool exec, bool write) {
   AssertCritical();
+  
+  {
+    HoldScope scope;
+    cout << "MemoryFault(" << addr << ", " << exec << "," << write << ")"
+      << endl;
+  }
   
   Thread * th = HardwareThread::GetThread();
   assert(th != NULL);

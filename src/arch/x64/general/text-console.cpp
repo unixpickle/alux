@@ -35,8 +35,8 @@ DepList TextConsole::GetDependencies() {
 }
 
 void TextConsole::PrintString(const char * string) {
-  AssertNoncritical();
-  ScopeLock scope(&mainLock);
+  ScopeCritical critical;
+  ScopeCriticalLock scope(&mainLock);
   while (*string) {
     unsigned char theChar = *(string++);
     if (theChar == '\n') {
@@ -79,8 +79,8 @@ void TextConsole::PrintString(const char * string) {
 }
 
 void TextConsole::SetColor(TextConsole::Color _color, bool bright) {
-  AssertNoncritical();
-  ScopeLock scope(&mainLock);
+  ScopeCritical critical;
+  ScopeCriticalLock scope(&mainLock);
   color = (uint8_t)_color | (bright ? 8 : 0);
 }
 

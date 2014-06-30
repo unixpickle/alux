@@ -9,6 +9,8 @@
 #include <lock>
 #include <new>
 
+#include <iostream> // TODO: delete this
+
 namespace OS {
 
 static Scheduler globalObj;
@@ -88,7 +90,9 @@ void Scheduler::Resign() {
 
 void Scheduler::Tick() {
   AssertCritical();
+  
   Thread * toRun = GetNextThread();
+  
   SwitchThread(toRun);
   if (!toRun) {
     TickTimer::GetGlobal().WaitTimeout();
@@ -165,7 +169,11 @@ Thread * Scheduler::GetNextThread() {
       PushThread(current);
     }
     
-    if (current->SchedThread::isRunning) continue;
+    if (current->SchedThread::isRunning) {
+      // TODO: delete this
+      cout << "task is running already: " << (uint64_t)current << endl;
+      continue;
+    }
     if (current->SchedThread::nextTick > now) {
       if (current->SchedThread::nextTick < nextTick) {
         nextTick = current->SchedThread::nextTick;

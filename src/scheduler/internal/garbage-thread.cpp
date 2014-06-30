@@ -4,9 +4,10 @@
 #include <scheduler/general/thread.hpp>
 #include <scheduler/general/task.hpp>
 #include <critical>
-#include <panic>
 #include <lock>
 #include <new>
+
+#include <panic> // TODO: delete this
 
 namespace OS {
 
