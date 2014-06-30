@@ -7,8 +7,6 @@
 #include <lock>
 #include <new>
 
-#include <panic> // TODO: delete this
-
 namespace OS {
 
 static GarbageThread gGarbage;

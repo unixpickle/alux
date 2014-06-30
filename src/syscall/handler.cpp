@@ -9,8 +9,6 @@
 #include <arch/general/hardware-thread.hpp>
 #include <critical>
 
-#include <panic> // TODO: delete this
-
 namespace OS {
 
 uint64_t SyscallHandler(uint16_t callNumber,
@@ -23,8 +21,6 @@ uint64_t SyscallHandler(uint16_t callNumber,
   
   // just for now, until I need this argument for something
   (void)arg3;
-  
-  Panic("foobarrrr");
   
   switch (callNumber) {
     case 0:

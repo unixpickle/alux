@@ -58,7 +58,7 @@ private:
   virtual DepList GetDependencies();
   
   void SwitchThread(Thread *); // @critical
-  Thread * GetNextThread(); // @critical
+  Thread * GetNextThread(uint64_t & nextDelay); // @critical
   Thread * PopThread(); // @critical, nosync
   void PushThread(Thread *); // @critical, nosync
   void UnlinkThread(Thread *);

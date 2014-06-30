@@ -9,8 +9,6 @@
 #include <lock>
 #include <new>
 
-#include <iostream> // TODO: delete this
-
 namespace OS {
 
 static Scheduler globalObj;
@@ -91,9 +89,11 @@ void Scheduler::Resign() {
 void Scheduler::Tick() {
   AssertCritical();
   
-  Thread * toRun = GetNextThread();
-  
+  uint64_t delay;
+  Thread * toRun = GetNextThread(delay);
+  TickTimer::GetGlobal().SetTimeout(delay, true);
   SwitchThread(toRun);
+  
   if (!toRun) {
     TickTimer::GetGlobal().WaitTimeout();
   } else {
@@ -144,7 +144,7 @@ void Scheduler::SwitchThread(Thread * t) {
   if (running) running->Release();
 }
 
-Thread * Scheduler::GetNextThread() {
+Thread * Scheduler::GetNextThread(uint64_t & nextDelay) {
   ScopeCriticalLock scope(&lock);
   
   Clock & clock = Clock::GetClock();
@@ -169,11 +169,7 @@ Thread * Scheduler::GetNextThread() {
       PushThread(current);
     }
     
-    if (current->SchedThread::isRunning) {
-      // TODO: delete this
-      cout << "task is running already: " << (uint64_t)current << endl;
-      continue;
-    }
+    if (current->SchedThread::isRunning) continue;
     if (current->SchedThread::nextTick > now) {
       if (current->SchedThread::nextTick < nextTick) {
         nextTick = current->SchedThread::nextTick;
@@ -185,7 +181,8 @@ Thread * Scheduler::GetNextThread() {
     break;
   }
   
-  TickTimer::GetGlobal().SetTimeout(nextTick - now, true);
+  nextDelay = nextTick - now;
+  
   if (current) current->SchedThread::isRunning = true;
   return current;
 }
