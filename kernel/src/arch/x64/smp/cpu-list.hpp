@@ -28,7 +28,7 @@ protected:
   
 private:
   int capacity;
-  int count;
+  int count = 0;
   uint8_t * buffer;
 };
 

@@ -11,7 +11,7 @@ struct DepList {
   static const int MaxDeps = 0x10;
   
   Module * modules[MaxDeps];
-  int count;
+  int count = 0;
   
   template <typename... Args>
   DepList(Args... args) : count(0) {

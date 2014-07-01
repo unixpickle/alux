@@ -60,7 +60,7 @@ protected:
    */
   void DoInvlpg(VirtAddr virt, size_t size);
   
-  uint64_t lock OS_ALIGNED(8); // @noncritical
+  uint64_t lock OS_ALIGNED(8) = 0; // @noncritical
   
   PageTable table;
   FreeList freeList;

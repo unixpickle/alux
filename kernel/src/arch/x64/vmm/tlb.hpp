@@ -33,19 +33,21 @@ public:
   
   /**
    * Called when the global map triggers page invalidations.
-   * @ambicritical
+   * @noncritical
    */
   void InvlpgGlobal(VirtAddr start, size_t size);
   
   /**
    * Called when a user map triggers page invalidations.
-   * @ambicritical
+   * @noncritical
    */
   void InvlpgUser(VirtAddr start, size_t size, UserMap * sender);
   
 protected:
   virtual void Initialize();
   virtual DepList GetDependencies();
+  
+  uint64_t invalidateLock OS_ALIGNED(8) = 0; // @noncritical
 };
 
 }

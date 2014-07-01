@@ -44,7 +44,7 @@ public:
   uint32_t highOffset;
   uint32_t reserved2;
   
-  IdtEntry() : codeSegment(8), ist(0), reserved1(0), reserved2(0) {
+  IdtEntry() : codeSegment(8), ist(0), reserved1(0), reserved2(0), flags(0) {
   }
   
   void SetOffset(uint64_t exc) {

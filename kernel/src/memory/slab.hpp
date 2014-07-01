@@ -2,6 +2,7 @@
 #define __MEMORY_SLAB_HPP__
 
 #include <anslabs>
+#include <macros>
 
 namespace OS {
 
@@ -16,7 +17,7 @@ public:
   void Delete(T * x);
   
 protected:
-  uint64_t lock = 0;
+  uint64_t lock OS_ALIGNED(8) = 0;
 };
 
 }

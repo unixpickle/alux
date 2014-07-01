@@ -36,8 +36,8 @@ protected:
 private:
   IndexSetType * indexSet;
   
-  uint64_t mapLock OS_ALIGNED(8);
-  Task * buckets[IdealMaximum];
+  uint64_t mapLock OS_ALIGNED(8) = 0;
+  Task * buckets[IdealMaximum] = {};
 };
 
 }

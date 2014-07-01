@@ -30,7 +30,10 @@ void TLB::WillSetUserMap(UserMap * map) {
 }
 
 void TLB::InvlpgGlobal(VirtAddr start, size_t size) {
+  AssertNoncritical();
+  ScopeLock scope(&invalidateLock);
   ScopeCritical critical;
+  
   Invlpg(start, size);
   if (gTLB.IsUninitialized()) return;
   
@@ -55,7 +58,10 @@ void TLB::InvlpgGlobal(VirtAddr start, size_t size) {
 }
 
 void TLB::InvlpgUser(VirtAddr start, size_t size, UserMap * sender) {
+  AssertNoncritical();
+  ScopeLock scope(&invalidateLock);
   ScopeCritical critical;
+  
   if (gTLB.IsUninitialized()) {
     Invlpg(start, size, false);
     return;

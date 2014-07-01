@@ -26,8 +26,8 @@ protected:
   bool GetBitmap(int idx);
   void FlipBitmap(int idx);
   
-  uint64_t lock OS_ALIGNED(8);
-  uint64_t bitmaps[PTCount * 8];
+  uint64_t lock OS_ALIGNED(8) = 0;
+  uint64_t bitmaps[PTCount * 8] = {};
   uint64_t * scratchPTs[PTCount];
   
   virtual void Initialize();

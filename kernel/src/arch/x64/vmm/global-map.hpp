@@ -41,10 +41,10 @@ protected:
   PageTable table;
   PhysAddr pdpt;
   
-  uint64_t lock OS_ALIGNED(8); // @noncritical
+  uint64_t lock OS_ALIGNED(8) = 0; // @noncritical
   
-  VirtAddr freeStart;
-  size_t freeSize;
+  VirtAddr freeStart = 0;
+  size_t freeSize = 0;
   
   virtual void Initialize();
   virtual DepList GetDependencies();

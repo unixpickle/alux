@@ -18,8 +18,8 @@ protected:
   virtual void Initialize();
   virtual DepList GetDependencies();
   
-  bool hasBeenInitialized;
-  bool hasPanicked;
+  bool hasBeenInitialized = false;
+  bool hasPanicked = false;
 };
 
 }

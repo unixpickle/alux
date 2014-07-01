@@ -38,8 +38,8 @@ protected:
   
 private:
   AllocatorList allocators;
-  uint64_t lock OS_ALIGNED(8);
-  size_t totalSpace;
+  uint64_t lock OS_ALIGNED(8) = 0;
+  size_t totalSpace = 0;
   
   static VirtAddr AllocateRaw(StepAllocator & alloc, size_t size);
   

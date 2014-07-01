@@ -14,7 +14,7 @@ public:
   public:
     VirtAddr start;
     size_t size;
-    Region * next;
+    Region * next = NULL;
     
     Region(VirtAddr, size_t);
     VirtAddr End();

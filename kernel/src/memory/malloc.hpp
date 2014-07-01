@@ -8,7 +8,7 @@ namespace OS {
 
 class Malloc : public Module {
 private:
-  MallocRegion * first;
+  MallocRegion * first = NULL;
   size_t pageSize;
   size_t pageAlignment;
   size_t allocSize;
