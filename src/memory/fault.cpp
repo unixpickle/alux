@@ -6,17 +6,12 @@
 #include <cassert>
 #include <panic>
 
-#include <iostream> // TODO: delete this
-
 namespace OS {
 
 void HandleMemoryFault(VirtAddr addr, bool exec, bool write) {
   AssertCritical();
   
   Thread * th = HardwareThread::GetThread();
-  
-  cout << "HandleMemoryFault(" << addr << "," << exec << "," << write << ")" 
-    << " thread=" << (uint64_t)th << endl;
   
   assert(th != NULL);
   Task * t = th->GetTask();

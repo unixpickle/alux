@@ -25,7 +25,6 @@ UserCode::UserCode(void * virtCode, size_t codeSize)
   
 void UserCode::Release() {
   if (!--retainCount) {
-    cout << "freeing usercode" << endl;
     delete this;
   }
 }

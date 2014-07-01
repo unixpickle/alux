@@ -14,13 +14,7 @@ fork:
   syscall
   ret
 
-db 'hey there noob'
 forkEntry:
-  ; TODO: delete this
-  mov rsi, rdi
-  mov rdi, 0x1337
-  syscall
-
   mov rsp, initial_stack_end
   call rdi
   call qword _ThreadExit

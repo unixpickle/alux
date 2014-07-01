@@ -90,7 +90,7 @@ void Task::RemoveThread(Thread * th) {
   } else {
     th->taskLast->taskNext = th->taskNext;
     if (th->taskNext) {
-      th->taskNext = th->taskLast;
+      th->taskNext->taskLast = th->taskLast;
     }
   }
 }

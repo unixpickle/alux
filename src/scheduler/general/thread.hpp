@@ -54,7 +54,7 @@ private:
   
   uint64_t retainLock OS_ALIGNED(8) = 0;
   uint64_t retainCount = 1;
-  bool isKilled;
+  bool isKilled = false;
 };
 
 }
