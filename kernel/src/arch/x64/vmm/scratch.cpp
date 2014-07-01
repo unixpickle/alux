@@ -3,7 +3,6 @@
 #include <arch/x64/vmm/global-map.hpp>
 #include <lock>
 #include <new>
-#include <string>
 #include <cassert>
 #include <cstring>
 #include <iostream>
