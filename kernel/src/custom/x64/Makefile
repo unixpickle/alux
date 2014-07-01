@@ -7,10 +7,10 @@ $(OUTDIR):
 	mkdir $(OUTDIR)
 
 $(OUTDIR)/x64-entry.o: x64-entry.s
-	$(NASM) -f elf64 $^ -o $@
+	$(ASM) -f elf64 $^ -o $@
 
 $(OUTDIR)/x64-multiboot-init.bin: x64-multiboot-init.s
-	$(NASM) -f bin $^ -o $@
+	$(ASM) -f bin $^ -o $@
 
 clean:
 	rm -rf $(OUTDIR)

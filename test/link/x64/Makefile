@@ -8,4 +8,4 @@ $(OUTPUT_FILE): $(BUILDDIR)/entry.o
 	fi
 
 $(BUILDDIR)/entry.o:
-	$(NASM) $(NASMFLAGS) entry.s -o $(BUILDDIR)/entry.o
+	$(ASM) $(ASMFLAGS) entry.s -o $(BUILDDIR)/entry.o
