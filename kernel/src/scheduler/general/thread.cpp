@@ -89,7 +89,7 @@ uint64_t Thread::GetThreadId() {
 }
 
 bool Thread::Retain() {
-  AssertCritical();
+  ScopeCritical critical;
   ScopeCriticalLock scope(&retainLock);
   if (isKilled) return false;
   if (!GetTask()->Retain()) return false;
@@ -99,7 +99,7 @@ bool Thread::Retain() {
 }
 
 void Thread::Release() {
-  AssertCritical();
+  ScopeCritical critical;
   bool shouldCleanup;
   Task * t = GetTask();
   {

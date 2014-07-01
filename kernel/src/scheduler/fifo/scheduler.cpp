@@ -39,13 +39,13 @@ void Scheduler::Start() {
 }
 
 void Scheduler::AddThread(Thread * t) {
-  AssertCritical();
+  ScopeCritical critical;
   ScopeCriticalLock scope(&lock);
   PushThread(t);
 }
 
 void Scheduler::SetTimeout(uint64_t deadline, bool, uint64_t * unlock) {
-  AssertCritical();
+  ScopeCritical critical;
   {
     ScopeCriticalLock scope(&lock);
 
@@ -59,7 +59,7 @@ void Scheduler::SetTimeout(uint64_t deadline, bool, uint64_t * unlock) {
 }
 
 void Scheduler::SetInfiniteTimeout(uint64_t * unlock) {
-  AssertCritical();
+  ScopeCritical critical;
   {
     ScopeCriticalLock scope(&lock);
   
@@ -73,7 +73,7 @@ void Scheduler::SetInfiniteTimeout(uint64_t * unlock) {
 }
 
 bool Scheduler::ClearTimeout(Thread * th) {
-  AssertCritical();
+  ScopeCritical critical;
   ScopeCriticalLock scope(&lock);
   
   bool wasDelayed = th->SchedThread::nextTick != 0;
@@ -82,7 +82,7 @@ bool Scheduler::ClearTimeout(Thread * th) {
 }
 
 void Scheduler::Resign() {
-  AssertCritical();
+  ScopeCritical critical;
   TickTimer::GetGlobal().SaveAndTick();
 }
 
@@ -104,7 +104,7 @@ void Scheduler::Tick() {
 // PROTECTED //
 
 void Scheduler::RemoveThread(Thread * t) {
-  AssertCritical();
+  ScopeCritical critical;
   ScopeCriticalLock scope(&lock);
   UnlinkThread(t);
 }

@@ -115,7 +115,7 @@ void Task::UnsleepThreadById(uint64_t ident) {
 }
 
 bool Task::Retain() {
-  AssertCritical();
+  ScopeCritical critical;
   ScopeCriticalLock lock(&stateLock);
   if (isKilled && !holdCount) return false;
   retainCount++;
@@ -123,7 +123,7 @@ bool Task::Retain() {
 }
 
 void Task::Release() {
-  AssertCritical();
+  ScopeCritical critical;
   bool shouldTerm;
   {
     ScopeCriticalLock lock(&stateLock);
@@ -133,7 +133,7 @@ void Task::Release() {
 }
 
 bool Task::Hold() {
-  AssertCritical();
+  ScopeCritical critical;
   ScopeCriticalLock lock(&stateLock);
   if (isKilled) return false;
   holdCount++;
@@ -141,7 +141,7 @@ bool Task::Hold() {
 }
 
 void Task::Unhold() {
-  AssertCritical();
+  ScopeCritical critical;
   bool shouldTerm;
   {
     ScopeCriticalLock lock(&stateLock);
@@ -151,7 +151,7 @@ void Task::Unhold() {
 }
 
 void Task::Kill(uint64_t status) {
-  AssertCritical();
+  ScopeCritical critical;
   ScopeCriticalLock lock(&stateLock);
   assert(retainCount || holdCount);
   

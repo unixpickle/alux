@@ -30,8 +30,8 @@ public:
   
   uint64_t GetThreadId();
   
-  bool Retain(); // @critical
-  void Release(); // @critical
+  bool Retain(); // @ambicritical
+  void Release(); // @ambicritical
   
   uint64_t timeoutLock OS_ALIGNED(8) = 0; // @noncritical
   bool shouldClearTimeout = false;

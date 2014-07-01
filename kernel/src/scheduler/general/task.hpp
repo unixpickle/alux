@@ -33,11 +33,11 @@ public:
   // TODO: get rid of this in favor of returning a referenced Thread
   void UnsleepThreadById(uint64_t ident); // @noncritical
   
-  bool Retain(); // @critical
-  void Release(); // @critical
-  bool Hold(); // @critical
-  void Unhold(); // @critical
-  void Kill(uint64_t status); // @critical
+  bool Retain(); // @ambicritical
+  void Release(); // @ambicritical
+  bool Hold(); // @ambicritical
+  void Unhold(); // @ambicritical
+  void Kill(uint64_t status); // @ambicritical
 
   uint64_t GetPID();
   AddressSpace & GetAddressSpace();

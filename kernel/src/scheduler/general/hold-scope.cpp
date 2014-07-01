@@ -23,7 +23,6 @@ HoldScope::HoldScope() : wasCritical(GetCritical()) {
 }
 
 HoldScope::~HoldScope() {
-  SetCritical(true);
   task->Unhold();
   SetCritical(wasCritical);
 }

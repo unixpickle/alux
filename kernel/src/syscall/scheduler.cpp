@@ -14,7 +14,6 @@ uint64_t SyscallLaunchThread(void * address, void * argument) {
   scope.GetTask()->AddThread(th);
   uint64_t theId = th->GetThreadId();
   
-  ScopeCritical critical;
   Scheduler::GetGlobal().AddThread(th);
   th->Release();
   
@@ -31,12 +30,9 @@ void SyscallFork(void * address, void * argument) {
   
   task->AddThread(th);
   
-  {
-    ScopeCritical critical;
-    Scheduler::GetGlobal().AddThread(th);
-    task->Unhold();
-    th->Release();
-  }
+  Scheduler::GetGlobal().AddThread(th);
+  task->Unhold();
+  th->Release();
   
   // NOTE: here, in the future, we will be opening a socket to the newly
   // launched task and we will return its file descriptor.

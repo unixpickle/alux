@@ -92,13 +92,9 @@ void MbootEntry(void * mbootPtr) {
   assert(thread != NULL);
   
   task->AddThread(thread);
-  
-  {
-    OS::ScopeCritical critical;
-    OS::Scheduler::GetGlobal().AddThread(thread);
-    thread->Release();
-    task->Unhold();
-  }
+  OS::Scheduler::GetGlobal().AddThread(thread);
+  thread->Release();
+  task->Unhold();
   
   OS::MainModule::GetGlobal().Main();
   
