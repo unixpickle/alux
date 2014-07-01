@@ -1,7 +1,7 @@
 #ifndef __UNISTD_H__
 #define __UNISTD_H__
 
-#include <cstdint>
+#include <stdint.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -9,6 +9,7 @@ extern "C" {
 
 void fork(void * function);
 uint64_t getpid();
+void usleep(uint64_t delay);
 
 #ifdef __cplusplus
 }

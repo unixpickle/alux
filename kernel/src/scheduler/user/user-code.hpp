@@ -10,14 +10,10 @@ namespace OS {
 class UserCode {
 public:
   /**
-   * Returned object is retained.
    * @noncritical
    */
   UserCode(void * virtCode, size_t codeSize);
   ~UserCode(); // @noncritical
-  
-  void Release(); // @noncritical
-  void Retain(); // @noncritical
   
   size_t GetPageAlignment();
   PhysAddr GetPhysStart(); // @noncritical
@@ -27,8 +23,6 @@ protected:
   size_t alignment = 0;
   PhysAddr physStart = 0;
   AddressSpace::Size physSize;
-  
-  Atomic<uint64_t> retainCount;
 };
 
 }

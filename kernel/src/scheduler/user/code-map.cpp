@@ -14,8 +14,6 @@ CodeMap::CodeMap(Task * t, UserCode * c) : task(t), code(c) {
   AddressSpace::Size size = code->GetPhysSize();
   assert(size.pageSize >= code->GetPageAlignment());
   
-  code->Retain();
-  
   UserMap & space = static_cast<UserMap &>(t->GetAddressSpace());
   
   bool canRemap;
@@ -62,7 +60,6 @@ CodeMap::~CodeMap() {
   } else {
     PhysicalAllocator::GetGlobal().Free(allocated);
   }
-  code->Release();
 }
 
 bool CodeMap::HandleFault(VirtAddr addr, bool, bool write) {

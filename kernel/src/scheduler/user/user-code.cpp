@@ -6,8 +6,7 @@
 
 namespace OS {
 
-UserCode::UserCode(void * virtCode, size_t codeSize)
-  : retainCount(1), physSize(0, 0) {
+UserCode::UserCode(void * virtCode, size_t codeSize) : physSize(0, 0) {
   alignment = AddressSpace::GetPageAlignment(0);
   physSize.pageSize = AddressSpace::GetPageSize(0);
   physSize.pageCount = codeSize / physSize.pageSize;
@@ -21,16 +20,6 @@ UserCode::UserCode(void * virtCode, size_t codeSize)
   
   EasyMap map(physStart, total);
   memcpy((void *)map.GetStart(), virtCode, codeSize);
-}
-  
-void UserCode::Release() {
-  if (!--retainCount) {
-    delete this;
-  }
-}
-
-void UserCode::Retain() {
-  retainCount++;
 }
 
 size_t UserCode::GetPageAlignment() {

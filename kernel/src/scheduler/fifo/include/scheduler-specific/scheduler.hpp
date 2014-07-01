@@ -12,7 +12,7 @@ class GarbageThread;
 
 class Scheduler : public Module {
 public:
-  static const uint64_t Jiffy = 6000; // 100Hz
+  static const uint64_t Jiffy = 3000; // 50Hz
   
   static void InitGlobal();
   static Scheduler & GetGlobal();

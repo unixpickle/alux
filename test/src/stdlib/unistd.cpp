@@ -7,4 +7,8 @@ uint64_t getpid() {
   return Syscall(SyscallNumberGetPID, NULL, NULL, NULL, 0, 0);
 }
 
+void usleep(uint64_t delay) {
+  Syscall(SyscallNumberSetTimeout, NULL, NULL, NULL, delay, 0);
+}
+
 }

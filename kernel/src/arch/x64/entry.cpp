@@ -82,6 +82,7 @@ void MbootEntry(void * mbootPtr) {
   if (!OS::x64::GetProgramSize()) {
     OS::Panic("No launch program specified!");
   }
+  
   OS::UserCode * code = new OS::UserCode(OS::x64::GetProgramStart(),
                                          OS::x64::GetProgramSize());
   OS::UserTask * task = OS::UserTask::New(code);

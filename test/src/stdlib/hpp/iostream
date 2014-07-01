@@ -1,6 +1,8 @@
 #ifndef __IOSTREAM_HPP__
 #define __IOSTREAM_HPP__
 
+#include <cstdint>
+
 namespace std {
 
 enum Color {
@@ -14,10 +16,35 @@ enum Color {
   ColorLightGray = 7
 };
 
-void puts(const char * buff, Color color = ColorLightGray, bool bright = true);
-void print(const char * buff,
+void Puts(const char * buff, Color color = ColorLightGray, bool bright = true);
+void Print(const char * buff,
            Color color = ColorLightGray,
            bool bright = true);
+
+class OutStream {
+public:
+  virtual void PrintBuffer(const char * buf) = 0;
+};
+
+class ConsoleStream : public OutStream {
+public:
+  virtual void PrintBuffer(const char * buf);
+};
+
+class ErrorStream : public OutStream {
+public:
+  virtual void PrintBuffer(const char * buf);
+};
+
+OutStream & operator<<(OutStream & stream, const char * string);
+OutStream & operator<<(OutStream & stream, uint8_t number);
+OutStream & operator<<(OutStream & stream, uint16_t number);
+OutStream & operator<<(OutStream & stream, uint32_t number);
+OutStream & operator<<(OutStream & stream, uint64_t number);
+
+extern ConsoleStream cout;
+extern ErrorStream cerr;
+extern const char * endl;
 
 }
 

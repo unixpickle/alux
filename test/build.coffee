@@ -18,6 +18,7 @@ module.exports = (Finder, Makefile) ->
     'src'
     'src/arch/' + arch + '/include'
     'src/stdlib/hpp'
+    'src/stdlib/h'
   ]
 
   objdir = process.env['OBJDIR']

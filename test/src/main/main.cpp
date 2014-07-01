@@ -1,9 +1,38 @@
 #include <iostream>
 #include <cunistd>
-
+#include <ctime>
 #include <arch/general/tests.hpp>
+#include <new>
 
-void Main();
+using namespace std;
+
+void Main() {
+  new(&cout) ConsoleStream();
+  new(&cerr) ErrorStream();
+  
+  cout << "testing basic threading...";
+  if (!BasicThreadTest()) {
+    cerr << "[fail]" << endl;
+    return;
+  }
+  cout << "[OK]" << endl;
+  
+  cout << "testing fork+thread...";
+  if (!ForkAndThreadTest()) {
+    cerr << "[fail]" << endl;
+    return;
+  }
+  cout << "[OK]" << endl;
+  
+  cout << "current time is " << utime() << endl;
+  
+  cout << "counting to five..." << endl;
+  for (uint32_t i = 0; i < 5; i++) {
+    usleep(utime() + 1000000);
+    cout << " " << i + 1;
+  }
+  cout << endl;
+}
 
 extern "C" {
 
@@ -15,36 +44,4 @@ void _main() {
   Main();
 }
 
-}
-
-void ForkedCall();
-
-void Main() {
-  
-  std::print("testing basic threading...");
-  if (!BasicThreadTest()) {
-    std::puts("[fail]", std::ColorRed, true);
-    return;
-  }
-  std::puts("[OK]");
-  
-  std::print("testing fork and thread...");
-  if (!ForkAndThreadTest()) {
-    std::puts("[fail]", std::ColorRed, true);
-    return;
-  }
-  std::puts("[OK]");
-  
-  if (getpid() != 1) {
-    std::puts("weird process ID found (expected 1)", std::ColorRed, true);
-  }
-  std::puts("this is the parent process", std::ColorLightGray, false);
-  fork((void *)ForkedCall);
-}
-
-void ForkedCall() {
-  if (getpid() != 2) {
-    std::puts("weird process ID found (expected 2)", std::ColorRed, true);
-  }
-  std::puts("this is coming from a subprocess\n");
 }

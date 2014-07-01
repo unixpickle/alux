@@ -18,6 +18,3 @@ forkEntry:
   mov rsp, initial_stack_end
   call rdi
   call qword _ThreadExit
-
-global _getpid
-global getpid
