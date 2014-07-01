@@ -3,40 +3,25 @@
 #include <scheduler-specific/scheduler.hpp>
 #include <arch/general/hardware-thread.hpp>
 #include <arch/general/state.hpp>
+#include <panic>
 
 namespace OS {
 
 static Atomic<uint64_t> threadCount(0);
 
 Thread * Thread::NewUser(Task * owner, void * call) {
-  {
-    ScopeCritical critical;
-    if (!owner->Retain()) return NULL;
-  }
   return new Thread(owner, false, call);
 }
 
 Thread * Thread::NewUser(Task * owner, void * call, void * arg) {
-  {
-    ScopeCritical critical;
-    if (!owner->Retain()) return NULL;
-  }
   return new Thread(owner, false, call, arg);
 }
 
 Thread * Thread::NewKernel(Task * owner, void * call) {
-  {
-    ScopeCritical critical;
-    if (!owner->Retain()) return NULL;
-  }
   return new Thread(owner, true, call);
 }
 
 Thread * Thread::NewKernel(Task * owner, void * call, void * arg) {
-  {
-    ScopeCritical critical;
-    if (!owner->Retain()) return NULL;
-  }
   return new Thread(owner, true, call, arg);
 }
 
@@ -67,6 +52,7 @@ Thread::~Thread() {
 }
 
 Thread::Thread(Task * owner, bool kernel, void * func) : task(owner) {
+  if (!task->Retain()) Panic("Thread::Thread() takes held task");
   ++threadCount;
   if (kernel) {
     state = State::NewKernel(func);
@@ -77,6 +63,7 @@ Thread::Thread(Task * owner, bool kernel, void * func) : task(owner) {
 
 Thread::Thread(Task * owner, bool kernel, void * func, void * arg)
   : task(owner) {
+  if (!task->Retain()) Panic("Thread::Thread() takes held task");
   ++threadCount;
   if (kernel) {
     state = State::NewKernel(func, arg);

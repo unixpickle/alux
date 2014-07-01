@@ -61,8 +61,8 @@ private:
   IndexSet<0x20> descriptors;
   
   uint64_t stateLock OS_ALIGNED(8) = 0; // @critical
-  uint64_t retainCount = 1;
-  uint64_t holdCount = 0;
+  uint64_t retainCount = 0;
+  uint64_t holdCount = 1;
   uint64_t killStatus;
   bool isKilled = false;
   

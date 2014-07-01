@@ -97,7 +97,7 @@ void MbootEntry(void * mbootPtr) {
     OS::ScopeCritical critical;
     OS::Scheduler::GetGlobal().AddThread(thread);
     thread->Release();
-    task->Release();
+    task->Unhold();
   }
   
   OS::MainModule::GetGlobal().Main();

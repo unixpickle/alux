@@ -34,7 +34,7 @@ void SyscallFork(void * address, void * argument) {
   {
     ScopeCritical critical;
     Scheduler::GetGlobal().AddThread(th);
-    task->Release();
+    task->Unhold();
     th->Release();
   }
   
