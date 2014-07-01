@@ -25,20 +25,20 @@ public:
   UserCode * GetUserCode();
   
 protected:
-  uint64_t lock OS_ALIGNED(8); // @noncritical
+  uint64_t lock OS_ALIGNED(8) = 0; // @noncritical
   
   struct PageStatus {
-    PhysAddr phys; // only if isCopied is true
-    bool isCopied;
-    bool isMapped;
+    PhysAddr phys = 0; // only if isCopied is true
+    bool isCopied = 0;
+    bool isMapped = 0;
   };
-  PhysAddr allocated;
+  PhysAddr allocated = 0;
   
-  Task * task;
-  UserCode * code;
+  Task * task = NULL;
+  UserCode * code = NULL;
   
-  VirtAddr spaceStart;
-  PageStatus * pages;
+  VirtAddr spaceStart = 0;
+  PageStatus * pages = NULL;
 };
 
 }

@@ -20,6 +20,7 @@ void _main() {
 void ForkedCall();
 
 void Main() {
+  
   std::print("testing basic threading...");
   if (!BasicThreadTest()) {
     std::puts("[fail]", std::ColorRed, true);
@@ -34,10 +35,10 @@ void Main() {
   }
   std::puts("[OK]");
   
-  std::puts("this is the parent process", std::ColorLightGray, false);
   if (getpid() != 1) {
     std::puts("weird process ID found (expected 1)", std::ColorRed, true);
   }
+  std::puts("this is the parent process", std::ColorLightGray, false);
   fork((void *)ForkedCall);
 }
 

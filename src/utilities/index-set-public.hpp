@@ -17,7 +17,7 @@ _INDEX_SET_TEMPLATE_
 Slab<typename _INDEX_SET_CLASS_::Node, SlabCount> _INDEX_SET_CLASS_::slab;
 
 _INDEX_SET_TEMPLATE_
-_INDEX_SET_CLASS_::IndexSet() : numUsed(0) {
+_INDEX_SET_CLASS_::IndexSet() {
   AssertNoncritical();
   firstNode = AllocNode();
   firstNode->next = NULL;
@@ -46,7 +46,12 @@ uint64_t _INDEX_SET_CLASS_::Pop() {
     Node * rem = firstNode;
     firstNode = firstNode->next;
     FreeNode(rem);
-    return Pop();
+    
+    // don't hold the lock while we do this
+    LockRelease(&lock);
+    uint64_t result = Pop();
+    LockHold(&lock);
+    return result;
   }
   return numUsed++;
 }

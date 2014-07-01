@@ -9,6 +9,8 @@
 #include <arch/general/hardware-thread.hpp>
 #include <critical>
 
+#include <iostream> // TODO: delete this
+
 namespace OS {
 
 uint64_t SyscallHandler(uint16_t callNumber,
@@ -66,6 +68,8 @@ uint64_t SyscallHandler(uint16_t callNumber,
       return SyscallGetThreadCount();
       break;
     default:
+      cout << "got strange syscall " << callNumber << " arg1="
+        << (uint64_t)arg1 << endl;
       Task::Exit(KillReasons::InvalidSyscall);
       break;
   }

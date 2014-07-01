@@ -24,9 +24,9 @@ public:
   void Push(uint64_t); // @noncritical
 
 private:
-  uint64_t lock OS_ALIGNED(8);
-  Node * firstNode;
-  uint64_t numUsed;
+  uint64_t lock OS_ALIGNED(8) = 0;
+  Node * firstNode = NULL;
+  uint64_t numUsed = 0;
   
   static uint64_t initLock OS_ALIGNED(8);
   static bool slabInitialized;

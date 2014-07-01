@@ -24,8 +24,8 @@ public:
   const AddressSpace::Size & GetPhysSize(); // @noncritical
   
 protected:
-  size_t alignment;
-  PhysAddr physStart;
+  size_t alignment = 0;
+  PhysAddr physStart = 0;
   AddressSpace::Size physSize;
   
   Atomic<uint64_t> retainCount;

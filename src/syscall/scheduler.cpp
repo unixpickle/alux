@@ -5,6 +5,8 @@
 #include <scheduler/general/hold-scope.hpp>
 #include <critical>
 
+#include <iostream> // TODO: delete this
+
 namespace OS {
 
 uint64_t SyscallLaunchThread(void * address, void * argument) {
@@ -24,8 +26,14 @@ uint64_t SyscallLaunchThread(void * address, void * argument) {
 void SyscallFork(void * address, void * argument) {
   HoldScope scope;
   
+  cout << "forking to " << (uint64_t)address << " arg="
+    << (uint64_t)argument << endl;
+  
   UserTask * thisTask = static_cast<UserTask *>(scope.GetTask());
-  Task * task = UserTask::New(thisTask->GetCodeMap().GetUserCode());
+  // TODO: this will change once i make tasks start off held
+  UserCode * code = thisTask->GetCodeMap().GetUserCode();
+  code->Retain();
+  Task * task = UserTask::New(code);
   Thread * th = Thread::NewUser(task, address, argument);
   
   task->AddThread(th);
@@ -34,6 +42,7 @@ void SyscallFork(void * address, void * argument) {
     ScopeCritical critical;
     Scheduler::GetGlobal().AddThread(th);
     task->Release();
+    th->Release();
   }
   
   // NOTE: here, in the future, we will be opening a socket to the newly

@@ -27,7 +27,8 @@ ForkAndThreadTest:
   ret
 
 NewProgram:
-  mov rdi, 1
+  ;mov rdi, 1
+  mov rdi, 3
   mov rsi, .newThread
   syscall
 .hang:

@@ -67,7 +67,6 @@ CodeMap::~CodeMap() {
 
 bool CodeMap::HandleFault(VirtAddr addr, bool, bool write) {
   HoldScope hold;
-  
   ScopeLock scope(&lock);
   
   if (!pages) return false; // no remap

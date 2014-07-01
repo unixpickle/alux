@@ -66,10 +66,10 @@ bool Task::IsKernel() {
 
 void Task::AddThread(Thread * th) {
   AssertNoncritical();
-  
   th->threadId = threadIds.Pop();
   
   ScopeLock lock(&threadsLock);
+  
   th->taskNext = firstThread;
   th->taskLast = NULL;
   if (firstThread) {

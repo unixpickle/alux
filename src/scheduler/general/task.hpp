@@ -54,17 +54,17 @@ private:
   uint64_t pid;
   bool isKernel;
   
-  uint64_t threadsLock OS_ALIGNED(8); // @noncritical
-  Thread * firstThread;
+  uint64_t threadsLock OS_ALIGNED(8) = 0; // @noncritical
+  Thread * firstThread = NULL;
   
   IndexSet<0x10> threadIds;
   IndexSet<0x20> descriptors;
   
-  uint64_t stateLock OS_ALIGNED(8); // @critical
+  uint64_t stateLock OS_ALIGNED(8) = 0; // @critical
   uint64_t retainCount = 1;
-  uint64_t holdCount;
+  uint64_t holdCount = 0;
   uint64_t killStatus;
-  bool isKilled;
+  bool isKilled = false;
   
   UserMap * userSpace;
   
