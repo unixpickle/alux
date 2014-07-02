@@ -23,6 +23,7 @@ protected:
   Thread * thread;
   Task * task;
   bool wasCritical;
+  bool didHold = false;
 };
 
 }

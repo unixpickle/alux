@@ -40,6 +40,10 @@ public:
   void Kill(uint64_t status); // @ambicritical
 
   uint64_t GetPID();
+  
+  uint64_t GetUID();
+  void SetUID(uint64_t);
+  
   AddressSpace & GetAddressSpace();
   UserMap * GetUserAddressSpace();
 
@@ -52,6 +56,7 @@ protected:
 
 private:
   uint64_t pid;
+  uint64_t uid = 0;
   bool isKernel;
   
   uint64_t threadsLock OS_ALIGNED(8) = 0; // @noncritical

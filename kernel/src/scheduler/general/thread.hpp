@@ -8,6 +8,7 @@ namespace OS {
 
 class Task;
 class State;
+class HoldScope;
 
 class Thread : public SchedThread, public GarbageThread::Garbage {
 public:
@@ -38,8 +39,11 @@ public:
   bool isSleeping = false;
   
 protected:
-  Thread * taskNext, * taskLast;
+  Thread * taskNext = NULL, * taskLast = NULL;
   friend class Task;
+  
+  bool isHoldingTask = false;
+  friend class HoldScope;
   
   virtual void CleanupGarbage();
   

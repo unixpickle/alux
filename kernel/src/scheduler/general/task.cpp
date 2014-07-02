@@ -165,6 +165,14 @@ uint64_t Task::GetPID() {
   return pid;
 }
 
+uint64_t Task::GetUID() {
+  return uid;
+}
+
+void Task::SetUID(uint64_t aUID) {
+  uid = aUID;
+}
+
 AddressSpace & Task::GetAddressSpace() {
   if (userSpace) return *userSpace;
   return GlobalMap::GetGlobal();

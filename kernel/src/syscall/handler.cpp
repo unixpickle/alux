@@ -2,6 +2,7 @@
 #include <syscall/console.hpp>
 #include <syscall/scheduler.hpp>
 #include <syscall/time.hpp>
+#include <syscall/memory.hpp>
 #include <scheduler-specific/scheduler.hpp>
 #include <scheduler/general/hold-scope.hpp>
 #include <scheduler/general/task.hpp>
@@ -64,6 +65,34 @@ uint64_t SyscallHandler(uint16_t callNumber,
       break;
     case 13:
       return SyscallGetThreadCount();
+      break;
+    case 14:
+      return SyscallGetPhysicalUsed();
+      break;
+    case 15:
+      return SyscallGetPhysicalAvailable();
+      break;
+    case 16:
+      return SyscallGetPhysicalTotal();
+      break;
+    case 17:
+      return SyscallGetPageSizeCount();
+      break;
+    case 18:
+      return SyscallGetPageSize(arg4);
+      break;
+    case 19:
+      return SyscallGetPageAlignment(arg4);
+      break;
+    case 20:
+      return SyscallAllocatePhysical((PhysAddr *)arg1, arg4, arg5);
+      break;
+    case 21:
+      SyscallMapPhysical(arg4, arg5, (uint64_t *)arg1, (PhysAddr *)arg2,
+                        (void **)arg3);
+      break;
+    case 22:
+      SyscallUnmapPhysical(arg4, arg5, arg1);
       break;
     default:
       Task::Exit(KillReasons::InvalidSyscall);

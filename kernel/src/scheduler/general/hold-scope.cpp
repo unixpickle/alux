@@ -15,15 +15,23 @@ HoldScope::HoldScope() : wasCritical(GetCritical()) {
   task = thread->GetTask();
   assert(task != NULL);
   
-  if (!task->Hold()) {
-    Thread::Exit();
+  // support nesting scopes that still allow for Exit() calls.
+  if (!thread->isHoldingTask) {
+    if (!task->Hold()) {
+      Thread::Exit();
+    }
+    thread->isHoldingTask = true;
+    didHold = true;
   }
   
   SetCritical(false);
 }
 
 HoldScope::~HoldScope() {
-  task->Unhold();
+  if (didHold) {
+    thread->isHoldingTask = false;
+    task->Unhold();
+  }
   SetCritical(wasCritical);
 }
 

@@ -39,7 +39,7 @@ void SyscallFork(void * address, void * argument) {
 }
 
 void SyscallExit(bool wasError) {
-  ScopeCritical critical;
+  AssertCritical();
   
   uint64_t killReason;
   if (wasError) killReason = KillReasons::UserError;
@@ -49,7 +49,7 @@ void SyscallExit(bool wasError) {
 }
 
 void SyscallThreadExit() {
-  ScopeCritical critical;
+  AssertCritical();
   Thread::Exit();
 }
 
@@ -64,7 +64,7 @@ uint64_t SyscallGetThreadID() {
 }
 
 uint64_t SyscallGetTaskCount() {
-  ScopeCritical critical;
+  AssertCritical();
   return Task::GetCounter();
 }
 

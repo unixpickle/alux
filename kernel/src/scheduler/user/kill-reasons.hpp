@@ -10,7 +10,8 @@ enum Reasons {
   UserError,
   UnownedMemory,
   InvalidSyscall,
-  MemoryFault
+  MemoryFault,
+  UnauthorizedSyscall
 };
 
 }
