@@ -45,17 +45,16 @@ public:
    * subroutine definitely can. Thus, we can't use a normal memcpy() with a
    * pointer passed from user-space. Instead, we use this method to make sure
    * that the copy is safe. This method may trigger a normal page fault to
-   * signal an illegal access, or it may return false. A return value of true
-   * signifies that the copy occured without fault.
+   * signal an illegal access, or it may exit the task using a HoldScope.
    * @noncritical
    */
-  virtual bool CopyToKernel(void * dest, VirtAddr start, size_t size) = 0;
+  virtual void CopyToKernel(void * dest, VirtAddr start, size_t size) = 0;
   
   /**
    * Same as CopyToKernel(), but backwards.
    * @noncritical
    */
-  virtual bool CopyFromKernel(VirtAddr dest, void * start, size_t size) = 0;
+  virtual void CopyFromKernel(VirtAddr dest, void * start, size_t size) = 0;
   
   /**
    * Delete this instance. You should treat this like the `delete` operator in

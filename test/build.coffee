@@ -7,6 +7,7 @@ module.exports = (Finder, Makefile) ->
   mainSources = [
     'main'
     'stdlib'
+    'memory'
   ]
 
   finder = new Finder()

@@ -61,15 +61,26 @@ uint64_t SyscallAllocatePhysical(PhysAddr * addrOut, uint64_t size,
   UserMap * map = scope.GetTask()->GetUserAddressSpace();
   assert(map != NULL);
   
-  // note that this might not actually return if the task triggers a page
-  // fault, in which case the physical memory will be leaked
-  bool res = map->CopyFromKernel((VirtAddr)addrOut, (void *)&result,
-                                 sizeof(result));
-  if (!res) {
-    // why bother freeing memory here, we might as well just cry :'(
-    scope.Exit(KillReasons::UnownedMemory);
-  }
+  // note that this might not actually return if the task gave us a pointer
+  // it doesn't own, in which case physical memory will be leaked
+  map->CopyFromKernel((VirtAddr)addrOut, (void *)&result, sizeof(result));
+  
   return 1;
+}
+
+void SyscallFreePhysical(PhysAddr * addrIn) {
+  HoldScope scope;
+  if (scope.GetTask()->GetUID()) {
+    scope.Exit(KillReasons::UnauthorizedSyscall);
+  }
+  
+  UserMap * map = scope.GetTask()->GetUserAddressSpace();
+  assert(map != NULL);
+  
+  PhysAddr addr;
+  map->CopyToKernel((void *)&addr, (PhysAddr)addrIn, sizeof(addr));
+  
+  PhysicalAllocator::GetGlobal().Free(addr);
 }
 
 void SyscallMapPhysical(uint64_t pageSize, uint64_t pageCount,
@@ -84,27 +95,16 @@ void SyscallMapPhysical(uint64_t pageSize, uint64_t pageCount,
   assert(map != NULL);
   
   PhysAddr physAddr;
-  bool res = map->CopyToKernel((void *)&physAddr, (VirtAddr)addrIn,
-                               sizeof(physAddr));
-  if (!res) {
-    scope.Exit(KillReasons::UnownedMemory);
-  }
+  map->CopyToKernel((void *)&physAddr, (VirtAddr)addrIn, sizeof(physAddr));
   
   uint64_t flags;
-  res = map->CopyToKernel((void *)&flags, (VirtAddr)flagsPtr, sizeof(flags));
-  if (!res) {
-    scope.Exit(KillReasons::UnownedMemory);
-  }
+  map->CopyToKernel((void *)&flags, (VirtAddr)flagsPtr, sizeof(flags));
   
   bool exec = (flags & 1) != 0;
   bool writable = (flags & 2) != 0;
   AddressSpace::MapInfo info(pageSize, pageCount, physAddr, exec, writable);
   void * result = (void *)map->Map(info);
-  res = map->CopyFromKernel((VirtAddr)addressOut, (void *)&result,
-                            sizeof(result));
-  if (!res) {
-    scope.Exit(KillReasons::UnownedMemory);
-  }
+  map->CopyFromKernel((VirtAddr)addressOut, (void *)&result, sizeof(result));
 }
 
 void SyscallUnmapPhysical(uint64_t pageSize, uint64_t pageCount,

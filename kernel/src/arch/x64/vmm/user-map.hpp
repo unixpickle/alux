@@ -37,8 +37,8 @@ public:
   virtual void MapAt(VirtAddr virt, MapInfo info);
   virtual VirtAddr Reserve(Size size);
   virtual void ReserveAt(VirtAddr addr, Size size);
-  virtual bool CopyToKernel(void * dest, VirtAddr start, size_t size);
-  virtual bool CopyFromKernel(VirtAddr dest, void * start, size_t size);
+  virtual void CopyToKernel(void * dest, VirtAddr start, size_t size);
+  virtual void CopyFromKernel(VirtAddr dest, void * start, size_t size);
   
 protected:
   static const size_t RegionVectorJump = 0x10;

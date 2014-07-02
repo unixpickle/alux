@@ -3,6 +3,8 @@
 #include <arch/x64/vmm/global-map.hpp>
 #include <arch/x64/vmm/tlb.hpp>
 #include <arch/general/physical-allocator.hpp>
+#include <scheduler/user/kill-reasons.hpp>
+#include <scheduler/general/hold-scope.hpp>
 #include <critical>
 #include <cassert>
 #include <cstring>
@@ -141,22 +143,22 @@ void UserMap::ReserveAt(VirtAddr addr, UserMap::Size size) {
   }
 }
 
-bool UserMap::CopyToKernel(void * dest, VirtAddr start, size_t size) {
-  if (start + size < start) return false;
-  if (start < SpaceStart) return false;
+void UserMap::CopyToKernel(void * dest, VirtAddr start, size_t size) {
+  if (start + size < start || start < SpaceStart) {
+    HoldScope scope;
+    scope.Exit(KillReasons::UnownedMemory);
+  }
   
   memcpy(dest, (void *)start, size);
-  
-  return true;
 }
 
-bool UserMap::CopyFromKernel(VirtAddr dest, void * start, size_t size) {
-  if (dest + size < dest) return false;
-  if (dest < SpaceStart) return false;
+void UserMap::CopyFromKernel(VirtAddr dest, void * start, size_t size) {
+  if (dest + size < dest || dest < SpaceStart) {
+    HoldScope scope;
+    scope.Exit(KillReasons::UnownedMemory);
+  }
   
   memcpy((void *)dest, start, size);
-  
-  return true;
 }
 
 void UserMap::FreeTable(PhysAddr table, int depth, int start) {

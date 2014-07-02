@@ -17,11 +17,10 @@ void SyscallPrint(const char * strBuf, uint8_t color, bool bright) {
   
   UserMap * map = scope.GetTask()->GetUserAddressSpace();
   assert(map != NULL);
+  
   while (1) {
     char str[2] = {0, 0};
-    if (!map->CopyToKernel((void *)str, (VirtAddr)strBuf, 1)) {
-      scope.Exit(KillReasons::UnownedMemory);
-    }
+    map->CopyToKernel((void *)str, (VirtAddr)strBuf, 1);
     if (!str[0]) break;
     console.PrintString(str);
     strBuf++;
