@@ -88,10 +88,13 @@ uint64_t SyscallHandler(uint16_t callNumber,
       return SyscallAllocatePhysical((PhysAddr *)arg1, arg4, arg5);
       break;
     case 21:
+      SyscallFreePhysical((PhysAddr *)arg1);
+      break;
+    case 22:
       SyscallMapPhysical(arg4, arg5, (uint64_t *)arg1, (PhysAddr *)arg2,
                         (void **)arg3);
       break;
-    case 22:
+    case 23:
       SyscallUnmapPhysical(arg4, arg5, arg1);
       break;
     default:
