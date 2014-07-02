@@ -1,4 +1,5 @@
 #include <scheduler-specific/scheduler.hpp>
+#include <scheduler/fifo/contextualizer.hpp>
 #include <scheduler/internal/garbage-thread.hpp>
 #include <arch/general/hardware-thread-list.hpp>
 #include <arch/general/tick-timer.hpp>
@@ -91,7 +92,6 @@ void Scheduler::Tick() {
   
   uint64_t delay;
   Thread * toRun = GetNextThread(delay);
-  SwitchThread(toRun);
   TickTimer::GetGlobal().SetTimeout(delay, true);
   
   if (!toRun) {
@@ -109,46 +109,9 @@ void Scheduler::RemoveThread(Thread * t) {
   UnlinkThread(t);
 }
 
-void Scheduler::SwitchThread(Thread * t) {
-  Thread * running = HardwareThread::GetThread();
-  
-  // switch address spaces so that we're not stuck in the old task's address
-  // space when we release it (which could cause problems)
-  if (t && t != running) {
-    t->GetTask()->GetAddressSpace().Set();
-  } else if (!t) {
-    if (running) {
-      GlobalMap::GetGlobal().Set();
-    }
-  }
-  
-  LockHold(&lock);
-
-  // if there is a current task, unset it from the CPU and mark it as not
-  // running
-  if (running && running != t) {
-    HardwareThread::SetThread(NULL);
-    running->SchedThread::isRunning = false;
-  }
-
-  // if there is a new task, make sure it's marked as running and set it to
-  // the CPU
-  if (t && t != running) {
-    assert(t->SchedThread::isRunning);
-    t->SchedThread::nextTick = 0;
-    HardwareThread::SetThread(t);
-  }
-  
-  LockRelease(&lock);
-  
-  // release the task while *not* holding the scheduler lock to avoid deadlock
-  // when the Release() call triggers the task to terminate and to request the
-  // scheduler to wakeup the garbage thread
-  if (running) running->Release();
-}
-
 Thread * Scheduler::GetNextThread(uint64_t & nextDelay) {
-  ScopeCriticalLock scope(&lock);
+  AssertCritical();
+  LockHold(&lock);
   
   Clock & clock = Clock::GetClock();
   uint64_t now = clock.GetTime();
@@ -157,7 +120,7 @@ Thread * Scheduler::GetNextThread(uint64_t & nextDelay) {
   Thread * first = NULL;
   Thread * current = NULL;
   
-  Thread * running = HardwareThread::GetThread();
+  Contextualizer ctx;
   
   while (1) {
     if (first) {
@@ -174,7 +137,6 @@ Thread * Scheduler::GetNextThread(uint64_t & nextDelay) {
       PushThread(current);
     }
     
-    if (current->SchedThread::isRunning || current == running) continue;
     if (current->SchedThread::nextTick > now) {
       if (current->SchedThread::nextTick < nextTick) {
         nextTick = current->SchedThread::nextTick;
@@ -182,14 +144,19 @@ Thread * Scheduler::GetNextThread(uint64_t & nextDelay) {
       continue;
     }
     
-    if (!current->Retain()) continue;
-    break;
+    if (ctx.SetNewThread(current)) break;
   }
   
   nextDelay = nextTick - now;
   
-  if (current) current->SchedThread::isRunning = true;
-  return current;
+  ctx.SwitchRunningInfo();
+  
+  LockRelease(&lock);
+  
+  ctx.SwitchAddressSpace();
+  ctx.ReleaseLast();
+  
+  return ctx.GetNewThread();
 }
 
 Thread * Scheduler::PopThread() {

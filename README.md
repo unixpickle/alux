@@ -15,8 +15,11 @@ I have a test user-space compiling and running. So far, I have created a basic p
 
 I want to expand the scheduler with an IPC mechanism, and I want to implement some useful syscalls. To do this, I plan to modify the kernel and my tests simultaneously for rapid testing and development.
 
- * Create system calls for accessing the clock and console
+ * Clean up build system and remove various environment variables
+ * Get rid of the SwitchThread() method in the FIFO scheduler
+ * Figure out a cleaner way to handle memory faults
  * Create (privileged) system calls for allocating, mapping, and freeing memory
+ * Write basic `new` and `delete` for user-space
  * Come up with a viable IPC mechanism and implement it
  * Create tests that implement:
    * Threading, mutexes, semaphores
