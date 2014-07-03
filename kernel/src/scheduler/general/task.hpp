@@ -23,7 +23,7 @@ public:
   
   static void Exit(uint64_t status) OS_NORETURN; // @critical
   
-  ~Task(); // @noncritical
+  virtual ~Task(); // @noncritical
   virtual void Delete(); // @noncritical
   virtual bool IsKernel();
   

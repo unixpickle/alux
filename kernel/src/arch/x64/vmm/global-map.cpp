@@ -33,7 +33,7 @@ GlobalMap & GlobalMap::GetGlobal() {
   return instance;
 }
 
-GlobalMap::GlobalMap() : table(0), allocator(NULL), pdpt(0) {
+GlobalMap::GlobalMap() : table(0) {
 }
 
 void GlobalMap::Initialize() {

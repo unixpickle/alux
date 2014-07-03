@@ -11,7 +11,7 @@ namespace x64 {
 class State : public OS::State {
 public:
   State(void * call, void * arg, bool kernel);
-  ~State();
+  virtual ~State();
   
   virtual void Load();
   virtual void Delete();

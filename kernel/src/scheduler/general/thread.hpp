@@ -23,7 +23,7 @@ public:
   
   static void Exit() OS_NORETURN; // @critical
   
-  ~Thread();
+  virtual ~Thread();
   
   virtual void Delete(); // @noncritical
   Task * GetTask(); // @ambicritical

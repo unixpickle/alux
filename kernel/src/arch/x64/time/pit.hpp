@@ -11,7 +11,7 @@ namespace x64 {
 class PIT : public Clock {
 protected:
   Atomic<uint64_t> counter;
-  uint16_t divide;
+  uint16_t divide = 0;
   void IntHandler();
 
 public:

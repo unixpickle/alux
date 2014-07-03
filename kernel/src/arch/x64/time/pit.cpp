@@ -26,6 +26,10 @@ PIT & PIT::GetGlobal() {
   return mainPit;
 }
 
+PIT::PIT() : counter(0) {
+  
+}
+
 void PIT::Start() {
   IOAPIC::GetBase().MapIRQ(0, IntVectors::PIT);
 }
@@ -33,8 +37,6 @@ void PIT::Start() {
 void PIT::Stop() {
   IOAPIC::GetBase().MaskIRQ(IntVectors::PIT);
 }
-
-PIT::PIT() : divide(0), counter(0) { }
 
 void PIT::SetDivisor(uint16_t aDiv) {
   divide = aDiv;

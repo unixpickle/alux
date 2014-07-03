@@ -18,7 +18,6 @@ static XAPIC xapic;
 static X2APIC x2apic;
 static int PreferredDivide = 0x3;
 static LAPICModule gModule;
-static Module * deps[2];
 
 void LAPICModule::InitGlobal() {
   new(&gModule) LAPICModule();

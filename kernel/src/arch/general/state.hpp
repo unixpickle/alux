@@ -12,6 +12,7 @@ public:
   static State * NewUser(void * call); // @noncritical
   static State * NewUser(void * call, void * arg); // @noncritical
   
+  virtual ~State() {}
   virtual void Load() = 0; // @critical
   virtual void Delete() = 0; // @noncritical
 };

@@ -30,7 +30,6 @@ static void CPUMain();
 void StartProcessors() {
   cout << "Starting processors..." << endl;
   
-  size_t codeSize;
   StartupCode _code;
   code = &_code;
   

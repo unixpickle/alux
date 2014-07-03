@@ -24,7 +24,7 @@ State * State::NewUser(void * call, void * arg) {
 namespace x64 {
 
 State::State(void * call, void * arg, bool _kernel)
-  : kernel(_kernel), rdi((uint64_t)arg) {
+  : rdi((uint64_t)arg), kernel(_kernel) {
   AssertNoncritical();
   
   stack = new uint8_t[0x4000];

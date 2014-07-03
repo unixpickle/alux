@@ -37,9 +37,9 @@ public:
   friend class Scratch;
   
 protected:
-  PageAllocator * allocator;
+  PageAllocator * allocator = NULL;
   PageTable table;
-  PhysAddr pdpt;
+  PhysAddr pdpt = 0;
   
   uint64_t lock OS_ALIGNED(8) = 0; // @noncritical
   

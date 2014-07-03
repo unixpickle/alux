@@ -16,8 +16,8 @@ export CC
 export LD
 export ASM
 
-override CXXFLAGS += -nostdlib -nostdinc -ffreestanding -mno-red-zone -fno-exceptions -fno-rtti -Wno-long-long -Wextra -std=c++11 -mno-sse -mno-mmx -mcmodel=large
-override CFLAGS += -nostdlib -nostdinc -ffreestanding -mno-red-zone -Wno-long-long -Wextra -mno-sse -mno-mmx -mcmodel=large
+override CXXFLAGS += -nostdlib -nostdinc -ffreestanding -mno-red-zone -fno-exceptions -fno-rtti -Wno-long-long -Wextra -Wall -std=c++11 -mno-sse -mno-mmx -mcmodel=large
+override CFLAGS += -nostdlib -nostdinc -ffreestanding -mno-red-zone -Wno-long-long -Wextra -Wall -mno-sse -mno-mmx -mcmodel=large
 override ASMFLAGS += -f elf64
 
 export CXXFLAGS

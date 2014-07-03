@@ -8,7 +8,6 @@
 namespace OS {
 
 static Malloc globalMalloc;
-static Module * deps[2];
 
 void Malloc::InitGlobal() {
   new(&globalMalloc) Malloc();
