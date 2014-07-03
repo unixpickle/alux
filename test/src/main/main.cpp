@@ -4,7 +4,7 @@
 #include <arch/general/tests.hpp>
 #include <new>
 
-using namespace std;
+using namespace Test;
 
 void Main() {
   new(&cout) ConsoleStream();

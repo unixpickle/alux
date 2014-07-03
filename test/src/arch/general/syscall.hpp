@@ -6,6 +6,7 @@
 namespace Test {
 
 class Syscall {
+public:
   enum Identifier {
     // console
     Print,
@@ -49,7 +50,7 @@ class Syscall {
   
   static_assert(sizeof(ReturnValue) == 8, "invalid ReturnValue size");
   
-  static ReturnValue Run(uint16_t name, ArgList & args);
+  static ReturnValue Run(uint16_t name, const ArgList & args);
 };
 
 }

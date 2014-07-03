@@ -4,11 +4,13 @@
 extern "C" {
 
 uint64_t getpid() {
-  return Syscall(SyscallNumberGetPID, NULL, NULL, NULL, 0, 0);
+  return Test::Syscall::Run(Test::Syscall::GetPID, Test::ArgList()).unsigned64;
 }
 
 void usleep(uint64_t delay) {
-  Syscall(SyscallNumberSetTimeout, NULL, NULL, NULL, delay, 0);
+  Test::ArgList list;
+  list.PushUInt64(delay);
+  Test::Syscall::Run(Test::Syscall::SetTimeout, list);
 }
 
 }

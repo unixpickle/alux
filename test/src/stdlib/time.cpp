@@ -5,7 +5,8 @@
 extern "C" {
 
 uint64_t utime() {
-  return Syscall(SyscallNumberGetBootMicroTime, NULL, NULL, NULL, 0, 0);
+  return Test::Syscall::Run(Test::Syscall::GetBootMicroTime,
+                            Test::ArgList()).unsigned64;
 }
 
 }

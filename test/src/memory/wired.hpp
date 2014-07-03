@@ -1,7 +1,7 @@
 #ifndef __MEMORY_WIRED_HPP__
 #define __MEMORY_WIRED_HPP__
 
-#include <address.h>
+#include <arch-specific/types.hpp>
 #include <cstddef>
 #include <cstdint>
 
