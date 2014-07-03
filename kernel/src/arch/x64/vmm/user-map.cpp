@@ -100,21 +100,28 @@ void UserMap::Unmap(VirtAddr virt, UserMap::Size size) {
 }
 
 VirtAddr UserMap::Map(UserMap::MapInfo info) {
+  VirtAddr result;
+  if (!Map(info, result)) {
+    Panic("UserMap::Map() - failed to find free region");
+  }
+  return result;
+}
+
+bool UserMap::Map(MapInfo info, VirtAddr & result) {
   AssertNoncritical();
   
-  VirtAddr addr;
   {
     ScopeLock scope(&lock);
-    addr = freeList.Alloc(info.pageSize, info.pageCount);
+    result = freeList.Alloc(info.pageSize, info.pageCount);
   }
-  if (!addr) return 0;
-  assert(addr >= SpaceStart);
+  if (!result) return false;
+  assert(result >= SpaceStart);
   
   uint64_t mask = PageTable::EntryMask(info.pageSize, info.executable, false);
   if (!info.writable) mask ^= 2;
   uint64_t source = info.physical | mask;
-  SetEntries(addr, source, info.pageSize, info.pageSize, info.pageCount);
-  return addr;
+  SetEntries(result, source, info.pageSize, info.pageSize, info.pageCount);
+  return true;
 }
 
 void UserMap::MapAt(VirtAddr virt, UserMap::MapInfo info) {

@@ -34,6 +34,18 @@ public:
   virtual bool SupportsPlacementReserve() = 0;
   
   /**
+   * Repeated from base-class. See address-space.h for more.
+   * @noncritical
+   */
+  virtual VirtAddr Map(MapInfo info) = 0;
+  
+  /**
+   * Same as Map(MapInfo), but a failure will not result in a kernel panic.
+   * @noncritical
+   */
+  virtual bool Map(MapInfo info, VirtAddr & result) = 0;
+  
+  /**
    * Reserve mappings starting at the specified address.
    * @noncritical
    */

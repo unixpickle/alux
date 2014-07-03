@@ -34,6 +34,7 @@ public:
   virtual bool SupportsPlacementReserve();
   virtual void Unmap(VirtAddr virt, Size size);
   virtual VirtAddr Map(MapInfo info);
+  virtual bool Map(MapInfo info, VirtAddr & result);
   virtual void MapAt(VirtAddr virt, MapInfo info);
   virtual VirtAddr Reserve(Size size);
   virtual void ReserveAt(VirtAddr addr, Size size);

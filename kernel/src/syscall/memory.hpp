@@ -10,10 +10,10 @@ uint64_t SyscallGetPhysicalTotal();
 uint64_t SyscallGetPageSizeCount();
 uint64_t SyscallGetPageSize(uint64_t index);
 uint64_t SyscallGetPageAlignment(uint64_t index);
-uint64_t SyscallAllocatePhysical(PhysAddr * addrOut, uint64_t size,
+bool SyscallAllocatePhysical(PhysAddr * addrOut, uint64_t size,
                                  uint64_t align);
 void SyscallFreePhysical(PhysAddr * addrIn);
-void SyscallMapPhysical(uint64_t pageSize, uint64_t pageCount,
+bool SyscallMapPhysical(uint64_t pageSize, uint64_t pageCount,
                         uint64_t * flags, PhysAddr * addrIn,
                         void ** addressOut);
 void SyscallUnmapPhysical(uint64_t pageSize, uint64_t pageCount,

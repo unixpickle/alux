@@ -48,7 +48,7 @@ uint64_t SyscallGetPageAlignment(uint64_t _index) {
   return (uint64_t)AddressSpace::GetPageAlignment((int)index);
 }
 
-uint64_t SyscallAllocatePhysical(PhysAddr * addrOut, uint64_t size,
+bool SyscallAllocatePhysical(PhysAddr * addrOut, uint64_t size,
                                  uint64_t align) {
   HoldScope scope;
   if (scope.GetTask()->GetUID()) {
@@ -56,7 +56,7 @@ uint64_t SyscallAllocatePhysical(PhysAddr * addrOut, uint64_t size,
   }
   
   PhysAddr result = PhysicalAllocator::GetGlobal().Alloc(align, size, NULL);
-  if (!result) return 0;
+  if (!result) return false;
   
   UserMap * map = scope.GetTask()->GetUserAddressSpace();
   assert(map != NULL);
@@ -65,7 +65,7 @@ uint64_t SyscallAllocatePhysical(PhysAddr * addrOut, uint64_t size,
   // it doesn't own, in which case physical memory will be leaked
   map->CopyFromKernel((VirtAddr)addrOut, (void *)&result, sizeof(result));
   
-  return 1;
+  return true;
 }
 
 void SyscallFreePhysical(PhysAddr * addrIn) {
@@ -83,7 +83,7 @@ void SyscallFreePhysical(PhysAddr * addrIn) {
   PhysicalAllocator::GetGlobal().Free(addr);
 }
 
-void SyscallMapPhysical(uint64_t pageSize, uint64_t pageCount,
+bool SyscallMapPhysical(uint64_t pageSize, uint64_t pageCount,
                         uint64_t * flagsPtr, PhysAddr * addrIn,
                         void ** addressOut) {
   HoldScope scope;
@@ -102,9 +102,17 @@ void SyscallMapPhysical(uint64_t pageSize, uint64_t pageCount,
   
   bool exec = (flags & 1) != 0;
   bool writable = (flags & 2) != 0;
+  
   AddressSpace::MapInfo info(pageSize, pageCount, physAddr, exec, writable);
-  void * result = (void *)map->Map(info);
-  map->CopyFromKernel((VirtAddr)addressOut, (void *)&result, sizeof(result));
+  VirtAddr result;
+  if (!map->Map(info, result)) return false;
+  
+  // we need to cast the result to a pointer before copying it (for future
+  // platforms) -- TODO: make everything a VirtAddr all over the place
+  void * resultPtr = (void *)result;
+  map->CopyFromKernel((VirtAddr)addressOut, (void *)&resultPtr,
+                      sizeof(result));
+  return true;
 }
 
 void SyscallUnmapPhysical(uint64_t pageSize, uint64_t pageCount,

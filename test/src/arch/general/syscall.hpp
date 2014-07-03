@@ -20,7 +20,21 @@ enum SyscallNumber {
   SyscallNumberSetTimeout,
   SyscallNumberSetInfiniteTimeout,
   SyscallNumberClearTimeout,
-  SyscallNumberClearClear
+  SyscallNumberClearClear,
+  // thread/task stats
+  SyscallNumberGetTaskCount,
+  SyscallNumberGetThreadCount,
+  // memory
+  SyscallNumberGetPhysicalUsed,
+  SyscallNumberGetPhysicalAvailable,
+  SyscallNumberGetPhysicalTotal,
+  SyscallNumberGetPageSizeCount,
+  SyscallNumberGetPageSize,
+  SyscallNumberGetPageAlignment,
+  SyscallNumberAllocatePhysical,
+  SyscallNumberFreePhysical,
+  SyscallNumberMapPhysical,
+  SyscallNumberUnmapPhysical
 };
 
 struct NewThreadInfo {
