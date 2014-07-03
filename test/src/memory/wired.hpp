@@ -5,7 +5,7 @@
 #include <cstddef>
 #include <cstdint>
 
-namespace std {
+namespace Test {
 
 class WiredMemory {
   static uint64_t PhysicalUsed();
@@ -18,9 +18,9 @@ class WiredMemory {
   static bool Allocate(PhysAddr & res, uint64_t size, uint64_t align);
   static void Free(PhysAddr addr);
   
-  static bool Map(void *& res, PhysAddr start, uint64_t pageSize,
+  static bool Map(VirtAddr & res, PhysAddr start, uint64_t pageSize,
                   uint64_t pageCount, bool exec = true, bool write = true);
-  static void Unmap(void * virt, uint64_t pageSize, uint64_t pageCount);
+  static void Unmap(VirtAddr virt, uint64_t pageSize, uint64_t pageCount);
 };
 
 }

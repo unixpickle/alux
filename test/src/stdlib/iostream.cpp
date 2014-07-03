@@ -2,7 +2,7 @@
 #include <iostream>
 #include <cstddef>
 
-namespace std {
+namespace Test {
 
 ConsoleStream cout;
 ErrorStream cerr;
@@ -14,8 +14,11 @@ void Puts(const char * buff, Color color, bool bright) {
 }
 
 void Print(const char * buff, Color color, bool bright) {
-  Syscall(SyscallNumberPrint, (void *)buff, NULL, NULL,
-          (uint64_t)color, (uint64_t)bright);           
+  ArgList list;
+  list.PushVirtAddr((VirtAddr)buff);
+  list.PushUInt64((uint64_t)color);
+  list.PushBool(bright);
+  Syscall::Run(Syscall::Print, list);
 }
 
 void ConsoleStream::PrintBuffer(const char * buf) {

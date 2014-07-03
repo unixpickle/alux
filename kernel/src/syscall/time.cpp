@@ -1,3 +1,4 @@
+#include <syscall/time.hpp>
 #include <scheduler-specific/scheduler.hpp>
 #include <scheduler/general/hold-scope.hpp>
 #include <scheduler/general/task.hpp>
@@ -9,13 +10,16 @@
 
 namespace OS {
 
-uint64_t SyscallGetBootMicroTime() {
+ReturnValue SyscallGetBootMicroTime() {
   HoldScope scope;
-  return Clock::GetClock().GetMicroTime();
+  return ReturnValue::NewUInt64(Clock::GetClock().GetMicroTime());
 }
 
-void SyscallSetTimeout(uint64_t timeout) {
+void SyscallSetTimeout(ArgList & args) {
   HoldScope scope;
+  
+  uint64_t timeout = args.PopUInt64();
+  
   Thread * thread = scope.GetThread();
   LockHold(&thread->timeoutLock);
   if (thread->shouldClearTimeout) {
@@ -46,8 +50,9 @@ void SyscallSetInfiniteTimeout() {
   Scheduler::GetGlobal().SetInfiniteTimeout(&thread->timeoutLock);
 }
 
-void SyscallClearTimeout(uint64_t threadId) {
+void SyscallClearTimeout(ArgList & args) {
   HoldScope scope;
+  uint64_t threadId = args.PopUInt64();
   scope.GetTask()->UnsleepThreadById(threadId);
 }
 

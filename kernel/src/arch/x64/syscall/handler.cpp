@@ -1,4 +1,5 @@
 #include <arch/x64/syscall/handler.hpp>
+#include <arch/x64/general/arg-list.hpp>
 #include <arch/general/hardware-thread.hpp>
 #include <scheduler/general/hold-scope.hpp>
 #include <syscall/handler.hpp>
@@ -32,8 +33,9 @@ uint64_t HandleSyscall(uint64_t call, uint64_t arg1,
   
   // TODO: here, put architecture-specific system calls
   
-  return SyscallHandler((uint16_t)call, (void *)arg1, (void *)arg2,
-                        (void *)arg3, arg4, arg5);
+  ArgList list(arg1, arg2, arg3, arg4, arg5);
+  ReturnValue val = SyscallHandler((uint16_t)call, list);
+  return val.value.unsigned64;
 }
 
 }

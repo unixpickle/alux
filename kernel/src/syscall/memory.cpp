@@ -10,122 +10,125 @@
 
 namespace OS {
 
-uint64_t SyscallGetPhysicalUsed() {
+ReturnValue SyscallGetPhysicalUsed() {
   HoldScope scope;
-  return (uint64_t)PhysicalAllocator::GetGlobal().Used();
+  size_t value = PhysicalAllocator::GetGlobal().Used();
+  return ReturnValue::NewUInt64((uint64_t)value);
 }
 
-uint64_t SyscallGetPhysicalAvailable() {
+ReturnValue SyscallGetPhysicalAvailable() {
   HoldScope scope;
-  return (uint64_t)PhysicalAllocator::GetGlobal().Available();
+  size_t value = PhysicalAllocator::GetGlobal().Available();
+  return ReturnValue::NewUInt64((uint64_t)value);
 }
 
-uint64_t SyscallGetPhysicalTotal() {
+ReturnValue SyscallGetPhysicalTotal() {
   HoldScope scope;
-  return (uint64_t)PhysicalAllocator::GetGlobal().Total();
+  size_t value = PhysicalAllocator::GetGlobal().Total();
+  return ReturnValue::NewUInt64((uint64_t)value);
 }
 
-uint64_t SyscallGetPageSizeCount() {
+ReturnValue SyscallGetPageSizeCount() {
   AssertCritical();
-  return (uint64_t)AddressSpace::GetPageSizeCount();
+  int value = AddressSpace::GetPageSizeCount();
+  return ReturnValue::NewUInt64((uint64_t)value);
 }
 
-uint64_t SyscallGetPageSize(uint64_t _index) {
+ReturnValue SyscallGetPageSize(ArgList & args) {
   AssertCritical();
-  int index = (int)_index;
+  int index = args.PopInt();
   if (index < 0 || index >= AddressSpace::GetPageSizeCount()) {
-    return 0;
+    return ReturnValue::NewUInt64(0);
   }
-  return (uint64_t)AddressSpace::GetPageSize((int)index);
+  size_t value = AddressSpace::GetPageSize((int)index);
+  return ReturnValue::NewUInt64((uint64_t)value);
 }
 
-uint64_t SyscallGetPageAlignment(uint64_t _index) {
+ReturnValue SyscallGetPageAlignment(ArgList & args) {
   AssertCritical();
-  int index = (int)_index;
+  int index = args.PopInt();
   if (index < 0 || index >= AddressSpace::GetPageSizeCount()) {
-    return 0;
+    return ReturnValue::NewUInt64(0);
   }
-  return (uint64_t)AddressSpace::GetPageAlignment((int)index);
+  size_t value = AddressSpace::GetPageAlignment((int)index);
+  return ReturnValue::NewUInt64((uint64_t)value);
 }
 
-bool SyscallAllocatePhysical(PhysAddr * addrOut, uint64_t size,
-                                 uint64_t align) {
+ReturnValue SyscallAllocatePhysical(ArgList & args) {
   HoldScope scope;
   if (scope.GetTask()->GetUID()) {
     scope.Exit(KillReasons::UnauthorizedSyscall);
   }
   
+  VirtAddr addrOut = args.PopVirtAddr();
+  size_t align = (size_t)args.PopUInt64();
+  size_t size = (size_t)args.PopUInt64();
+  
   PhysAddr result = PhysicalAllocator::GetGlobal().Alloc(align, size, NULL);
-  if (!result) return false;
+  if (!result) return ReturnValue::NewBool(false);
   
   UserMap * map = scope.GetTask()->GetUserAddressSpace();
   assert(map != NULL);
   
   // note that this might not actually return if the task gave us a pointer
   // it doesn't own, in which case physical memory will be leaked
-  map->CopyFromKernel((VirtAddr)addrOut, (void *)&result, sizeof(result));
+  map->CopyFromKernel(addrOut, (void *)&result, sizeof(result));
   
-  return true;
+  return ReturnValue::NewBool(false);
 }
 
-void SyscallFreePhysical(PhysAddr * addrIn) {
+void SyscallFreePhysical(ArgList & args) {
   HoldScope scope;
   if (scope.GetTask()->GetUID()) {
     scope.Exit(KillReasons::UnauthorizedSyscall);
   }
   
-  UserMap * map = scope.GetTask()->GetUserAddressSpace();
-  assert(map != NULL);
-  
-  PhysAddr addr;
-  map->CopyToKernel((void *)&addr, (PhysAddr)addrIn, sizeof(addr));
-  
+  PhysAddr addr = args.PopPhysAddr();
   PhysicalAllocator::GetGlobal().Free(addr);
 }
 
-bool SyscallMapPhysical(uint64_t pageSize, uint64_t pageCount,
-                        uint64_t * flagsPtr, PhysAddr * addrIn,
-                        void ** addressOut) {
+ReturnValue SyscallMapPhysical(ArgList & args) {
   HoldScope scope;
   if (scope.GetTask()->GetUID()) {
     scope.Exit(KillReasons::UnauthorizedSyscall);
   }
   
+  size_t pageSize = (size_t)args.PopUInt64();
+  size_t pageCount = (size_t)args.PopUInt64();
+  uint32_t flags = args.PopUInt32();
+  PhysAddr physAddr = args.PopPhysAddr();
+  VirtAddr addrOut = args.PopVirtAddr();
+  
   UserMap * map = scope.GetTask()->GetUserAddressSpace();
   assert(map != NULL);
-  
-  PhysAddr physAddr;
-  map->CopyToKernel((void *)&physAddr, (VirtAddr)addrIn, sizeof(physAddr));
-  
-  uint64_t flags;
-  map->CopyToKernel((void *)&flags, (VirtAddr)flagsPtr, sizeof(flags));
   
   bool exec = (flags & 1) != 0;
   bool writable = (flags & 2) != 0;
   
   AddressSpace::MapInfo info(pageSize, pageCount, physAddr, exec, writable);
   VirtAddr result;
-  if (!map->Map(info, result)) return false;
+  if (!map->Map(info, result)) return ReturnValue::NewBool(false);
   
   // we need to cast the result to a pointer before copying it (for future
   // platforms) -- TODO: make everything a VirtAddr all over the place
-  void * resultPtr = (void *)result;
-  map->CopyFromKernel((VirtAddr)addressOut, (void *)&resultPtr,
-                      sizeof(result));
-  return true;
+  map->CopyFromKernel(addrOut, (void *)&result, sizeof(result));
+  return ReturnValue::NewBool(true);
 }
 
-void SyscallUnmapPhysical(uint64_t pageSize, uint64_t pageCount,
-                          void * address) {
+void SyscallUnmapPhysical(ArgList & args) {
   HoldScope scope;
   if (scope.GetTask()->GetUID()) {
     scope.Exit(KillReasons::UnauthorizedSyscall);
   }
   
+  size_t pageSize = (size_t)args.PopUInt64();
+  size_t pageCount = (size_t)args.PopUInt64();
+  VirtAddr address = args.PopVirtAddr();
+  
   UserMap * map = scope.GetTask()->GetUserAddressSpace();
   assert(map != NULL);
   
-  map->Unmap((VirtAddr)address, AddressSpace::Size(pageSize, pageCount));
+  map->Unmap(address, AddressSpace::Size(pageSize, pageCount));
 }
 
 }

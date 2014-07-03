@@ -3,7 +3,7 @@
 
 #include <cstdint>
 
-namespace std {
+namespace Test {
 
 enum Color {
   ColorBlack = 0,

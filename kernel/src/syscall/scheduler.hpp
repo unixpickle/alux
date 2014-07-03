@@ -1,16 +1,19 @@
 #ifndef __SYSCALL_SCHEDULER_HPP__
 #define __SYSCALL_SCHEDULER_HPP__
 
+#include <arch/general/arg-list.hpp>
+#include <syscall/return-value.hpp>
+
 namespace OS {
 
-uint64_t SyscallLaunchThread(void * address, void * argument);
-void SyscallFork(void * address, void * argument);
-void SyscallExit(bool wasError);
+ReturnValue SyscallLaunchThread(ArgList & args);
+void SyscallFork(ArgList & list);
+void SyscallExit(ArgList & list);
 void SyscallThreadExit();
-uint64_t SyscallGetPID();
-uint64_t SyscallGetThreadID();
-uint64_t SyscallGetTaskCount();
-uint64_t SyscallGetThreadCount();
+ReturnValue SyscallGetPID();
+ReturnValue SyscallGetThreadID();
+ReturnValue SyscallGetTaskCount();
+ReturnValue SyscallGetThreadCount();
 
 }
 

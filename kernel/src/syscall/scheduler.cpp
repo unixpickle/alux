@@ -1,3 +1,4 @@
+#include <syscall/scheduler.hpp>
 #include <scheduler-specific/scheduler.hpp>
 #include <scheduler/user/user-task.hpp>
 #include <scheduler/user/kill-reasons.hpp>
@@ -7,8 +8,11 @@
 
 namespace OS {
 
-uint64_t SyscallLaunchThread(void * address, void * argument) {
+ReturnValue SyscallLaunchThread(ArgList & args) {
   HoldScope scope;
+  
+  void * address = (void *)args.PopVirtAddr();
+  void * argument = (void *)args.PopVirtAddr();
   
   Thread * th = Thread::NewUser(scope.GetTask(), address, argument);
   scope.GetTask()->AddThread(th);
@@ -17,11 +21,14 @@ uint64_t SyscallLaunchThread(void * address, void * argument) {
   Scheduler::GetGlobal().AddThread(th);
   th->Release();
   
-  return theId;
+  return ReturnValue::NewUInt64(theId);
 }
 
-void SyscallFork(void * address, void * argument) {
+void SyscallFork(ArgList & args) {
   HoldScope scope;
+  
+  void * address = (void *)args.PopVirtAddr();
+  void * argument = (void *)args.PopVirtAddr();
   
   UserTask * thisTask = static_cast<UserTask *>(scope.GetTask());
   // TODO: this will change once i make tasks start off held
@@ -38,8 +45,10 @@ void SyscallFork(void * address, void * argument) {
   // launched task and we will return its file descriptor.
 }
 
-void SyscallExit(bool wasError) {
+void SyscallExit(ArgList & args) {
   AssertCritical();
+  
+  bool wasError = args.PopBool();
   
   uint64_t killReason;
   if (wasError) killReason = KillReasons::UserError;
@@ -53,24 +62,24 @@ void SyscallThreadExit() {
   Thread::Exit();
 }
 
-uint64_t SyscallGetPID() {
+ReturnValue SyscallGetPID() {
   HoldScope scope;
-  return scope.GetTask()->GetPID();
+  return ReturnValue::NewUInt64(scope.GetTask()->GetPID());
 }
 
-uint64_t SyscallGetThreadID() {
+ReturnValue SyscallGetThreadID() {
   HoldScope scope;
-  return scope.GetThread()->GetThreadId();
+  return ReturnValue::NewUInt64(scope.GetThread()->GetThreadId());
 }
 
-uint64_t SyscallGetTaskCount() {
+ReturnValue SyscallGetTaskCount() {
   AssertCritical();
-  return Task::GetCounter();
+  return ReturnValue::NewUInt64(Task::GetCounter());
 }
 
-uint64_t SyscallGetThreadCount() {
+ReturnValue SyscallGetThreadCount() {
   ScopeCritical critical;
-  return Thread::GetCounter();
+  return ReturnValue::NewUInt64(Thread::GetCounter());
 }
 
 }

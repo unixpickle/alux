@@ -1,3 +1,4 @@
+#include <syscall/console.hpp>
 #include <scheduler/general/hold-scope.hpp>
 #include <scheduler/general/task.hpp>
 #include <scheduler/user/kill-reasons.hpp>
@@ -6,11 +7,14 @@
 
 namespace OS {
 
-void SyscallPrint(const char * strBuf, uint8_t color, bool bright) {
+void SyscallPrint(ArgList & list) {
   HoldScope scope;
   
+  VirtAddr strBuf = list.PopVirtAddr();
+  uint8_t color = (uint8_t)list.PopUInt64();
+  bool bright = list.PopBool() != false;
+  
   if (color > 7) color = 7;
-  bright = (bright != false);
   
   Console & console = Console::GetGlobal();
   console.SetColor((Console::Color)color, bright);
@@ -20,7 +24,7 @@ void SyscallPrint(const char * strBuf, uint8_t color, bool bright) {
   
   while (1) {
     char str[2] = {0, 0};
-    map->CopyToKernel((void *)str, (VirtAddr)strBuf, 1);
+    map->CopyToKernel((void *)str, strBuf, 1);
     if (!str[0]) break;
     console.PrintString(str);
     strBuf++;

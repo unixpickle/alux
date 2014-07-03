@@ -1,52 +1,56 @@
 #ifndef __GENERAL_SYSCALL_HPP__
 #define __GENERAL_SYSCALL_HPP__
 
-#include <cstdint>
+#include <arch-specific/arg-list.hpp>
 
-extern "C" {
+namespace Test {
 
-enum SyscallNumber {
-  // console
-  SyscallNumberPrint,
-  // threading
-  SyscallNumberLaunchThread,
-  SyscallNumberFork,
-  SyscallNumberExit,
-  SyscallNumberThreadExit,
-  SyscallNumberGetPID,
-  SyscallNumberGetThreadID,
-  // time
-  SyscallNumberGetBootMicroTime,
-  SyscallNumberSetTimeout,
-  SyscallNumberSetInfiniteTimeout,
-  SyscallNumberClearTimeout,
-  SyscallNumberClearClear,
-  // thread/task stats
-  SyscallNumberGetTaskCount,
-  SyscallNumberGetThreadCount,
-  // memory
-  SyscallNumberGetPhysicalUsed,
-  SyscallNumberGetPhysicalAvailable,
-  SyscallNumberGetPhysicalTotal,
-  SyscallNumberGetPageSizeCount,
-  SyscallNumberGetPageSize,
-  SyscallNumberGetPageAlignment,
-  SyscallNumberAllocatePhysical,
-  SyscallNumberFreePhysical,
-  SyscallNumberMapPhysical,
-  SyscallNumberUnmapPhysical
+class Syscall {
+  enum Identifier {
+    // console
+    Print,
+    // threading
+    LaunchThread,
+    Fork,
+    Exit,
+    ThreadExit,
+    GetPID,
+    GetThreadID,
+    // time
+    GetBootMicroTime,
+    SetTimeout,
+    SetInfiniteTimeout,
+    ClearTimeout,
+    ClearClear,
+    // thread/task stats
+    GetTaskCount,
+    GetThreadCount,
+    // memory
+    GetPhysicalUsed,
+    GetPhysicalAvailable,
+    GetPhysicalTotal,
+    GetPageSizeCount,
+    GetPageSize,
+    GetPageAlignment,
+    AllocatePhysical,
+    FreePhysical,
+    MapPhysical,
+    UnmapPhysical
+  };
+  
+  typedef union {
+    bool boolean;
+    int integer;
+    uint32_t unsigned32;
+    uint64_t unsigned64;
+    PhysAddr physicalAddr;
+    VirtAddr virtualAddr;
+  } ReturnValue;
+  
+  static_assert(sizeof(ReturnValue) == 8, "invalid ReturnValue size");
+  
+  static ReturnValue Run(uint16_t name, ArgList & args);
 };
-
-struct NewThreadInfo {
-  void * stackTop;
-  void (* func)(void *);
-  void * argument;
-} __attribute__((packed));
-
-uint64_t Syscall(uint16_t name, void * arg1, void * arg2, void * arg3,
-                 uint64_t arg4, uint64_t arg5);
-void ThreadEntry(NewThreadInfo * info);
-void ThreadExit();
 
 }
 

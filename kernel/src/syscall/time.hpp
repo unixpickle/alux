@@ -1,14 +1,15 @@
 #ifndef __SYSCALL_TIME_HPP__
 #define __SYSCALL_TIME_HPP__
 
-#include <cstdint>
+#include <arch/general/arg-list.hpp>
+#include <syscall/return-value.hpp>
 
 namespace OS {
 
-uint64_t SyscallGetBootMicroTime();
-void SyscallSetTimeout(uint64_t timeout);
+ReturnValue SyscallGetBootMicroTime();
+void SyscallSetTimeout(ArgList & args);
 void SyscallSetInfiniteTimeout();
-void SyscallClearTimeout(uint64_t threadId);
+void SyscallClearTimeout(ArgList & args);
 void SyscallClearClear();
 
 }

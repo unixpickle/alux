@@ -1,57 +1,68 @@
 #include <memory/wired.hpp>
 #include <arch/general/syscall.hpp>
 
-namespace std {
+namespace Test {
 
 uint64_t WiredMemory::PhysicalUsed() {
-  return Syscall(SyscallNumberGetPhysicalUsed, NULL, NULL, NULL, 0, 0);
+  return Syscall::Run(Syscall::GetPhysicalUsed, ArgList()).unsigned64;
 }
 
 uint64_t WiredMemory::PhysicalAvailable() {
-  return Syscall(SyscallNumberGetPhysicalUsed, NULL, NULL, NULL, 0, 0);
+  return Syscall::Run(Syscall::GetPhysicalUsed, ArgList()).unsigned64;
 }
 
 uint64_t WiredMemory::PhysicalTotal() {
-  return Syscall(SyscallNumberGetPhysicalUsed, NULL, NULL, NULL, 0, 0);
+  return Syscall::Run(Syscall::GetPhysicalUsed, ArgList()).unsigned64;
 }
 
 int WiredMemory::GetPageSizeCount() {
-  return (int)Syscall(SyscallNumberGetPageSizeCount, NULL, NULL, NULL, 0, 0);
+  return Syscall::Run(Syscall::GetPageSizeCount, ArgList()).integer;
 }
 
 uint64_t WiredMemory::GetPageSize(int idx) {
-  return Syscall(SyscallNumberGetPageSize, NULL, NULL, NULL, (uint64_t)idx, 0);
+  ArgList list;
+  list.PushInt(idx);
+  return Syscall::Run(Syscall::GetPageSize, list).unsigned64;
 }
 
 uint64_t WiredMemory::GetPageAlignment(int idx) {
-  return Syscall(SyscallNumberGetPageAlignment, NULL, NULL, NULL,
-                 (uint64_t)idx, 0);
+  ArgList list;
+  list.PushInt(idx);
+  return Syscall::Run(Syscall::GetPageAlignment, list).unsigned64;
 }
 
 bool WiredMemory::Allocate(PhysAddr & res, uint64_t size, uint64_t align) {
-  if (!Syscall(SyscallNumberAllocatePhysical, (void *)&res, NULL, NULL,
-               size, align)) {
-    return false;
-  }
-  return true;
+  ArgList list;
+  list.PushVirtAddr((VirtAddr)&res);
+  list.PushUInt64(align);
+  list.PushUInt64(size);
+  return Syscall::Run(Syscall::AllocatePhysical, list).boolean;
 }
 
 void WiredMemory::Free(PhysAddr addr) {
-  Syscall(SyscallNumberFreePhysical, (void *)&addr, NULL, NULL, 0, 0);
+  ArgList list;
+  list.PushPhysAddr(addr);
+  Syscall::Run(Syscall::FreePhysical, list);
 }
 
-bool WiredMemory::Map(void *& res, PhysAddr start, uint64_t pageSize,
+bool WiredMemory::Map(VirtAddr & res, PhysAddr start, uint64_t pageSize,
                       uint64_t pageCount, bool exec, bool write) {
-  uint64_t flags = exec | (write << 1);
-  if (!Syscall(SyscallNumberMapPhysical, &flags, &start, &res, pageSize,
-               pageCount)) {
-    return false;
-  }
-  return true;
+  uint32_t flags = exec | (write << 1);
+  ArgList list;
+  list.PushUInt64(pageSize);
+  list.PushUInt64(pageCount);
+  list.PushUInt32(flags);
+  list.PushPhysAddr(start);
+  list.PushVirtAddr((VirtAddr)&res);
+  return Syscall::Run(Syscall::MapPhysical, list).boolean;
 }
 
-void WiredMemory::Unmap(void * virt, uint64_t pageSize, uint64_t pageCount) {
-  Syscall(SyscallNumberUnmapPhysical, virt, NULL, NULL, pageSize, pageCount);
+void WiredMemory::Unmap(VirtAddr virt, uint64_t pageSize, uint64_t pageCount) {
+  ArgList list;
+  list.PushUInt64(pageSize);
+  list.PushUInt64(pageCount);
+  list.PushVirtAddr(virt);
+  Syscall::Run(Syscall::UnmapPhysical, list);
 }
 
 }
