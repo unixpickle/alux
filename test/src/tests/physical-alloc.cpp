@@ -1,5 +1,6 @@
 #include <memory/wired.hpp>
 #include <iostream>
+#include <ctime>
 
 namespace Test {
 
@@ -31,6 +32,20 @@ void TestPhysicalAllocation() {
       cout << " after free=" << WiredMemory::PhysicalUsed() << endl;
     }
   }
+  
+  uint64_t start = utime();
+  for (int i = 0; i < 0x10000; i++) {
+    PhysAddr addr;
+    bool result = WiredMemory::Allocate(addr, WiredMemory::GetPageSize(0),
+                                        WiredMemory::GetPageAlignment(i));
+    if (!result) {
+      cerr << "failed to allocate for timed test" << endl;
+    } else {
+      WiredMemory::Free(addr);
+    }
+  }
+  cout << "0x10000 page allocations took " << utime() - start << " micros"
+    << endl;
 }
 
 }
