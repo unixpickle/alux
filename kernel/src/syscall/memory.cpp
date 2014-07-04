@@ -74,7 +74,7 @@ ReturnValue SyscallAllocatePhysical(ArgList & args) {
   // it doesn't own, in which case physical memory will be leaked
   map->CopyFromKernel(addrOut, (void *)&result, sizeof(result));
   
-  return ReturnValue::NewBool(false);
+  return ReturnValue::NewBool(true);
 }
 
 void SyscallFreePhysical(ArgList & args) {

@@ -8,6 +8,7 @@ module.exports = (Finder, Makefile) ->
     'main'
     'stdlib'
     'memory'
+    'tests'
   ]
 
   finder = new Finder()

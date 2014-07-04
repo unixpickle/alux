@@ -8,11 +8,11 @@ uint64_t WiredMemory::PhysicalUsed() {
 }
 
 uint64_t WiredMemory::PhysicalAvailable() {
-  return Syscall::Run(Syscall::GetPhysicalUsed, ArgList()).unsigned64;
+  return Syscall::Run(Syscall::GetPhysicalAvailable, ArgList()).unsigned64;
 }
 
 uint64_t WiredMemory::PhysicalTotal() {
-  return Syscall::Run(Syscall::GetPhysicalUsed, ArgList()).unsigned64;
+  return Syscall::Run(Syscall::GetPhysicalTotal, ArgList()).unsigned64;
 }
 
 int WiredMemory::GetPageSizeCount() {

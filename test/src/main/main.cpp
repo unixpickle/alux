@@ -1,8 +1,10 @@
 #include <iostream>
 #include <cunistd>
 #include <ctime>
-#include <arch/general/tests.hpp>
 #include <new>
+#include <arch/general/tests.hpp>
+#include <tests/basic-timeout.hpp>
+#include <tests/physical-alloc.hpp>
 
 using namespace Test;
 
@@ -24,14 +26,10 @@ void Main() {
   }
   cout << "[OK]" << endl;
   
-  cout << "current time is " << utime() << endl;
+  TestBasicTimeout();
+  TestPhysicalAllocation();
   
-  cout << "counting to five..." << endl;
-  for (uint32_t i = 0; i < 5; i++) {
-    usleep(utime() + 1000000);
-    cout << " " << i + 1;
-  }
-  cout << endl;
+  cout << "tests complete!" << endl;
 }
 
 extern "C" {

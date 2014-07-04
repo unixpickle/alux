@@ -8,6 +8,7 @@
 namespace Test {
 
 class WiredMemory {
+public:
   static uint64_t PhysicalUsed();
   static uint64_t PhysicalAvailable();
   static uint64_t PhysicalTotal();
