@@ -8,7 +8,7 @@ namespace OS {
 template <class T>
 class Atomic {
 protected:
-  T value OS_ALIGNED(8);
+  volatile T value OS_ALIGNED(8);
   
 public:
   Atomic(const Atomic<T> & a) {
@@ -72,9 +72,7 @@ public:
   }
   
   T GetValue() {
-    T res;
-    __atomic_store(&res, &value, __ATOMIC_SEQ_CST);
-    return res;
+    return __atomic_load_n(&value, __ATOMIC_SEQ_CST);
   }
 };
 
