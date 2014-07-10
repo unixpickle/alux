@@ -5,13 +5,15 @@
 
 extern "C" {
 
-void InterruptCoded(void * caller, uint64_t vector, uint64_t code);
-void InterruptRegular(void * caller, uint64_t vector);
-void InterruptDummy(void * caller, uint64_t vector);
+void InterruptCoded(void * caller, uint64_t vector, uint64_t code,
+                    uint64_t cs);
+void InterruptRegular(void * caller, uint64_t vector, uint64_t cs);
+void InterruptDummy(void * caller, uint64_t vector, uint64_t cs);
 
-void _InterruptCoded(void * caller, uint64_t vector, uint64_t code);
-void _InterruptRegular(void * caller, uint64_t vector);
-void _InterruptDummy(void * caller, uint64_t vector);
+void _InterruptCoded(void * caller, uint64_t vector, uint64_t code,
+                     uint64_t cs);
+void _InterruptRegular(void * caller, uint64_t vector, uint64_t cs);
+void _InterruptDummy(void * caller, uint64_t vector, uint64_t cs);
 
 }
 

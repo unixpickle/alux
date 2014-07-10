@@ -51,6 +51,11 @@ void State::Load() {
     CPU & cpu = CPU::GetCurrent();
     cpu.SetKernelStack((void *)GetStackTop());
   }
+  
+  if (state.cs & 3) {
+    __asm__ __volatile__("swapgs");
+  }
+  
   __asm__ __volatile__(
     "sub $0x28, %%rsp\n"
     "mov $5, %%rcx\n"

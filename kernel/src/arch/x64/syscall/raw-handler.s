@@ -6,6 +6,7 @@ extern _SyscallMain
 
 _RawSyscallHandler:
 RawSyscallHandler:
+  swapgs
   mov r10, rsp
   mov rsp, [gs:0x10]
   push r10
@@ -18,6 +19,9 @@ RawSyscallHandler:
   pop rsp
   
   mov r11, 0x200
+  
   ; TODO: here, verify that RCX is canonical! Serious security holes could
   ; be created if I do not get around to this!
+  
+  swapgs
   o64 sysret

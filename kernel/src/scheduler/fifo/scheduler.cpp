@@ -6,6 +6,7 @@
 #include <arch/general/clock.hpp>
 #include <arch/general/state.hpp>
 #include <arch/general/global-map.hpp>
+#include <iostream>
 #include <critical>
 #include <lock>
 #include <new>
@@ -29,6 +30,9 @@ DepList Scheduler::GetDependencies() {
 
 void Scheduler::Start() {
   AssertNoncritical();
+  
+  cout << "Scheduler::Start()" << endl;
+  
   SetCritical(true);
   HardwareThreadList & list = HardwareThreadList::GetGlobal();
   HardwareThread & thisCPU = HardwareThread::GetCurrent();

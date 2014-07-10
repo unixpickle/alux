@@ -38,6 +38,7 @@ RawNonCodedHandler:
   
   mov rsi, [rsp + 0x48] ; vector number
   mov rdi, [rsp + 0x50] ; caller RIP
+  mov rdx, [rsp + 0x58] ; caller CS
   call _InterruptRegular
   
   popunpres
@@ -50,6 +51,7 @@ RawCodedHandler:
   mov rdx, [rsp + 0x50] ; exception code
   mov rsi, [rsp + 0x48] ; vector number
   mov rdi, [rsp + 0x58] ; caller RIP
+  mov rcx, [rsp + 0x60] ; caller CS
   call _InterruptCoded
   
   popunpres
@@ -61,6 +63,7 @@ RawDummyHandler:
   
   mov rsi, [rsp + 0x48] ; vector number
   mov rdi, [rsp + 0x50] ; caller RIP
+  mov rdx, [rsp + 0x58] ; caller CS
   call _InterruptDummy
   
   popunpres

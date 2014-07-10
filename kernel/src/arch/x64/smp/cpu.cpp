@@ -3,7 +3,7 @@
 #include <arch/x64/interrupts/lapic.hpp>
 #include <arch/x64/interrupts/vectors.hpp>
 #include <arch/x64/segments/gdt.hpp>
-#include <arch/x64/common.hpp>
+#include <arch/x64/segments/gs-register.hpp>
 #include <critical>
 
 namespace OS {
@@ -53,7 +53,7 @@ uint64_t CPU::GetTSSSelector() {
 
 void CPU::LoadGS() {
   AssertCritical();
-  WriteMSR(0xc0000101, (uint64_t)&info);
+  GSRegister::SetBase((uint64_t)&info);
 }
 
 UserMap * CPU::GetCurrentMap() {
