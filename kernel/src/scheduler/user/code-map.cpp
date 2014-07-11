@@ -35,7 +35,7 @@ CodeMap::CodeMap(Task * t, UserCode * c) : task(t), code(c) {
   } else {
     // allocate all of the code and map it
     PhysicalAllocator & allocator = PhysicalAllocator::GetGlobal();
-    allocated = allocator.Alloc(size.Total(), code->GetPageAlignment(), NULL);
+    allocated = allocator.Alloc(size.Total(), code->GetPageAlignment());
     assert(allocated != 0);
     AddressSpace::MapInfo info(size.pageSize, size.pageCount, allocated);
     if (UserMap::ShouldLocateCode()) {
@@ -84,7 +84,7 @@ bool CodeMap::HandleFault(VirtAddr addr, bool, bool write) {
   if (write || !task->GetAddressSpace().SupportsRO()) {
     // copy the thing
     PhysicalAllocator & allocator = PhysicalAllocator::GetGlobal();
-    PhysAddr addr = allocator.Alloc(pageSize, code->GetPageAlignment(), NULL);
+    PhysAddr addr = allocator.Alloc(pageSize, code->GetPageAlignment());
     assert(addr != 0);
     
     // copy the original page into the newly allocated one

@@ -3,10 +3,9 @@
 
 #include <arch/x64/pmm/step-allocator.hpp>
 #include <arch/general/physical-allocator.hpp>
-#include <module/module.hpp>
-#include <analloc2>
 #include <panic>
 #include <macros>
+#include <analloc2>
 
 namespace OS {
 
@@ -14,21 +13,21 @@ namespace x64 {
 
 class Allocator : public PhysicalAllocator, public PageAllocator {
 public:
-  static const int MaximumAllocators = 0x10;
-  typedef ANAlloc::BBTree TreeType;
-  typedef ANAlloc::AllocatorList<MaximumAllocators, TreeType> AllocatorList;
+  static const int MaxAllocators = 0x10;
   
   static void InitGlobal();
   static Allocator & GetGlobal();
   
-  PhysAddr AllocLower(size_t size, size_t align, size_t * realSize);
+  virtual PhysAddr AllocLower(size_t size, size_t align);
   
-  virtual PhysAddr Alloc(size_t size, size_t align, size_t * realSize);
+  // OS::PhysicalAllocator
+  virtual PhysAddr Alloc(size_t size, size_t align);
   virtual void Free(PhysAddr address);
   virtual size_t Used();
   virtual size_t Available();
   virtual size_t Total();
   
+  // OS::x64::PageAllocator
   virtual PhysAddr AllocPage();
   virtual void FreePage(PhysAddr p);
   
@@ -37,12 +36,18 @@ protected:
   virtual void Initialize();
   
 private:
-  AllocatorList allocators;
-  uint64_t lock OS_ALIGNED(8) = 0;
+  ANAlloc::FixedCluster<MaxAllocators> lower;
+  ANAlloc::FixedCluster<MaxAllocators> upper;
+  bool hasUpper = false;
+  
+  uint64_t upperLock OS_ALIGNED(8) = 0;
+  uint64_t lowerLock OS_ALIGNED(8) = 0;
+  
   size_t totalSpace = 0;
   
-  static VirtAddr AllocateRaw(StepAllocator & alloc, size_t size);
-  
+  static VirtAddr AllocateRaw(size_t size);
+  void InitializeCluster(ANAlloc::MutableCluster & cluster,
+                         const ANAlloc::RegionList & regs);  
 };
 
 }

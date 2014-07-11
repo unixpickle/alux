@@ -2,13 +2,12 @@
 #define __X64_REGION_LIST_HPP__
 
 #include <module/module.hpp>
+#include <arch-specific/types.hpp>
 #include <analloc2>
 
 namespace OS {
 
 namespace x64 {
-
-typedef ANAlloc::Region MemoryRegion;
 
 class RegionList : public Module {
 public:
@@ -17,20 +16,20 @@ public:
   static void InitGlobal(void * mbootPtr);
   static RegionList & GetGlobal();
   
-  RegionList();
-  MemoryRegion * GetRegions();
-  int GetRegionCount();
-  MemoryRegion * FindRegion(uintptr_t ptr);
-  MemoryRegion * NextRegion(MemoryRegion * reg);
+  const ANAlloc::RegionList & GetLowerRegions();
+  const ANAlloc::RegionList & GetUpperRegions();
+  
+  const ANAlloc::Region * FindRegion(PhysAddr addr);
+  const ANAlloc::Region * NextRegion(const ANAlloc::Region * reg);
   
 protected:
-  MemoryRegion regions[MaximumCount];
-  int regionCount;
+  ANAlloc::FixedRegionList<MaximumCount> lowerRegions;
+  ANAlloc::FixedRegionList<MaximumCount> upperRegions;
   
   virtual void Initialize();
   virtual DepList GetDependencies();
   
-  void AddRegion(MemoryRegion & region);
+  void AddRegion(const ANAlloc::Region & region);
 };
 
 }

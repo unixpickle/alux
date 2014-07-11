@@ -21,6 +21,44 @@ RegionList & RegionList::GetGlobal() {
   return globalRegions;
 }
 
+const ANAlloc::RegionList & RegionList::GetLowerRegions() {
+  return lowerRegions;
+}
+
+const ANAlloc::RegionList & RegionList::GetUpperRegions() {
+  return upperRegions;
+}
+
+const ANAlloc::Region * RegionList::FindRegion(PhysAddr addr) {
+  for (int i = 0; i < lowerRegions.GetCount(); i++) {
+    if (lowerRegions[i].Contains((ANAlloc::UInt)addr)) {
+      return &lowerRegions[i];
+    }
+  }
+  for (int i = 0; i < upperRegions.GetCount(); i++) {
+    if (upperRegions[i].Contains((ANAlloc::UInt)addr)) {
+      return &upperRegions[i];
+    }
+  }
+  return NULL;
+}
+
+const ANAlloc::Region * RegionList::NextRegion(const ANAlloc::Region * reg) {
+  for (int i = 0; i < lowerRegions.GetCount(); i++) {
+    if (lowerRegions[i].GetStart() > reg->GetStart()) {
+      return &lowerRegions[i];
+    }
+  }
+  for (int i = 0; i < upperRegions.GetCount(); i++) {
+    if (upperRegions[i].GetStart() > reg->GetStart()) {
+      return &upperRegions[i];
+    }
+  }
+  return NULL;
+}
+
+// PROTECTED //
+
 void RegionList::Initialize() {
   cout << "Initializing region list..." << endl;
   
@@ -46,8 +84,8 @@ void RegionList::Initialize() {
     if (info->base_addr + info->length <= 0x100000) continue;
     
     // get the range
-    uint64_t start = info->base_addr;
-    uint64_t len = info->length;
+    ANAlloc::UInt start = (ANAlloc::UInt)info->base_addr;
+    ANAlloc::UInt len = (ANAlloc::UInt)info->length;
     
     // if this region is in the lower MB, we will stretch it out to the
     // beginning of the address space.
@@ -56,22 +94,22 @@ void RegionList::Initialize() {
       start = 0;
     }
     
-    MemoryRegion region(start, len);
+    ANAlloc::Region region(start, len);
     if (start < 0x100000000L && start + len > 0x100000000L) {
       // this will probably never happen, but if it does we need to split the
       // regions for ANAlloc to be able to differentiate between upper and
       // lower memory
-      size_t lowSize = (size_t)(0x100000000L - start);
-      MemoryRegion lowerRegion(start, lowSize);
-      MemoryRegion upperRegion(0x100000000L, len - lowSize);
+      ANAlloc::UInt lowSize = (ANAlloc::UInt)(0x100000000L - start);
+      ANAlloc::Region lowerRegion(start, lowSize);
+      ANAlloc::Region upperRegion(0x100000000L, len - lowSize);
       AddRegion(lowerRegion);
       AddRegion(upperRegion);
     } else {
       AddRegion(region);
     }
   }
-  if (!GetRegionCount()) {
-    Panic("RegionList::Initialize() - no regions found");
+  if (!lowerRegions.GetCount()) {
+    Panic("RegionList::Initialize() - no lower regions found");
   }
 }
 
@@ -79,51 +117,25 @@ DepList RegionList::GetDependencies() {
   return DepList(&OutStreamModule::GetGlobal());
 }
 
-RegionList::RegionList() : regionCount(0) {
-}
-
-MemoryRegion * RegionList::GetRegions() {
-  return regions;
-}
-
-int RegionList::GetRegionCount() {
-  return regionCount;
-}
-
-MemoryRegion * RegionList::FindRegion(uintptr_t ptr) {
-  for (int i = 0; i < regionCount; i++) {
-    if (regions[i].GetStart() > ptr) continue;
-    if (regions[i].GetEnd() <= ptr) continue;
-    return &regions[i];
-  }
-  return NULL;
-}
-
-MemoryRegion * RegionList::NextRegion(MemoryRegion * reg) {
-  uintptr_t idx = ((uintptr_t)reg - (uintptr_t)regions)
-    / sizeof(MemoryRegion);
-  assert(idx < (uintptr_t)regionCount);
-  if (idx + 1 == (uintptr_t)regionCount) return NULL;
-  return reg + 1;
-}
-
-void RegionList::AddRegion(MemoryRegion & region) {
-  if (regionCount == MaximumCount) {
-    Panic("RegionList::AddRegion() - region overflow");
+void RegionList::AddRegion(const ANAlloc::Region & region) {
+  ANAlloc::FixedRegionList<MaximumCount> * list = NULL;
+  
+  if (region.GetStart() < 0x100000000L) {
+    list = &lowerRegions;
+  } else {
+    list = &upperRegions;
   }
   
-  int insertIndex = regionCount;
-  for (int i = 0; i < regionCount; i++) {
-    if (regions[i].GetStart() > region.GetStart()) {
+  int insertIndex = list->GetCount();
+  for (int i = 0; i < list->GetCount(); i++) {
+    if ((*list)[i].GetStart() > region.GetStart()) {
       insertIndex = i;
       break;
     }
   }
-  for (int i = regionCount; i > insertIndex; i--) {
-    regions[i] = regions[i - 1];
+  if (!list->Insert(region, insertIndex)) {
+    Panic("RegionList::AddRegion() - region overflow");
   }
-  regions[insertIndex] = region;
-  regionCount++;
 }
 
 }

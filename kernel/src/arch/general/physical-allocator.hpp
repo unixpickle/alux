@@ -21,7 +21,7 @@ public:
    * @return 0 on failure; some address (aligned to `align`) on success.
    * @noncritical
    */
-  virtual PhysAddr Alloc(size_t size, size_t align, size_t * realSize) = 0;
+  virtual PhysAddr Alloc(size_t size, size_t align) = 0;
   
   /**
    * Free a piece of memory allocated with Alloc()

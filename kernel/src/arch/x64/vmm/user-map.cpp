@@ -28,7 +28,7 @@ VirtAddr UserMap::GetCodeLocation() {
 namespace x64 {
 
 UserMap::UserMap() : table(0) {
-  PhysAddr pml4 = PhysicalAllocator::GetGlobal().Alloc(0x1000, 0x1000, NULL);
+  PhysAddr pml4 = PhysicalAllocator::GetGlobal().Alloc(0x1000, 0x1000);
   if (!pml4) Panic("UserMap::UserMap() - could not allocate PML4");
   
   // push both canonical regions to the free list

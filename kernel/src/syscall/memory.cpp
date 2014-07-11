@@ -64,7 +64,7 @@ ReturnValue SyscallAllocatePhysical(ArgList & args) {
   size_t align = (size_t)args.PopUInt64();
   size_t size = (size_t)args.PopUInt64();
   
-  PhysAddr result = PhysicalAllocator::GetGlobal().Alloc(align, size, NULL);
+  PhysAddr result = PhysicalAllocator::GetGlobal().Alloc(align, size);
   if (!result) return ReturnValue::NewBool(false);
   
   UserMap * map = scope.GetTask()->GetUserAddressSpace();

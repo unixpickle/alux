@@ -15,7 +15,7 @@ PhysAddr StepAllocator::AllocPage() {
 
 PhysAddr StepAllocator::AllocSize(size_t pageSize) {
   RegionList & regions = RegionList::GetGlobal();
-  MemoryRegion * reg = regions.FindRegion(lastAddr);
+  const ANAlloc::Region * reg = regions.FindRegion(lastAddr);
   if (!reg) {
     if (!(reg = regions.FindRegion(lastAddr - 1))) {
       Panic("StepAllocator::AllocSize() - lastAddr out of bounds");

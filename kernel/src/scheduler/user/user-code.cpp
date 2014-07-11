@@ -13,7 +13,7 @@ UserCode::UserCode(void * virtCode, size_t codeSize) : physSize(0, 0) {
   if (codeSize % physSize.pageSize) physSize.pageCount++;
   
   size_t total = physSize.Total();
-  physStart = PhysicalAllocator::GetGlobal().Alloc(total, alignment, NULL);
+  physStart = PhysicalAllocator::GetGlobal().Alloc(total, alignment);
   if (!physStart) {
     Panic("UserCode::UserCode() - failed to allocate physical memory");
   }

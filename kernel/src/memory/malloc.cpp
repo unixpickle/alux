@@ -48,11 +48,11 @@ void * Malloc::Alloc(size_t size, bool getNew) {
   if (size > allocSize / 2) return 0;
   
   if (!getNew) {
-    MallocRegion * reg = first;
-    while (reg) {
-      void * ptr = reg->AllocBuf(size);
+    MallocLink * link = first;
+    while (link) {
+      void * ptr = link->malloc->Alloc(size);
       if (ptr) return ptr;
-      reg = reg->next;
+      link = link->next;
     }
     return 0;
   }
@@ -64,31 +64,31 @@ void * Malloc::Alloc(size_t size, bool getNew) {
 }
 
 void Malloc::Free(void * addr) {
-  MallocRegion * reg = first;
-  while (reg) {
-    if (reg->OwnsPointer(addr)) {
-      reg->FreeBuf(addr);
+  MallocLink * link = first;
+  while (link) {
+    if (link->malloc->OwnsPointer(addr)) {
+      link->malloc->Free(addr);
       return;
     }
-    reg = reg->next;
+    link = link->next;
   }
-  Panic("Free(): attempt to free unowned pointer");
+  Panic("Malloc::Free() - attempt to free unowned pointer");
 }
 
 void Malloc::MakeNewRegion() {
   PhysicalAllocator & physAlloc = PhysicalAllocator::GetGlobal();
   AddressSpace & space = GlobalMap::GetGlobal();
-  PhysAddr addr = physAlloc.Alloc(allocSize, pageAlignment, NULL);
+  PhysAddr addr = physAlloc.Alloc(allocSize, pageAlignment);
   
   AddressSpace::MapInfo info(pageSize, allocSize / pageSize, addr);
   VirtAddr vAddr = space.Map(info);
   
   assert(vAddr > 0);
   
-  void * region = (void *)vAddr;
-  MallocRegion * last = first;
-  first = new(region) MallocRegion(region, allocSize, sizeof(MallocRegion));
-  first->next = last;
+  uint8_t * region = (uint8_t *)vAddr;
+  MallocLink * link = MallocLink::Wrap(region, allocSize);
+  link->next = first;
+  first = link;
 }
   
 }

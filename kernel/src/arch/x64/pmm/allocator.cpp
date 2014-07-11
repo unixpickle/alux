@@ -25,6 +25,68 @@ Allocator & Allocator::GetGlobal() {
   return allocator;
 }
 
+PhysAddr Allocator::AllocLower(size_t size, size_t align) {
+  ScopeLock scope(&lowerLock);
+  ANAlloc::UInt addr;
+  bool res = lower.Align((ANAlloc::UInt)size, (ANAlloc::UInt)align, addr);
+  if (!res) return 0;
+  return (PhysAddr)addr;
+}
+
+PhysAddr Allocator::Alloc(size_t size, size_t align) {
+  if (!hasUpper) {
+    return AllocLower(size, align);
+  }
+  {
+    ScopeLock scope(&upperLock);
+    ANAlloc::UInt addr;
+    bool res = upper.Align((ANAlloc::UInt)size, (ANAlloc::UInt)align, addr);
+    if (res) return (PhysAddr)addr;
+  }
+  return AllocLower(size, align);
+}
+
+void Allocator::Free(PhysAddr address) {
+  if (address < 0x100000000L) {
+    ScopeLock scope(&lowerLock);
+    lower.Free((ANAlloc::UInt)address);
+  } else {
+    ScopeLock scope(&upperLock);
+    upper.Free((ANAlloc::UInt)address);
+  }
+}
+
+size_t Allocator::Used() {
+  return totalSpace - Available();
+}
+
+size_t Allocator::Available() {
+  size_t available = 0;
+  {
+    ScopeLock scope(&lowerLock);
+    available += (size_t)lower.GetFreeSize();
+  }
+  {
+    ScopeLock scope(&upperLock);
+    available += (size_t)upper.GetFreeSize();
+  }
+  return available;
+}
+
+size_t Allocator::Total() {
+  return totalSpace;
+}
+
+PhysAddr Allocator::AllocPage() {
+  return Alloc(0x1000, 0x1000);
+}
+
+void Allocator::FreePage(PhysAddr p) {
+  Free(p);
+}
+
+// PROTECTED //
+
 DepList Allocator::GetDependencies() {
   return DepList(&GlobalMap::GetGlobal(), &Scratch::GetGlobal(),
                  &RegionList::GetGlobal(), &OutStreamModule::GetGlobal());
@@ -34,71 +96,36 @@ void Allocator::Initialize() {
   cout << "Initializing physical allocator..." << endl;
   
   RegionList & regions = RegionList::GetGlobal();
-  for (int i = 0; i < regions.GetRegionCount(); i++) {
-    totalSpace += regions.GetRegions()[i].GetSize();
+  for (int i = 0; i < regions.GetLowerRegions().GetCount(); i++) {
+    totalSpace += (size_t)regions.GetLowerRegions()[i].GetSize();
+  }
+  for (int i = 0; i < regions.GetUpperRegions().GetCount(); i++) {
+    totalSpace += (size_t)regions.GetUpperRegions()[i].GetSize();
   }
   
-  AllocatorList::InitInfo info(0x1000000, 0x1000, 0x1000,
-                               regions.GetRegions(),
-                               regions.GetRegionCount());
-  allocators.SetInfo(info);
-  allocators.GenerateDescriptions(true); // `true` is needed to sort it
+  InitializeCluster(lower, regions.GetLowerRegions());
+  if (regions.GetUpperRegions().GetCount()) {
+    InitializeCluster(upper, regions.GetUpperRegions());
+    hasUpper = true;
+  }
   
   PageAllocator & theAllocator = *GlobalMap::GetGlobal().allocator;
   StepAllocator & alloc = static_cast<StepAllocator &>(theAllocator);
-
-  VirtAddr newAddress = AllocateRaw(alloc, allocators.BitmapByteCount());
-  allocators.GenerateAllocators((uint8_t *)newAddress);
-  allocators.Reserve(alloc.GetLastAddress());
   
+  lower.Reserve(0, (ANAlloc::UInt)alloc.GetLastAddress());
+  if (hasUpper) {
+    upper.Reserve(0, (ANAlloc::UInt)alloc.GetLastAddress());
+  }
+
   GlobalMap::GetGlobal().allocator = this;
 }
 
-PhysAddr Allocator::AllocLower(size_t size, size_t align, size_t * realSize) {
-  ScopeLock scope(&lock);
-  uintptr_t addr;
-  bool res = allocators.AllocAscending(size, align, addr, realSize,
-                                       0xFFFFFFFF);
-  if (!res) return 0;
-  return (PhysAddr)addr;
-}
+// PRIVATE //
 
-PhysAddr Allocator::Alloc(size_t size, size_t align, size_t * realSize) {
-  ScopeLock scope(&lock);
-  uintptr_t addr;
-  bool res = allocators.AllocDescending(size, align, addr, realSize);
-  if (!res) return 0;
-  return (PhysAddr)addr;
-}
-
-void Allocator::Free(PhysAddr address) {
-  ScopeLock scope(&lock);
-  allocators.FreePointer(address);
-}
-
-size_t Allocator::Used() {
-  return totalSpace - Available();
-}
-
-size_t Allocator::Available() {
-  ScopeLock scope(&lock);
-  return allocators.GetAvailableSpace();
-}
-
-size_t Allocator::Total() {
-  return totalSpace;
-}
-
-PhysAddr Allocator::AllocPage() {
-  return Alloc(0x1000, 0x1000, NULL);
-}
-
-void Allocator::FreePage(PhysAddr p) {
-  Free(p);
-}
-
-// for initialization only
-VirtAddr Allocator::AllocateRaw(StepAllocator & alloc, size_t size) {
+VirtAddr Allocator::AllocateRaw(size_t size) {
+  PageAllocator & theAllocator = *GlobalMap::GetGlobal().allocator;
+  StepAllocator & alloc = static_cast<StepAllocator &>(theAllocator);
+  
   GlobalMap & map = GlobalMap::GetGlobal();
   
   size_t pageSize = size >= 0x200000 ? 0x200000 : 0x1000;
@@ -113,6 +140,21 @@ VirtAddr Allocator::AllocateRaw(StepAllocator & alloc, size_t size) {
   }
   
   return reserved;
+}
+
+void Allocator::InitializeCluster(ANAlloc::MutableCluster & cluster,
+                                  const ANAlloc::RegionList & regs) {
+  ANAlloc::FixedDescList<MaxAllocators> descs;
+  
+  // create the descriptions
+  ANAlloc::Layout layout(descs, regs, 12, 0x1000000, 0x1000);
+  layout.Run();
+  
+  // create the allocators and their trees
+  ANAlloc::ClusterBuilder<ANAlloc::BBTree> builder(descs, cluster, 12);
+  ANAlloc::UInt space = builder.RequiredSpace();
+  VirtAddr newAddress = AllocateRaw((size_t)space);
+  builder.CreateAllocators((uint8_t *)newAddress);
 }
 
 }
