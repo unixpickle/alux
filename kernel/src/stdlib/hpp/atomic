@@ -8,7 +8,7 @@ namespace OS {
 template <class T>
 class Atomic {
 protected:
-  volatile T value OS_ALIGNED(8);
+  T value OS_ALIGNED(8);
   
 public:
   Atomic(const Atomic<T> & a) {
