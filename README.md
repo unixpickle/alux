@@ -13,9 +13,10 @@ General architectual ideas that I am playing around with:
 
 I have a test user-space compiling and running. So far, I have created a basic print system call, and some system calls for running and exiting tasks and threads.
 
+**My next step is a somewhat lightweight "rewrite" of a large part of the kernel.** I am planning to move all of the general APIs in the kernel to [ansa](http://github.com/unixpickle/ansa). I am also working to move all of the architecture-specific APIs to [anarch](http://github.com/unixpickle/anarch). Once I have both of these migrations completed, I will continue to work on the TODO list below.
+
 I want to expand the scheduler with an IPC mechanism, and I want to implement some useful syscalls. To do this, I plan to modify the kernel and my tests simultaneously for rapid testing and development.
 
- * Create a nicer way to pass arguments to syscalls
  * Clean up build system and remove various environment variables
  * Figure out a cleaner way to handle memory faults
  * Write basic `new` and `delete` for user-space
