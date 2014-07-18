@@ -1,0 +1,15 @@
+#!/bin/bash
+
+if [ $# != 2 ]; then
+  echo 'Usage: clang-elf-x64 <LD name> <AR name>'
+  exit
+fi
+
+export CXXFLAGS=${CXXFLAGS}\ "-integrated-as -target x86_64-pc-none-elf64"
+export CFLAGS=${CFLAGS}\ "-integrated-as -target x86_64-pc-none-elf64"
+export LD=$1
+export AR=$2
+export OUTPUT_FORMAT=elf64-x86-64
+
+make clean
+make kernel/build/kernel

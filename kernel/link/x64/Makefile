@@ -1,16 +1,15 @@
-OUTPUT_FILE = $(BUILDDIR)/alux.bin
-OUTPUT_FORMAT ?= binary
-CUSTOM_OUTDIR = $(BUILDDIR)/custom
+override BUILD=../../build
+override KERNEL=../../build/kernel
+override ANARCH=../../dependencies/anarch/build/anarch.a
 
-$(OUTPUT_FILE): $(CUSTOM_OUTDIR)
-	$(LD) $(OBJDIR)/*.o $(CUSTOM_OUTDIR)/*.o -T linker.ld --oformat=$(OUTPUT_FORMAT) -o $(OUTPUT_FILE).1
+$(KERNEL): $(BUILD)/custom $(ANARCH)
+	$(LD) $(BUILD)/custom/*.o $(BUILD)/objects/*.o $(ANARCH) -T linker.ld --oformat=$(OUTPUT_FORMAT) -o $(KERNEL).1
 	if [ "$(OUTPUT_FORMAT)" = "binary" ]; then \
-		cp $(CUSTOM_OUTDIR)/x64-multiboot-init.bin $(OUTPUT_FILE); \
-		cat $(OUTPUT_FILE).1 >>$(OUTPUT_FILE); \
-		coffee writesize.coffee $(OUTPUT_FILE); \
-		cat zero-size.dat >>$(OUTPUT_FILE); \
-	  rm $(OUTPUT_FILE).1; \
+		cp $(BUILD)/custom/x64-multiboot-init.bin $(KERNEL); \
+		cat $(KERNEL).1 >>$(KERNEL); \
+		./write-size $(KERNEL); \
+		cat zero-size.dat >>$(KERNEL); \
+	  rm $(KERNEL).1; \
 	else \
-	  mv $(OUTPUT_FILE).1 $(OUTPUT_FILE).elf; \
+	  mv $(KERNEL).1 $(KERNEL).elf; \
 	fi
-	

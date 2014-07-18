@@ -1,6 +1,0 @@
-#ifndef __CSTDINT_HPP__
-#define __CSTDINT_HPP__
-
-#include <stdint.h>
-
-#endif

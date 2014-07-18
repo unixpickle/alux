@@ -1,20 +1,17 @@
-PROJECT_ROOT = $(shell pwd)
-TARGET_ARCH ?= x64
-TARGET_SCHEDULER ?= fifo
-OUTFILE ?= alux.bin
-BUILDDIR ?= $(PROJECT_ROOT)/build
-OBJDIR ?= $(BUILDDIR)/objects
-CXX ?= "g++"
+PROJECT_ROOT=$(shell pwd)
+export PROJECT_ROOT
+
+OUTPUT_FORMAT ?= binary
+export OUTPUT_FORMAT
+
+override OBJDIR=build/objects
+export OBJDIR
+
+CXX ?= g++
 CC ?= gcc
 LD ?= ld
 ASM ?= nasm
 
-export PROJECT_ROOT
-export TARGET_ARCH
-export TARGET_SCHEDULER
-export OUTFILE
-export BUILDDIR
-export OBJDIR
 export CXX
 export CC
 export LD
@@ -28,15 +25,27 @@ export CXXFLAGS
 export CFLAGS
 export ASMFLAGS
 
-$(BUILDDIR)/$(OUTFILE): $(BUILDDIR)
-	$(MAKE) -C $(OBJDIR)
-	$(MAKE) -C ./src/custom/$(TARGET_ARCH)
-	$(MAKE) -C ./link/$(TARGET_ARCH)
+build/kernel: build/objects dependencies/anarch/build/anarch.a
+	$(MAKE) -C src/custom/$(TARGET_ARCH)
+	$(MAKE) -C link/$(TARGET_ARCH)
 
-$(BUILDDIR):
-	mkdir $(BUILDDIR)
-	mkdir $(OBJDIR)
-	../dependencies/makemaker/bin/makemaker build.coffee
+build/objects: build dependencies
+	mkdir build/objects
+	dependencies/makemaker/bin/makemaker build.coffee
+	$(MAKE) -C build/objects
+
+dependencies/anarch/build/anarch.a: dependencies
+	$(MAKE) -C dependencies/anarch
+
+dependencies:
+	mkdir dependencies
+	git clone https://github.com/unixpickle/anarch.git dependencies/anarch
+	git clone https://github.com/unixpickle/anslabs.git dependencies/anslabs
+	git clone https://github.com/unixpickle/makemaker.git dependencies/makemaker
+
+build:
+	mkdir build
 
 clean:
 	rm -rf build
+	rm -rf dependencies/anarch/build
