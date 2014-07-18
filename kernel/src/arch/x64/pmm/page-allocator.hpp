@@ -9,7 +9,6 @@ namespace x64 {
 
 class PageAllocator {
 public:
-  virtual ~PageAllocator() {}
   virtual PhysAddr AllocPage() = 0;
   virtual void FreePage(PhysAddr p) = 0;
 };
