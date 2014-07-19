@@ -5,10 +5,11 @@ mainSources = [
 ]
 
 includes = [
-  '../dependencies/anarch/include'
-  '../dependencies/anarch/src/stdlib/hpp'
-  '../dependencies/anarch/src/stdlib/h'
-  '../dependencies/anarch/dependencies/ansa/include'
+  'dependencies/anarch/include'
+  'dependencies/anarch/src/stdlib/hpp'
+  'dependencies/anarch/src/stdlib/h'
+  'dependencies/anarch/dependencies/ansa/include'
+  'dependencies/anarch/dependencies/analloc2/include'
 ]
 
 module.exports = (Finder, Makefile, environment) ->
@@ -22,4 +23,8 @@ module.exports = (Finder, Makefile, environment) ->
   finder.search 'src/entry/' + arch
   
   objdir = path.join environment.root, 'build/objects'
-  return new Makefile finder, includes, objdir
+  makefile = new Makefile finder, includes, objdir
+  targetDefine = "-D__ANARCH_TARGET_#{arch.toUpperCase()}__"
+  makefile.addFlags 'c', targetDefine
+  makefile.addFlags 'cpp', targetDefine
+  return makefile

@@ -8,3 +8,6 @@ kernel/build/kernel:
 
 clean:
 	$(MAKE) -C kernel clean
+
+clean-all:
+	$(MAKE) -C kernel clean-all

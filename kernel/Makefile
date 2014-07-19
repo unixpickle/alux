@@ -25,11 +25,11 @@ export CXXFLAGS
 export CFLAGS
 export ASMFLAGS
 
-build/kernel: build/objects dependencies/anarch/build/anarch.a
+build/kernel: build/objects
 	$(MAKE) -C src/custom/$(TARGET_ARCH)
 	$(MAKE) -C link/$(TARGET_ARCH)
 
-build/objects: build dependencies
+build/objects: build dependencies/anarch/build/anarch.a
 	mkdir build/objects
 	dependencies/makemaker/bin/makemaker build.coffee
 	$(MAKE) -C build/objects
@@ -49,3 +49,7 @@ build:
 clean:
 	rm -rf build
 	rm -rf dependencies/anarch/build
+
+clean-all:
+	rm -rf build
+	rm -rf dependencies

@@ -3,7 +3,7 @@
 
 extern "C" {
 
-void AluxMainX64() __asm__("AluxMainX64");
+void AluxMainX64(void * mbootPtr) __asm__("AluxMainX64");
 
 }
 
