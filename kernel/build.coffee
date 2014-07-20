@@ -2,6 +2,7 @@ path = require 'path'
 
 mainSources = [
   'src/entry/all'
+  'src/compiler'
 ]
 
 includes = [
