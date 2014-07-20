@@ -16,8 +16,6 @@ void AluxMainX64(void * mbootPtr) {
   anarch::cout << "AluxMainX64(" << (uint64_t)mbootPtr << ")"
     << anarch::endl;
   
-  __asm__ __volatile__("cli\nhlt"); // TODO: delete this
-  
   // this stack is going to be preserved throughout the runtime of the OS, so
   // it is acceptable to store the boot info here
   
