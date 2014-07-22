@@ -1,8 +1,7 @@
 #include "main.hpp"
 #include <anarch/x64/multiboot-region-list>
 #include <anarch/x64/init>
-#include <anarch/api/global-map>
-#include <anarch/api/panic>
+#include <anarch/api/domain-list>
 #include <anarch/stream>
 #include <ansa/macros>
 #include <ansa/cstring>
@@ -26,10 +25,10 @@ void AluxMainX64(void * mbootPtr) {
   
   anarch::x64::SetBootInfo(&bootInfo);
   
-  // load the global map
-  anarch::GlobalMap::GetGlobal().Load();
+  // load the DomainList
+  anarch::DomainList::GetGlobal().Load();
   
-  anarch::cout << "finished loading GlobalMap" << anarch::endl;
+  anarch::cout << "finished loading DomainList" << anarch::endl;
 }
 
 }
