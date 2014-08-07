@@ -1,9 +1,10 @@
 path = require 'path'
 
 mainSources = [
-  'src/entry/all'
+  'src/arch/all'
   'src/compiler'
   'src/memory'
+  'src/tasks'
 ]
 
 includes = [
@@ -22,7 +23,7 @@ module.exports = (Finder, Makefile, environment) ->
   finder = new Finder()
   for source in mainSources
     finder.search source
-  finder.search 'src/entry/' + arch
+  finder.search 'src/arch/' + arch
   
   objdir = path.join environment.root, 'build/objects'
   makefile = new Makefile finder, includes, objdir
