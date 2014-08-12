@@ -2,6 +2,7 @@
 #define __ALUX_GARBAGE_OBJECT_HPP__
 
 #include <anarch/stddef>
+#include <ansa/linked-list>
 
 namespace OS {
 
@@ -32,8 +33,7 @@ protected:
   virtual void Destroy() = 0; // @noncritical
   
   GarbageCollector & garbageCollector;
-  GarbageObject * nextGarbage = NULL;
-  GarbageObject * lastGarbage = NULL;
+  ansa::LinkedList<GarbageObject>::Link garbageLink;
   
   friend class GarbageThread;
 };

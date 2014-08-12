@@ -37,15 +37,19 @@ public:
   
   /**
    * Set an infinite timeout and the unlock a lock.
+   *
+   * See note on ClearTimeout().
+   *
    * @ambicritical
    */
   virtual void SetInfiniteTimeout(ansa::Lock & unlock) = 0;
   
   /**
-   * Clear the timeout for a given thread. Note that this may be called pretty
-   * much any time you Release() a Thread or Task. For this reason, the
-   * implementation of this method should not try to seize any locks that the
-   * scheduler seizes internally while releasing something.
+   * Clear the timeout for a given thread.
+   *
+   * The garbage thread may call this at any time, so it should not attempt to
+   * seize any locks or Release() any objects to avoid deadlock.
+   *
    * @ambicritical
    */
   virtual void ClearTimeout(Thread & thread) = 0;

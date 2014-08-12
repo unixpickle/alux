@@ -1,4 +1,4 @@
-#include "scheduler.hpp"
+#include "rr-scheduler.hpp"
 #include "../current.hpp"
 #include <anarch/api/global-map>
 
@@ -10,6 +10,8 @@ void RRScheduler::Init() {
   kernelTask = &KernelTask::New(*this);
   garbageThread = &Thread::New(*kernelTask, state);
   garbageCollector = new GarbageCollector(*garbageThread);
+  kernelTask->Unhold();
+  garbageThread->Release();
 }
 
 void RRScheduler::Add(Thread & th) {

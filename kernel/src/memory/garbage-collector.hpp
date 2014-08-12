@@ -23,6 +23,7 @@ public:
   
   /**
    * The main garbage collection method. This will loop forever with pauses.
+   * @noncritical
    */
   void Main();
   
@@ -30,6 +31,7 @@ protected:
   /**
    * Push a new piece of garbage to the thread. A garbage object should always
    * push itself through this method.
+   * @ambicritical
    */
   void Push(GarbageObject & obj);
   
@@ -37,13 +39,8 @@ protected:
   
 private:
   Thread & thread;
-  
-  ansa::NoncriticalLock lock;
-  GarbageObject * first = NULL;
-  GarbageObject * last = NULL;
-  
-  void Wakeup();
-  GarbageObject & Pop();
+  ansa::CriticalLock lock;
+  ansa::LinkedList<GarbageObject> objects;
 };
 
 }
