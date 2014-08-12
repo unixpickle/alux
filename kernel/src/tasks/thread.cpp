@@ -20,13 +20,9 @@ uint64_t Thread::ReadCounter() {
   return counter;
 }
 
-Thread::Thread(Task & t, anarch::State & s) : task(t), state(s) {
-  ++counter;
-}
-
-Thread::~Thread() {
-  --counter;
-  state.Delete();
+static Thread * New(Task & t, anarch::State & s) {
+  // TODO: here, use a pool
+  return *(new Thread(t, s));
 }
 
 Task & Thread::GetTask() {
@@ -55,20 +51,53 @@ void Thread::Release() {
   bool shouldCleanup = !--retainCount && isKilled;
   retainLock.Release();
   
+  // after releasing the lock, we may have been freed
+  __asm__ __volatile__("" : : : "memory");
+  
   if (shouldCleanup) {
     // this was the last Release() call; goodbye, cruel world.
-    PushGarbage();
+    ThrowAway();
   } else {
     // If we get a Release() call and it's not the last one, but then another
     // Release() call comes in and it *is* the last one, we may have just been
     // deallocated before we reached this point. Thus, we can't use an instance
-    // variable if we weren't the last Release().
+    // variable if we weren't the last Release(). However, we may use the stack
+    // because a thread's retain count will never reach zero while it's
+    // running.
     t.Release();
   }
 }
 
-void Thread::PushGarbage() {
-  // TODO: push ourselves to a garbage thread here
+ThreadId Thread::GetId() const {
+  return identifier;
+}
+
+Thread::Thread(Task & t, anarch::State & s)
+  : GarbageObject(t.GetScheduler().GetGarbageCollector()), task(t), state(s),
+    schedulerLink(*this) {
+  ++counter;
+  identifier = GetTask().AddThread(*this);
+}
+
+Thread::~Thread() {
+  --counter;
+  state.Delete();
+}
+
+void Thread::Destroy() {
+  AssertNoncritical();
+  
+  // only remove ourselves from the owning task if the owning task is still
+  // retained
+  retainLock.Seize();
+  bool killed = retainCount != 0;
+  retainLock.Release();
+  if (killed) {
+    GetTask().RemoveThread(*this);
+    GetTask().Release();
+  }
+  // TODO: here, use a pool
+  delete this;
 }
 
 }

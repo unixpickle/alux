@@ -19,14 +19,6 @@ uint64_t Task::ReadCounter() {
   return counter;
 }
 
-Task::Task() {
-  ++counter;
-}
-
-Task::~Task() {
-  --counter;
-}
-
 bool Task::Retain() {
   anarch::ScopedCritical critical;
   anarch::ScopedLock lock(stateLock);
@@ -40,7 +32,7 @@ void Task::Release() {
   stateLock.Seize();
   bool terminated = !--retainCount && !holdCount && isKilled;
   stateLock.Release();
-  if (terminated) PushGarbage();
+  if (terminated) ThrowAway();
 }
 
 bool Task::Hold() {
@@ -56,7 +48,7 @@ void Task::Unhold() {
   stateLock.Seize();
   bool terminated = !--holdCount && !retainCount && isKilled;
   stateLock.Release();
-  if (terminated) PushGarbage();
+  if (terminated) ThrowAway();
 }
 
 void Task::Kill(uint16_t status) {
@@ -69,12 +61,64 @@ void Task::Kill(uint16_t status) {
   }
 }
 
-void Task::RemoveReferences() {
-  // TODO: here, remove our ref from the PID pool and from the Scheduler
+Scheduler & Task::GetScheduler() const {
+  return scheduler;
 }
 
-void Task::PushGarbage() {
-  // TODO: push us to some sort of GarbageThread
+TaskId Task::GetId() const {
+  return identifier;
+}
+
+ThreadId Task::AddThread(Thread & th) {
+  AssertNoncritical();
+  ScopedLock scope(threadsLock);
+  threads.Add(&th.taskLink);
+  return threadCounter++;
+}
+
+void Task::RemoveThread(Thread & th) {
+  AssertNoncritical();
+  ScopedLock scope(threadsLock);
+  threads.Remove(&th.taskLink);
+}
+
+Thread * Task::LookupThread(ThreadId theId) {
+  AssertNoncritical();
+  ScopedLock scope(threadsLock);
+  auto iter = threads.GetStart();
+  auto iterEnd = threads.GetEnd();
+  while (iter != iterEnd) {
+    if ((*iter).GetId() == theId) {
+      return &(*iter);
+    }
+    ++iter;
+  }
+  return NULL;
+}
+
+Task::Task(Scheduler & s)
+  : GarbageObject(s.GetGarbageCollector()), pidPoolLink(*this),
+    schedulerLink(*this) {
+  ++counter;
+}
+
+Task::~Task() {
+  --counter;
+}
+
+void Task::Deinit() {
+  Thread * t;
+  while ((t = threads.Pop())) {
+    if (t->isScheduled) {
+      GetScheduler().Remove(*t);
+    }
+    t->ThrowAwaySync();
+  }
+  GetScheduler().GetTaskIdPool().Free(identifier);
+}
+
+void Task::Init() {
+  identifier = GetScheduler().GetTaskIdPool().Alloc(*this);
 }
 
 }
