@@ -1,5 +1,6 @@
 #include "thread.hpp"
 #include "task.hpp"
+#include <anarch/api/thread>
 #include <anarch/critical>
 #include <anarch/new>
 #include <ansa/atomic>
@@ -18,6 +19,14 @@ void Thread::InitializeCounter() {
 
 uint64_t Thread::ReadCounter() {
   return counter;
+}
+
+Thread * Thread::GetCurrent() {
+  return (Thread *)anarch::Thread::GetUserInfo();
+}
+
+void Thread::SetCurrent(Thread * th) {
+  anarch::Thread::SetUserInfo((void *)th);
 }
 
 static Thread * New(Task & t, anarch::State & s) {

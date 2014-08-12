@@ -32,6 +32,9 @@ public:
    */
   static uint64_t ReadCounter();
   
+  static Thread * GetCurrent(); // @critical
+  static void SetCurrent(Thread *); // @critical
+  
   /**
    * Allocate a new thread, initialize it by adding it to a task, and then
    * return it. The thread will not be scheduled automatically.

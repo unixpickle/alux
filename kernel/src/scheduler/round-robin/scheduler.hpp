@@ -10,6 +10,8 @@ namespace OS {
 
 class RRScheduler : public Scheduler {
 public:
+  static uint64_t JiffyUs = 2000;
+  
   virtual void Init(); // @noncritical
   
   virtual void Add(Thread & th);
@@ -33,6 +35,9 @@ protected:
   
 private:
   static void StartGarbage(void * schedPtr);
+  static void CallSwitch(void * obj);
+  
+  void Switch();
 };
 
 }
