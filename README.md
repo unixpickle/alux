@@ -1,27 +1,36 @@
 # Alux
 
-Alux is a small Hobby Operating System. The purpose of this project is to create a lightweight microkernel on top of which you may place a language interpreter like V8.
+Alux is a small Hobby Operating System. The purpose of this project is to create a lightweight microkernel on top of which you may place a language interpreter like V8 or the Dart VM.
 
-General architectual ideas that I am playing around with:
+# Objectives
 
- * A unified address space to reduce latency due to TLB misses
- * CPU pinning for tasks/threads
- * Cross-platform abstractions
- * Memory allocation and VMM completely in user-space
+I will attempt to do all of the following:
+
+ * Provide a minimal, lightweight kernel API
+ * Provide a thin layer of security specific to the CPU architecture
+ * Allow user-space tasks to manage the memory and resources of other user-space tasks with almost no exceptions
+
+As an end result, I hope to be able to create a distribution of Alux that runs the Dart VM. This distribution will ship with a set of drivers and programs written entirely in Dart. The distribution *may* include some sort of user-space ELF loader for native plugins.
 
 ## TODO
 
-I have a test user-space compiling and running. So far, I have created a basic print system call, and some system calls for running and exiting tasks and threads.
+I have moved architecture-specific code to [anarch](http://github.com/unixpickle/anarch). I am now in the process of implementing a scheduler that sits on top of anarch and performs all of the tasks of the old scheduler:
 
-**My next step is a somewhat lightweight "rewrite" of a large part of the kernel.** I am planning to move all of the general APIs in the kernel to [ansa](http://github.com/unixpickle/ansa). I am also working to move all of the architecture-specific APIs to [anarch](http://github.com/unixpickle/anarch). Once I have both of these migrations completed, I will continue to work on the TODO list below.
+ * Create a class for a user-space task
+ * Come up with a good system for embedding an executable in the kernel binary
+ * Write a memory fault handler that copies user-space code
+ * Setup the syscall interface for a basic `print` syscall
+ * Run a user-space "hello world" program
 
-I want to expand the scheduler with an IPC mechanism, and I want to implement some useful syscalls. To do this, I plan to modify the kernel and my tests simultaneously for rapid testing and development.
+After this point, some stuff needs to be cleaned up:
 
- * Clean up build system and remove various environment variables
- * Figure out a cleaner way to handle memory faults
- * Write basic `new` and `delete` for user-space
- * Come up with a viable IPC mechanism and implement it
- * Create tests that implement:
+ * Unified TaskIdTable class with a hash-map based implementation.
+ * A memory-cache API both in anarch and Alux
+ * A better identifier table for thread IDs.
+ * A clean way for the garbage thread to depend on the scheduler
+
+After all that, I will implement system calls and corresponding user-space tests. These system calls will provide the following facilities:
+
    * Threading, mutexes, semaphores
    * Memory management
    * Launching and killing sub-tasks
@@ -29,6 +38,8 @@ I want to expand the scheduler with an IPC mechanism, and I want to implement so
    * Assertions, exit statuses
    * Static variables
    * NX regions of memory
+
+Finally, I plan to work on an IPC mechanism. I still have no idea what I will do for this, so I won't even attempt to make a TODO list for it.
 
 ## License
 
