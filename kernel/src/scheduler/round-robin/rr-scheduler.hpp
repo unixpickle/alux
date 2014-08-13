@@ -16,6 +16,12 @@ public:
   RRScheduler();
   virtual void Init(); // @noncritical
   
+  /**
+   * Turns over control of every hardware thread to the scheduler.
+   * @critical
+   */
+  virtual void Start();
+  
   virtual void Add(Thread & th);
   virtual void Remove(Thread & th);
   virtual void SetTimeout(uint64_t deadline, ansa::Lock & unlock);

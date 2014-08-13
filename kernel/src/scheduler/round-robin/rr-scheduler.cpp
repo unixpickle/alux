@@ -1,5 +1,6 @@
 #include "rr-scheduler.hpp"
 #include <anarch/api/clock-module>
+#include <anarch/api/domain-list>
 #include <anarch/api/global-map>
 #include <anarch/api/thread>
 #include <anarch/api/timer>
@@ -18,6 +19,20 @@ void RRScheduler::Init() {
   garbageCollector = new GarbageCollector(*garbageThread);
   kernelTask->Unhold();
   garbageThread->Release();
+}
+
+void RRScheduler::Start() {
+  AssertCritical();
+  anarch::DomainList & domains = anarch::DomainList::GetGlobal();
+  for (int i = 0; i < domains.GetCount(); ++i) {
+    anarch::Domain & domain = domains[i];
+    for (int j = 0; j < domain.GetThreadCount(); ++j) {
+      anarch::Thread & thread = domain.GetThread(j);
+      if (&thread == &anarch::Thread::GetCurrent()) continue;
+      thread.RunAsync(CallSwitch, (void *)this);
+    }
+  }
+  Switch();
 }
 
 void RRScheduler::Add(Thread & th) {
