@@ -5,7 +5,7 @@
 void * operator new(size_t s) {
   AssertNoncritical();
   void * result;
-  if (anarch::Domain::GetCurrent().Alloc(result, s)) {
+  if (!anarch::Domain::GetCurrent().Alloc(result, s)) {
     return NULL;
   }
   return result;
@@ -14,7 +14,7 @@ void * operator new(size_t s) {
 void * operator new[](size_t s) {
   AssertNoncritical();
   void * result;
-  if (anarch::Domain::GetCurrent().Alloc(result, s)) {
+  if (!anarch::Domain::GetCurrent().Alloc(result, s)) {
     return NULL;
   }
   return result;

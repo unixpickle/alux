@@ -10,6 +10,12 @@
 #include <ansa/macros>
 #include <ansa/cstring>
 
+namespace {
+
+OS::RRScheduler gScheduler;
+
+}
+
 extern "C" {
 
 void PrintLoopThread();
@@ -37,20 +43,27 @@ void AluxMainX64(void * mbootPtr) {
   
   anarch::cout << "finished loading anarch modules!" << anarch::endl;
   
-  OS::RRScheduler sched;
-  sched.Init();
-  
-  OS::KernelTask & testTask = OS::KernelTask::New(sched);
+  new(&gScheduler) OS::RRScheduler();
+  gScheduler.Init();
+    
+  OS::KernelTask & testTask = OS::KernelTask::New(gScheduler);
   anarch::State & testState = anarch::State::NewKernel(PrintLoopThread);
   OS::Thread & thread = OS::Thread::New(testTask, testState);
-  sched.Add(thread);
+  gScheduler.Add(thread);
   
-  sched.Start();
+  anarch::SetCritical(true);
+  gScheduler.Start();
 }
 
 void PrintLoopThread() {
+  anarch::Clock & clock = anarch::ClockModule::GetGlobal().GetClock();
+  uint64_t delta = clock.GetMicrosPerTick().Flip().ScaleInteger(10000);
+  
+  ansa::Lock dummyLock;
   while (1) {
-    anarch::cout << "yo" << anarch::endl;
+    anarch::cout << clock.GetMicros() / 1000000 << "\r";
+    dummyLock.Seize();
+    gScheduler.SetTimeout(clock.GetTicks() + delta, dummyLock);
   }
 }
 

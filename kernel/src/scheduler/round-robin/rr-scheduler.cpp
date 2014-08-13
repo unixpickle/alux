@@ -19,6 +19,7 @@ void RRScheduler::Init() {
   garbageCollector = new GarbageCollector(*garbageThread);
   kernelTask->Unhold();
   garbageThread->Release();
+  Add(*garbageThread);
 }
 
 void RRScheduler::Start() {
@@ -121,6 +122,10 @@ void RRScheduler::CallSwitch(void * obj) {
   sched.Switch();
 }
 
+void RRScheduler::SaveAndSwitch(void * obj) {
+  Thread::GetCurrent()->GetState().SuspendAndCall(CallSwitch, obj);
+}
+
 void RRScheduler::Switch() {
   AssertCritical();
   
@@ -130,11 +135,18 @@ void RRScheduler::Switch() {
   lock.Seize();
   Thread * th = Thread::GetCurrent();
   if (th) {
+    Thread::SetCurrent(NULL);
+    
     // push the current thread to the back
     threads.Remove(&th->schedulerLink);
     threads.Add(&th->schedulerLink);
-    Thread::SetCurrent(NULL);
+    
+    // set it to not be running and release it
+    ThreadInfo & info = *(ThreadInfo *)th->schedulerUserInfo;
+    info.running = false;
+    th->Release();
   }
+  
   Thread * nextThread = NULL;
   auto iter = threads.GetStart();
   while (iter != threads.GetEnd()) {
@@ -157,11 +169,13 @@ void RRScheduler::Switch() {
   
   // switch to the thread
   if (nextThread) {
+    Thread::SetCurrent(nextThread);
     nextThread->GetTask().GetMemoryMap().Set();
-    timer.SetTimeout(timeout, CallSwitch, (void *)this);
+    timer.SetTimeout(timeout, SaveAndSwitch, (void *)this);
     nextThread->GetState().Resume();
   } else {
     timer.SetTimeout(timeout, CallSwitch, (void *)this);
+    timer.WaitTimeout();
   }
 }
 

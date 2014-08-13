@@ -43,6 +43,7 @@ protected:
   
 private:
   static void StartGarbage(void * schedPtr);
+  static void SaveAndSwitch(void * obj);
   static void CallSwitch(void * obj);
   
   void Switch();
