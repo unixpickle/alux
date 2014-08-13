@@ -1,12 +1,14 @@
 # Building on OS X
 
-In order to compile Alux (at least, officially), you must have the a GNU C Linker on your system. Even if you have Xcode and its command-line utilities installed, you probably do not have GNU binutils&ndash;instead, you most likely have llvm sym-linked to `/usr/bin/ld` or to a similar path.
+Alux's individual C and C++ source files can all be compiled with Clang or GCC. However, if you are using OS X, you will probably run into some difficulty linking the final binary.
 
-For this reason, you probably need to install the *real* binutils.
+### Overview
+
+In order to link Alux, you need the GNU Linker (ld) and the GNU Library Archiver (ar). Even if you have Xcode and its command-line utilities installed, you probably do not have GNU binutils&ndash;instead, you most likely have a simpler linker symbolically linked to `/usr/bin/ld` or to a similar path. For this reason, you should install the *real* binutils as described below. Note that the binutils package on Homebrew does *not* include `ld` and is thus insufficient.
 
 On the x86-64 platform, Alux uses NASM to assemble code for initialization and context switching. You will need to install this in addition.
 
-Also, the build script uses CoffeeScript, so you will need Node and CoffeeScript installed on your system.
+Also, several build scripts use CoffeeScript, so you will need Node and CoffeeScript installed on your system.
 
 ## Building binutils
 
@@ -24,18 +26,14 @@ Simply run this and you're done!
 
     brew install nasm
 
-## Building Using a Custom Tools
+## Building Alux using Clang on x86-64
 
-Finally, you will need to compile and link Alux with your custom toolchain. You can still use the default Clang compiler, you just need to give it some options. To do this, run these commands before running the normal `make` command:
+The [tools/](../tools/) directory includes a script called `clang-build-x64`. This tool takes two command line arguments: an `ld` command, and an `ar` command. If you followed the above steps to setup GNU binutils, you would run:
 
-    export LD=your-linker-or-gcc
-    export CXXFLAGS="-integrated-as -target x86_64-pc-none-elf64"
-    export CFLAGS="-integrated-as -target x86_64-pc-none-elf64"
+    ./tools/clang-build-x64 x86_64-unknown-elf-ld x86_64-unknown-elf-ar
 
-You may additionally wish to add:
+This command will create a multiboot-compliant flat binary in a `build/` directory.
 
-	export NASM=your-nasm
+## Building Alux using a custom toolchain
 
-Now, you may simply run `make` in the root project directory, which will generate a `build/` directory. If the compilation is successful, a multiboot-able file `alux.bin` should be created in the `build/` directory.
-
-Creating a bootable ISO out of this binary file is slightly harder, and I would suggest you use Linux for that one.
+The `LD`, `AR`, `CXX`, `CC`, and `NASM` environment variables give you complete control over the build process.
