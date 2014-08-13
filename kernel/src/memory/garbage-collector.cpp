@@ -20,7 +20,7 @@ void GarbageCollector::Main() {
       obj->Destroy();
     }
     
-    anarch::CriticalScope critical;
+    anarch::ScopedCritical critical;
     lock.Seize();
     thread.GetTask().GetScheduler().SetInfiniteTimeout(lock);
   }

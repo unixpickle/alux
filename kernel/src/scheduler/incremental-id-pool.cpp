@@ -13,7 +13,7 @@ TaskId IncrementalIdPool::Alloc(Task & task) {
 void IncrementalIdPool::Free(Task & task) {
   AssertNoncritical();
   anarch::ScopedLock scope(lock);
-  tasks.Remove(&tasks.pidPoolLink);
+  tasks.Remove(&task.pidPoolLink);
 }
 
 Task * IncrementalIdPool::GetTask(TaskId ident) {

@@ -11,6 +11,7 @@ namespace OS {
 
 class Task;
 class Scheduler;
+class RRScheduler;
 
 typedef NativeInt ThreadId;
 
@@ -80,14 +81,14 @@ public:
   
 protected:
   Thread(Task & task, anarch::State & state); // @noncritical
-  ~Thread(); // @noncritical
+  virtual ~Thread(); // @noncritical
   
   bool isScheduled = false;
   
   friend class Task;  
   ansa::LinkedList<Thread>::Link taskLink;
   
-  friend class Scheduler;
+  friend class RRScheduler;
   ansa::LinkedList<Thread>::Link schedulerLink;
   void * schedulerUserInfo;
   

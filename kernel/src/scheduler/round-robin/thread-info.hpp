@@ -7,7 +7,7 @@
 namespace OS {
 
 struct ThreadInfo {
-  ansa::Atomic<uint64_t> nextTick = 0;
+  ansa::Atomic<uint64_t> nextTick;
   bool running = false;
 };
 

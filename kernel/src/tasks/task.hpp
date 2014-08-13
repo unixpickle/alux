@@ -12,6 +12,7 @@ namespace OS {
 
 class Scheduler;
 class TaskIdPool;
+class IncrementalIdPool;
 
 typedef NativeInt TaskId;
 
@@ -139,10 +140,10 @@ protected:
   virtual void Deinit();
   
   friend class Thread;
-  friend class TaskIdPool;
+  friend class IncrementalIdPool;
   
   /**
-   * The link for the PID pool.
+   * The link for the TaskIdPool pool.
    */
   ansa::LinkedList<Task>::Link pidPoolLink;
   

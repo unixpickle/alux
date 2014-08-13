@@ -1,5 +1,5 @@
 #include "garbage-object.hpp"
-#include "garbage-thread.hpp"
+#include "garbage-collector.hpp"
 #include <anarch/critical>
 
 namespace OS {

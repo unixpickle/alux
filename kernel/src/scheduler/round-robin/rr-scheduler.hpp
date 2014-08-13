@@ -3,20 +3,21 @@
 
 #include "thread-info.hpp"
 #include "../scheduler.hpp"
-#include "../../memory/garbage-thread.hpp"
+#include "../incremental-id-pool.hpp"
+#include "../../memory/garbage-collector.hpp"
 #include "../../tasks/kernel-task.hpp"
 
 namespace OS {
 
 class RRScheduler : public Scheduler {
 public:
-  static uint64_t JiffyUs = 2000;
+  static const uint64_t JiffyUs = 2000;
   
+  RRScheduler();
   virtual void Init(); // @noncritical
   
   virtual void Add(Thread & th);
   virtual void Remove(Thread & th);
-  virtual void RemoveAll(Task & task);
   virtual void SetTimeout(uint64_t deadline, ansa::Lock & unlock);
   virtual void SetInfiniteTimeout(ansa::Lock & unlock);
   virtual void ClearTimeout(Thread & thread);
@@ -29,6 +30,7 @@ protected:
   Thread * garbageThread;
   GarbageCollector * garbageCollector;
   IncrementalIdPool pidPool;
+  TaskIdPool & poolRef;
   
   anarch::CriticalLock lock;
   ansa::LinkedList<Thread> threads;

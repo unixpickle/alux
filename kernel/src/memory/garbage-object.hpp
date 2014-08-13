@@ -35,7 +35,7 @@ protected:
   GarbageCollector & garbageCollector;
   ansa::LinkedList<GarbageObject>::Link garbageLink;
   
-  friend class GarbageThread;
+  friend class GarbageCollector;
 };
 
 }

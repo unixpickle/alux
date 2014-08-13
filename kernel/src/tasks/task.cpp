@@ -1,4 +1,5 @@
 #include "task.hpp"
+#include "../scheduler/scheduler.hpp"
 #include <anarch/critical>
 #include <anarch/new>
 #include <ansa/atomic>
@@ -71,20 +72,20 @@ TaskId Task::GetId() const {
 
 ThreadId Task::AddThread(Thread & th) {
   AssertNoncritical();
-  ScopedLock scope(threadsLock);
+  anarch::ScopedLock scope(threadsLock);
   threads.Add(&th.taskLink);
   return threadCounter++;
 }
 
 void Task::RemoveThread(Thread & th) {
   AssertNoncritical();
-  ScopedLock scope(threadsLock);
+  anarch::ScopedLock scope(threadsLock);
   threads.Remove(&th.taskLink);
 }
 
 Thread * Task::LookupThread(ThreadId theId) {
   AssertNoncritical();
-  ScopedLock scope(threadsLock);
+  anarch::ScopedLock scope(threadsLock);
   auto iter = threads.GetStart();
   auto iterEnd = threads.GetEnd();
   while (iter != iterEnd) {
@@ -97,8 +98,7 @@ Thread * Task::LookupThread(ThreadId theId) {
 }
 
 Task::Task(Scheduler & s)
-  : GarbageObject(s.GetGarbageCollector()), pidPoolLink(*this),
-    schedulerLink(*this) {
+  : GarbageObject(s.GetGarbageCollector()), pidPoolLink(*this), scheduler(s) {
   ++counter;
 }
 
@@ -114,7 +114,7 @@ void Task::Deinit() {
     }
     t->ThrowAwaySync();
   }
-  GetScheduler().GetTaskIdPool().Free(identifier);
+  GetScheduler().GetTaskIdPool().Free(*this);
 }
 
 void Task::Init() {

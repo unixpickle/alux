@@ -1,5 +1,6 @@
 #include "thread.hpp"
 #include "task.hpp"
+#include "../scheduler/scheduler.hpp"
 #include <anarch/api/thread>
 #include <anarch/critical>
 #include <anarch/new>
@@ -29,16 +30,16 @@ void Thread::SetCurrent(Thread * th) {
   anarch::Thread::SetUserInfo((void *)th);
 }
 
-static Thread * New(Task & t, anarch::State & s) {
+Thread & Thread::New(Task & t, anarch::State & s) {
   // TODO: here, use a pool
   return *(new Thread(t, s));
 }
 
-Task & Thread::GetTask() {
+Task & Thread::GetTask() const {
   return task;
 }
 
-anarch::State & Thread::GetState() {
+anarch::State & Thread::GetState() const {
   return state;
 }
 
@@ -82,8 +83,8 @@ ThreadId Thread::GetId() const {
 }
 
 Thread::Thread(Task & t, anarch::State & s)
-  : GarbageObject(t.GetScheduler().GetGarbageCollector()), task(t), state(s),
-    schedulerLink(*this) {
+  : GarbageObject(t.GetScheduler().GetGarbageCollector()), taskLink(*this),
+    schedulerLink(*this), task(t), state(s) {
   ++counter;
   identifier = GetTask().AddThread(*this);
 }

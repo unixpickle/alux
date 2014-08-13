@@ -39,7 +39,7 @@ protected:
   
 private:
   Thread & thread;
-  ansa::CriticalLock lock;
+  anarch::CriticalLock lock;
   ansa::LinkedList<GarbageObject> objects;
 };
 
