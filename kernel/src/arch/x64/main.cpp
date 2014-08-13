@@ -12,7 +12,7 @@
 
 extern "C" {
 
-void TickTockMethod();
+void PrintLoopThread();
 
 void AluxMainX64(void * mbootPtr) {
   anarch::x64::InitializeSingletons();
@@ -39,7 +39,19 @@ void AluxMainX64(void * mbootPtr) {
   
   OS::RRScheduler sched;
   sched.Init();
+  
+  OS::KernelTask & testTask = OS::KernelTask::New(sched);
+  anarch::State & testState = anarch::State::NewKernel(PrintLoopThread);
+  OS::Thread & thread = OS::Thread::New(testTask, testState);
+  sched.Add(thread);
+  
   sched.Start();
+}
+
+void PrintLoopThread() {
+  while (1) {
+    anarch::cout << "yo" << anarch::endl;
+  }
 }
 
 }
