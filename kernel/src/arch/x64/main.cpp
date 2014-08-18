@@ -1,4 +1,5 @@
 #include "main.hpp"
+#include "layout.hpp"
 #include "../../scheduler/round-robin/rr-scheduler.hpp"
 #include "../../memory/page-fault.hpp"
 #include <anarch/x64/multiboot-region-list>
@@ -24,6 +25,8 @@ void PrintLoopThread();
 void AluxMainX64(void * mbootPtr) {
   anarch::x64::InitializeSingletons();
   
+  anarch::SetGlobalPageDelegate(OS::HandlePageFault);
+  
   anarch::StreamModule::GetGlobal().Load();
   anarch::cout << "AluxMainX64(" << (uint64_t)mbootPtr << ")"
     << anarch::endl;
@@ -32,12 +35,17 @@ void AluxMainX64(void * mbootPtr) {
   // it is acceptable to store the boot info here
   
   anarch::x64::MultibootRegionList regions(mbootPtr);
+  OS::x64::Layout layout((void *)0x100000);
+  layout.AlignProgram();
   
-  // TODO: here, calculate the length of the kernel by loading the program
-  anarch::x64::BootInfo bootInfo(regions, 0x300000);
+  anarch::cout << "kernelSize=" << layout.kernelSize << " programSize="
+    << layout.programSize << " programStart=" << (PhysAddr)layout.programStart
+    << anarch::endl;
+  
+  anarch::x64::BootInfo bootInfo(regions, (PhysAddr)layout.programStart
+    + (PhysSize)layout.programSize);
   
   anarch::x64::SetBootInfo(&bootInfo);
-  anarch::SetGlobalPageDelegate(OS::HandlePageFault);
   
   // load the modules we use
   anarch::DomainList::GetGlobal().Load();
