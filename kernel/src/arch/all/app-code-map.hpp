@@ -1,17 +1,17 @@
-#ifndef __ALUX_USER_PROGRAM_MAP_HPP__
-#define __ALUX_USER_PROGRAM_MAP_HPP__
+#ifndef __ALUX_APP_CODE_MAP_HPP__
+#define __ALUX_APP_CODE_MAP_HPP__
 
 #include <anarch/types>
 #include <anarch/api/user-map>
 
 namespace OS {
 
-class UserProgram;
+class App;
 
-class UserProgramMap {
+class AppCodeMap {
 public:
   virtual void * GetEntryPoint() = 0; // @ambicritical
-  virtual UserProgram & GetUserProgram() = 0; // @ambicritical
+  virtual App & GetApp() = 0; // @ambicritical
   
   virtual bool HandlePageFault(VirtAddr addr, bool write) = 0; // @noncritical
   virtual void Delete() = 0; // @noncritical
@@ -21,8 +21,8 @@ public:
   }
   
 protected:
-  UserProgramMap(anarch::UserMap & map) : memoryMap(map) {}
-  virtual ~UserProgramMap() {}
+  AppCodeMap(anarch::UserMap & map) : memoryMap(map) {}
+  virtual ~AppCodeMap() {}
   
   anarch::UserMap & memoryMap;
 };

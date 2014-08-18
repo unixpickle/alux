@@ -1,5 +1,5 @@
-#include "user-program-map.hpp"
-#include "user-program.hpp"
+#include "app-code-map.hpp"
+#include "app.hpp"
 #include <anarch/api/panic>
 #include <anarch/api/domain>
 #include <anarch/critical>
@@ -8,25 +8,26 @@ namespace OS {
 
 namespace x64 {
 
-UserProgramMap & UserProgramMap::New(anarch::UserMap & m, UserProgram & prog) {
-  return *(new UserProgramMap(m, prog));
+AppCodeMap & AppCodeMap::New(anarch::UserMap & m, App & prog) {
+  return *(new AppCodeMap(m, prog));
 }
 
-void * UserProgramMap::GetEntryPoint() {
+void * AppCodeMap::GetEntryPoint() {
   return (void *)StartAddr;
 }
 
-OS::UserProgram & UserProgramMap::GetUserProgram() {
-  return program;
+OS::App & AppCodeMap::GetApp() {
+  return app;
 }
 
-bool UserProgramMap::HandlePageFault(VirtAddr addr, bool wasWrite) {
+bool AppCodeMap::HandlePageFault(VirtAddr addr, bool wasWrite) {
   AssertNoncritical();
   anarch::ScopedLock scope(lock);
   
-  if (addr < StartAddr || addr >= StartAddr + program.GetLength()) {
+  if (addr < StartAddr || addr >= StartAddr + app.GetLength()) {
     return false;
   }
+  
   Sector & sec = sectors[(addr - StartAddr) / 0x200000];
   if (wasWrite) {
     addr &= ~(PhysAddr)0xfff; // page align it
@@ -37,13 +38,13 @@ bool UserProgramMap::HandlePageFault(VirtAddr addr, bool wasWrite) {
   return true;
 }
 
-void UserProgramMap::Delete() {
+void AppCodeMap::Delete() {
   AssertNoncritical();
   delete this;
 }
 
-UserProgramMap::UserProgramMap(anarch::UserMap & map, UserProgram & prog)
-  : OS::UserProgramMap(map), program(prog),
+AppCodeMap::AppCodeMap(anarch::UserMap & map, App & prog)
+  : OS::AppCodeMap(map), app(prog),
     sectorCount(prog.GetLength() / SectorSize) {
   assert(prog.GetLength() % SectorSize == 0);
   assert(prog.GetMemory() % SectorSize == 0);
@@ -60,7 +61,7 @@ UserProgramMap::UserProgramMap(anarch::UserMap & map, UserProgram & prog)
   GetMemoryMap().ReserveAt(StartAddr, theSize);
 }
 
-UserProgramMap::~UserProgramMap() {
+AppCodeMap::~AppCodeMap() {
   AssertNoncritical();
   
   // free all of the physical memory and virtual memory used by each sector
@@ -78,7 +79,7 @@ UserProgramMap::~UserProgramMap() {
   delete[] sectors;
 }
 
-void UserProgramMap::HandleReadFault(Sector & sector) {
+void AppCodeMap::HandleReadFault(Sector & sector) {
   if (sector.readable) return;
   sector.readable = true;
   
@@ -89,8 +90,8 @@ void UserProgramMap::HandleReadFault(Sector & sector) {
                        anarch::UserMap::Size(SectorSize, 1), attrs);
 }
 
-void UserProgramMap::HandleFirstWriteFault(Sector & sector,
-                                           VirtAddr pageAddr) {
+void AppCodeMap::HandleFirstWriteFault(Sector & sector,
+                                       VirtAddr pageAddr) {
   assert(!sector.writable);
   anarch::UserMap::Size roSize(SectorSize, 1);
   if (sector.readable) {
@@ -128,7 +129,7 @@ void UserProgramMap::HandleFirstWriteFault(Sector & sector,
                        attrs);
 }
 
-void UserProgramMap::HandleWriteFault(Sector & sector, VirtAddr pageAddr) {
+void AppCodeMap::HandleWriteFault(Sector & sector, VirtAddr pageAddr) {
   if (!sector.writable) {
     return HandleFirstWriteFault(sector, pageAddr);
   }

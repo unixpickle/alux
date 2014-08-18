@@ -1,24 +1,24 @@
-#ifndef __ALUX_X64_USER_PROGRAM_MAP_HPP__
-#define __ALUX_X64_USER_PROGRAM_MAP_HPP__
+#ifndef __ALUX_X64_APP_CODE_MAP_HPP__
+#define __ALUX_X64_APP_CODE_MAP_HPP__
 
-#include "../all/user-program-map.hpp"
+#include "../all/app-code-map.hpp"
 #include <anarch/lock>
 
 namespace OS {
 
 namespace x64 {
 
-class UserProgram;
+class App;
 
-class UserProgramMap : public OS::UserProgramMap {
+class AppCodeMap : public OS::AppCodeMap {
 public:
   static const VirtAddr StartAddr = 0x8000000000UL;
   static const PhysSize SectorSize = 0x200000;
   
-  static UserProgramMap & New(anarch::UserMap & map, UserProgram & prog);
+  static AppCodeMap & New(anarch::UserMap & map, App & prog);
   
   virtual void * GetEntryPoint();
-  virtual OS::UserProgram & GetUserProgram();
+  virtual OS::App & GetApp();
   
   virtual bool HandlePageFault(VirtAddr addr, bool write);
   virtual void Delete();
@@ -35,14 +35,14 @@ private:
     PhysAddr readOnlyStart;
   };
   
-  UserProgramMap(anarch::UserMap & map, UserProgram & prog);
-  virtual ~UserProgramMap();
+  AppCodeMap(anarch::UserMap & map, App & prog);
+  virtual ~AppCodeMap();
   
   void HandleReadFault(Sector & sector);
-  void HandleFirstWriteFault(Sector & sector, VirtAddr pageAddr);
   void HandleWriteFault(Sector & sector, VirtAddr pageAddr);
+  void HandleFirstWriteFault(Sector & sector, VirtAddr pageAddr);
   
-  UserProgram & program;
+  App & app;
   
   anarch::NoncriticalLock lock;
   Sector * sectors;
