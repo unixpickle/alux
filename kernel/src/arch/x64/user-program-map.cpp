@@ -1,5 +1,7 @@
 #include "user-program-map.hpp"
 #include "user-program.hpp"
+#include <anarch/api/panic>
+#include <anarch/api/domain>
 #include <anarch/critical>
 
 namespace OS {
@@ -27,6 +29,7 @@ bool UserProgramMap::HandlePageFault(VirtAddr addr, bool wasWrite) {
   }
   Sector & sec = sectors[(addr - StartAddr) / 0x200000];
   if (wasWrite) {
+    addr &= ~(PhysAddr)0xfff; // page align it
     HandleWriteFault(sec, addr);
   } else {
     HandleReadFault(sec);
@@ -40,17 +43,38 @@ void UserProgramMap::Delete() {
 }
 
 UserProgramMap::UserProgramMap(anarch::UserMap & map, UserProgram & prog)
-  : OS::UserProgramMap(map), program(prog) {
-  assert(prog.GetLength() % Sector::Size == 0);
-  assert(prog.GetMemory() % Sector::Size == 0);
-  PhysSize sectorCount = prog.GetLength() / 0x200000;
-  sectors = new[] Sector[sectorCount];
-  GetMemoryMap().ReserveAt(StartAddr,
-                           anarch::UserMap::Size(Sector::Size, sectorCount));
+  : OS::UserProgramMap(map), program(prog),
+    sectorCount(prog.GetLength() / SectorSize) {
+  assert(prog.GetLength() % SectorSize == 0);
+  assert(prog.GetMemory() % SectorSize == 0);
+  
+  // create sector list
+  sectors = new Sector[sectorCount];
+  for (int i = 0; i < sectorCount; ++i) {
+    PhysSize offset = (PhysSize)i * SectorSize;
+    sectors[i].startAddr = StartAddr + offset;
+    sectors[i].readOnlyStart = prog.GetMemory() + offset;
+  }
+  
+  anarch::UserMap::Size theSize(SectorSize, sectorCount);
+  GetMemoryMap().ReserveAt(StartAddr, theSize);
 }
 
 UserProgramMap::~UserProgramMap() {
-  // TODO: here, delete physical pages that we allocated
+  AssertNoncritical();
+  
+  // free all of the physical memory and virtual memory used by each sector
+  for (int i = 0; i < sectorCount; ++i) {
+    if (!sectors[i].writable) continue;
+    for (int j = 0; j < 0x200; ++j) {
+      PhysAddr writable = sectors[i].writables[j];
+      if (!writable) continue;
+      anarch::Domain::GetCurrent().FreePhys(writable);
+    }
+    delete[] sectors[i].writables;
+  }
+  
+  // free the sectors list
   delete[] sectors;
 }
 
@@ -58,38 +82,70 @@ void UserProgramMap::HandleReadFault(Sector & sector) {
   if (sector.readable) return;
   sector.readable = true;
   
-  PhysAddr start = program.GetMemory() + Sector::Size * GetSectorIndex(sector);
-  VirtAddr dest = StartAddr + Sector::Size * GetSectorIndex(sector);
   anarch::UserMap::Attributes attrs;
   attrs.writable = false;
   
-  GetMemoryMap().MapAt(dest, start, anarch::UserMap::Size(Sector::Size, 1),
-                       attrs);
+  GetMemoryMap().MapAt(sector.startAddr, sector.readOnlyStart,
+                       anarch::UserMap::Size(SectorSize, 1), attrs);
 }
 
-void UserProgramMap::HandleWriteFault(Sector & sector, VirtAddr addr) {
-  if (sector.writable) return;
+void UserProgramMap::HandleFirstWriteFault(Sector & sector,
+                                           VirtAddr pageAddr) {
+  assert(!sector.writable);
+  anarch::UserMap::Size roSize(SectorSize, 1);
   if (sector.readable) {
-    // TODO: some way to go from big pages to small pages
+    GetMemoryMap().UnmapAndReserve(sector.startAddr, roSize);
   }
-  sector.readable = sector.writable = true;
-  sector.writables = new[] PhysAddr[0x200];
+  GetMemoryMap().Rereserve(sector.startAddr, roSize, 0x1000);
   
-  // TODO: check if i actually need to do this; it's so unclear man
+  sector.readable = sector.writable = true;
+  sector.writables = new PhysAddr[0x200];
+  
+  // TODO: check if I actually need to do this; it's so unclear man
   for (int i = 0; i < 0x200; ++i) {
     sector.writables[i] = 0;
   }
   
   PhysAddr allocated;
-  // TODO: create Domain physical memory allocation!
-#warning THIS IS NOT DONE
+  if (!anarch::Domain::GetCurrent().AllocPhys(allocated, 0x1000, 0x1000)) {
+    anarch::Panic("UserProgramMap::HandleFirstWriteFault() - "
+                  "Domain::AllocPhys failed");
+  }
   
-  int pageIdx = (int)((addr % Sector::Size) / 0x1000);
+  int pageIdx = (int)((pageAddr % SectorSize) / 0x1000);
   sector.writables[pageIdx] = allocated;
+  
+  anarch::UserMap::Attributes attrs;
+  attrs.writable = false;
+  
+  // map all the pages as read only
+  GetMemoryMap().MapAt(sector.startAddr, sector.readOnlyStart,
+                       anarch::UserMap::Size(0x1000, 0x200), attrs);
+
+  attrs.writable = true;
+  // map the one writable page
+  GetMemoryMap().MapAt(pageAddr, allocated, anarch::UserMap::Size(0x1000, 1),
+                       attrs);
 }
 
-size_t UserProgramMap::GetSectorIndex(Sector & s) {
-  return (&s - sectors) / sizeof(Sector);
+void UserProgramMap::HandleWriteFault(Sector & sector, VirtAddr pageAddr) {
+  if (!sector.writable) {
+    return HandleFirstWriteFault(sector, pageAddr);
+  }
+  
+  int pageIdx = (int)((pageAddr % SectorSize) / 0x1000);
+  if (sector.writables[pageIdx]) return;
+  
+  PhysAddr allocated;
+  if (!anarch::Domain::GetCurrent().AllocPhys(allocated, 0x1000, 0x1000)) {
+    anarch::Panic("UserProgramMap::HandleWriteFault() - "
+                  "Domain::AllocPhys failed");
+  }
+  sector.writables[pageIdx] = allocated;
+  
+  anarch::UserMap::Attributes attrs;
+  GetMemoryMap().MapAt(pageAddr, allocated, anarch::UserMap::Size(0x1000, 1),
+                       attrs);
 }
 
 }

@@ -13,6 +13,7 @@ class UserProgram;
 class UserProgramMap : public OS::UserProgramMap {
 public:
   static const VirtAddr StartAddr = 0x8000000000UL;
+  static const PhysSize SectorSize = 0x200000;
   
   static UserProgramMap & New(anarch::UserMap & map, UserProgram & prog);
   
@@ -23,28 +24,29 @@ public:
   virtual void Delete();
   
 private:
-  UserProgramMap(anarch::UserMap & map, UserProgram & prog);
-  virtual ~UserProgramMap();
-  
-  void HandleReadFault(Sector & sector);
-  void HandleWriteFault(Sector & sector, VirtAddr addr);
-  size_t GetSectorIndex(Sector &);
-  
-  UserProgram & program;
-  
   /**
    * A 2MB sector.
    */
   struct Sector {
-    static const PhysSize Size = 0x200000;
-    
     bool readable = false;
     bool writable = false;
     PhysAddr * writables = NULL;
+    VirtAddr startAddr;
+    PhysAddr readOnlyStart;
   };
+  
+  UserProgramMap(anarch::UserMap & map, UserProgram & prog);
+  virtual ~UserProgramMap();
+  
+  void HandleReadFault(Sector & sector);
+  void HandleFirstWriteFault(Sector & sector, VirtAddr pageAddr);
+  void HandleWriteFault(Sector & sector, VirtAddr pageAddr);
+  
+  UserProgram & program;
   
   anarch::NoncriticalLock lock;
   Sector * sectors;
+  int sectorCount;
 };
 
 }
