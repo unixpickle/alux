@@ -7,7 +7,7 @@ namespace OS {
 
 class UserProgram {
 public:
-  virtual UserProgramMap & CreateMap() = 0;
+  virtual UserProgramMap & CreateMap(anarch::UserMap &) = 0;
 };
 
 }
