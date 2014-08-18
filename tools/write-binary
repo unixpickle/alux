@@ -1,0 +1,35 @@
+#!/usr/bin/env coffee
+#
+# This tool sets the main binary in a kernel image
+#
+
+if process.argv.length isnt 4
+  console.log 'Usage: write-binary <alux.bin> <program.bin>'
+  process.exit 1
+
+die = (err) ->
+  console.log err
+  process.exit 1
+
+fs = require 'fs'
+mainBin = process.argv[2]
+programBin = process.argv[3]
+
+mainStat = fs.statSync mainBin
+die "not a file: #{mainStat}" if not mainStat.isFile()
+programStat = fs.statSync programBin
+die "not a file: #{programBin}" if not programStat.isFile()
+
+kernelImage = fs.readFileSync mainBin
+programImage = fs.readFileSync programBin
+
+kernelSize = kernelImage.readInt32LE 0x20
+if kernelSize isnt kernelImage.length
+  console.error 'Warning: kernel image already had executable; removing'
+  kernelImage = kernelImage.slice 0, kernelSize
+
+kernelImage.writeUInt32LE programImage.length, 0x24
+kernelImage = Buffer.concat kernelImage, prorgamImage
+fs.writeFileSync mainBin, kernelImage
+
+console.log "Final image is #{kernelImage.length} bytes"

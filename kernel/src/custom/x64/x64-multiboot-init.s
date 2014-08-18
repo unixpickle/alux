@@ -28,7 +28,9 @@ multiboot_header:
   dd start            ; entry point
 
 exec_size:
-  dq 0
+  dd 0
+app_size:
+  dd 0
 
 start:
   mov esp, initial_stack.end
@@ -133,10 +135,6 @@ entry64:
   ; entry point found!
   add rsi, 0x10
   jmp rsi
-
-
-; 16-bit processor entrypoint
-%include "./x64-proc-entry.s"
 
 ; static data area
 

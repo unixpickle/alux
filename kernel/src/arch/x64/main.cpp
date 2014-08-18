@@ -1,5 +1,6 @@
 #include "main.hpp"
 #include "../../scheduler/round-robin/rr-scheduler.hpp"
+#include "../../memory/page-fault.hpp"
 #include <anarch/x64/multiboot-region-list>
 #include <anarch/x64/init>
 #include <anarch/api/domain-list>
@@ -36,6 +37,7 @@ void AluxMainX64(void * mbootPtr) {
   anarch::x64::BootInfo bootInfo(regions, 0x300000);
   
   anarch::x64::SetBootInfo(&bootInfo);
+  anarch::SetGlobalPageDelegate(OS::HandlePageFault);
   
   // load the modules we use
   anarch::DomainList::GetGlobal().Load();

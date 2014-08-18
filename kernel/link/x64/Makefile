@@ -8,7 +8,6 @@ $(KERNEL): $(BUILD)/custom $(ANARCH)
 		cp $(BUILD)/custom/x64-multiboot-init.bin $(KERNEL); \
 		cat $(KERNEL).1 >>$(KERNEL); \
 		./write-size $(KERNEL); \
-		cat zero-size.dat >>$(KERNEL); \
 	  rm $(KERNEL).1; \
 	else \
 	  mv $(KERNEL).1 $(KERNEL).elf; \
