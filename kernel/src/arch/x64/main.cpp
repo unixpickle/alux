@@ -1,6 +1,4 @@
 #include "main.hpp"
-#include "layout.hpp"
-#include "../../scheduler/round-robin/rr-scheduler.hpp"
 #include "../../memory/page-fault.hpp"
 #include <anarch/x64/multiboot-region-list>
 #include <anarch/x64/init>
@@ -12,15 +10,7 @@
 #include <ansa/macros>
 #include <ansa/cstring>
 
-namespace {
-
-OS::RRScheduler gScheduler;
-
-}
-
 extern "C" {
-
-void PrintLoopThread();
 
 void AluxMainX64(void * mbootPtr) {
   anarch::x64::InitializeSingletons();
@@ -35,15 +25,7 @@ void AluxMainX64(void * mbootPtr) {
   // it is acceptable to store the boot info here
   
   anarch::x64::MultibootRegionList regions(mbootPtr);
-  OS::x64::Layout layout((void *)0x100000);
-  layout.AlignProgram();
-  
-  anarch::cout << "kernelSize=" << layout.kernelSize << " programSize="
-    << layout.programSize << " programStart=" << (PhysAddr)layout.programStart
-    << anarch::endl;
-  
-  anarch::x64::BootInfo bootInfo(regions, (PhysAddr)layout.programStart
-    + (PhysSize)layout.programSize);
+  anarch::x64::BootInfo bootInfo(regions, 0x300000);
   
   anarch::x64::SetBootInfo(&bootInfo);
   
@@ -52,29 +34,7 @@ void AluxMainX64(void * mbootPtr) {
   anarch::ClockModule::GetGlobal().Load();
   
   anarch::cout << "finished loading anarch modules!" << anarch::endl;
-  
-  new(&gScheduler) OS::RRScheduler();
-  gScheduler.Init();
-    
-  OS::KernelTask & testTask = OS::KernelTask::New(gScheduler);
-  anarch::State & testState = anarch::State::NewKernel(PrintLoopThread);
-  OS::Thread & thread = OS::Thread::New(testTask, testState);
-  gScheduler.Add(thread);
-  
-  anarch::SetCritical(true);
-  gScheduler.Start();
-}
-
-void PrintLoopThread() {
-  anarch::Clock & clock = anarch::ClockModule::GetGlobal().GetClock();
-  uint64_t delta = clock.GetMicrosPerTick().Flip().ScaleInteger(10000);
-  
-  ansa::Lock dummyLock;
-  while (1) {
-    anarch::cout << clock.GetMicros() / 1000000 << "\r";
-    dummyLock.Seize();
-    gScheduler.SetTimeout(clock.GetTicks() + delta, dummyLock);
-  }
+  __asm__ __volatile__("cli\nhlt");
 }
 
 }
