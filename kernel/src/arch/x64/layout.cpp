@@ -13,7 +13,12 @@ Layout::Layout(void * loadAddr) : kernelStart(loadAddr) {
 
 void Layout::AlignProgram() {
   VirtAddr addr = (VirtAddr)programStart;
-  if (addr % 0x200000 == 0) return;
+  if (addr % 0x200000 == 0) {
+    if (programSize % 0x200000) {
+      programSize += 0x200000 - (programSize % 0x200000);
+    }
+    return;
+  }
   addr += 0x200000 - (addr % 0x200000);
   
   // TODO: figure out how to reuse what might otherwise be 2MB of wasted
@@ -27,6 +32,10 @@ void Layout::AlignProgram() {
     dest[i] = source[i];
   }
   programStart = (void *)addr;
+  
+  if (programSize % 0x200000) {
+    programSize += 0x200000 - (programSize % 0x200000);
+  }
 }
 
 }
