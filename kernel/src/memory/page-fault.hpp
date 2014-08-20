@@ -3,7 +3,7 @@
 
 #include <anarch/api/page-delegate>
 
-namespace OS {
+namespace Alux {
 
 void HandlePageFault(VirtAddr, bool); // @critical -> @noncritical -> @critical
 

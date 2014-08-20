@@ -16,18 +16,16 @@ As an end result, I hope to be able to create a distribution of Alux that runs t
 
 I have moved architecture-specific code to [anarch](http://github.com/unixpickle/anarch). I am now in the process of implementing a scheduler that sits on top of anarch and performs all of the tasks of the old scheduler:
 
- * Create a class for a user-space task
- * Come up with a good system for embedding an executable in the kernel binary
- * Write a memory fault handler that copies user-space code
- * Setup the syscall interface for a basic `print` syscall
- * Run a user-space "hello world" program
-
-After this point, some stuff needs to be cleaned up:
-
- * Unified TaskIdTable class with a hash-map based implementation.
- * A memory-cache API both in anarch and Alux
- * A better identifier table for thread IDs.
- * A clean way for the garbage thread to depend on the scheduler
+ * Create a fundamental `Object` base class
+ * Create a `TidList` hash-map class for task ID's
+ * Create a `Scheduler` abstract class
+ * Create a `GarbageCollector` which collects `GarbageObject`s.
+   * The garbage collection mechanism will be inextricably linked with the scheduler
+   * A garbage collector accesses protected methods in the `Scheduler` via friend-classing so that no deadlocks occur
+ * Create a `Task` abstract class and a `Thread` class
+ * Create `KernelTask` and `UserTask` classes
+ * Extract the program image from the kernel file in startup
+ * Launch a garbage thread and a 
 
 After all that, I will implement system calls and corresponding user-space tests. These system calls will provide the following facilities:
 

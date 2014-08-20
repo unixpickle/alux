@@ -15,7 +15,7 @@ extern "C" {
 void AluxMainX64(void * mbootPtr) {
   anarch::x64::InitializeSingletons();
   
-  anarch::SetGlobalPageDelegate(OS::HandlePageFault);
+  anarch::SetGlobalPageDelegate(Alux::HandlePageFault);
   
   anarch::StreamModule::GetGlobal().Load();
   anarch::cout << "AluxMainX64(" << (uint64_t)mbootPtr << ")"
