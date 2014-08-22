@@ -1,16 +1,20 @@
 #ifndef __ALUX_SCHEDULER__
 #define __ALUX_SCHEDULER__
 
+#include "garbage-collector.hpp"
+#include "../identifiers/id-map.hpp"
+#include "../tasks/task.hpp"
 #include <anarch/stdint>
 #include <ansa/lock>
 
 namespace Alux {
 
-class GarbageCollector;
-class Thread;
-
 class Scheduler {
 public:
+  Scheduler(); // @noncritical
+  
+  virtual ~Scheduler(); // @noncritical
+  
   /**
    * Add a thread to the scheduler.
    * @noncritical
@@ -74,6 +78,8 @@ public:
    */
   virtual GarbageCollector & GetGarbageCollector() const = 0;
   
+  IdMap<Task> & GetTaskIdMap();
+  
 protected:
   friend class GarbageCollector;
   
@@ -100,6 +106,9 @@ protected:
    * @ambicritical
    */
   virtual void ClearGarbageTimeout() = 0;
+  
+private:
+  IdMap<Task> taskIdMap;
 };
 
 }

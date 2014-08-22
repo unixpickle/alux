@@ -1,12 +1,13 @@
 #ifndef __ALUX_GARBAGE_COLLECTOR_HPP__
 #define __ALUX_GARBAGE_COLLECTOR_HPP__
 
-#include "scheduler.hpp"
 #include "garbage-object.hpp"
 #include <ansa/linked-list>
 #include <anarch/lock>
 
 namespace Alux {
+
+class Scheduler;
 
 class GarbageCollector {
 public:

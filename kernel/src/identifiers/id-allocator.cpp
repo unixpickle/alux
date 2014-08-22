@@ -1,8 +1,9 @@
+#include "id-allocator.hpp"
 #include <anarch/critical>
 
 namespace Alux {
 
-IdentifierAllocator::IdentifierAllocator(Identifier b)
+IdAllocator::IdAllocator(Identifier b)
   : upperBound(b), currentMax(1), poolCount(1), poolCapacity(1),
     pool(new Identifier[1]) {
   AssertNoncritical();
@@ -11,11 +12,11 @@ IdentifierAllocator::IdentifierAllocator(Identifier b)
   pool[0] = 0;
 }
 
-IdentifierAllocator::~IdentifierAllocator() {
+IdAllocator::~IdAllocator() {
   delete[] pool;
 }
 
-bool IdentifierAllocator::AllocIdentifier(Identifier & ident) {
+bool IdAllocator::AllocIdentifier(Identifier & ident) {
   AssertNoncritical();
   anarch::ScopedLock scope(lock);
   
@@ -33,7 +34,7 @@ bool IdentifierAllocator::AllocIdentifier(Identifier & ident) {
   return true;
 }
 
-void IdentifierAllocator::FreeIdentifier(Identifier ident) {
+void IdAllocator::FreeIdentifier(Identifier ident) {
   AssertNoncritical();
   anarch::ScopedLock scope(lock);
   

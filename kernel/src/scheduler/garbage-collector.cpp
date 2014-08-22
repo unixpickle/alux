@@ -1,4 +1,5 @@
 #include "garbage-collector.hpp"
+#include "scheduler.hpp"
 #include <anarch/critical>
 
 namespace Alux {

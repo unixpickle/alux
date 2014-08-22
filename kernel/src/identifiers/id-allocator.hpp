@@ -1,5 +1,5 @@
-#ifndef __ALUX_ID_LIST_HPP__
-#define __ALUX_ID_LIST_HPP__
+#ifndef __ALUX_ID_ALLOCATOR_HPP__
+#define __ALUX_ID_ALLOCATOR_HPP__
 
 #include "type.hpp"
 #include <anarch/lock>
@@ -9,20 +9,20 @@ namespace Alux {
 /**
  * A simple mechanism for allocating identifiers.
  */
-class IdentifierAllocator {
+class IdAllocator {
 public:
   /**
-   * Create a new [IdentifierAllocator] which will never return an ID greater
+   * Create a new [IdAllocator] which will never return an ID greater
    * than or equal to [upperBound].
    * @ambicritical
    */
-  IdentifierAllocator(Identifier upperBound);
+  IdAllocator(Identifier upperBound);
   
   /**
    * Frees any memory used by this allocator.
    * @ambicritical
    */
-  ~IdentifierAllocator();
+  ~IdAllocator();
   
   /**
    * Find an unused [Identifier] from the pool and return it. This operation is

@@ -1,11 +1,14 @@
 #ifndef __ALUX_TASK_HPP__
 #define __ALUX_TASK_HPP__
 
-#include "identifier.hpp"
+#include "thread.hpp"
 #include "../scheduler/garbage-object.hpp"
-#include <anarch/memory-map>
+#include "../identifiers/id-map.hpp"
+#include <anarch/api/memory-map>
 
 namespace Alux {
+
+class Scheduler;
 
 class Task : public GarbageObject {
 public:
@@ -23,6 +26,9 @@ protected:
   Task(Scheduler &);
   virtual void Init(); // @noncritical
   virtual void Dealloc(); // @noncritical
+  
+  friend class IdMap<Task>;
+  ansa::LinkedList<Task>::Link idMapLink;
 };
 
 }
