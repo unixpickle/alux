@@ -6,6 +6,7 @@ mainSources = [
   'src/memory'
   'src/tasks'
   'src/scheduler'
+  'src/identifiers'
 ]
 
 includes = [

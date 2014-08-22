@@ -22,13 +22,26 @@ public:
   Scheduler & GetScheduler() const;
   Identifier GetIdentifier() const;
   
+  IdMap<Thread> & GetThreads();
+  
 protected:
   Task(Scheduler &);
-  virtual void Init(); // @noncritical
-  virtual void Dealloc(); // @noncritical
+  virtual bool Init(); // @noncritical
+  virtual void Deinit(); // @noncritical
   
   friend class IdMap<Task>;
   ansa::LinkedList<Task>::Link idMapLink;
+  
+private:
+  Scheduler & scheduler;
+  Identifier identifier;
+  IdMap<Thread> threads;
+  
+  anarch::CriticalLock lifeLock;
+  int retainCount = 0;
+  int holdCount = 1;
+  uint16_t killStatus;
+  bool killed = false;
 };
 
 }

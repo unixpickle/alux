@@ -46,7 +46,7 @@ void IdAllocator::FreeIdentifier(Identifier ident) {
   pool[poolCount++] = ident;
 }
 
-void IdList::GrowPool() {
+void IdAllocator::GrowPool() {
   // make sure the pool *can* be expanded
   assert(poolCapacity < upperBound);
   poolCapacity *= 2;

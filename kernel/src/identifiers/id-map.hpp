@@ -20,6 +20,7 @@ public:
     anarch::ScopedLock scope(lock);
     if (!AllocIdentifier(idOut)) return false;
     buckets[idOut % Buckets].Add(&anObj.idMapLink);
+    return true;
   }
   
   /**
@@ -47,6 +48,15 @@ public:
       }
     }
     return NULL;
+  }
+  
+  int GetBucketCount() const {
+    return Buckets;
+  }
+  
+  ansa::LinkedList<T> & GetBucket(int idx) {
+    assert(idx >= 0 && idx < Buckets);
+    return buckets[idx];
   }
   
 private:
