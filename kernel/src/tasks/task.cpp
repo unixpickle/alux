@@ -5,6 +5,7 @@
 namespace Alux {
 
 bool Task::Retain() {
+  anarch::ScopedCritical critical;
   anarch::ScopedLock scope(lifeLock);
   if (killed && !holdCount) return false;
   ++retainCount;
@@ -12,6 +13,7 @@ bool Task::Retain() {
 }
 
 void Task::Release() {
+  anarch::ScopedCritical critical;
   anarch::ScopedLock scope(lifeLock);
   --retainCount;
   if (!retainCount && !holdCount && killed) {
@@ -20,6 +22,7 @@ void Task::Release() {
 }
 
 bool Task::Hold() {
+  anarch::ScopedCritical critical;
   anarch::ScopedLock scope(lifeLock);
   if (killed) return false;
   ++holdCount;
@@ -27,6 +30,7 @@ bool Task::Hold() {
 }
 
 void Task::Unhold() {
+  anarch::ScopedCritical critical;
   anarch::ScopedLock scope(lifeLock);
   --holdCount;
   if (!retainCount && !holdCount && killed) {
@@ -35,6 +39,7 @@ void Task::Unhold() {
 }
 
 void Task::Kill(uint16_t status) {
+  anarch::ScopedCritical critical;
   anarch::ScopedLock scope(lifeLock);
   if (killed) return;
   killStatus = status;

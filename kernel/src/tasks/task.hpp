@@ -12,8 +12,11 @@ class Scheduler;
 
 class Task : public GarbageObject {
 public:
+  // both @ambicritical
   virtual anarch::MemoryMap & GetMemoryMap() const = 0;
   virtual bool IsUserTask() const = 0;
+  
+  // all @ambicritical
   bool Retain();
   void Release();
   bool Hold();
@@ -21,11 +24,10 @@ public:
   void Kill(uint16_t status);
   Scheduler & GetScheduler() const;
   Identifier GetIdentifier() const;
-  
   IdMap<Thread> & GetThreads();
   
 protected:
-  Task(Scheduler &);
+  Task(Scheduler &); // @ambicritical
   virtual bool Init(); // @noncritical
   virtual void Deinit(); // @noncritical
   
