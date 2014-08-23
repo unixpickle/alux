@@ -1,7 +1,11 @@
 #ifndef __ALUX_EXECUTABLE_MAP_HPP__
 #define __ALUX_EXECUTABLE_MAP_HPP__
 
+#include <anarch/api/user-map>
+
 namespace Alux {
+
+class Executable;
 
 class ExecutableMap {
 public:
