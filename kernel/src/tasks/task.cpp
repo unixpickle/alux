@@ -78,6 +78,7 @@ void Task::Deinit() {
     for (auto iter = bucket.GetStart(); iter != bucket.GetEnd(); ++iter) {
       Thread & th = *iter;
       scheduler.Remove(th);
+      th.Dealloc();
     }
   }
 }
