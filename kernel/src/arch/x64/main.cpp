@@ -54,7 +54,7 @@ void AluxMainX64(void * mbootPtr) {
 void MyCoolPrintMethod() {
   auto & scheduler = Alux::Thread::GetCurrent()->GetTask().GetScheduler();
   auto & clock = anarch::ClockModule::GetGlobal().GetClock();
-  uint64_t delay = clock.GetMicrosPerTick().Flip().ScaleInteger(500000);
+  uint64_t delay = clock.GetMicrosPerTick().Flip().ScaleInteger(1000000);
   while (1) {
     anarch::cout << "my cool print method!" << anarch::endl;
     uint64_t next = clock.GetTicks() + delay;
