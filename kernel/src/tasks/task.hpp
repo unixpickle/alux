@@ -34,9 +34,6 @@ protected:
   friend class IdMap<Task>;
   ansa::LinkedList<Task>::Link idMapLink;
   
-  friend class Scheduler;
-  void * schedulerUserInfo;
-  
 private:
   Scheduler & scheduler;
   Identifier identifier;

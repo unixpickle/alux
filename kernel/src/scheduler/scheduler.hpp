@@ -73,10 +73,17 @@ public:
   virtual void Yield() = 0;
   
   /**
+   * Call this ONCE to start the scheduler. The scheduler is responsible for
+   * waking up other CPUs and performing context switches from here on out.
+   * @ambicritical
+   */
+  virtual void Run() = 0;
+  
+  /**
    * Return the garbage collector for this scheduler.
    * @ambicritical
    */
-  virtual GarbageCollector & GetGarbageCollector() const = 0;
+  virtual GarbageCollector & GetGarbageCollector() = 0;
   
   IdMap<Task> & GetTaskIdMap();
   
@@ -107,7 +114,7 @@ protected:
    */
   virtual void ClearGarbageTimeout() = 0;
   
-  inline void *& ThreadUserInfo(Thread & th) {
+  inline static void *& ThreadUserInfo(Thread & th) {
     return th.schedulerUserInfo;
   }
   

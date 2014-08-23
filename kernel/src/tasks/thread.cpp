@@ -98,6 +98,7 @@ bool Thread::Init() {
 void Thread::Deinit() {
   if (killed) {
     GetTask().GetThreads().Remove(*this);
+    GetTask().GetScheduler().Remove(*this);
     GetTask().Release();
   }
 }

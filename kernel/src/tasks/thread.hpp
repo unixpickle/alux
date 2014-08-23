@@ -40,6 +40,9 @@ protected:
   friend class IdMap<Thread>;
   ansa::LinkedList<Thread>::Link idMapLink;
   
+  friend class Scheduler;
+  void * schedulerUserInfo;
+  
 private:
   Thread(Task &, anarch::State &);
   bool Init();

@@ -2,6 +2,7 @@
 #define __ALUX_RR_SCHEDULER_HPP__
 
 #include "scheduler.hpp"
+#include <ansa/atomic>
 
 namespace Alux {
 
@@ -11,6 +12,8 @@ namespace Alux {
  */
 class RRScheduler : public Scheduler {
 public:
+  static const uint64_t JiffyUs = 50000;
+  
   RRScheduler(); // @noncritical
   
   virtual void Add(Thread &);
@@ -24,7 +27,12 @@ public:
   virtual void ClearTimeout(Thread &);
   virtual void Yield();
   
-  virtual GarbageCollector & GetGarbageCollector() const;
+  virtual GarbageCollector & GetGarbageCollector();
+  virtual void Run();
+  
+protected:
+  virtual void SetGarbageTimeout();
+  virtual void ClearGarbageTimeout();
   
 private:
   struct ThreadObj {
@@ -32,9 +40,21 @@ private:
     
     ansa::LinkedList<ThreadObj>::Link link;
     Thread & thread;
+    ansa::Atomic<uint64_t> deadline;
+    bool running = false;
   };
   
+  anarch::CriticalLock lock;
   ansa::LinkedList<ThreadObj> threads;
+  
+  GarbageCollector collector;
+  
+  void Switch(); // @critical
+  void ResignCurrent(); // @critical, unsynchronized
+  
+  static void CallSwitch(void * scheduler);
+  static void SuspendAndSwitch(void * scheduler);
+  static void RunSyncAndSwitch(void * scheduler);
 };
 
 }
