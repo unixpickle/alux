@@ -91,8 +91,7 @@ protected:
   friend class GarbageCollector;
   
   /**
-   * Set an infinite timeout on the garbage thread. This is automatically
-   * atomic with the [ClearGarbageTimeout] method.
+   * Set an infinite timeout on the garbage thread.
    *
    * This may be called from the garbage collector's internals. Thus, nothing
    * should be retained or released in this method so that the garbage thread
@@ -100,11 +99,10 @@ protected:
    *
    * @ambicritical
    */
-  virtual void SetGarbageTimeout() = 0;
+  virtual void SetGarbageTimeout(ansa::Lock & unlock) = 0;
   
   /**
-   * Clear the timeout on the garbage thread. This is automatically atomic with
-   * the [SetGarbageTimeout] method.
+   * Clear the timeout on the garbage thread.
    *
    * This may be called any time you release or unhold a [GarbageObject]. Thus,
    * your scheduler should take care not to seize any locks in here that it

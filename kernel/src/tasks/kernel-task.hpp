@@ -16,7 +16,7 @@ public:
    *
    * @noncritical
    */
-  KernelTask * New(Scheduler &);
+  static KernelTask * New(Scheduler &);
   
   /**
    * Returns the global memory map.

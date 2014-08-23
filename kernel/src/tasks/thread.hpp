@@ -24,7 +24,7 @@ public:
    * to its owning task and scheduled on the task's scheduler.
    * @noncritical
    */
-  Thread * New(Task &, anarch::State &);
+  static Thread * New(Task &, anarch::State &);
   
   Task & GetTask() const; // @ambicritical
   anarch::State & GetState() const; // @ambicritical

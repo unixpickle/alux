@@ -13,11 +13,12 @@ void GarbageCollector::Main() {
     anarch::SetCritical(true);
     objectsLock.Seize();
     GarbageObject * obj = objects.Shift();
-    objectsLock.Release();
-    anarch::SetCritical(false);
     if (!obj) {
-      scheduler.SetGarbageTimeout();
+      scheduler.SetGarbageTimeout(objectsLock);
+      anarch::SetCritical(false);
     } else {
+      objectsLock.Release();
+      anarch::SetCritical(false);
       obj->Dealloc();
     }
   }
@@ -27,8 +28,8 @@ void GarbageCollector::Add(GarbageObject & obj) {
   anarch::ScopedCritical critical;
   objectsLock.Seize();
   objects.Add(&obj.garbageLink);
-  objectsLock.Release();
   scheduler.ClearGarbageTimeout();
+  objectsLock.Release();
 }
 
 }

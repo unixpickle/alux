@@ -2,6 +2,7 @@
 #define __ALUX_RR_SCHEDULER_HPP__
 
 #include "scheduler.hpp"
+#include "../tasks/kernel-task.hpp"
 #include <ansa/atomic>
 
 namespace Alux {
@@ -31,7 +32,7 @@ public:
   virtual void Run();
   
 protected:
-  virtual void SetGarbageTimeout();
+  virtual void SetGarbageTimeout(ansa::Lock & unlock);
   virtual void ClearGarbageTimeout();
   
 private:
@@ -48,6 +49,8 @@ private:
   ansa::LinkedList<ThreadObj> threads;
   
   GarbageCollector collector;
+  KernelTask * collectorTask;
+  Thread * collectorThread;
   
   void Switch(); // @critical
   void ResignCurrent(); // @critical, unsynchronized
@@ -55,6 +58,8 @@ private:
   static void CallSwitch(void * scheduler);
   static void SuspendAndSwitch(void * scheduler);
   static void RunSyncAndSwitch(void * scheduler);
+  
+  static void RunGarbageThread(void * garbage);
 };
 
 }

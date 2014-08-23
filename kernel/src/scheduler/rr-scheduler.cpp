@@ -11,14 +11,24 @@
 namespace Alux {
 
 RRScheduler::RRScheduler() : collector(*this) {
-  // TODO: here, create the garbage thread and the garbage task
+  collectorTask = KernelTask::New(*this);
+  if (!collectorTask) {
+    anarch::Panic("RRScheduler() - failed to allocate collector task");
+  }
+  anarch::State & state = anarch::State::NewKernel(RunGarbageThread,
+                                                   (void *)&collector);
+  collectorThread = Thread::New(*collectorTask, state);
+  if (!collectorThread) {
+    anarch::Panic("RRScheduler() - failed to allocate collector thread");
+  }
+  Add(*collectorThread);
+  collectorThread->Release();
+  collectorTask->Unhold();
 }
 
 void RRScheduler::Add(Thread & t) {
   ThreadObj * obj = new ThreadObj(t);
-  if (!obj) {
-    anarch::Panic("RRScheduler::Add() - failed to allocate ThreadObj");
-  }
+  assert(obj != NULL);
   ThreadUserInfo(t) = (void *)obj;
   
   anarch::ScopedCritical critical;
@@ -93,12 +103,13 @@ void RRScheduler::Run() {
   Switch();
 }
 
-void RRScheduler::SetGarbageTimeout() {
-  // TODO: have a garbage thread instance variable and use it here
+void RRScheduler::SetGarbageTimeout(ansa::Lock & unlock) {
+  assert(Thread::GetCurrent() == collectorThread);
+  SetInfiniteTimeout(unlock);
 }
 
 void RRScheduler::ClearGarbageTimeout() {
-  // TODO: have a garbage thread instance variable and use it here
+  ClearTimeout(*collectorThread);
 }
 
 void RRScheduler::Switch() {
@@ -168,6 +179,10 @@ void RRScheduler::SuspendAndSwitch(void * scheduler) {
 
 void RRScheduler::RunSyncAndSwitch(void * scheduler) {
   anarch::Thread::RunSync(CallSwitch, scheduler);
+}
+
+void RRScheduler::RunGarbageThread(void * garbage) {
+  ((GarbageCollector *)garbage)->Main();
 }
 
 }
