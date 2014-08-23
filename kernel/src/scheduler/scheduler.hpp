@@ -107,6 +107,10 @@ protected:
    */
   virtual void ClearGarbageTimeout() = 0;
   
+  inline void *& ThreadUserInfo(Thread & th) {
+    return th.schedulerUserInfo;
+  }
+  
 private:
   IdMap<Task> taskIdMap;
 };
