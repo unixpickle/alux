@@ -21,7 +21,6 @@ RRScheduler::RRScheduler() : collector(*this) {
   if (!collectorThread) {
     anarch::Panic("RRScheduler() - failed to allocate collector thread");
   }
-  Add(*collectorThread);
   collectorThread->Release();
   collectorTask->Unhold();
 }

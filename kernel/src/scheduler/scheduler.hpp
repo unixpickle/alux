@@ -94,8 +94,8 @@ protected:
    * Set an infinite timeout on the garbage thread.
    *
    * This may be called from the garbage collector's internals. Thus, nothing
-   * should be retained or released in this method so that the garbage thread
-   * doesn't deadlock.
+   * should be retained or released in this method until [unlock] is unlocked
+   * to prevent deadlock.
    *
    * @ambicritical
    */
