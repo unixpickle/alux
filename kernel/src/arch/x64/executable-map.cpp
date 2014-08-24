@@ -31,7 +31,9 @@ bool ExecutableMap::HandlePageFault(VirtAddr addr, bool write) {
     return false;
   }
 
-  Sector & sector = sectors[(addr - StartAddr) / 0x200000];
+  int idx = (int)((addr - StartAddr) / 0x200000);
+  assert(idx >= 0 && idx < sectorCount);
+  Sector & sector = sectors[idx];
   addr &= ~(PhysAddr)0xfff; // page align it
   if (write) {
     HandleWriteFault(sector, addr);
@@ -55,8 +57,8 @@ ExecutableMap::ExecutableMap(Executable & e, anarch::UserMap & m)
   sectors = new Sector[sectorCount];
   assert(sectors != NULL);
   for (int i = 0; i < sectorCount; ++i) {
-    PhysSize offset = (PhysSize)i * 0x200000;
-    sectors[i].virtualAddr = (VirtAddr)offset;
+    size_t offset = (size_t)i * 0x200000;
+    sectors[i].virtualAddr = StartAddr + offset;
     sectors[i].readOnlyAddr = executable.GetMemory() + offset;
   }
   
@@ -100,7 +102,7 @@ void ExecutableMap::HandleWriteFault(Sector & sector, VirtAddr pageAddr) {
 void ExecutableMap::MapROLargePage(Sector & sector) {
   anarch::UserMap::Attributes attrs;
   attrs.writable = false;
-
+  
   GetMap().MapAt(sector.virtualAddr, sector.readOnlyAddr,
                  anarch::UserMap::Size(0x200000, 1), attrs);
   

@@ -29,7 +29,7 @@ if kernelSize isnt kernelImage.length
   kernelImage = kernelImage.slice 0, kernelSize
 
 kernelImage.writeUInt32LE programImage.length, 0x24
-kernelImage = Buffer.concat kernelImage, prorgamImage
+kernelImage = Buffer.concat [kernelImage, programImage]
 fs.writeFileSync mainBin, kernelImage
 
 console.log "Final image is #{kernelImage.length} bytes"
