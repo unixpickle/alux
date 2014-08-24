@@ -50,6 +50,8 @@ void ExecutableMap::Delete() {
 ExecutableMap::ExecutableMap(Executable & e, anarch::UserMap & m)
   : Alux::ExecutableMap(m), executable(e) {
   sectorCount = executable.GetLength() / 0x200000;
+  if (!sectorCount) return;
+  
   sectors = new Sector[sectorCount];
   assert(sectors != NULL);
   for (int i = 0; i < sectorCount; ++i) {

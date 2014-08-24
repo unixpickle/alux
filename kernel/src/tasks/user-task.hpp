@@ -17,7 +17,12 @@ public:
    *
    * @noncritical
    */
-  UserTask * New(Executable &, anarch::UserMap &, Scheduler &);
+  static UserTask * New(Executable &, anarch::UserMap &, Scheduler &);
+  
+  /**
+   * Returns the executable map for this task.
+   */
+  ExecutableMap & GetExecutableMap();
   
   /**
    * Returns the task's memory map.

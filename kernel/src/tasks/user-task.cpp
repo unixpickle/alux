@@ -14,6 +14,10 @@ UserTask * UserTask::New(Executable & e, anarch::UserMap & m, Scheduler & s) {
   return res;
 }
 
+ExecutableMap & UserTask::GetExecutableMap() {
+  return executableMap;
+}
+
 anarch::UserMap & UserTask::GetMemoryMap() const {
   return memoryMap;
 }

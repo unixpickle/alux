@@ -1,5 +1,7 @@
 #include "main.hpp"
+#include "executable.hpp"
 #include "program-image.hpp"
+#include "../../tasks/user-task.hpp"
 #include "../../syscall/handler.hpp"
 #include "../../memory/page-fault.hpp"
 #include "../../scheduler/rr-scheduler.hpp"
@@ -45,17 +47,26 @@ void AluxMainX64(void * mbootPtr) {
   anarch::ClockModule::GetGlobal().Load();
   anarch::SyscallModule::GetGlobal().Load();
   
+  // set up our syscall handler
   anarch::SyscallModule::GetGlobal().SetHandler(Alux::StandardSyscallHandler);
   
   anarch::cout << "finished loading anarch modules!" << anarch::endl;
   
   Alux::RRScheduler scheduler;
   
-  Alux::KernelTask * task = Alux::KernelTask::New(scheduler);
+  // create user task
+  anarch::UserMap & map = anarch::UserMap::New();
+  Alux::x64::Executable exec(image.GetProgramStart(), image.GetProgramSize());
+  Alux::UserTask * task = Alux::UserTask::New(exec, map, scheduler);
   assert(task != NULL);
-  anarch::State & state = anarch::State::NewKernel(MyCoolPrintMethod);
+  
+  // create user thread
+  void * entry = task->GetExecutableMap().GetEntryPoint();
+  anarch::State & state = anarch::State::NewUser((void (*)())entry);
   Alux::Thread * thread = Alux::Thread::New(*task, state);
   assert(thread != NULL);
+  
+  // release user task data
   thread->Release();
   task->Unhold();
   

@@ -14,7 +14,7 @@ public:
    * Create an executable with a 2MB aligned region of memory. The length of
    * the memory and the address of the memory must BOTH be 2MB aligned.
    */
-  Executable(PhysAddr memory, PhysSize length);
+  Executable(PhysAddr memory, size_t length);
   
   /**
    * Create a new executable map that will copy code from this region.
@@ -29,13 +29,13 @@ public:
     return (const char *)memory;
   }
   
-  inline PhysSize GetLength() const {
+  inline size_t GetLength() const {
     return length;
   }
   
 private:
   PhysAddr memory;
-  PhysSize length;
+  size_t length;
 };
 
 }

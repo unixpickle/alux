@@ -5,7 +5,7 @@ namespace Alux {
 
 namespace x64 {
 
-Executable::Executable(PhysAddr m, PhysSize l) : memory(m), length(l) {
+Executable::Executable(PhysAddr m, size_t l) : memory(m), length(l) {
   assert(l % 0x200000 == 0);
   assert(m % 0x200000 == 0);
 }
