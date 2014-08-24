@@ -1,5 +1,6 @@
 #include "main.hpp"
 #include "program-image.hpp"
+#include "../../syscall/handler.hpp"
 #include "../../memory/page-fault.hpp"
 #include "../../scheduler/rr-scheduler.hpp"
 #include <anarch/x64/multiboot-region-list>
@@ -42,6 +43,9 @@ void AluxMainX64(void * mbootPtr) {
   // load the modules we use
   anarch::DomainList::GetGlobal().Load();
   anarch::ClockModule::GetGlobal().Load();
+  anarch::SyscallModule::GetGlobal().Load();
+  
+  anarch::SyscallModule::GetGlobal().SetHandler(Alux::StandardSyscallHandler);
   
   anarch::cout << "finished loading anarch modules!" << anarch::endl;
   

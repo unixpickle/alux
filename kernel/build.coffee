@@ -5,6 +5,7 @@ mainSources = [
   'src/compiler'
   'src/memory'
   'src/tasks'
+  'src/syscall'
   'src/scheduler'
   'src/identifiers'
 ]
