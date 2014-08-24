@@ -10,6 +10,7 @@
 namespace Alux {
 
 class Task;
+class HoldScope;
 
 class Thread : public GarbageObject {
 public:
@@ -31,6 +32,7 @@ public:
   
   bool Retain(); // @ambicritical
   void Release(); // @ambicritical
+  void Kill(); // @ambicritical
   
   Identifier GetIdentifier() const; // @ambicritical
   
@@ -42,6 +44,9 @@ protected:
   
   friend class Scheduler;
   void * schedulerUserInfo;
+  
+  friend class HoldScope;
+  bool holdingTask = false;
   
 private:
   Thread(Task &, anarch::State &);

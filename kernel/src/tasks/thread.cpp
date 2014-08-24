@@ -72,6 +72,12 @@ void Thread::Release() {
   }
 }
 
+void Thread::Kill() {
+  anarch::ScopedCritical critical;
+  anarch::ScopedLock scope(lifeLock);
+  killed = true;
+}
+
 Identifier Thread::GetIdentifier() const {
   return identifier;
 }
