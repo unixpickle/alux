@@ -6,28 +6,24 @@ Alux is a small Hobby Operating System. The purpose of this project is to create
 
 I will attempt to do all of the following:
 
- * Provide a minimal, lightweight kernel API
+ * Provide a minimal, lightweight kernel API for IPC, basic memory management, task scheduling and time management.
  * Provide a thin layer of security specific to the CPU architecture
- * Allow user-space tasks to manage the memory and resources of other user-space tasks with almost no exceptions
+ * Allow user-space tasks to manage the resources of other user-space tasks with almost no exceptions
 
 As an end result, I hope to be able to create a distribution of Alux that runs the Dart VM. This distribution will ship with a set of drivers and programs written entirely in Dart. The distribution *may* include some sort of user-space ELF loader for native plugins.
 
+Additionally, I plan to spin off a version of Alux that runs the V8 JavaScript engine. Ideally, if [Runtime.JS](https://github.com/runtimejs/runtime) ends up with a strong JavaScript API, I will implement that as part of Alux.js.
+
 ## TODO
 
-I have moved architecture-specific code to [anarch](http://github.com/unixpickle/anarch). I am now in the process of implementing a scheduler that sits on top of anarch and performs all of the tasks of the old scheduler:
+I am now in the process of making a simple "Hello world" user-space program execute:
 
- * Create a fundamental `Object` base class
- * Create a `TidList` hash-map class for task ID's
- * Create a `Scheduler` abstract class
- * Create a `GarbageCollector` which collects `GarbageObject`s.
-   * The garbage collection mechanism will be inextricably linked with the scheduler
-   * A garbage collector accesses protected methods in the `Scheduler` via friend-classing so that no deadlocks occur
- * Create a `Task` abstract class and a `Thread` class
- * Create `KernelTask` and `UserTask` classes
- * Extract the program image from the kernel file in startup
- * Launch a garbage thread and a 
+ * Create a `UserTask` classes
+ * Create a `ProgramImage` class that I initialize at boot
+ * Hook up a system call handler that prints "Hello world"
+ * Launch a `UserTask` that runs the system call (i.e. a test *libalux* app)
 
-After all that, I will implement system calls and corresponding user-space tests. These system calls will provide the following facilities:
+After all that, I will implement system calls. These system calls will provide the following facilities:
 
    * Threading, mutexes, semaphores
    * Memory management
@@ -37,7 +33,13 @@ After all that, I will implement system calls and corresponding user-space tests
    * Static variables
    * NX regions of memory
 
-Finally, I plan to work on an IPC mechanism. I still have no idea what I will do for this, so I won't even attempt to make a TODO list for it.
+As I implement these system calls, I will create appropriate bindings for [libalux](http://github.com/unixpickle/libalux).
+
+Finally, I plan to work on an IPC mechanism. I still haven't a clue how this will work, but here's the general features it will have:
+
+ * The ability to connect to a task by specifying its PID
+ * A means by which to transfer information between the kernel and a driver
+ * A shared-memory facility for very efficient inter-process sockets
 
 ## License
 
