@@ -11,7 +11,7 @@ Executable::Executable(PhysAddr m, PhysSize l) : memory(m), length(l) {
 }
 
 ExecutableMap & Executable::GenerateMap(anarch::UserMap & m) {
-  return *ExecutableMap::New(*this, m);
+  return ExecutableMap::New(*this, m);
 }
 
 }

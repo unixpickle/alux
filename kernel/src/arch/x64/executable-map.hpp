@@ -14,7 +14,7 @@ class ExecutableMap : public Alux::ExecutableMap {
 public:
   static const VirtAddr StartAddr = 0x8000000000UL;
   
-  static ExecutableMap * New(Executable &, anarch::UserMap &);
+  static ExecutableMap & New(Executable &, anarch::UserMap &);
   
   virtual Alux::Executable & GetExecutable();
   virtual void * GetEntryPoint();

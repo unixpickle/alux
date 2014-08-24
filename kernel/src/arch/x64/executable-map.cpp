@@ -9,8 +9,10 @@ namespace Alux {
 
 namespace x64 {
 
-ExecutableMap * ExecutableMap::New(Executable & e, anarch::UserMap & m) {
-  return new ExecutableMap(e, m);
+ExecutableMap & ExecutableMap::New(Executable & e, anarch::UserMap & m) {
+  ExecutableMap * res = new ExecutableMap(e, m);
+  assert(res != NULL);
+  return *res;
 }
 
 Alux::Executable & ExecutableMap::GetExecutable() {
