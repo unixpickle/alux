@@ -1,4 +1,5 @@
 #include "main.hpp"
+#include "program-image.hpp"
 #include "../../memory/page-fault.hpp"
 #include "../../scheduler/rr-scheduler.hpp"
 #include <anarch/x64/multiboot-region-list>
@@ -27,8 +28,14 @@ void AluxMainX64(void * mbootPtr) {
   // this stack is going to be preserved throughout the runtime of the OS, so
   // it is acceptable to store the boot info here
   
+  Alux::x64::ProgramImage image;
+  
+  anarch::cout << "kernelEnd=" << image.GetKernelEnd() << " programStart="
+    << image.GetProgramStart() << " programEnd=" << image.GetProgramEnd()
+    << anarch::endl;
+  
   anarch::x64::MultibootRegionList regions(mbootPtr);
-  anarch::x64::BootInfo bootInfo(regions, 0x300000);
+  anarch::x64::BootInfo bootInfo(regions, image.GetProgramEnd());
   
   anarch::x64::SetBootInfo(&bootInfo);
   

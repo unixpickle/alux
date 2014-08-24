@@ -19,7 +19,6 @@ Additionally, I plan to spin off a version of Alux that runs the V8 JavaScript e
 I am now in the process of making a simple "Hello world" user-space program execute:
 
  * Create a `UserTask` classes
- * Create a `ProgramImage` class that I initialize at boot
  * Hook up a system call handler that prints "Hello world"
  * Launch a `UserTask` that runs the system call (i.e. a test *libalux* app)
 
