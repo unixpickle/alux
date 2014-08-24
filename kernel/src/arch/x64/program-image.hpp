@@ -1,6 +1,7 @@
 #ifndef __ALUX_X64_PROGRAM_IMAGE_HPP__
 #define __ALUX_X64_PROGRAM_IMAGE_HPP__
 
+#include <anarch/stddef>
 #include <anarch/types>
 
 namespace Alux {
@@ -19,7 +20,7 @@ public:
     return programStart;
   }
   
-  inline PhysSize GetProgramSize() const {
+  inline size_t GetProgramSize() const {
     return programSize;
   }
   
@@ -30,7 +31,7 @@ public:
 private:
   PhysAddr kernelEnd;
   PhysAddr programStart;
-  PhysSize programSize;
+  size_t programSize;
 };
 
 }
