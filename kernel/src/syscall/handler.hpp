@@ -5,7 +5,7 @@
 
 namespace Alux {
 
-void StandardSyscallHandler(uint16_t number, anarch::SyscallArgs & args);
+anarch::SyscallRet SyscallHandler(uint16_t number, anarch::SyscallArgs & args);
 
 }
 

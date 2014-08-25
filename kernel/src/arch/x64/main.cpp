@@ -48,7 +48,7 @@ void AluxMainX64(void * mbootPtr) {
   anarch::SyscallModule::GetGlobal().Load();
   
   // set up our syscall handler
-  anarch::SyscallModule::GetGlobal().SetHandler(Alux::StandardSyscallHandler);
+  anarch::SyscallModule::GetGlobal().SetHandler(Alux::SyscallHandler);
   
   anarch::cout << "finished loading anarch modules!" << anarch::endl;
   

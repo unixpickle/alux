@@ -5,7 +5,8 @@
 
 namespace Alux {
 
-void StandardSyscallHandler(uint16_t number, anarch::SyscallArgs & args) {
+anarch::SyscallRet SyscallHandler(uint16_t number,
+                                  anarch::SyscallArgs & args) {
   AssertCritical();
   switch (number) {
     case 0:
@@ -16,6 +17,7 @@ void StandardSyscallHandler(uint16_t number, anarch::SyscallArgs & args) {
         << anarch::endl;
       break;
   }
+  return anarch::SyscallRet();
 }
 
 }
