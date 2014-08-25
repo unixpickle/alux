@@ -12,7 +12,6 @@ void HandlePageFault(VirtAddr addr, bool write) {
   if (scope.GetTask().IsUserTask()) {
     UserTask & task = static_cast<UserTask &>(scope.GetTask());
     if (task.GetExecutableMap().HandlePageFault(addr, write)) {
-      anarch::cout << "handled page fault" << anarch::endl;
       return;
     }
   }
