@@ -1,5 +1,6 @@
 #include "handler.hpp"
 #include "console.hpp"
+#include "task.hpp"
 #include <anarch/stream>
 #include <anarch/critical>
 
@@ -11,6 +12,9 @@ anarch::SyscallRet SyscallHandler(uint16_t number,
   switch (number) {
     case 0:
       PrintSyscall(args);
+      break;
+    case 1:
+      ExitSyscall(args);
       break;
     default:
       anarch::cerr << "unknown StandardSyscallHandler(" << number << ", ...)"
