@@ -16,4 +16,10 @@ anarch::SyscallRet GetPidSyscall() {
   return anarch::SyscallRet::Integer32((uint32_t)t.GetIdentifier());
 }
 
+anarch::SyscallRet GetUidSyscall() {
+  AssertCritical();
+  Task & t = Thread::GetCurrent()->GetTask();
+  return anarch::SyscallRet::Integer32((uint32_t)t.GetUserIdentifier());
+}
+
 }

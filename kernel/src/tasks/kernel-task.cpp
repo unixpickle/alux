@@ -28,7 +28,7 @@ void KernelTask::Dealloc() {
   delete this;
 }
 
-KernelTask::KernelTask(Scheduler & s) : Task(s) {
+KernelTask::KernelTask(Scheduler & s) : Task(0, s) {
 }
 
 }

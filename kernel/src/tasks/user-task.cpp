@@ -3,9 +3,10 @@
 
 namespace Alux {
 
-UserTask * UserTask::New(Executable & e, anarch::UserMap & m, Scheduler & s) {
+UserTask * UserTask::New(Executable & e, anarch::UserMap & m, Identifier i, 
+                         Scheduler & s) {
   AssertNoncritical();
-  UserTask * res = new UserTask(e, m, s);
+  UserTask * res = new UserTask(e, m, i, s);
   if (!res) return NULL;
   if (!res->Init()) {
     delete res;
@@ -32,8 +33,9 @@ void UserTask::Dealloc() {
   delete this;
 }
 
-UserTask::UserTask(Executable & e, anarch::UserMap & m, Scheduler & s)
-  : Task(s), memoryMap(m), executableMap(e.GenerateMap(m)) {
+UserTask::UserTask(Executable & e, anarch::UserMap & m, Identifier i, 
+                   Scheduler & s)
+  : Task(i, s), memoryMap(m), executableMap(e.GenerateMap(m)) {
 }
 
 UserTask::~UserTask() {

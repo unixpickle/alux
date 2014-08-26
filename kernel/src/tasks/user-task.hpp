@@ -17,7 +17,8 @@ public:
    *
    * @noncritical
    */
-  static UserTask * New(Executable &, anarch::UserMap &, Scheduler &);
+  static UserTask * New(Executable &, anarch::UserMap &, Identifier,
+                        Scheduler &);
   
   /**
    * Returns the executable map for this task.
@@ -44,7 +45,7 @@ public:
   virtual void Dealloc();
   
 private:
-  UserTask(Executable &, anarch::UserMap &, Scheduler &);
+  UserTask(Executable &, anarch::UserMap &, Identifier, Scheduler &);
   virtual ~UserTask();
   
   anarch::UserMap & memoryMap;

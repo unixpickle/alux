@@ -24,10 +24,11 @@ public:
   void Kill(uint16_t status);
   Scheduler & GetScheduler() const;
   Identifier GetIdentifier() const;
+  Identifier GetUserIdentifier() const;
   IdMap<Thread> & GetThreads();
   
 protected:
-  Task(Scheduler &); // @ambicritical
+  Task(Identifier uid, Scheduler &); // @ambicritical
   virtual bool Init(); // @noncritical
   virtual void Deinit(); // @noncritical
   
@@ -35,6 +36,8 @@ protected:
   ansa::LinkedList<Task>::Link idMapLink;
   
 private:
+  Identifier uid;
+  
   Scheduler & scheduler;
   Identifier identifier;
   IdMap<Thread> threads;

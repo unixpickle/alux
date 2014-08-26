@@ -54,13 +54,17 @@ Identifier Task::GetIdentifier() const {
   return identifier;
 }
 
+Identifier Task::GetUserIdentifier() const {
+  return uid;
+}
+
 IdMap<Thread> & Task::GetThreads() {
   return threads;
 }
 
-Task::Task(Scheduler & s)
-  : GarbageObject(s.GetGarbageCollector()), idMapLink(*this), scheduler(s),
-    threads(0x100) {
+Task::Task(Identifier u, Scheduler & s)
+  : GarbageObject(s.GetGarbageCollector()), idMapLink(*this), uid(u),
+    scheduler(s), threads(0x100) {
 }
 
 bool Task::Init() {

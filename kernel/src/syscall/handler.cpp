@@ -18,8 +18,10 @@ anarch::SyscallRet SyscallHandler(uint16_t number,
       break;
     case 2:
       return GetPidSyscall();
+    case 3:
+      return GetUidSyscall();
     default:
-      anarch::cerr << "unknown StandardSyscallHandler(" << number << ", ...)"
+      anarch::cerr << "unknown SyscallHandler(" << number << ", ...)"
         << anarch::endl;
       break;
   }

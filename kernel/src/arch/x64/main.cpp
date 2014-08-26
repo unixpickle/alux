@@ -57,7 +57,7 @@ void AluxMainX64(void * mbootPtr) {
   // create user task
   anarch::UserMap & map = anarch::UserMap::New();
   Alux::x64::Executable exec(image.GetProgramStart(), image.GetProgramSize());
-  Alux::UserTask * task = Alux::UserTask::New(exec, map, scheduler);
+  Alux::UserTask * task = Alux::UserTask::New(exec, map, 0, scheduler);
   assert(task != NULL);
   
   // create user thread
