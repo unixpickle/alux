@@ -1,6 +1,7 @@
 #include "handler.hpp"
 #include "console.hpp"
 #include "memory.hpp"
+#include "time.hpp"
 #include "task.hpp"
 #include <anarch/stream>
 #include <anarch/critical>
@@ -34,6 +35,8 @@ anarch::SyscallRet SyscallHandler(uint16_t number,
     case 9:
       FreeSyscall(args);
       break;
+    case 10:
+      return GetNanoTimeSyscall();
     default:
       anarch::cerr << "unknown SyscallHandler(" << number << ", ...)"
         << anarch::endl;
