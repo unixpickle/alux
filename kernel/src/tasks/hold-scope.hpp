@@ -1,7 +1,7 @@
 #ifndef __ALUX_HOLD_SCOPE_HPP__
 #define __ALUX_HOLD_SCOPE_HPP__
 
-#include "task.hpp"
+#include "user-task.hpp"
 
 namespace Alux {
 
@@ -32,6 +32,11 @@ public:
     return *thread;
   }
   
+  inline UserTask & GetUserTask() {
+    assert(GetTask().IsUserTask());
+    return static_cast<UserTask &>(GetTask());
+  }
+  
   /**
    * Exit the current thread and unhold the current task.
    * @ambicritical
@@ -42,7 +47,7 @@ public:
    * Exit the current task and unhold it.
    * @ambicritical
    */
-  void ExitTask(uint64_t status);
+  void ExitTask(uint16_t status);
   
 private:
   bool wasCritical;

@@ -40,7 +40,7 @@ void HoldScope::ExitThread() {
   task->GetScheduler().Yield();
 }
 
-void HoldScope::ExitTask(uint64_t status) {
+void HoldScope::ExitTask(uint16_t status) {
   // because we enter a critical section, the task cannot be deallocated or
   // fully released until we Yield()
   anarch::SetCritical(true);

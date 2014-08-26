@@ -12,6 +12,10 @@ class Scheduler;
 
 class Task : public GarbageObject {
 public:
+  static const uint16_t KillReasonNormal = 0;
+  static const uint16_t KillReasonAbort = 1;
+  static const uint16_t KillReasonPermissions = 2;
+  
   // both @ambicritical
   virtual anarch::MemoryMap & GetMemoryMap() const = 0;
   virtual bool IsUserTask() const = 0;

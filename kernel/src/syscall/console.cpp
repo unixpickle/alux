@@ -7,10 +7,9 @@ namespace Alux {
 
 void PrintSyscall(anarch::SyscallArgs & args) {
   HoldScope scope;
-  assert(scope.GetTask().IsUserTask());
   
   VirtAddr addr = args.PopVirtAddr();
-  UserTask & task = static_cast<UserTask &>(scope.GetTask());
+  UserTask & task = scope.GetUserTask();
   
   while (1) {
     char buffer[2] = {0, 0};

@@ -7,7 +7,7 @@ namespace Alux {
 void ExitSyscall(anarch::SyscallArgs & args) {
   bool aborted = args.PopBool();
   HoldScope scope;
-  scope.ExitTask(aborted ? 1 : 0);
+  scope.ExitTask(aborted ? Task::KillReasonAbort : Task::KillReasonNormal);
 }
 
 anarch::SyscallRet GetPidSyscall() {
