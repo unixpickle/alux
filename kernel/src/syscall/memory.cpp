@@ -106,8 +106,8 @@ SyscallRet VMReadSyscall(SyscallArgs & args) {
     return SyscallRet::Error(SyscallErrorNoMapping);
   }
   
-  map.CopyFromKernel(output1, &result1, sizeof(result1));
-  map.CopyFromKernel(output2, &result2, sizeof(result2));
+  if (output1) map.CopyFromKernel(output1, &result1, sizeof(result1));
+  if (output2) map.CopyFromKernel(output2, &result2, sizeof(result2));
   return SyscallRet::Integer(EncodeAttributes(attributes));
 }
 
