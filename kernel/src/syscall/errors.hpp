@@ -4,10 +4,11 @@
 namespace Alux {
 
 enum {
-  SyscallErrorIndex = 1,
-  SyscallErrorPermissions,
+  SyscallErrorPermissions = 1,
+  SyscallErrorIndex,
   SyscallErrorNoMemory,
-  SyscallErrorNoMapping
+  SyscallErrorNoMapping,
+  SyscallErrorNoVMSpace
 };
 
 }

@@ -41,13 +41,13 @@ public:
    * Exit the current thread and unhold the current task.
    * @ambicritical
    */
-  void ExitThread();
+  void ExitThread() ANSA_NORETURN;
   
   /**
    * Exit the current task and unhold it.
    * @ambicritical
    */
-  void ExitTask(uint16_t status);
+  void ExitTask(uint16_t status) ANSA_NORETURN;
   
 private:
   bool wasCritical;

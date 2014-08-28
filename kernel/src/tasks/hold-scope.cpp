@@ -38,15 +38,18 @@ void HoldScope::ExitThread() {
   thread->Kill();
   task->Unhold();
   task->GetScheduler().Yield();
+  __builtin_unreachable();
 }
 
 void HoldScope::ExitTask(uint16_t status) {
   // because we enter a critical section, the task cannot be deallocated or
   // fully released until we Yield()
   anarch::SetCritical(true);
+  thread->Kill();
   task->Kill(status);
   task->Unhold();
   task->GetScheduler().Yield();
+  __builtin_unreachable();
 }
 
 }
