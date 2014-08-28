@@ -4,6 +4,9 @@
 #include <anarch/api/user-map>
 #include <anarch/api/domain>
 
+using anarch::SyscallRet;
+using anarch::SyscallArgs;
+
 namespace Alux {
 
 namespace {
@@ -26,27 +29,27 @@ anarch::MemoryMap::Attributes DecodeAttributes(int arg) {
 
 }
 
-anarch::SyscallRet CountPageSizesSyscall() {
-  return anarch::SyscallRet::Integer(anarch::UserMap::GetPageSizeCount());
+SyscallRet CountPageSizesSyscall() {
+  return SyscallRet::Integer(anarch::UserMap::GetPageSizeCount());
 }
 
-anarch::SyscallRet GetPageSizeSyscall(anarch::SyscallArgs & args) {
+SyscallRet GetPageSizeSyscall(SyscallArgs & args) {
   int idx = args.PopInt();
   if (idx < 0 || idx >= anarch::UserMap::GetPageSizeCount()) {
-    return anarch::SyscallRet::Error(SyscallErrorIndex);
+    return SyscallRet::Error(SyscallErrorIndex);
   }
-  return anarch::SyscallRet::VirtSize(anarch::UserMap::GetPageSize(idx));
+  return SyscallRet::VirtSize(anarch::UserMap::GetPageSize(idx));
 }
 
-anarch::SyscallRet GetPageAlignSyscall(anarch::SyscallArgs & args) {
+SyscallRet GetPageAlignSyscall(SyscallArgs & args) {
   int idx = args.PopInt();
   if (idx < 0 || idx >= anarch::UserMap::GetPageSizeCount()) {
-    return anarch::SyscallRet::Error(SyscallErrorIndex);
+    return SyscallRet::Error(SyscallErrorIndex);
   }
-  return anarch::SyscallRet::VirtSize(anarch::UserMap::GetPageSizeAlign(idx));
+  return SyscallRet::VirtSize(anarch::UserMap::GetPageSizeAlign(idx));
 }
 
-anarch::SyscallRet GetVMCapabilitiesSyscall() {
+SyscallRet GetVMCapabilitiesSyscall() {
   anarch::UserMap::Capabilities caps = anarch::UserMap::GetCapabilities();
   int result = 0;
   if (caps.placementReserve) result |= 1;
@@ -54,13 +57,13 @@ anarch::SyscallRet GetVMCapabilitiesSyscall() {
   if (caps.executableFlag) result |= 4;
   if (caps.writableFlag) result |= 8;
   if (caps.cachableFlag) result |= 0x10;
-  return anarch::SyscallRet::Integer(result);
+  return SyscallRet::Integer(result);
 }
 
-anarch::SyscallRet AllocateSyscall(anarch::SyscallArgs & args) {
+SyscallRet AllocateSyscall(SyscallArgs & args) {
   HoldScope scope;
   if (scope.GetTask().GetUserIdentifier() != 0) {
-    return anarch::SyscallRet::Error(SyscallErrorPermissions);
+    return SyscallRet::Error(SyscallErrorPermissions);
   }
   
   PhysSize size = args.PopPhysSize();
@@ -68,25 +71,26 @@ anarch::SyscallRet AllocateSyscall(anarch::SyscallArgs & args) {
   
   PhysAddr result;
   if (!anarch::Domain::GetCurrent().AllocPhys(result, size, align)) {
-    return anarch::SyscallRet::Error(SyscallErrorNoMemory);
+    return SyscallRet::Error(SyscallErrorNoMemory);
   }
-  return anarch::SyscallRet::Phys(result);
+  return SyscallRet::Phys(result);
 }
 
-void FreeSyscall(anarch::SyscallArgs & args) {
+SyscallRet FreeSyscall(SyscallArgs & args) {
   HoldScope scope;
   if (scope.GetTask().GetUserIdentifier() != 0) {
-    scope.ExitTask(Task::KillReasonPermissions);
+    return SyscallRet::Error(SyscallErrorPermissions);
   }
 
   PhysAddr addr = args.PopPhysAddr();
   anarch::Domain::GetCurrent().FreePhys(addr);
+  return SyscallRet::Empty();
 }
 
-anarch::SyscallRet VMReadSyscall(anarch::SyscallArgs & args) {
+SyscallRet VMReadSyscall(SyscallArgs & args) {
   HoldScope scope;
   if (scope.GetTask().GetUserIdentifier() != 0) {
-    return anarch::SyscallRet::Error(SyscallErrorPermissions);
+    return SyscallRet::Error(SyscallErrorPermissions);
   }
   
   anarch::UserMap & map = scope.GetUserTask().GetMemoryMap();
@@ -99,18 +103,18 @@ anarch::SyscallRet VMReadSyscall(anarch::SyscallArgs & args) {
   size_t result2;
   
   if (!map.Read(&result1, &attributes, &result2, address)) {
-    return anarch::SyscallRet::Error(SyscallErrorNoMapping);
+    return SyscallRet::Error(SyscallErrorNoMapping);
   }
   
   map.CopyFromKernel(output1, &result1, sizeof(result1));
   map.CopyFromKernel(output2, &result2, sizeof(result2));
-  return anarch::SyscallRet::Integer(EncodeAttributes(attributes));
+  return SyscallRet::Integer(EncodeAttributes(attributes));
 }
 
-anarch::SyscallRet VMMapSyscall(anarch::SyscallArgs & args) {
+SyscallRet VMMapSyscall(SyscallArgs & args) {
   HoldScope scope;
   if (scope.GetTask().GetUserIdentifier() != 0) {
-    return anarch::SyscallRet::Error(SyscallErrorPermissions);
+    return SyscallRet::Error(SyscallErrorPermissions);
   }
   
   anarch::UserMap & map = scope.GetUserTask().GetMemoryMap();
@@ -124,15 +128,15 @@ anarch::SyscallRet VMMapSyscall(anarch::SyscallArgs & args) {
   
   VirtAddr result;
   if (!map.Map(result, phys, size, attrs)) {
-    return anarch::SyscallRet::Error(SyscallErrorNoVMSpace);
+    return SyscallRet::Error(SyscallErrorNoVMSpace);
   }
-  return anarch::SyscallRet::Virt(result);
+  return SyscallRet::Virt(result);
 }
 
-void VMMapAtSyscall(anarch::SyscallArgs & args) {
+SyscallRet VMMapAtSyscall(SyscallArgs & args) {
   HoldScope scope;
   if (scope.GetTask().GetUserIdentifier() != 0) {
-    scope.ExitTask(Task::KillReasonPermissions);
+    return SyscallRet::Error(SyscallErrorPermissions);
   }
   
   anarch::UserMap & map = scope.GetUserTask().GetMemoryMap();
@@ -146,12 +150,13 @@ void VMMapAtSyscall(anarch::SyscallArgs & args) {
   anarch::MemoryMap::Size size(pageSize, pageCount);
   
   map.MapAt(dest, phys, size, attrs);
+  return SyscallRet::Empty();
 }
 
-void VMUnmapSyscall(anarch::SyscallArgs & args) {
+SyscallRet VMUnmapSyscall(SyscallArgs & args) {
   HoldScope scope;
   if (scope.GetTask().GetUserIdentifier() != 0) {
-    scope.ExitTask(Task::KillReasonPermissions);
+    return SyscallRet::Error(SyscallErrorPermissions);
   }
   
   anarch::UserMap & map = scope.GetUserTask().GetMemoryMap();
@@ -159,12 +164,13 @@ void VMUnmapSyscall(anarch::SyscallArgs & args) {
   size_t pageSize = args.PopVirtSize();
   size_t pageCount = args.PopVirtSize();
   map.Unmap(addr, anarch::MemoryMap::Size(pageSize, pageCount));
+  return SyscallRet::Empty();
 }
 
-void VMUnmapAndReserveSyscall(anarch::SyscallArgs & args) {
+SyscallRet VMUnmapAndReserveSyscall(SyscallArgs & args) {
   HoldScope scope;
   if (scope.GetTask().GetUserIdentifier() != 0) {
-    scope.ExitTask(Task::KillReasonPermissions);
+    return SyscallRet::Error(SyscallErrorPermissions);
   }
   
   anarch::UserMap & map = scope.GetUserTask().GetMemoryMap();
@@ -172,12 +178,13 @@ void VMUnmapAndReserveSyscall(anarch::SyscallArgs & args) {
   size_t pageSize = args.PopVirtSize();
   size_t pageCount = args.PopVirtSize();
   map.UnmapAndReserve(addr, anarch::MemoryMap::Size(pageSize, pageCount));
+  return SyscallRet::Empty();
 }
 
-anarch::SyscallRet VMReserveSyscall(anarch::SyscallArgs & args) {
+SyscallRet VMReserveSyscall(SyscallArgs & args) {
   HoldScope scope;
   if (scope.GetTask().GetUserIdentifier() != 0) {
-    return anarch::SyscallRet::Error(SyscallErrorPermissions);
+    return SyscallRet::Error(SyscallErrorPermissions);
   }
   
   anarch::UserMap & map = scope.GetUserTask().GetMemoryMap();
@@ -186,15 +193,15 @@ anarch::SyscallRet VMReserveSyscall(anarch::SyscallArgs & args) {
   
   VirtAddr result;
   if (!map.Reserve(result, anarch::MemoryMap::Size(pageSize, pageCount))) {
-    return anarch::SyscallRet::Error(SyscallErrorNoVMSpace);
+    return SyscallRet::Error(SyscallErrorNoVMSpace);
   }
-  return anarch::SyscallRet::Virt(result);
+  return SyscallRet::Virt(result);
 }
 
-void VMReserveAtSyscall(anarch::SyscallArgs & args) {
+SyscallRet VMReserveAtSyscall(SyscallArgs & args) {
   HoldScope scope;
   if (scope.GetTask().GetUserIdentifier() != 0) {
-    scope.ExitTask(Task::KillReasonPermissions);
+    return SyscallRet::Error(SyscallErrorPermissions);
   }
   
   anarch::UserMap & map = scope.GetUserTask().GetMemoryMap();
@@ -203,12 +210,13 @@ void VMReserveAtSyscall(anarch::SyscallArgs & args) {
   size_t pageCount = args.PopVirtSize();
   
   map.ReserveAt(dest, anarch::MemoryMap::Size(pageSize, pageCount));
+  return SyscallRet::Empty();
 }
 
-void VMUnreserveSyscall(anarch::SyscallArgs & args) {
+SyscallRet VMUnreserveSyscall(SyscallArgs & args) {
   HoldScope scope;
   if (scope.GetTask().GetUserIdentifier() != 0) {
-    scope.ExitTask(Task::KillReasonPermissions);
+    return SyscallRet::Error(SyscallErrorPermissions);
   }
   
   anarch::UserMap & map = scope.GetUserTask().GetMemoryMap();
@@ -217,12 +225,13 @@ void VMUnreserveSyscall(anarch::SyscallArgs & args) {
   size_t pageCount = args.PopVirtSize();
   
   map.Unreserve(dest, anarch::MemoryMap::Size(pageSize, pageCount));
+  return SyscallRet::Empty();
 }
 
-void VMRereserveSyscall(anarch::SyscallArgs & args) {
+SyscallRet VMRereserveSyscall(SyscallArgs & args) {
   HoldScope scope;
   if (scope.GetTask().GetUserIdentifier() != 0) {
-    scope.ExitTask(Task::KillReasonPermissions);
+    return SyscallRet::Error(SyscallErrorPermissions);
   }
   
   anarch::UserMap & map = scope.GetUserTask().GetMemoryMap();
@@ -233,6 +242,7 @@ void VMRereserveSyscall(anarch::SyscallArgs & args) {
   
   map.Rereserve(dest, anarch::MemoryMap::Size(pageSize, pageCount),
                 newPageSize);
+  return SyscallRet::Empty();
 }
 
 }

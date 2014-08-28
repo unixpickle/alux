@@ -15,17 +15,17 @@ anarch::SyscallRet GetVMCapabilitiesSyscall();
 
 // physical memory management
 anarch::SyscallRet AllocateSyscall(anarch::SyscallArgs &);
-void FreeSyscall(anarch::SyscallArgs &);
+anarch::SyscallRet FreeSyscall(anarch::SyscallArgs &);
 
 anarch::SyscallRet VMReadSyscall(anarch::SyscallArgs &);
 anarch::SyscallRet VMMapSyscall(anarch::SyscallArgs &);
-void VMMapAtSyscall(anarch::SyscallArgs &);
-void VMUnmapSyscall(anarch::SyscallArgs &);
-void VMUnmapAndReserveSyscall(anarch::SyscallArgs &);
+anarch::SyscallRet VMMapAtSyscall(anarch::SyscallArgs &);
+anarch::SyscallRet VMUnmapSyscall(anarch::SyscallArgs &);
+anarch::SyscallRet VMUnmapAndReserveSyscall(anarch::SyscallArgs &);
 anarch::SyscallRet VMReserveSyscall(anarch::SyscallArgs &);
-void VMReserveAtSyscall(anarch::SyscallArgs &);
-void VMUnreserveSyscall(anarch::SyscallArgs &);
-void VMRereserveSyscall(anarch::SyscallArgs &);
+anarch::SyscallRet VMReserveAtSyscall(anarch::SyscallArgs &);
+anarch::SyscallRet VMUnreserveSyscall(anarch::SyscallArgs &);
+anarch::SyscallRet VMRereserveSyscall(anarch::SyscallArgs &);
 
 }
 
