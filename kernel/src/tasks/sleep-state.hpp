@@ -10,10 +10,10 @@ namespace Alux {
  */
 class SleepState {
 public:
-  void Cancel(); // @ambicritical
+  void Cancel(); // @critical
   
-  static void Sleep(uint64_t nanoseconds); // @ambicritical
-  static void SleepInfinite(); // @ambicritical
+  static void Sleep(uint64_t nanoseconds); // @critical
+  static void SleepInfinite(); // @critical
   
 private:
   anarch::CriticalLock lock;

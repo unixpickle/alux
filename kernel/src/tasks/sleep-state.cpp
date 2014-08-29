@@ -19,7 +19,7 @@ uint64_t NanoDeadline(uint64_t nanos) {
 }
 
 void SleepState::Cancel() {
-  anarch::ScopedCritical critical;
+  AssertCritical();
   anarch::ScopedLock scope(lock);
   if (!sleeping) {
     cancelled = true;
@@ -31,7 +31,7 @@ void SleepState::Cancel() {
 }
 
 void SleepState::Sleep(uint64_t nanos) {
-  anarch::ScopedCritical critical;
+  AssertCritical();
   
   Thread * th = Thread::GetCurrent();
   assert(th != NULL);
@@ -54,7 +54,7 @@ void SleepState::Sleep(uint64_t nanos) {
 }
 
 void SleepState::SleepInfinite() {
-  anarch::ScopedCritical critical;
+  AssertCritical();
   
   Thread * th = Thread::GetCurrent();
   assert(th != NULL);
