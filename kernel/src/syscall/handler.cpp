@@ -1,6 +1,7 @@
 #include "handler.hpp"
 #include "console.hpp"
 #include "memory.hpp"
+#include "thread.hpp"
 #include "time.hpp"
 #include "task.hpp"
 #include <anarch/stream>
@@ -58,6 +59,21 @@ anarch::SyscallRet SyscallHandler(uint16_t number,
       return VMUnreserveSyscall(args);
     case 19:
       return VMRereserveSyscall(args);
+    case 20:
+      ExitThreadSyscall();
+      break;
+    case 21:
+      return GetThreadIdSyscall();
+    case 22:
+      return LaunchThreadSyscall(args);
+    case 23:
+      SleepSyscall(args);
+      break;
+    case 24:
+      SleepInfiniteSyscall();
+      break;
+    case 25:
+      return WakeupSyscall(args);
     default:
       anarch::cerr << "unknown SyscallHandler(" << number << ", ...)"
         << anarch::endl;

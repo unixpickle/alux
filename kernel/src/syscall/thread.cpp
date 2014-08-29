@@ -8,12 +8,7 @@ namespace Alux {
 
 void ExitThreadSyscall() {
   HoldScope scope;
-  if (scope.GetTask().GetThreads().GetCount() == 1) {
-    // we are the last thread
-    scope.ExitTask(Task::KillReasonNormal);
-  } else {
-    scope.ExitThread();
-  }
+  scope.ExitThread();
 }
 
 anarch::SyscallRet GetThreadIdSyscall() {

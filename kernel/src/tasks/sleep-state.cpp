@@ -39,7 +39,7 @@ void SleepState::Sleep(uint64_t nanos) {
   
   state.lock.Seize();
   
-  if (state.cancelled) {
+  if (state.cancelled || !nanos) {
     state.cancelled = false;
     state.lock.Release();
     return;
