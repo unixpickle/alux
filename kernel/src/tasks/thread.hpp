@@ -1,6 +1,7 @@
 #ifndef __ALUX_THREAD_HPP__
 #define __ALUX_THREAD_HPP__
 
+#include "sleep-state.hpp"
 #include "../scheduler/garbage-object.hpp"
 #include "../identifiers/id-map.hpp"
 #include <anarch/api/state>
@@ -14,6 +15,8 @@ class HoldScope;
 
 class Thread : public GarbageObject {
 public:
+  virtual ~Thread();
+  
   static Thread * GetCurrent(); // @ambicritical
   static void SetCurrent(Thread *); // @critical
   static void ExitCurrent(); // @ambicritical
@@ -29,6 +32,7 @@ public:
   
   Task & GetTask() const; // @ambicritical
   anarch::State & GetState() const; // @ambicritical
+  SleepState & GetSleepState(); // @ambicritical
   
   bool Retain(); // @ambicritical
   void Release(); // @ambicritical
@@ -47,6 +51,8 @@ protected:
   
   friend class HoldScope;
   bool holdingTask = false;
+  
+  SleepState sleepState;
   
 private:
   Thread(Task &, anarch::State &);

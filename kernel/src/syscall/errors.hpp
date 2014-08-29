@@ -8,7 +8,9 @@ enum {
   SyscallErrorIndex,
   SyscallErrorNoMemory,
   SyscallErrorNoMapping,
-  SyscallErrorNoVMSpace
+  SyscallErrorNoVMSpace,
+  SyscallErrorUnableToLaunch,
+  SyscallErrorNoThread
 };
 
 }

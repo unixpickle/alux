@@ -5,6 +5,10 @@
 #include <anarch/critical>
 
 namespace Alux {
+  
+Thread::~Thread() {
+  state.Delete();
+}
 
 Thread * Thread::GetCurrent() {
   anarch::ScopedCritical critical;
@@ -50,6 +54,10 @@ Task & Thread::GetTask() const {
 
 anarch::State & Thread::GetState() const {
   return state;
+}
+
+SleepState & Thread::GetSleepState() {
+  return sleepState;
 }
 
 bool Thread::Retain() {

@@ -3,6 +3,7 @@
 
 #include "id-allocator.hpp"
 #include <ansa/linked-list>
+#include <ansa/atomic>
 
 namespace Alux {
 
@@ -19,6 +20,7 @@ public:
   bool Add(T & anObj, Identifier & idOut) {
     anarch::ScopedLock scope(lock);
     if (!AllocIdentifier(idOut)) return false;
+    ++count;
     buckets[idOut % Buckets].Add(&anObj.idMapLink);
     return true;
   }
@@ -29,22 +31,24 @@ public:
    */
   void Remove(T & anObj) {
     anarch::ScopedLock scope(lock);
+    --count;
     buckets[anObj.GetIdentifier() % Buckets].Remove(&anObj.idMapLink);
     FreeIdentifier(anObj.GetIdentifier());
   }
   
   /**
    * Find an item by its ID and return a pointer to it. If no object could be
-   * found, NULL will be returned.
+   * found, NULL will be returned. The returned object will be retained.
    * @noncritical
    */
-  T * Find(Identifier anId) const {
+  T * Find(Identifier anId) {
     anarch::ScopedLock scope(lock);
-    ansa::LinkedList<T> & bucket = buckets[anId % Buckets];
+    const ansa::LinkedList<T> & bucket = buckets[anId % Buckets];
     for (auto iter = bucket.GetStart(); iter != bucket.GetEnd(); ++iter) {
       T & item = *iter;
       if (item.GetIdentifier() == anId) {
-        return &item;
+        if (item.Retain()) return &item;
+        else return NULL;
       }
     }
     return NULL;
@@ -59,9 +63,14 @@ public:
     return buckets[idx];
   }
   
+  int GetCount() const {
+    return count;
+  }
+  
 private:
   anarch::NoncriticalLock lock;
   ansa::LinkedList<T> buckets[Buckets];
+  ansa::Atomic<int> count;
 };
 
 }
