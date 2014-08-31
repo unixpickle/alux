@@ -6,6 +6,7 @@
 namespace Alux {
 
 void PrintSyscall(anarch::SyscallArgs & args);
+void SetColorSyscall(anarch::SyscallArgs & args);
 
 }
 

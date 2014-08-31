@@ -74,12 +74,15 @@ anarch::SyscallRet SyscallHandler(uint16_t number,
       break;
     case 25:
       return WakeupSyscall(args);
+    case 26:
+      SetColorSyscall(args);
+      break;
     default:
       anarch::cerr << "unknown SyscallHandler(" << number << ", ...)"
         << anarch::endl;
       break;
   }
-  return anarch::SyscallRet();
+  return anarch::SyscallRet::Empty();
 }
 
 }

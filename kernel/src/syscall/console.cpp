@@ -19,4 +19,12 @@ void PrintSyscall(anarch::SyscallArgs & args) {
   }
 }
 
+void SetColorSyscall(anarch::SyscallArgs & args) {
+  int color = args.PopInt() & 7;
+  bool bright = args.PopBool();
+  
+  anarch::Console::Color c = (anarch::Console::Color)color;
+  anarch::Console::GetGlobal().SetColor(c, bright);
+}
+
 }
