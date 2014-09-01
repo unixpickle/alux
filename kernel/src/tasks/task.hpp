@@ -14,9 +14,9 @@ class Task : public GarbageObject {
 public:
   typedef PoolIdMap<Thread, 0x10> ThreadMap;
   
-  static const uint16_t KillReasonNormal = 0;
-  static const uint16_t KillReasonAbort = 1;
-  static const uint16_t KillReasonPermissions = 2;
+  static const int KillReasonNormal = 0;
+  static const int KillReasonAbort = 1;
+  static const int KillReasonPermissions = 2;
   
   // both @ambicritical
   virtual anarch::MemoryMap & GetMemoryMap() const = 0;
@@ -27,7 +27,7 @@ public:
   void Release();
   bool Hold();
   void Unhold();
-  void Kill(uint16_t status);
+  void Kill(int status);
   Scheduler & GetScheduler() const;
   Identifier GetIdentifier() const;
   Identifier GetUserIdentifier() const;
@@ -53,7 +53,7 @@ private:
   anarch::CriticalLock lifeLock;
   int retainCount = 0;
   int holdCount = 1;
-  uint16_t killStatus;
+  int killStatus;
   bool killed = false;
 };
 

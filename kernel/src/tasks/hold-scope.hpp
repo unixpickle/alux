@@ -47,7 +47,7 @@ public:
    * Exit the current task and unhold it.
    * @ambicritical
    */
-  void ExitTask(uint16_t status) ANSA_NORETURN;
+  void ExitTask(int status) ANSA_NORETURN;
   
 private:
   bool wasCritical;

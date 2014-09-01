@@ -38,7 +38,7 @@ void Task::Unhold() {
   }
 }
 
-void Task::Kill(uint16_t status) {
+void Task::Kill(int status) {
   anarch::ScopedCritical critical;
   anarch::ScopedLock scope(lifeLock);
   if (killed) return;

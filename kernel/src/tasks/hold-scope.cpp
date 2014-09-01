@@ -41,7 +41,7 @@ void HoldScope::ExitThread() {
   __builtin_unreachable();
 }
 
-void HoldScope::ExitTask(uint16_t status) {
+void HoldScope::ExitTask(int status) {
   // because we enter a critical section, the task cannot be deallocated or
   // fully released until we Yield()
   anarch::SetCritical(true);
