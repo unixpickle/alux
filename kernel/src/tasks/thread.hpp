@@ -43,7 +43,9 @@ public:
   virtual void Dealloc(); // @noncritical
   
 protected:
-  friend class IdMap<Thread>;
+  template <class T, int C>
+  friend class IdMap;
+  
   ansa::LinkedList<Thread>::Link idMapLink;
   
   friend class Scheduler;

@@ -5,9 +5,9 @@
 
 namespace Alux {
 
-typedef uint_fast32_t Identifier;
+typedef int_fast32_t Identifier;
 
-static const uint_fast32_t IDENTIFIER_MAX = UINT_FAST32_MAX;
+static const int_fast32_t IDENTIFIER_MAX = INT_FAST32_MAX;
 
 }
 

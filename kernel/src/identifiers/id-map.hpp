@@ -1,17 +1,22 @@
 #ifndef __ALUX_ID_MAP_HPP__
 #define __ALUX_ID_MAP_HPP__
 
-#include "id-allocator.hpp"
+#include "type.hpp"
+#include <anarch/critical>
 #include <ansa/linked-list>
 #include <ansa/atomic>
+#include <ansa/nocopy>
 
 namespace Alux {
 
-template <class T, int Buckets = 0x10>
-class IdMap : private IdAllocator {
+/**
+ * An abstract way to map identifiers to objects. This class should be
+ * subclassed to implement different forms of identifier allocation.
+ */
+template <class T, int Buckets>
+class IdMap : ansa::NoCopy {
 public:
-  IdMap(Identifier upperBound) : IdAllocator(upperBound) {
-  }
+  virtual ~IdMap() {}
   
   /**
    * Add an item to this map and allocate an ID for it.
@@ -19,8 +24,8 @@ public:
    */
   bool Add(T & anObj, Identifier & idOut) {
     anarch::ScopedLock scope(lock);
-    if (!AllocIdentifier(idOut)) return false;
-    ++count;
+    if (!Alloc(idOut)) return false;
+    ++objectCount;
     buckets[idOut % Buckets].Add(&anObj.idMapLink);
     return true;
   }
@@ -31,9 +36,9 @@ public:
    */
   void Remove(T & anObj) {
     anarch::ScopedLock scope(lock);
-    --count;
+    --objectCount;
     buckets[anObj.GetIdentifier() % Buckets].Remove(&anObj.idMapLink);
-    FreeIdentifier(anObj.GetIdentifier());
+    Free(anObj.GetIdentifier());
   }
   
   /**
@@ -64,13 +69,24 @@ public:
   }
   
   int GetCount() const {
-    return count;
+    return objectCount;
   }
+  
+protected:
+  /**
+   * Override this method in a subclass to allocate a new identifier.
+   */
+  virtual bool Alloc(Identifier &) = 0;
+  
+  /**
+   * Override this method in a subclass to free an identifier.
+   */
+  virtual void Free(Identifier) = 0;
   
 private:
   anarch::NoncriticalLock lock;
   ansa::LinkedList<T> buckets[Buckets];
-  ansa::Atomic<int> count;
+  ansa::Atomic<int> objectCount;
 };
 
 }

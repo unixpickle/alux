@@ -2,7 +2,7 @@
 #define __ALUX_SCHEDULER__
 
 #include "garbage-collector.hpp"
-#include "../identifiers/id-map.hpp"
+#include "../identifiers/pool-id-map.hpp"
 #include "../tasks/task.hpp"
 #include <anarch/stdint>
 #include <ansa/lock>
@@ -11,6 +11,8 @@ namespace Alux {
 
 class Scheduler {
 public:
+  typedef PoolIdMap<Task, 0x100> TaskMap;
+  
   Scheduler(); // @noncritical
   
   virtual ~Scheduler(); // @noncritical
@@ -85,7 +87,7 @@ public:
    */
   virtual GarbageCollector & GetGarbageCollector() = 0;
   
-  IdMap<Task> & GetTaskIdMap();
+  TaskMap & GetTaskIdMap();
   
 protected:
   friend class GarbageCollector;
@@ -117,7 +119,7 @@ protected:
   }
   
 private:
-  IdMap<Task> taskIdMap;
+  TaskMap taskIdMap;
 };
 
 }

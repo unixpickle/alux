@@ -58,7 +58,7 @@ Identifier Task::GetUserIdentifier() const {
   return uid;
 }
 
-IdMap<Thread> & Task::GetThreads() {
+Task::ThreadMap & Task::GetThreads() {
   return threads;
 }
 

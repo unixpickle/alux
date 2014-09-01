@@ -8,7 +8,7 @@ Scheduler::Scheduler() : taskIdMap(0x10000) {
 Scheduler::~Scheduler() {
 }
 
-IdMap<Task> & Scheduler::GetTaskIdMap() {
+Scheduler::TaskMap & Scheduler::GetTaskIdMap() {
   return taskIdMap;
 }
 
