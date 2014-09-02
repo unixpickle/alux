@@ -7,6 +7,7 @@
 namespace Alux {
 
 class Port;
+class EndpointQueue;
 
 class Endpoint {
 public:
@@ -17,29 +18,32 @@ public:
    */
   Endpoint(Port &);
   
+  virtual ~Endpoint(); // @noncritical
+  
+  // operations involving the lifetime of this endpoint
   bool Retain(); // @noncritical
   void Release(); // @noncritical
   void Close(int reason); // @noncritical
   
+  // operations involving the remote end
+  bool HasConnected(); // @noncritical
   bool IsConnected(); // @noncritical
   Endpoint * GetRemote(); // @noncritical
   void SetRemote(Endpoint *); // @noncritical
   
-  void SetData(const Data &); // @noncritical
-  Data GetData(); // @noncritical
-  
+  // operations acting on the port
+  void SetData(const Data &); // @noncritical  
   int GetControl(); // @noncritical
-  void SetControl(int); // @noncritical
-  
   void Signal(); // @noncritical
-  bool IsSignaled(); // @noncritical
-  void Unsignal(); // @noncritical
   
-protected:
+private:
+  virtual void Delete();
+  
   anarch::NoncriticalLock portLock;
-  Port & port;
+  Port * port;
   
   anarch::NoncriticalLock remoteLock;
+  bool hasConnected = false;
   Endpoint * remote = NULL;
   
   anarch::NoncriticalLock lifeLock;
