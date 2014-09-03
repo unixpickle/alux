@@ -17,6 +17,7 @@ void Endpoint::Release() {
   
   portLock.Seize();
   --retainCount;
+  assert(retainCount >= 0);
   bool shouldDie = (!retainCount && !port);
   portLock.Release();
   
@@ -24,7 +25,14 @@ void Endpoint::Release() {
   __asm__("" : : : "memory");
   
   // if we should die, this thread is the last thread with a pointer to `this`.
-  if (shouldDie) Delete();
+  if (shouldDie) {
+    Endpoint * rem = GetRemote();
+    if (rem) {
+      rem->RemoteDestroyed(closeReason);
+      rem->Release();
+    }
+    Delete();
+  }
 }
 
 Endpoint * Endpoint::GetRemote() {
@@ -33,6 +41,20 @@ Endpoint * Endpoint::GetRemote() {
   if (!remote) return NULL;
   if (!remote->Retain()) return NULL;
   return remote;
+}
+
+void Endpoint::Connect(Endpoint & ep) {
+  // this is the only time two remoteLock's will be locked simultaneously, so
+  // it is safe
+  remoteLock.Seize();
+  assert(!remote);
+  ep.SetRemote(*this);
+  remote = &ep;
+  remoteLock.Release();
+  
+  // signal both endpoints so that they know they're connected
+  Send(Data::Empty());
+  ep.Send(Data::Empty());
 }
 
 void Endpoint::Send(const Data & data) {
@@ -53,23 +75,25 @@ Endpoint::Endpoint(Port & p) : port(&p) {
   AssertNoncritical();
 }
 
-void RemoteSevered(int status) {
+void Endpoint::Sever(int reason) {
+  anarch::ScopedLock scope(portLock);
+  if (!port) return;
+  closeReason = reason;
+  port = NULL;
+  assert(retainCount > 0);
+}
+
+void Endpoint::RemoteDestroyed(int status) {
   remoteLock.Seize();
   remote = NULL;
   remoteLock.Release();
   Send(Data::Integer(status, false));
 }
 
-void SetRemote(Endpoint * ep) {
-  portLock.Seize();
-  
-  remoteLock.Seize();
+void Endpoint::SetRemote(Endpoint & ep) {
+  anarch::ScopedLock inner(remoteLock);
   assert(!remote);
-  remote = ep;
-  remoteLock.Release();
-  
-  // notify the port that we got a connection
-  Send(Data::Empty());
+  remote = &ep;
 }
 
 }

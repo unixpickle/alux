@@ -25,7 +25,7 @@ public:
   
   /**
    * Decrement the retain counter. If the retain counter reaches 0 and this
-   * endpoint has been severed, the remote will be notified of the endpoint
+   * endpoint has been severed, the remote will be notified and the endpoint
    * will be deleted.
    * @noncritical
    */
@@ -39,11 +39,16 @@ public:
   Endpoint * GetRemote();
   
   /**
-   * Connect this endpoint to a remote. If either endpoints are already
-   * connected, this will most likely panic the kernel.
+   * Connect this endpoint to a remote. Neither endpoint should already be
+   * connected.
+   *
+   * If you attempt to call Connect() between two sockets simultaneously in the
+   * opposite order, a deadlock will probably occur. Generally, Connect should
+   * only be called once per pair of endpoints.
+   *
    * @noncritical
    */
-  void Connect(Endpoint *);
+  void Connect(Endpoint &);
   
   /**
    * Send data to the endpoint.
@@ -81,13 +86,12 @@ protected:
   friend class Port;
   
   /**
-   * Sever this endpoint from the port that owns it. After this is returned,
-   * this endpoint will never act on the owning port again. Retain()s on this
-   * endpoint will fail after Sever() is called, and the remote will be
-   * notified that the remote has disconnected.
+   * Sever this endpoint from the port that owns it. After this has returned,
+   * this endpoint will never act on the owning port again; future Retain()s
+   * on this endpoint will fail.
    * @noncritical
    */
-  virtual void Sever() = 0;
+  virtual void Sever(int reason);
   
 private:  
   anarch::NoncriticalLock remoteLock;
@@ -96,18 +100,20 @@ private:
   anarch::NoncriticalLock portLock;
   Port * port;
   int retainCount = 1;
+  int closeReason = 0;
   
   /**
-   * When an endpoint is severed, it will call this on its remote.
+   * When an endpoint is severed and its retain count reaches zero, this is
+   * called.
    * @noncritical
    */
-  void RemoteSevered(int status);
+  void RemoteDestroyed(int status);
   
   /**
    * Called on this endpoint when another endpoint attempts to Connect() to us.
    * @noncritical
    */
-  void SetRemote(Endpoint *);
+  bool SetRemote(Endpoint &);
 };
 
 }
