@@ -7,49 +7,107 @@
 namespace Alux {
 
 class Port;
-class EndpointQueue;
 
+/**
+ * An "endpoint" is the means by which a port connects to another port. Both
+ * ports expose their functionality through an endpoint. The endpoint can then
+ * be severed from a port at any time so that cleanup is possible while the
+ * port is free to create a new endpoint as soon as it wants.
+ */
 class Endpoint {
 public:
   /**
-   * Create a new endpoint given a certain port. The returned endpoint will
-   * have a retain count of 1.
+   * If this endpoint has been severed from its port, this returns `false`.
+   * Otherwise, it increments the retain counter and returns `true`.
+   * @noncritical
+   */
+  bool Retain();
+  
+  /**
+   * Decrement the retain counter. If the retain counter reaches 0 and this
+   * endpoint has been severed, the remote will be notified of the endpoint
+   * will be deleted.
+   * @noncritical
+   */
+  void Release();
+  
+  /**
+   * Returns a pointer to the remote endpoint. If this endpoint is not
+   * connected, or the remote has been severed, this will return NULL.
+   * @noncritical
+   */
+  Endpoint * GetRemote();
+  
+  /**
+   * Connect this endpoint to a remote. If either endpoints are already
+   * connected, this will most likely panic the kernel.
+   * @noncritical
+   */
+  void Connect(Endpoint *);
+  
+  /**
+   * Send data to the endpoint.
+   * @noncritical
+   */
+  void Send(const Data &);
+  
+  /**
+   * Get the control flags of this endpoint's owning port.
+   * @noncritical
+   */
+  int GetControl();
+  
+protected:
+  /**
+   * Create a new endpoint given a certain port. The resultant endpoint has a
+   * retain count of 1.
    * @noncritical
    */
   Endpoint(Port &);
   
-  virtual ~Endpoint(); // @noncritical
+  /**
+   * You may implement your own fancy destructors.
+   * @noncritical
+   */
+  virtual ~Endpoint() {}
   
-  // operations involving the lifetime of this endpoint
-  bool Retain(); // @noncritical
-  void Release(); // @noncritical
-  void Close(int reason); // @noncritical
+  /**
+   * Implement this in your subclass for whatever allocation method you choose
+   * to use for instances of your subclass.
+   * @noncritical
+   */
+  virtual void Delete() = 0;
   
-  // operations involving the remote end
-  bool HasConnected(); // @noncritical
-  bool IsConnected(); // @noncritical
-  Endpoint * GetRemote(); // @noncritical
-  void SetRemote(Endpoint *); // @noncritical
+  friend class Port;
   
-  // operations acting on the port
-  void SetData(const Data &); // @noncritical  
-  int GetControl(); // @noncritical
-  void Signal(); // @noncritical
+  /**
+   * Sever this endpoint from the port that owns it. After this is returned,
+   * this endpoint will never act on the owning port again. Retain()s on this
+   * endpoint will fail after Sever() is called, and the remote will be
+   * notified that the remote has disconnected.
+   * @noncritical
+   */
+  virtual void Sever() = 0;
   
-private:
-  virtual void Delete();
+private:  
+  anarch::NoncriticalLock remoteLock;
+  Endpoint * remote = NULL;
   
   anarch::NoncriticalLock portLock;
   Port * port;
-  
-  anarch::NoncriticalLock remoteLock;
-  bool hasConnected = false;
-  Endpoint * remote = NULL;
-  
-  anarch::NoncriticalLock lifeLock;
-  int closeReason = 0;
-  bool closed = false;
   int retainCount = 1;
+  
+  /**
+   * When an endpoint is severed, it will call this on its remote.
+   * @noncritical
+   */
+  void RemoteSevered(int status);
+  
+  /**
+   * Called on this endpoint when another endpoint attempts to Connect() to us.
+   * @noncritical
+   */
+  void SetRemote(Endpoint *);
 };
 
 }

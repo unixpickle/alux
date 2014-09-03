@@ -14,11 +14,36 @@ union Datum {
   VirtAddr vAddr;
   PhysAddr pAddr;
   
+  int integer;
   uint64_t integer64;
 };
 
 struct Data {
-  Datum data[4];
+  Datum data[2];
+  
+  bool connected = true;
+  
+  /**
+   * Create a piece of data whose first datum contains a specified integer
+   * value.
+   * @ambicritical
+   */
+  inline static Data Integer(int value, bool connected = true) {
+    Data result;
+    result.data[0].integer = value;
+    result.connected = connected;
+    return result;
+  }
+  
+  /**
+   * Create a piece of data with an optional connected status.
+   * @ambicritical
+   */
+  inline static Data Empty(bool connected = true) {
+    Data result;
+    result.connected = connected;
+    return result;
+  }
 };
 
 }

@@ -4,18 +4,10 @@
 
 namespace Alux {
 
-Endpoint::Endpoint(Port & p) : port(&p) {
-  AssertNoncritical();
-}
-
-Endpoint::~Endpoint() {
-  AssertNoncritical();
-}
-
 bool Endpoint::Retain() {
   AssertNoncritical();
-  anarch::ScopedLock scope(lifeLock);
-  if (closed) return false;
+  anarch::ScopedLock scope(portLock);
+  if (!port) return false;
   ++retainCount;
   return true;
 }
@@ -23,39 +15,16 @@ bool Endpoint::Retain() {
 void Endpoint::Release() {
   AssertNoncritical();
   
-  lifeLock.Seize();
+  portLock.Seize();
   --retainCount;
-  bool shouldDie = (!retainCount && closed);
-  lifeLock.Release();
+  bool shouldDie = (!retainCount && !port);
+  portLock.Release();
   
-  if (shouldDie) {
-    Endpoint * ep = GetRemote();
-    if (ep) {
-      ep->SetRemote(NULL);
-      ep->Signal();
-      ep->Release();
-    }
-    Delete();
-  }
-}
-
-void Endpoint::Close(int reason) {
-  AssertNoncritical();
-  anarch::ScopedLock scope(lifeLock);
-  closed = true;
-  assert(retainCount > 0);
-}
-
-bool Endpoint::HasConnected() {
-  AssertNoncritical();
-  anarch::ScopedLock scope(remoteLock);
-  return hasConnected;
-}
-
-bool Endpoint::IsConnected() {
-  AssertNoncritical();
-  anarch::ScopedLock scope(remoteLock);
-  return remote != NULL;
+  // compiler memory barrier because `this` could have been freed
+  __asm__("" : : : "memory");
+  
+  // if we should die, this thread is the last thread with a pointer to `this`.
+  if (shouldDie) Delete();
 }
 
 Endpoint * Endpoint::GetRemote() {
@@ -66,34 +35,41 @@ Endpoint * Endpoint::GetRemote() {
   return remote;
 }
 
-void Endpoint::SetRemote(Endpoint * ep) {
-  AssertNoncritical();
-  anarch::ScopedLock scope(remoteLock);
-  assert(!hasConnected || ep == NULL);
-  hasConnected = true;
-  remote = ep;
-}
-
-void Endpoint::SetData(const Data & data) {
+void Endpoint::Send(const Data & data) {
   AssertNoncritical();
   anarch::ScopedLock scope(portLock);
   if (!port) return;
-  port->SetData(data);
+  port->Send(data);
 }
 
 int Endpoint::GetControl() {
   AssertNoncritical();
   anarch::ScopedLock scope(portLock);
   if (!port) return 0;
+  return port->GetControl();
+}
+
+Endpoint::Endpoint(Port & p) : port(&p) {
+  AssertNoncritical();
+}
+
+void RemoteSevered(int status) {
+  remoteLock.Seize();
+  remote = NULL;
+  remoteLock.Release();
+  Send(Data::Integer(status, false));
+}
+
+void SetRemote(Endpoint * ep) {
+  portLock.Seize();
   
-}
-
-void Endpoint::Signal() {
-  // TODO: signal the port
-}
-
-void Endpoint::Delete() {
-  delete this;
+  remoteLock.Seize();
+  assert(!remote);
+  remote = ep;
+  remoteLock.Release();
+  
+  // notify the port that we got a connection
+  Send(Data::Empty());
 }
 
 }

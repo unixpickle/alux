@@ -7,27 +7,18 @@ namespace Alux {
 
 class Port {
 public:
-  Endpoint * Open(); // @noncritical
-  void Close(int reason); // @noncritical
-  Endpoint * GetEndpoint(); // @noncritical
+  virtual void Send(const Data & data) = 0;
+  virtual bool Receive(Data & data) = 0;
   
-  virtual void Signal() = 0; // @noncritical
-  virtual bool IsSignaled() = 0; // @noncritical
-  virtual void Unsignal() = 0; // @noncritical
+  inline int GetControl() {
+    return control;
+  }
   
-  void ReadData(Data & output);
-  void WriteData(const Data & input);
-  
-  int GetControl();
-  void SetControl(int);
+  inline void SetControl(int value) {
+    control = value;
+  }
   
 private:
-  anarch::NoncriticalLock endpointLock;
-  Endpoint * endpoint;
-  
-  anarch::NoncriticalLock dataLock;
-  Data data;
-  
   ansa::Atomic<int> control;
 };
 
