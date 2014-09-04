@@ -3,7 +3,8 @@
 
 #include "sleep-state.hpp"
 #include "../scheduler/garbage-object.hpp"
-#include "../identifiers/id-map.hpp"
+#include "../idmap/hash-map.hpp"
+#include "../idmap/id-map.hpp"
 #include <anarch/api/state>
 #include <anarch/lock>
 #include <ansa/linked-list>
@@ -44,9 +45,12 @@ public:
   
 protected:
   template <class T, int C>
-  friend class IdMap;
+  friend class HashMap;
+  ansa::LinkedList<Thread>::Link hashMapLink;
   
-  ansa::LinkedList<Thread>::Link idMapLink;
+  template <class T>
+  friend class IdMap;
+  void SetIdentifier(Identifier ident);
   
   friend class Scheduler;
   void * schedulerUserInfo;

@@ -90,6 +90,10 @@ Identifier Thread::GetIdentifier() const {
   return identifier;
 }
 
+void Thread::SetIdentifier(Identifier ident) {
+  identifier = ident;
+}
+
 void Thread::Dealloc() {
   AssertNoncritical();
   Deinit();
@@ -97,12 +101,12 @@ void Thread::Dealloc() {
 }
 
 Thread::Thread(Task & t, anarch::State & s)
-  : GarbageObject(t.GetScheduler().GetGarbageCollector()), idMapLink(*this),
+  : GarbageObject(t.GetScheduler().GetGarbageCollector()), hashMapLink(*this),
     task(t), state(s) {
 }
 
 bool Thread::Init() {
-  if (!GetTask().GetThreads().Add(*this, identifier)) {
+  if (!GetTask().GetThreads().Add(*this)) {
     return false;
   }
   GetTask().GetScheduler().Add(*this);

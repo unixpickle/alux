@@ -24,8 +24,4 @@ Endpoint * Port::GetEndpoint() {
   return endpoint;
 }
 
-bool Port::IsUser() {
-  return false;
-}
-
 }

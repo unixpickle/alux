@@ -7,7 +7,7 @@ mainSources = [
   'src/tasks'
   'src/syscall'
   'src/scheduler'
-  'src/identifiers'
+  'src/idmap'
 ]
 
 includes = [

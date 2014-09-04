@@ -8,6 +8,12 @@ namespace Alux {
 class Port {
 public:
   /**
+   * You may use a destructor in a subclass.
+   * @noncritical
+   */
+  virtual ~Port() {}
+  
+  /**
    * Open a simple [Endpoint] instance. If this port already has an endpoint,
    * this will return NULL. Otherwise, the returned endpoint will be retained.
    * @noncritical
@@ -15,16 +21,10 @@ public:
   Endpoint * Open() = 0;
   
   /**
-   * If this port has an endpoint, it will be severed by calling this method.
+   * Severs the current endpoint if one exists.
    * @noncritical
    */
   void Sever() = 0;
-  
-  /**
-   * Return `true` if this is a [UserPort].
-   * @ambicritical
-   */
-  virtual bool IsUser();
   
   /**
    * Returns a retained reference to the port's current endpoint. If the port
@@ -33,13 +33,6 @@ public:
    * @noncritical
    */
   virtual Endpoint * GetEndpoint();
-  
-  /**
-   * If a piece of data has been signaled on this port, this will return `true`
-   * and set [data]. Otherwise, it will return `false`.
-   * @noncritical
-   */
-  virtual bool Receive(Data & data) = 0;
   
   /**
    * Get the control data.

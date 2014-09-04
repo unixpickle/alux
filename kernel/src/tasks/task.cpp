@@ -54,6 +54,10 @@ Identifier Task::GetIdentifier() const {
   return identifier;
 }
 
+void Task::SetIdentifier(Identifier ident) {
+  identifier = ident;
+}
+
 Identifier Task::GetUserIdentifier() const {
   return uid;
 }
@@ -63,13 +67,13 @@ Task::ThreadMap & Task::GetThreads() {
 }
 
 Task::Task(Identifier u, Scheduler & s)
-  : GarbageObject(s.GetGarbageCollector()), idMapLink(*this), uid(u),
+  : GarbageObject(s.GetGarbageCollector()), hashMapLink(*this), uid(u),
     scheduler(s), threads(0x100) {
 }
 
 bool Task::Init() {
   AssertNoncritical();
-  return scheduler.GetTaskIdMap().Add(*this, identifier);
+  return scheduler.GetTaskIdMap().Add(*this);
 }
 
 void Task::Deinit() {
@@ -77,8 +81,8 @@ void Task::Deinit() {
   scheduler.GetTaskIdMap().Remove(*this);
   
   // unschedule threads from the scheduler
-  for (int i = 0; i < threads.GetBucketCount(); ++i) {
-    auto & bucket = threads.GetBucket(i);
+  for (int i = 0; i < threads.GetMap().GetBucketCount(); ++i) {
+    auto & bucket = threads.GetMap().GetBucket(i);
     for (auto iter = bucket.GetStart(); iter != bucket.GetEnd(); ++iter) {
       Thread & th = *iter;
       scheduler.Remove(th);

@@ -44,12 +44,13 @@ anarch::SyscallRet WakeupSyscall(anarch::SyscallArgs & args) {
   HoldScope scope;
   uint32_t identifier = args.PopUInt32();
   
-  Thread * th = scope.GetTask().GetThreads().Find(identifier);
+  Thread * th = scope.GetTask().GetThreads().GetMap().Find(identifier);
   if (!th) {
     return anarch::SyscallRet::Error(SyscallErrorNoThread);
   }
   
   th->GetSleepState().Cancel();
+  th->Release();
   return anarch::SyscallRet::Empty();
 }
 

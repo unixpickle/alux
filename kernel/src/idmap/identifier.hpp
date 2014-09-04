@@ -1,5 +1,5 @@
-#ifndef __ALUX_IDENTIFIERS_HPP__
-#define __ALUX_IDENTIFIERS_HPP__
+#ifndef __ALUX_IDENTIFIER_HPP__
+#define __ALUX_IDENTIFIER_HPP__
 
 #include <anarch/stdint>
 

@@ -3,7 +3,8 @@
 
 #include "thread.hpp"
 #include "../scheduler/garbage-object.hpp"
-#include "../identifiers/pool-id-map.hpp"
+#include "../idmap/pool-id-map.hpp"
+#include "../idmap/retain-hash-map.hpp"
 #include <anarch/api/memory-map>
 
 namespace Alux {
@@ -12,7 +13,7 @@ class Scheduler;
 
 class Task : public GarbageObject {
 public:
-  typedef PoolIdMap<Thread, 0x10> ThreadMap;
+  typedef PoolIdMap<Thread, RetainHashMap<Thread, 0x10> > ThreadMap;
   
   static const int KillReasonNormal = 0;
   static const int KillReasonAbort = 1;
@@ -39,9 +40,12 @@ protected:
   virtual void Deinit(); // @noncritical
   
   template <class T, int C>
-  friend class IdMap;
+  friend class HashMap;
+  ansa::LinkedList<Task>::Link hashMapLink;
   
-  ansa::LinkedList<Task>::Link idMapLink;
+  template <class T>
+  friend class IdMap;
+  void SetIdentifier(Identifier);
   
 private:
   Identifier uid;
