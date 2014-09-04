@@ -81,9 +81,11 @@ protected:
    * to use for instances of your subclass.
    * @noncritical
    */
-  virtual void Delete() = 0;
+  virtual void Delete();
   
   friend class Port;
+  
+  static Endpoint * New(Port &);
   
   /**
    * Sever this endpoint from the port that owns it. After this has returned,

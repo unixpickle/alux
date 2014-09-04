@@ -75,6 +75,14 @@ Endpoint::Endpoint(Port & p) : port(&p) {
   AssertNoncritical();
 }
 
+void Endpoint::Delete() {
+  delete this;
+}
+
+Endpoint * Endpoint::New(Port & port) {
+  return new Endpoint(port);
+}
+
 void Endpoint::Sever(int reason) {
   anarch::ScopedLock scope(portLock);
   if (!port) return;
