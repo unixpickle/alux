@@ -50,14 +50,6 @@ Scheduler & Task::GetScheduler() const {
   return scheduler;
 }
 
-Identifier Task::GetIdentifier() const {
-  return identifier;
-}
-
-void Task::SetIdentifier(Identifier ident) {
-  identifier = ident;
-}
-
 Identifier Task::GetUserIdentifier() const {
   return uid;
 }

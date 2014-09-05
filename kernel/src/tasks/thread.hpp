@@ -3,6 +3,7 @@
 
 #include "sleep-state.hpp"
 #include "../scheduler/garbage-object.hpp"
+#include "../idmap/id-object.hpp"
 #include "../idmap/hash-map.hpp"
 #include "../idmap/id-map.hpp"
 #include <anarch/api/state>
@@ -14,7 +15,7 @@ namespace Alux {
 class Task;
 class HoldScope;
 
-class Thread : public GarbageObject {
+class Thread : public GarbageObject, public IdObject {
 public:
   virtual ~Thread();
   
@@ -38,19 +39,13 @@ public:
   bool Retain(); // @ambicritical
   void Release(); // @ambicritical
   void Kill(); // @ambicritical
-  
-  Identifier GetIdentifier() const; // @ambicritical
-  
+    
   virtual void Dealloc(); // @noncritical
   
 protected:
   template <class T, int C>
   friend class HashMap;
   ansa::LinkedList<Thread>::Link hashMapLink;
-  
-  template <class T>
-  friend class IdMap;
-  void SetIdentifier(Identifier ident);
   
   friend class Scheduler;
   void * schedulerUserInfo;
@@ -67,9 +62,7 @@ private:
   
   Task & task;
   anarch::State & state;
-  
-  Identifier identifier;
-  
+    
   anarch::CriticalLock lifeLock;
   int retainCount = 1;
   bool killed = false;

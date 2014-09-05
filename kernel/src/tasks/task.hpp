@@ -3,6 +3,7 @@
 
 #include "thread.hpp"
 #include "../scheduler/garbage-object.hpp"
+#include "../idmap/id-object.hpp"
 #include "../idmap/pool-id-map.hpp"
 #include "../idmap/retain-hash-map.hpp"
 #include <anarch/api/memory-map>
@@ -11,7 +12,7 @@ namespace Alux {
 
 class Scheduler;
 
-class Task : public GarbageObject {
+class Task : public GarbageObject, public IdObject {
 public:
   typedef PoolIdMap<Thread, RetainHashMap<Thread, 0x10> > ThreadMap;
   
@@ -30,7 +31,6 @@ public:
   void Unhold();
   void Kill(int status);
   Scheduler & GetScheduler() const;
-  Identifier GetIdentifier() const;
   Identifier GetUserIdentifier() const;
   ThreadMap & GetThreads();
   
@@ -43,15 +43,10 @@ protected:
   friend class HashMap;
   ansa::LinkedList<Task>::Link hashMapLink;
   
-  template <class T>
-  friend class IdMap;
-  void SetIdentifier(Identifier);
-  
 private:
   Identifier uid;
   
   Scheduler & scheduler;
-  Identifier identifier;
   ThreadMap threads;
   
   anarch::CriticalLock lifeLock;

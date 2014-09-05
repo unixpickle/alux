@@ -86,14 +86,6 @@ void Thread::Kill() {
   killed = true;
 }
 
-Identifier Thread::GetIdentifier() const {
-  return identifier;
-}
-
-void Thread::SetIdentifier(Identifier ident) {
-  identifier = ident;
-}
-
 void Thread::Dealloc() {
   AssertNoncritical();
   Deinit();
