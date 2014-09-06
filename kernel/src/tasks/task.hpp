@@ -2,19 +2,17 @@
 #define __ALUX_TASK_HPP__
 
 #include "thread.hpp"
+#include "retain-hash-map.hpp"
 #include "../scheduler/garbage-object.hpp"
-#include "../idmap/id-object.hpp"
-#include "../idmap/pool-id-map.hpp"
-#include "../idmap/retain-hash-map.hpp"
 #include <anarch/api/memory-map>
 
 namespace Alux {
 
 class Scheduler;
 
-class Task : public GarbageObject, public IdObject {
+class Task : public GarbageObject, public anidmap::IdObject {
 public:
-  typedef PoolIdMap<Thread, RetainHashMap<Thread, 0x10> > ThreadMap;
+  typedef anidmap::PoolIdMap<Thread, RetainHashMap<Thread, 0x10> > ThreadMap;
   
   static const int KillReasonNormal = 0;
   static const int KillReasonAbort = 1;
@@ -40,7 +38,7 @@ protected:
   virtual void Deinit(); // @noncritical
   
   template <class T, int C>
-  friend class HashMap;
+  friend class anidmap::HashMap;
   ansa::LinkedList<Task>::Link hashMapLink;
   
 private:

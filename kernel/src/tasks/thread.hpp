@@ -1,11 +1,13 @@
 #ifndef __ALUX_THREAD_HPP__
 #define __ALUX_THREAD_HPP__
 
+#include "identifier.hpp"
 #include "sleep-state.hpp"
+#include "retain-hash-map.hpp"
 #include "../scheduler/garbage-object.hpp"
-#include "../idmap/id-object.hpp"
-#include "../idmap/hash-map.hpp"
-#include "../idmap/id-map.hpp"
+#include <anidmap/maps>
+#include <anidmap/id-maps>
+#include <anidmap/id-object>
 #include <anarch/api/state>
 #include <anarch/lock>
 #include <ansa/linked-list>
@@ -15,7 +17,7 @@ namespace Alux {
 class Task;
 class HoldScope;
 
-class Thread : public GarbageObject, public IdObject {
+class Thread : public GarbageObject, public anidmap::IdObject {
 public:
   virtual ~Thread();
   
@@ -44,7 +46,7 @@ public:
   
 protected:
   template <class T, int C>
-  friend class HashMap;
+  friend class anidmap::HashMap;
   ansa::LinkedList<Thread>::Link hashMapLink;
   
   friend class Scheduler;

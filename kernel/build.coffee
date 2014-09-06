@@ -7,7 +7,7 @@ mainSources = [
   'src/tasks'
   'src/syscall'
   'src/scheduler'
-  'src/idmap'
+  'dependencies/anidmap/src'
 ]
 
 includes = [
@@ -16,6 +16,8 @@ includes = [
   'dependencies/anarch/src/stdlib/h'
   'dependencies/anarch/dependencies/ansa/include'
   'dependencies/anarch/dependencies/analloc2/include'
+  'dependencies/anidmap/include'
+  'src/include'
 ]
 
 module.exports = (Finder, Makefile, environment) ->

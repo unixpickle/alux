@@ -2,8 +2,6 @@
 #define __ALUX_SCHEDULER__
 
 #include "garbage-collector.hpp"
-#include "../idmap/pool-id-map.hpp"
-#include "../idmap/retain-hash-map.hpp"
 #include "../tasks/task.hpp"
 #include <anarch/stdint>
 #include <ansa/lock>
@@ -12,7 +10,7 @@ namespace Alux {
 
 class Scheduler {
 public:
-  typedef PoolIdMap<Task, RetainHashMap<Task, 0x100> > TaskMap;
+  typedef anidmap::PoolIdMap<Task, RetainHashMap<Task, 0x100> > TaskMap;
   
   Scheduler(); // @noncritical
   

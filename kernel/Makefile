@@ -40,7 +40,7 @@ dependencies/anarch/build/anarch.a: dependencies
 dependencies:
 	mkdir dependencies
 	git clone https://github.com/unixpickle/anarch.git dependencies/anarch
-	git clone https://github.com/unixpickle/anslabs.git dependencies/anslabs
+	git clone https://github.com/unixpickle/anidmap.git dependencies/anidmap
 	git clone https://github.com/unixpickle/makemaker.git dependencies/makemaker
 
 build:

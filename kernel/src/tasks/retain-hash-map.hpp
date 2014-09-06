@@ -1,12 +1,12 @@
 #ifndef __ALUX_RETAIN_HASH_MAP_HPP__
 #define __ALUX_RETAIN_HASH_MAP_HPP__
 
-#include "hash-map.hpp"
+#include <anidmap/maps>
 
 namespace Alux {
 
 template <class T, int BucketCount>
-class RetainHashMap : public HashMap<T, BucketCount> {
+class RetainHashMap : public anidmap::HashMap<T, BucketCount> {
 public:
   /**
    * Returns a retained object.
