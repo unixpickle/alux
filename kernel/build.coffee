@@ -7,6 +7,7 @@ mainSources = [
   'src/tasks'
   'src/syscall'
   'src/scheduler'
+  'src/ipc'
   'dependencies/anidmap/src'
 ]
 

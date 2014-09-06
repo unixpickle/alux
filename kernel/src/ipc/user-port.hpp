@@ -2,15 +2,15 @@
 #define __ALUX_USER_PORT_HPP__
 
 #include "port.hpp"
-#include "../id-map/id-object.hpp"
-#include "../id-map/hash-map.hpp"
+#include <anidmap/id-object>
+#include <anidmap/maps>
 #include <ansa/linked-list>
 
 namespace Alux {
 
 class Thread;
 
-class UserPort : public Port, public IdObject {
+class UserPort : public Port, public anidmap::IdObject {
 public:
   UserPort * New(Thread &); // @noncritical
   virtual void Delete(); // @noncritical
@@ -20,7 +20,7 @@ protected:
   ansa::LinkedList<UserPort>::Link waitingLink;
   
   template <class T, int C>
-  friend class HashMap;
+  friend class anidmap::HashMap;
   ansa::LinkedList<UserPort>::Link hashMapLink;
   
   virtual void Send(const Data & data); // @noncritical

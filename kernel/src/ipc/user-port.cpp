@@ -13,7 +13,8 @@ void UserPort::Delete() {
 void UserPort::Send(const Data &) {
 }
 
-UserPort::UserPort(Thread & th) : thread(th) {
+UserPort::UserPort(Thread & th)
+  : waitingLink(*this), hashMapLink(*this), thread(th) {
 }
 
 }

@@ -98,10 +98,11 @@ void Endpoint::RemoteDestroyed(int status) {
   Send(Data::Integer(status, false));
 }
 
-void Endpoint::SetRemote(Endpoint & ep) {
+bool Endpoint::SetRemote(Endpoint & ep) {
   anarch::ScopedLock inner(remoteLock);
-  assert(!remote);
+  if (remote) return false;
   remote = &ep;
+  return true;
 }
 
 }

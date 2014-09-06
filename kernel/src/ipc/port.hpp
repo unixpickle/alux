@@ -18,13 +18,13 @@ public:
    * this will return NULL. Otherwise, the returned endpoint will be retained.
    * @noncritical
    */
-  Endpoint * Open() = 0;
+  Endpoint * Open();
   
   /**
    * Severs the current endpoint if one exists.
    * @noncritical
    */
-  void Sever() = 0;
+  void Sever(int reason);
   
   /**
    * Returns a retained reference to the port's current endpoint. If the port
@@ -32,7 +32,7 @@ public:
    * return NULL.
    * @noncritical
    */
-  virtual Endpoint * GetEndpoint();
+  Endpoint * GetEndpoint();
   
   /**
    * Get the control data.

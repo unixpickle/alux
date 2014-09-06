@@ -1,7 +1,7 @@
 #ifndef __ALUX_ENDPOINT_HPP__
 #define __ALUX_ENDPOINT_HPP__
 
-#include "data.h"
+#include "data.hpp"
 #include <anarch/lock>
 
 namespace Alux {

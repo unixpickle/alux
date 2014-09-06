@@ -1,4 +1,5 @@
 #include "port.hpp"
+#include <anarch/assert>
 
 namespace Alux {
 
@@ -8,10 +9,10 @@ Endpoint * Port::Open() {
   return endpoint = Endpoint::New(*this);
 }
 
-void Port::Sever() {
+void Port::Sever(int reason) {
   anarch::ScopedLock scope(endpointLock);
   if (!endpoint) return;
-  endpoint->Sever();
+  endpoint->Sever(reason);
   endpoint = NULL;
 }
 
