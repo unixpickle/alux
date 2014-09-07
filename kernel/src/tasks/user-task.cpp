@@ -3,33 +3,24 @@
 
 namespace Alux {
 
-UserTask * UserTask::New(Executable & e, anarch::UserMap & m, Identifier i, 
+UserTask & UserTask::New(Executable & e, anarch::UserMap & m, Identifier i, 
                          Scheduler & s) {
   AssertNoncritical();
   UserTask * res = new UserTask(e, m, i, s);
-  if (!res) return NULL;
-  if (!res->Init()) {
-    delete res;
-    return NULL;
-  }
-  return res;
+  assert(res != NULL);
+  return *res;
 }
 
-ExecutableMap & UserTask::GetExecutableMap() {
-  return executableMap;
-}
-
-anarch::UserMap & UserTask::GetMemoryMap() const {
+anarch::UserMap & UserTask::GetMemoryMap() {
   return memoryMap;
 }
 
-bool UserTask::IsUserTask() const {
+bool UserTask::IsUserTask() {
   return true;
 }
 
 void UserTask::Dealloc() {
-  AssertNoncritical();
-  Deinit();
+  Task::Dealloc();
   delete this;
 }
 

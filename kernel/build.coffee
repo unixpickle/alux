@@ -1,4 +1,5 @@
 path = require 'path'
+anarch = require './dependencies/anarch/build.coffee'
 
 mainSources = [
   'src/arch/all'
@@ -13,11 +14,6 @@ mainSources = [
 ]
 
 includes = [
-  'dependencies/anarch/include'
-  'dependencies/anarch/src/stdlib/hpp'
-  'dependencies/anarch/src/stdlib/h'
-  'dependencies/anarch/dependencies/ansa/include'
-  'dependencies/anarch/dependencies/analloc2/include'
   'dependencies/anidmap/include'
   'src/include'
 ]
@@ -31,6 +27,9 @@ module.exports = (Finder, Makefile, environment) ->
   for source in mainSources
     finder.search source
   finder.search 'src/arch/' + arch
+  
+  # find anarch sources and use anarch's includes
+  includes = includes.concat anarch finder
   
   objdir = path.join environment.root, 'build/objects'
   makefile = new Makefile finder, includes, objdir

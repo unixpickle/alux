@@ -1,8 +1,8 @@
 #include "thread.hpp"
 #include "errors.hpp"
-#include "../tasks/sleep-state.hpp"
+#include "../threads/sleep-state.hpp"
+#include "../threads/thread.hpp"
 #include "../tasks/hold-scope.hpp"
-#include "../tasks/thread.hpp"
 
 namespace Alux {
 
@@ -23,8 +23,8 @@ anarch::SyscallRet LaunchThreadSyscall(anarch::SyscallArgs & args) {
   VirtAddr argument = args.PopVirtAddr();
   anarch::State & state = anarch::State::NewUser((void (*)(void *))callAddress,
                                                  (void *)argument);
-  Thread * th = Thread::New(scope.GetTask(), state);
-  if (!th) {
+  Thread & th = Thread::New(scope.GetTask(), state);
+  if (!th.AddToTask()) {
     state.Delete();
     return anarch::SyscallRet::Error(SyscallErrorUnableToLaunch);
   }
@@ -49,7 +49,7 @@ anarch::SyscallRet WakeupSyscall(anarch::SyscallArgs & args) {
     return anarch::SyscallRet::Error(SyscallErrorNoThread);
   }
   
-  th->GetSleepState().Cancel();
+  SleepState::Unsleep(*th);
   th->Release();
   return anarch::SyscallRet::Empty();
 }

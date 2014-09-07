@@ -11,16 +11,23 @@
 namespace Alux {
 
 RRScheduler::RRScheduler() : collector(*this) {
-  collectorTask = KernelTask::New(*this);
-  if (!collectorTask) {
-    anarch::Panic("RRScheduler() - failed to allocate collector task");
+  // create task
+  collectorTask = &KernelTask::New(*this);
+  if (!collectorTask->AddToScheduler()) {
+    anarch::Panic("RRScheduler() - failed to add task to scheduler");
   }
+  
+  // create thread
   anarch::State & state = anarch::State::NewKernel(RunGarbageThread,
                                                    (void *)&collector);
-  collectorThread = Thread::New(*collectorTask, state);
-  if (!collectorThread) {
-    anarch::Panic("RRScheduler() - failed to allocate collector thread");
+  collectorTask->Retain();
+  collectorThread = &Thread::New(*collectorTask, state);
+  if (!collectorThread->AddToTask()) {
+    anarch::Panic("RRScheduler() - failed to add thread to task");
   }
+  collectorThread->AddToScheduler();
+  
+  // release thread and task
   collectorThread->Release();
   collectorTask->Unhold();
 }

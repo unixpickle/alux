@@ -7,24 +7,20 @@ namespace Alux {
 KernelTask * KernelTask::New(Scheduler & s) {
   AssertNoncritical();
   KernelTask * t = new KernelTask(s);
-  if (!t) return NULL;
-  if (!t->Init()) {
-    delete t;
-    return NULL;
-  }
+  assert(t != NULL);
   return t;
 }
 
-anarch::MemoryMap & KernelTask::GetMemoryMap() const {
+anarch::MemoryMap & KernelTask::GetMemoryMap() {
   return anarch::GlobalMap::GetGlobal();
 }
 
-bool KernelTask::IsUserTask() const {
+bool KernelTask::IsUserTask() {
   return false;
 }
 
 void KernelTask::Dealloc() {
-  Deinit();
+  Task::Dealloc();
   delete this;
 }
 
