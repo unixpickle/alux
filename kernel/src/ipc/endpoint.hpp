@@ -3,6 +3,7 @@
 
 #include "data.hpp"
 #include <anarch/lock>
+#include <ansa/nocopy>
 
 namespace Alux {
 
@@ -14,7 +15,7 @@ class Port;
  * be severed from a port at any time so that cleanup is possible while the
  * port is free to create a new endpoint as soon as it wants.
  */
-class Endpoint {
+class Endpoint : public ansa::NoCopy {
 public:
   /**
    * If this endpoint has been severed from its port, this returns `false`.

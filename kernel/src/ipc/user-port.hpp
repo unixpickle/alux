@@ -12,13 +12,18 @@ class Thread;
 
 class UserPort : public Port, public anidmap::IdObject {
 public:
-  UserPort * New(Thread &); // @noncritical
+  /**
+   * Read the next pending data packet from the most recent pending port of the
+   * current thread.
+   * @noncritical
+   */
+  static UserPort * ReadNext(Data &);
+  
+  static UserPort * New(Thread &); // @noncritical
   virtual void Delete(); // @noncritical
+  virtual void Delete(bool remove); // @noncritical
   
 protected:
-  friend class Thread;
-  ansa::LinkedList<UserPort>::Link waitingLink;
-  
   template <class T, int C>
   friend class anidmap::HashMap;
   ansa::LinkedList<UserPort>::Link hashMapLink;
@@ -28,9 +33,15 @@ protected:
 private:
   UserPort(Thread &);
   
-  Thread & thread;
+  bool Read(Data & out); // @noncritical
   
-  anarch::NoncriticalLock dataLock;
+  bool Init();
+  void Deinit();
+  
+  Thread & thread;
+  ansa::LinkedList<UserPort>::Link waitingLink;
+  
+  // synchronized by thread's waitingLock
   bool signaled = false;
   Data data;
 };

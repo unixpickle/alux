@@ -48,6 +48,45 @@ Thread * Thread::New(Task & t, anarch::State & s) {
   return th;
 }
 
+Thread * Thread::New(Task & t, anarch::State & s, Endpoint & e) {
+  AssertNoncritical();
+  if (!t.Retain()) return NULL;
+  
+  // create thread
+  Thread * th = new Thread(t, s);
+  if (!th) {
+    t.Release();
+    return NULL;
+  }
+  
+  // create port
+  UserPort * p = UserPort::New(*th);
+  if (!p) {
+    t.Release();
+    delete th;
+    return NULL;
+  }
+  
+  // create remote endpoint
+  Endpoint * ep = p->Open();
+  if (!ep) {
+    t.Release();
+    th->DestroyPorts(0);
+    delete th;
+    return NULL;
+  }
+  
+  if (!th->Init()) {
+    t.Release();
+    th->DestroyPorts(0);
+    delete th;
+  }
+  
+  // connect remote endpoint
+  ep->Connect(e);
+  return th;
+}
+
 Task & Thread::GetTask() const {
   return task;
 }
@@ -58,6 +97,10 @@ anarch::State & Thread::GetState() const {
 
 SleepState & Thread::GetSleepState() {
   return sleepState;
+}
+
+PollState & Thread::GetPollState() {
+  return pollState;
 }
 
 bool Thread::Retain() {
@@ -94,7 +137,12 @@ void Thread::Dealloc() {
 
 Thread::Thread(Task & t, anarch::State & s)
   : GarbageObject(t.GetScheduler().GetGarbageCollector()), hashMapLink(*this),
-    task(t), state(s) {
+    sleepState(*this), pollState(*this), task(t), state(s),
+    ports(anidmap::IDENTIFIER_MAX) {
+}
+
+Thread::PortMap & Thread::GetPorts() {
+  return ports;
 }
 
 bool Thread::Init() {
@@ -106,10 +154,29 @@ bool Thread::Init() {
 }
 
 void Thread::Deinit() {
+  // close all ports belonging to the thread
+  if (!killed) {
+    DestroyPorts(1 + GetTask().GetKillReason());
+  } else {
+    DestroyPorts(0);
+  }
+  
   if (killed) {
+    // if this thread was exited, we need to do some more cleanup
     GetTask().GetThreads().Remove(*this);
     GetTask().GetScheduler().Remove(*this);
     GetTask().Release();
+  }
+}
+
+void Thread::DestroyPorts(int closeReason) {
+  for (int i = 0; i < ports.GetMap().GetBucketCount(); ++i) {
+    auto & bucket = ports.GetMap().GetBucket(i);
+    for (auto iter = bucket.GetStart(); iter != bucket.GetEnd(); ++iter) {
+      UserPort & p = *iter;
+      p.Sever(closeReason);
+      p.Delete(false);
+    }
   }
 }
 

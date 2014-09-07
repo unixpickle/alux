@@ -28,6 +28,7 @@ public:
   bool Hold();
   void Unhold();
   void Kill(int status);
+  int GetKillReason();
   Scheduler & GetScheduler() const;
   Identifier GetUserIdentifier() const;
   ThreadMap & GetThreads();

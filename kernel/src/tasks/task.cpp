@@ -46,6 +46,11 @@ void Task::Kill(int status) {
   killed = true;
 }
 
+int Task::GetKillReason() {
+  anarch::ScopedLock scope(lifeLock);
+  return killStatus;
+}
+
 Scheduler & Task::GetScheduler() const {
   return scheduler;
 }

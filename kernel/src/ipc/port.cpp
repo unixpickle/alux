@@ -12,7 +12,11 @@ Endpoint * Port::Open() {
 void Port::Sever(int reason) {
   anarch::ScopedLock scope(endpointLock);
   if (!endpoint) return;
+  bool result = endpoint->Retain();
+  assert(result);
+  (void)result;
   endpoint->Sever(reason);
+  endpoint->Release();
   endpoint = NULL;
 }
 
