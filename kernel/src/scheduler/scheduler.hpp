@@ -9,10 +9,12 @@
 namespace Alux {
 
 class Scheduler {
-public:
-  Scheduler(); // @noncritical
-  
-  virtual ~Scheduler(); // @noncritical
+public:  
+  /**
+   * @noncritical
+   */
+  virtual ~Scheduler() {
+  }
   
   /**
    * Add a thread to the scheduler.

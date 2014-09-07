@@ -1,9 +1,8 @@
 override BUILD=../../build
 override KERNEL=../../build/kernel
-override ANARCH=../../dependencies/anarch/build/anarch.a
 
-$(KERNEL): $(BUILD)/custom $(ANARCH)
-	$(LD) $(BUILD)/custom/*.o $(BUILD)/objects/*.o $(ANARCH) -T linker.ld --oformat=$(OUTPUT_FORMAT) -o $(KERNEL).1
+$(KERNEL): $(BUILD)/custom
+	$(LD) $(BUILD)/custom/*.o $(BUILD)/objects/*.o -T linker.ld --oformat=$(OUTPUT_FORMAT) -o $(KERNEL).1
 	if [ "$(OUTPUT_FORMAT)" = "binary" ]; then \
 		cp $(BUILD)/custom/x64-multiboot-init.bin $(KERNEL); \
 		cat $(KERNEL).1 >>$(KERNEL); \

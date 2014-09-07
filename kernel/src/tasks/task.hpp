@@ -137,6 +137,7 @@ public:
    * @ambicritical
    */
   inline Scheduler & GetScheduler() {
+    assert(inScheduler);
     return scheduler;
   }
   
@@ -154,6 +155,7 @@ public:
    * @ambicritical
    */
   inline ThreadList & GetThreadList() {
+    assert(inScheduler);
     return threadList;
   }
   
@@ -177,6 +179,7 @@ private:
   Identifier uid;
   Scheduler & scheduler;
   ThreadList threadList;
+  bool inScheduler = false;
   
   // [lifeLock] applies to [retainCount], [holdCount], [killReason], and 
   // [killed].

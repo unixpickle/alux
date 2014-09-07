@@ -10,6 +10,7 @@
 #include <anarch/api/domain-list>
 #include <anarch/api/clock-module>
 #include <anarch/api/clock>
+#include <anarch/api/panic>
 #include <anarch/critical>
 #include <anarch/stream>
 #include <ansa/macros>

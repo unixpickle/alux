@@ -4,11 +4,11 @@
 
 namespace Alux {
 
-KernelTask * KernelTask::New(Scheduler & s) {
+KernelTask & KernelTask::New(Scheduler & s) {
   AssertNoncritical();
   KernelTask * t = new KernelTask(s);
   assert(t != NULL);
-  return t;
+  return *t;
 }
 
 anarch::MemoryMap & KernelTask::GetMemoryMap() {

@@ -9,7 +9,10 @@ Task::Task(Identifier user, Scheduler & sched)
 }
 
 bool Task::AddToScheduler() {
-  return scheduler.GetTaskList().Add(*this);
+  if (!scheduler.GetTaskList().Add(*this)) {
+    return false;
+  }
+  return inScheduler = true;
 }
 
 bool Task::Retain() {
@@ -62,7 +65,9 @@ int Task::GetKillReason() {
 }
 
 void Task::Dealloc() {
-  scheduler.GetTaskList().Remove(*this);
+  if (inScheduler) {
+    scheduler.GetTaskList().Remove(*this);
+  }
 }
 
 }

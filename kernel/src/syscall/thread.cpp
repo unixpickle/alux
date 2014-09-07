@@ -23,12 +23,19 @@ anarch::SyscallRet LaunchThreadSyscall(anarch::SyscallArgs & args) {
   VirtAddr argument = args.PopVirtAddr();
   anarch::State & state = anarch::State::NewUser((void (*)(void *))callAddress,
                                                  (void *)argument);
+  
+  // create the thread and start it up!
+  scope.GetTask().Retain();
   Thread & th = Thread::New(scope.GetTask(), state);
   if (!th.AddToTask()) {
-    state.Delete();
+    th.Release();
+    th.Dealloc();
     return anarch::SyscallRet::Error(SyscallErrorUnableToLaunch);
   }
-  return anarch::SyscallRet::Integer32((uint32_t)th->GetIdentifier());
+  th.AddToScheduler();
+  th.Release();
+  
+  return anarch::SyscallRet::Integer32((uint32_t)th.GetIdentifier());
 }
 
 void SleepSyscall(anarch::SyscallArgs & args) {
@@ -44,7 +51,7 @@ anarch::SyscallRet WakeupSyscall(anarch::SyscallArgs & args) {
   HoldScope scope;
   uint32_t identifier = args.PopUInt32();
   
-  Thread * th = scope.GetTask().GetThreads().GetMap().Find(identifier);
+  Thread * th = scope.GetTask().GetThreadList().Find(identifier);
   if (!th) {
     return anarch::SyscallRet::Error(SyscallErrorNoThread);
   }

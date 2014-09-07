@@ -16,7 +16,7 @@ public:
    * kernel will kindly Panic().
    * @noncritical
    */
-  static KernelTask * New(Scheduler &);
+  static KernelTask & New(Scheduler &);
   
   /**
    * Returns the global memory map.
