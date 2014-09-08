@@ -1,25 +1,15 @@
 #include "sleep-state.hpp"
-#include "thread.hpp"
-#include "task.hpp"
 #include "../scheduler/scheduler.hpp"
 #include "../util/time.hpp"
-#include <anarch/api/clock-module>
-#include <anarch/api/clock>
 #include <anarch/critical>
 
 namespace Alux {
 
-SleepState::SleepState(Thread & t) : thread(t) {
+void SleepState::Unsleep(Thread & th) {
+  th.sleepState.Cancel();
 }
 
-void SleepState::Cancel() {
-  anarch::ScopedCritical critical;
-  anarch::ScopedLock scope(lock);
-  if (!sleeping) {
-    cancelled = true;
-  } else {
-    thread.GetTask().GetScheduler().ClearTimeout(thread);
-  }
+SleepState::SleepState(Thread & t) : thread(t) {
 }
 
 void SleepState::Sleep(uint64_t nanos) {
@@ -27,7 +17,7 @@ void SleepState::Sleep(uint64_t nanos) {
   
   Thread * th = Thread::GetCurrent();
   assert(th != NULL);
-  SleepState & state = th->GetSleepState();
+  SleepState & state = th->sleepState;
   
   state.lock.Seize();
   
@@ -40,7 +30,7 @@ void SleepState::Sleep(uint64_t nanos) {
   state.sleeping = true;
   th->GetTask().GetScheduler().SetTimeout(NanosFromNow(nanos), state.lock);
   
-  anarch::ScopedLock(state.lock);
+  anarch::ScopedLock scope(state.lock);
   state.sleeping = false;
   state.cancelled = false;
 }
@@ -50,7 +40,7 @@ void SleepState::SleepInfinite() {
   
   Thread * th = Thread::GetCurrent();
   assert(th != NULL);
-  SleepState & state = th->GetSleepState();
+  SleepState & state = th->sleepState;
   
   state.lock.Seize();
   
@@ -63,9 +53,19 @@ void SleepState::SleepInfinite() {
   state.sleeping = true;
   th->GetTask().GetScheduler().SetInfiniteTimeout(state.lock);
   
-  anarch::ScopedLock(state.lock);
+  anarch::ScopedLock scope(state.lock);
   state.sleeping = false;
   state.cancelled = false;
+}
+
+void SleepState::Cancel() {
+  anarch::ScopedCritical critical;
+  anarch::ScopedLock scope(lock);
+  if (!sleeping) {
+    cancelled = true;
+  } else {
+    thread.GetTask().GetScheduler().ClearTimeout(thread);
+  }
 }
 
 }

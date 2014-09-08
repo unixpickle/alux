@@ -1,11 +1,11 @@
 #ifndef __ALUX_ANIDMAP_LOCK_HPP__
 #define __ALUX_ANIDMAP_LOCK_HPP__
 
-#include <anarch/lock>
+#include "../../util/lock.hpp"
 
 namespace anidmap {
 
-typedef anarch::NoncriticalLock Lock;
+typedef Alux::NoncriticalLock Lock;
 
 }
 

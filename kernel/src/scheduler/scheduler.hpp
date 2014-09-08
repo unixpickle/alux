@@ -2,19 +2,19 @@
 #define __ALUX_SCHEDULER__
 
 #include "garbage-collector.hpp"
-#include "../tasks/task.hpp"
+#include "../containers/task-list.hpp"
 #include <anarch/stdint>
 #include <ansa/lock>
 
 namespace Alux {
 
 class Scheduler {
-public:
-  typedef anidmap::PoolIdMap<Task, RetainHashMap<Task, 0x100> > TaskMap;
-  
-  Scheduler(); // @noncritical
-  
-  virtual ~Scheduler(); // @noncritical
+public:  
+  /**
+   * @noncritical
+   */
+  virtual ~Scheduler() {
+  }
   
   /**
    * Add a thread to the scheduler.
@@ -81,12 +81,20 @@ public:
   virtual void Run() = 0;
   
   /**
-   * Return the garbage collector for this scheduler.
+   * Get the garbage collector for this scheduler.
    * @ambicritical
    */
   virtual GarbageCollector & GetGarbageCollector() = 0;
   
-  TaskMap & GetTaskIdMap();
+  /**
+   * Get the task list. While you can technically get the task list from a
+   * critical section, you cannot manipulate or search it while in a critical
+   * section.
+   * @ambicritical
+   */
+  inline TaskList & GetTaskList() {
+    return taskList;
+  }
   
 protected:
   friend class GarbageCollector;
@@ -113,12 +121,17 @@ protected:
    */
   virtual void ClearGarbageTimeout() = 0;
   
+  /**
+   * Friend functions are not inherited (thanks a lot, C++ standards 
+   * committee.) Instead, I have to make a method in this base class so
+   * schedulers can access a thread's protected `schedulerUserInfo` field.
+   */
   inline static void *& ThreadUserInfo(Thread & th) {
     return th.schedulerUserInfo;
   }
   
 private:
-  TaskMap taskIdMap;
+  TaskList taskList;
 };
 
 }

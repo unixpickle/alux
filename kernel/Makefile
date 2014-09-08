@@ -29,13 +29,13 @@ build/kernel: build/objects
 	$(MAKE) -C src/custom/$(TARGET_ARCH)
 	$(MAKE) -C link/$(TARGET_ARCH)
 
-build/objects: build dependencies/anarch/build/anarch.a
+build/objects: build dependencies/anarch/dependencies
 	mkdir build/objects
 	dependencies/makemaker/bin/makemaker build.coffee
 	$(MAKE) -C build/objects
 
-dependencies/anarch/build/anarch.a: dependencies
-	$(MAKE) -C dependencies/anarch
+dependencies/anarch/dependencies: dependencies
+	$(MAKE) -C dependencies/anarch dependencies
 
 dependencies:
 	mkdir dependencies

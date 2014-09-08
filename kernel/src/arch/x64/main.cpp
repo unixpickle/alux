@@ -10,14 +10,13 @@
 #include <anarch/api/domain-list>
 #include <anarch/api/clock-module>
 #include <anarch/api/clock>
+#include <anarch/api/panic>
 #include <anarch/critical>
 #include <anarch/stream>
 #include <ansa/macros>
 #include <ansa/cstring>
 
 extern "C" {
-
-void MyCoolPrintMethod();
 
 void AluxMainX64(void * mbootPtr) {
   anarch::x64::InitializeSingletons();
@@ -57,31 +56,27 @@ void AluxMainX64(void * mbootPtr) {
   // create user task
   anarch::UserMap & map = anarch::UserMap::New();
   Alux::x64::Executable exec(image.GetProgramStart(), image.GetProgramSize());
-  Alux::UserTask * task = Alux::UserTask::New(exec, map, 0, scheduler);
-  assert(task != NULL);
+  Alux::UserTask & task = Alux::UserTask::New(exec, map, 0, scheduler);
+  if (!task.AddToScheduler()) {
+    anarch::Panic("AluxMainX64() - failed to add task to scheduler");
+  }
   
-  // create user thread
-  void * entry = task->GetExecutableMap().GetEntryPoint();
+  // create user thread (which consumes a reference to our task)
+  void * entry = task.GetExecutableMap().GetEntryPoint();
   anarch::State & state = anarch::State::NewUser((void (*)())entry);
-  Alux::Thread * thread = Alux::Thread::New(*task, state);
-  assert(thread != NULL);
+  task.Retain();
+  Alux::Thread & thread = Alux::Thread::New(task, state);
+  if (!thread.AddToTask()) {
+    anarch::Panic("AluxMainX64() - failed to add thread to task");
+  }
+  thread.AddToScheduler();
   
   // release user task data
-  thread->Release();
-  task->Unhold();
+  thread.Release();
+  task.Unhold();
   
+  // and boom, run our task!
   scheduler.Run();
-}
-
-void MyCoolPrintMethod() {
-  auto & scheduler = Alux::Thread::GetCurrent()->GetTask().GetScheduler();
-  auto & clock = anarch::ClockModule::GetGlobal().GetClock();
-  uint64_t delay = clock.GetMicrosPerTick().Flip().ScaleInteger(1000000);
-  while (1) {
-    anarch::cout << "my cool print method!" << anarch::endl;
-    uint64_t next = clock.GetTicks() + delay;
-    scheduler.SetTimeout(next);
-  }
 }
 
 }

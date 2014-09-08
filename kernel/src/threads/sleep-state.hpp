@@ -12,9 +12,11 @@ class Thread;
  */
 class SleepState {
 public:
-  SleepState(Thread &);
-  
-  void Cancel(); // @ambicritical
+  /**
+   * Unsleep a given thread.
+   * @ambicritical
+   */
+  static void Unsleep(Thread &);
   
   /**
    * Sleep the current thread for a period of time.
@@ -36,7 +38,13 @@ public:
    */
   static void SleepInfinite();
   
+protected:
+  friend class Thread;
+  SleepState(Thread &);
+  
 private:
+  void Cancel(); // @ambicritical
+  
   Thread & thread;
   
   anarch::CriticalLock lock;
