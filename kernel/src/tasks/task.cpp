@@ -5,7 +5,8 @@
 namespace Alux {
 
 Task::Task(Identifier user, Scheduler & sched)
-  : GarbageObject(*this), hashMapLink(*this), uid(user), scheduler(sched) { 
+  : GarbageObject(sched.GetGarbageCollector()), hashMapLink(*this),
+    uid(user), scheduler(sched) { 
 }
 
 bool Task::AddToScheduler() {
@@ -65,6 +66,13 @@ int Task::GetKillReason() {
 }
 
 void Task::Dealloc() {
+  for (int i = 0; i < threadList.GetMap().GetBucketCount(); ++i) {
+    auto & bucket = threadList.GetMap().GetBucket(i);
+    for (auto j = bucket.GetStart(); j != bucket.GetEnd(); ++j) {
+      Thread & th = *j;
+      th.Dealloc();
+    }
+  }
   if (inScheduler) {
     scheduler.GetTaskList().Remove(*this);
   }

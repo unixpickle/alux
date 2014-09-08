@@ -87,14 +87,14 @@ void Thread::Kill() {
 
 void Thread::Dealloc() {
   AssertNoncritical();
+  if (inScheduler) {
+    GetTask().GetScheduler().Remove(*this);
+  }
   if (killed) {
     if (inTask) {
       GetTask().GetThreadList().Remove(*this);
     }
     GetTask().Release();
-  }
-  if (inScheduler) {
-    GetTask().GetScheduler().Remove(*this);
   }
   delete this;
 }
