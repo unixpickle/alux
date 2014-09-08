@@ -30,7 +30,7 @@ void SleepState::Sleep(uint64_t nanos) {
   state.sleeping = true;
   th->GetTask().GetScheduler().SetTimeout(NanosFromNow(nanos), state.lock);
   
-  anarch::ScopedLock(state.lock);
+  anarch::ScopedLock scope(state.lock);
   state.sleeping = false;
   state.cancelled = false;
 }
@@ -53,7 +53,7 @@ void SleepState::SleepInfinite() {
   state.sleeping = true;
   th->GetTask().GetScheduler().SetInfiniteTimeout(state.lock);
   
-  anarch::ScopedLock(state.lock);
+  anarch::ScopedLock scope(state.lock);
   state.sleeping = false;
   state.cancelled = false;
 }

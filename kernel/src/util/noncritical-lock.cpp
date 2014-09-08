@@ -9,7 +9,7 @@ void NoncriticalLock::Seize() {
   AssertNoncritical();
   
   queueLock.Seize();
-  
+  /*
   if (!held) {
     held = true;
     queueLock.Release();
@@ -41,11 +41,13 @@ void NoncriticalLock::Seize() {
     assert(threadLink.owner == true);
     th->Release();
   }
+  */
 }
 
 void NoncriticalLock::Release() {
   AssertNoncritical();
-  queueLock.Seize();
+  queueLock.Release();
+  /*queueLock.Seize();
   WaitingThread * next = queue.Shift();
   if (!next) {
     held = false;
@@ -61,7 +63,7 @@ void NoncriticalLock::Release() {
     next->thread->GetTask().GetScheduler().ClearTimeout(*next->thread);
   } else {
     next->owner = true;
-  }
+  }*/
 }
 
 }
