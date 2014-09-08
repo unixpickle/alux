@@ -168,6 +168,9 @@ void RRScheduler::ResignCurrent() {
   threads.Remove(&obj->link);
   threads.Add(&obj->link);
   
+  // this could be optimized away in the future
+  anarch::GlobalMap::GetGlobal().Set();
+  
   // stop it and release it
   obj->running = false;
   th->Release();
