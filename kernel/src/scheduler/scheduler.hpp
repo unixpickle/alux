@@ -100,23 +100,7 @@ protected:
   friend class GarbageCollector;
   
   /**
-   * Set an infinite timeout on the garbage thread.
-   *
-   * This may be called from the garbage collector's internals. Thus, nothing
-   * should be retained or released in this method until [unlock] is unlocked
-   * to prevent deadlock.
-   *
-   * @ambicritical
-   */
-  virtual void SetGarbageTimeout(ansa::Lock & unlock) = 0;
-  
-  /**
    * Clear the timeout on the garbage thread.
-   *
-   * This may be called any time you release or unhold a [GarbageObject]. Thus,
-   * your scheduler should take care not to seize any locks in here that it
-   * might be holding while it releases or retains a thread.
-   *
    * @ambicritical
    */
   virtual void ClearGarbageTimeout() = 0;
