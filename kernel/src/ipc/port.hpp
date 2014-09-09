@@ -2,6 +2,7 @@
 #define __ALUX_PORT_HPP__
 
 #include "message.hpp"
+#include "terminal.hpp"
 
 namespace Alux {
 
@@ -24,6 +25,8 @@ public:
   void SendToRemote(const Message &);
   
 protected:
+  friend class Terminal;
+  
   /**
    * Send a message to this port. This will be called by a remote entity to
    * signal this port that data is being sent to it.

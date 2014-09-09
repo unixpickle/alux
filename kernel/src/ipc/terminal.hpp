@@ -42,8 +42,38 @@ class Port;
  */
 class Terminal : public GarbageObject {
 public:
-  Terminal();
+  /**
+   * Connect two terminals. Terminals can only be connected once, so you should
+   * take care to only reference a terminal from one place at a time.
+   * @critical
+   */
+  static void Connect(Terminal &, Terminal &);
+  
+  /**
+   * Create a new terminal.
+   * @ambicritical
+   */
+  Terminal(GarbageCollector &);
+  
+  /**
+   * You may wish to implement a destructor for your terminal in a subclass.
+   * @noncritical
+   */
   virtual ~Terminal() {}
+  
+  /**
+   * If this terminal has been severed, this returns `false`. Otherwise, it
+   * increments the retain counter and returns `true`.
+   * @critical
+   */
+  bool Retain();
+  
+  /**
+   * Decrement the retain counter. If the retain counter reaches 0 and the
+   * terminal has been severed, it will be thrown away.
+   * @critical
+   */
+  void Release();
   
   /**
    * Tell the remote that we have been severed. This sets the remote to a
