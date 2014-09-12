@@ -7,6 +7,7 @@
 namespace Alux {
 
 class Terminal;
+class Port;
 
 /**
  * A [Connection] allows [Message]s to be passed between [Terminal]s. The
@@ -19,14 +20,15 @@ class Terminal;
 class Connection {
 public:
   /**
-   * Allocate a new connection given two terminals. Both terminals must be
+   * Allocate a new connection between two terminals. Both terminals must be
    * retained. A "connected" message will be sent to both terminals.
    * @noncritical
    */
-  static Connection & New(Terminal & t1, Terminal & t2);
+  static void Connect(Terminal & t1, Terminal & t2);
   
 protected:
   friend class Terminal;
+  friend class Port;
   
   /**
    * Send a message to the terminal that is not [sender].

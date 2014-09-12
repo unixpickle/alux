@@ -6,6 +6,7 @@ bool Port::SetTerminal(Terminal & t) {
   anarch::ScopedLock scope(lock);
   if (!terminal) return false;
   terminal = &t;
+  return true;
 }
 
 void Port::SendToRemote(const Message & m) {
@@ -28,9 +29,9 @@ Terminal * Port::GetTerminal(bool sever) {
   if (!terminal) return NULL;
   
   // Retain() has to return `true` because we haven't severed the terminal
-  bool result = terminal->Retain();
-  assert(result);
-  (void)result;
+  bool res = terminal->Retain();
+  assert(res);
+  (void)res;
   
   // possibly sever the terminal
   Terminal * result = terminal;

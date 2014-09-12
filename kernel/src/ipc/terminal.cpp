@@ -1,4 +1,4 @@
-#include "terminal.hpp"
+#include "port.hpp" // no need to import "terminal.hpp" directly
 #include <anarch/critical>
 
 namespace Alux {
@@ -8,11 +8,6 @@ Terminal & Terminal::New(Port * p, GarbageCollector & c) {
   Terminal * t = new Terminal(p, c);
   assert(t != NULL);
   return *t;
-}
-
-void Terminal::Connect(Terminal & t1, Terminal & t2) {
-  AssertNoncritical();
-  Connection & conn = Connection::New(t1, t2);
 }
 
 Terminal::Terminal(Port * p, GarbageCollector & c)

@@ -1,9 +1,9 @@
 #include "terminal.hpp" // no need for "connection.hpp"
-#include <anarch/assert>
+#include <anarch/critical>
 
 namespace Alux {
 
-Connection & Connection::New(Terminal & t1, Terminal & t2) {
+void Connection::Connect(Terminal & t1, Terminal & t2) {
   AssertNoncritical();
   Connection * c = new Connection(t1, t2);
   assert(c != NULL);
@@ -13,8 +13,6 @@ Connection & Connection::New(Terminal & t1, Terminal & t2) {
   t1.Deliver(Message::Opened());
   t2.Deliver(Message::Opened());
   c->lock.Release();
-  
-  return *c;
 }
 
 void Connection::SendToRemote(Terminal & sender, const Message & m) {
@@ -50,7 +48,7 @@ void Connection::Close(Terminal & sender) {
       terminal2 = NULL;
     }
     if (!other) {
-      SetCritical(false);
+      anarch::SetCritical(false);
       delete this;
       return;
     }

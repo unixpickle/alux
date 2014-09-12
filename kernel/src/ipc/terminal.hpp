@@ -3,6 +3,7 @@
 
 #include "connection.hpp"
 #include "../scheduler/garbage-object.hpp"
+#include <ansa/atomic-ptr>
 
 namespace Alux {
 
@@ -47,14 +48,6 @@ public:
    * @noncritical
    */
   static Terminal & New(Port *, GarbageCollector &);
-  
-  /**
-   * Connect two terminals. Terminals can only be connected once, so you should
-   * take care to only reference a terminal from one place at a time. Both
-   * terminals should be retained.
-   * @noncritical
-   */
-  static void Connect(Terminal &, Terminal &);
   
   /**
    * Create a new terminal. The terminal will have a retain count of 1.

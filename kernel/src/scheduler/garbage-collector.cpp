@@ -14,7 +14,7 @@ void GarbageCollector::Main() {
     objectsLock.Seize();
     GarbageObject * obj = objects.Shift();
     if (!obj) {
-      scheduler.SetGarbageTimeout(objectsLock);
+      scheduler.SetInfiniteTimeout(objectsLock);
       anarch::SetCritical(false);
     } else {
       objectsLock.Release();
