@@ -1,7 +1,7 @@
 #ifndef __ALUX_TERMINAL_HPP__
 #define __ALUX_TERMINAL_HPP__
 
-#include <anarch/lock>
+#include "connection.hpp"
 #include "../scheduler/garbage-object.hpp"
 
 namespace Alux {
@@ -16,10 +16,9 @@ class Port;
  * created, it is naturally "waiting". Later, a connection may be made between
  * two "waiting" terminals, changing them to the "opened" state.
  *
- * The terminal shutdown process makes the entire concept of a "terminal"
- * complicated to the point of insanity. Imagine that a terminal is a cellular
- * phone and a port is a person. The communications stream between two people
- * talking on phones looks identical to how ports communicate:
+ * Imagine that a terminal is a cellular phone and a port is a person. The
+ * communications stream between two people talking on phones looks identical
+ * to how ports communicate:
  *
  *     person A <-> phone A      <-> phone B      <-> person B
  *     (port A) <-> (terminal A) <-> (terminal B) <-> (port B)
@@ -43,17 +42,25 @@ class Port;
 class Terminal : public GarbageObject {
 public:
   /**
+   * Allocate and initialize a new [Terminal] object. Subclasses of [Terminal]
+   * should implement their own [New] method.
+   * @noncritical
+   */
+  static Terminal & New(Port *, GarbageCollector &);
+  
+  /**
    * Connect two terminals. Terminals can only be connected once, so you should
-   * take care to only reference a terminal from one place at a time.
-   * @critical
+   * take care to only reference a terminal from one place at a time. Both
+   * terminals should be retained.
+   * @noncritical
    */
   static void Connect(Terminal &, Terminal &);
   
   /**
-   * Create a new terminal.
+   * Create a new terminal. The terminal will have a retain count of 1.
    * @ambicritical
    */
-  Terminal(GarbageCollector &);
+  Terminal(Port *, GarbageCollector &);
   
   /**
    * You may wish to implement a destructor for your terminal in a subclass.
@@ -76,20 +83,30 @@ public:
   void Release();
   
   /**
-   * Tell the remote that we have been severed. This sets the remote to a
-   * "closed" or "closed-severed" state.
+   * Removes ourselves from the active connection and then deallocates the
+   * instance assuming it was allocated using [New].
    * @noncritical
    */
   virtual void Dealloc();
   
+protected:
+  /**
+   * Subclasses should call this in their [Dealloc] since they cannot call
+   * Terminal::Dealloc() safely.
+   * @noncritical
+   */
+  void Hangup();
+  
 private:
   friend class Port;
   anarch::CriticalLock portLock;
-  Port * port = NULL;
+  Port * port;
+  int retainCount = 1;
   
-  anarch::CriticalLock remoteLock;
-  Terminal * remote = NULL;
-  bool closed = false;
+  ansa::AtomicPtr<Connection> connection;
+  
+  friend class Connection;
+  void Deliver(const Message & m); // @critical
 };
 
 }
