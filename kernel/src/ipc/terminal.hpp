@@ -106,7 +106,9 @@ private:
   ansa::AtomicPtr<Connection> connection;
   
   friend class Connection;
+  
   void Deliver(const Message & m); // @critical
+  void Sever(); // @critical
 };
 
 }

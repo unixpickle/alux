@@ -53,4 +53,10 @@ void Terminal::Deliver(const Message & m) {
   port->SendToThis(m);
 }
 
+void Terminal::Sever() {
+  anarch::ScopedLock scope(portLock);
+  port = NULL;
+  assert(retainCount > 0);
+}
+
 }

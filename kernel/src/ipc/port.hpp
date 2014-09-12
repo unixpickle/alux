@@ -46,8 +46,10 @@ protected:
   virtual void SendToThis(const Message &) = 0;
   
 private:
-  anarch::CriticalLock terminalLock;
+  anarch::CriticalLock lock;
   Terminal * terminal = NULL;
+  
+  Terminal * GetTerminal(bool sever = false);
 };
 
 }
