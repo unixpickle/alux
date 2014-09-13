@@ -17,6 +17,12 @@ namespace Alux {
 class Port {
 public:
   /**
+   * Your subclass might want a fancy destructor. The criticality of the
+   * destructor may vary depending on the subclass.
+   */
+  virtual ~Port() {}
+  
+  /**
    * Set the terminal of this port if the port does not already have one.
    * @critical
    */

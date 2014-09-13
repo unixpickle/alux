@@ -3,8 +3,7 @@
 
 #include "sleep-state.hpp"
 #include "../scheduler/garbage-object.hpp"
-#include <anidmap/id-object>
-#include <anidmap/maps>
+#include "../containers/thread-port-list.hpp"
 #include <anarch/api/state>
 #include <anarch/lock>
 #include <ansa/linked-list>
@@ -140,10 +139,18 @@ protected:
   friend class SleepState;
   SleepState sleepState;
   
+  friend class ThreadPort;
+  
+  inline ThreadPortList & GetPortList() {
+    return portList;
+  }
+  
 private:
   Task & task;
   anarch::State & state;
   
+  ThreadPortList portList;
+    
   // [lifeLock] controls both [retainCount] and [killed].
   anarch::CriticalLock lifeLock;
   int retainCount = 1;

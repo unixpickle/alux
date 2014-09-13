@@ -87,6 +87,17 @@ void Thread::Kill() {
 
 void Thread::Dealloc() {
   AssertNoncritical();
+  
+  // destroy all the ports on this thread
+  for (int i = 0; i < portList.GetMap().GetBucketCount(); ++i) {
+    auto & bucket = portList.GetMap().GetBucket(i);
+    for (auto j = bucket.GetStart(); j != bucket.GetEnd(); ++j) {
+      ThreadPort & p = *j;
+      p.Sever();
+      p.Dealloc(false);
+    }
+  }
+  
   if (inScheduler) {
     GetTask().GetScheduler().Remove(*this);
   }
@@ -96,6 +107,7 @@ void Thread::Dealloc() {
     }
     GetTask().Release();
   }
+  
   delete this;
 }
 
