@@ -43,7 +43,7 @@ void Thread::ExitCurrent() {
 
 Thread::Thread(Task & t, anarch::State & s)
   : GarbageObject(t.GetScheduler().GetGarbageCollector()), hashMapLink(*this),
-    sleepState(*this), task(t), state(s) {
+    sleepState(*this), pollState(*this), task(t), state(s) {
 }
 
 bool Thread::AddToTask() {

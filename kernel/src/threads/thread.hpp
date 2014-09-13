@@ -2,6 +2,7 @@
 #define __ALUX_THREAD_HPP__
 
 #include "sleep-state.hpp"
+#include "poll-state.hpp"
 #include "../scheduler/garbage-object.hpp"
 #include "../containers/thread-port-list.hpp"
 #include <anarch/api/state>
@@ -138,6 +139,9 @@ protected:
   
   friend class SleepState;
   SleepState sleepState;
+  
+  friend class PollState;
+  PollState pollState;
   
   friend class ThreadPort;
   

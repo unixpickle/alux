@@ -7,9 +7,6 @@ namespace Alux {
 HoldScope::HoldScope() {
   thread = Thread::GetCurrent();
   
-  wasCritical = anarch::GetCritical();
-  if (wasCritical) anarch::SetCritical(false);
-  
   assert(thread != NULL);
   task = &thread->GetTask();
   didHold = !thread->holdingTask;
@@ -21,14 +18,19 @@ HoldScope::HoldScope() {
     }
     thread->holdingTask = true;
   }
+  
+  // we can only leave the critical section once we know the task is held
+  wasCritical = anarch::GetCritical();
+  if (wasCritical) anarch::SetCritical(false);
 }
 
 HoldScope::~HoldScope() {
+  // leave the critical section first so that we can safely unhold the task
+  anarch::SetCritical(wasCritical);
   if (didHold) {
     thread->holdingTask = false;
     task->Unhold();
   }
-  anarch::SetCritical(wasCritical);
 }
 
 void HoldScope::ExitThread() {

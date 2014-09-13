@@ -2,6 +2,7 @@
 #define __ALUX_MESSAGE_HPP__
 
 #include <anarch/types>
+#include <anarch/stddef>
 
 namespace Alux {
 
