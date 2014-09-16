@@ -4,6 +4,7 @@
 #include "thread.hpp"
 #include "time.hpp"
 #include "task.hpp"
+#include "port.hpp"
 #include <anarch/stream>
 #include <anarch/critical>
 
@@ -77,6 +78,10 @@ anarch::SyscallRet SyscallHandler(uint16_t number,
     case 26:
       SetColorSyscall(args);
       break;
+    case 27:
+      return CreatePortSyscall();
+    case 28:
+      return DestroyPortSyscall(args);
     default:
       anarch::cerr << "unknown SyscallHandler(" << number << ", ...)"
         << anarch::endl;

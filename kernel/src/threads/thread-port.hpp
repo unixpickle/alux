@@ -16,7 +16,7 @@ public:
    * kernel will Panic().
    * @noncritical
    */
-  ThreadPort & New(Thread &);
+  static ThreadPort & New(Thread &);
   
   /**
    * Attempt to add this port to its thread. If the thread has no available

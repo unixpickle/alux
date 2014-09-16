@@ -10,7 +10,9 @@ enum {
   SyscallErrorNoMapping,
   SyscallErrorNoVMSpace,
   SyscallErrorUnableToLaunch,
-  SyscallErrorNoThread
+  SyscallErrorNoThread,
+  SyscallErrorPortsListFull,
+  SyscallErrorNoPort
 };
 
 }

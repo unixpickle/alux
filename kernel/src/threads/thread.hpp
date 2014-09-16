@@ -125,6 +125,10 @@ public:
    */
   virtual void Dealloc();
   
+  inline ThreadPortList & GetPortList() {
+    return portList;
+  }
+  
 protected:
   template <class T, int C>
   friend class anidmap::HashMap;
@@ -142,12 +146,6 @@ protected:
   
   friend class PollState;
   PollState pollState;
-  
-  friend class ThreadPort;
-  
-  inline ThreadPortList & GetPortList() {
-    return portList;
-  }
   
 private:
   Task & task;
