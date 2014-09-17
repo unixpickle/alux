@@ -8,6 +8,7 @@
 namespace Alux {
 
 class Thread;
+class PollState;
 
 class ThreadPort : public anidmap::IdObject, public Port {
 public:
@@ -33,6 +34,11 @@ protected:
   template <class T, int C>
   friend class anidmap::HashMap;
   ansa::LinkedList<ThreadPort>::Link hashMapLink;
+  
+  friend class PollState;
+  ansa::LinkedList<ThreadPort>::Link pollStateLink;
+  bool isQueued = false;
+  Message lastMessage;
   
   /**
    * Add this port to the thread's polling list and wake up the thread if it

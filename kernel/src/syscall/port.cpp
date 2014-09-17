@@ -21,7 +21,6 @@ anarch::SyscallRet DestroyPortSyscall(anarch::SyscallArgs & args) {
   if (!port) {
     return anarch::SyscallRet::Error(SyscallErrorNoPort);
   }
-  scope.GetThread().GetPortList().Remove(*port);
   port->Sever();
   port->Dealloc(true);
   return anarch::SyscallRet::Empty();

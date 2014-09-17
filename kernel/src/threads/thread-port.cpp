@@ -15,16 +15,18 @@ bool ThreadPort::AddToThread() {
 void ThreadPort::Dealloc(bool remove) {
   if (remove) {
     thread.GetPortList().Remove(*this);
+    thread.pollState.RemovePending(*this);
   }
   delete this;
 }
 
-void ThreadPort::SendToThis(const Message &) {
-#warning TODO: Implement ThreadPort::SendToThis()
-  // TODO: port queueing and wakeup action here!
+void ThreadPort::SendToThis(const Message & msg) {
+  lastMessage = msg;
+  thread.pollState.AddToPending(*this);
 }
 
-ThreadPort::ThreadPort(Thread & t) : hashMapLink(*this), thread(t) {
+ThreadPort::ThreadPort(Thread & t)
+  : hashMapLink(*this), pollStateLink(*this), thread(t) {
 }
 
 }

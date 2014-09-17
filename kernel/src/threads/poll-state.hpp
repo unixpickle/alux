@@ -1,9 +1,7 @@
 #ifndef __ALUX_POLL_STATE_HPP__
 #define __ALUX_POLL_STATE_HPP__
 
-#include "../ipc/message.hpp"
-#include <anarch/lock>
-#include <anidmap/identifier>
+#include "thread-port.hpp"
 
 namespace Alux {
 
@@ -27,9 +25,15 @@ protected:
   friend class Thread;
   PollState(Thread &);
   
+  friend class ThreadPort;
+  void AddToPending(ThreadPort &);
+  void RemovePending(ThreadPort &);
+  
 private:
   anarch::CriticalLock lock;
+  bool polling = false;
   Thread & thread;
+  ansa::LinkedList<ThreadPort> pendingPorts;
 };
 
 }

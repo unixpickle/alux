@@ -145,6 +145,7 @@ protected:
   SleepState sleepState;
   
   friend class PollState;
+  friend class ThreadPort;
   PollState pollState;
   
 private:
