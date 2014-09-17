@@ -39,8 +39,8 @@ dependencies/anarch/dependencies: dependencies
 
 dependencies:
 	mkdir dependencies
-	git clone https://github.com/unixpickle/anarch.git dependencies/anarch
-	git clone https://github.com/unixpickle/anidmap.git dependencies/anidmap
+	git clone --branch v0.0.2 https://github.com/unixpickle/anarch.git dependencies/anarch 2>/dev/null
+	git clone --branch v0.0.1 https://github.com/unixpickle/anidmap.git dependencies/anidmap 2>/dev/null
 	git clone https://github.com/unixpickle/makemaker.git dependencies/makemaker
 
 build:
